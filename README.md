@@ -58,7 +58,7 @@ Pour supprimer une position favorite, effectuez un appui long sur le bouton my p
 
 ![image](https://user-images.githubusercontent.com/47839015/224559837-ad28b843-49ab-468c-8b8c-1ad470775750.png)
 
-#Démarrage
+## Démarrage
 Pour commencer, vous devez créer un dispositif radio. Le wiki fournit toutes les instructions : Guide matériel simple. Des connexions Dupont entre le module radio et l’ESP32 suffisent. Des instructions pour fabriquer un boîtier discret sont également incluses.
 Ensuite, installez le firmware initial sur l’ESP32. Le guide d’installation est ici : [Simple Hardware Guide](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Simple-ESPSomfy-RTS-device)
 
