@@ -1,3 +1,6 @@
+# Version traduite en français du projet de  [rstrouse](https://github.com/rstrouse/ESPSomfy-RTS) 
+
+
 # ESPSomfy-RTS <image src="https://user-images.githubusercontent.com/47839015/218898940-3541b360-5c49-4e38-a918-392cd0408b76.png" align="right" style="width:177px;display:inline-block;float:right"></image>
 
 Un contrôleur pour stores et volets Somfy RTS, capable de gérer jusqu’à 32 stores individuels et 16 groupes via les protocoles RTx 433 MHz. Si vous utilisez des moteurs IO Home Control, ce projet n’est pas pour vous, mais vous pouvez utiliser le protocole IO Remote pour connecter le dispositif ESPSomfy RTS à une télécommande disectée. Consultez le [Wiki](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Controlling-Motors-with-GPIO) pour les options et vérifiez si la solution est compatible avec votre matériel.
@@ -17,7 +20,7 @@ Ce logiciel utilise quelques composants matériels faciles à trouver, incluant 
 
 # Mises à jour du dispositif ESPSomfy RTS
 
-Si vous cherchez à installer le dernier logiciel sur votre appareil, le wiki fournit les instructions ici :. [Updating ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)
+Si vous cherchez à installer le dernier logiciel sur votre appareil, le wiki fournit les instructions ici : [Updating ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)
 
 # Fonctionnalités
 
@@ -49,7 +52,7 @@ Pour déplacer un store vers un pourcentage de fermeture précis, cliquez sur l�
 
 ## Définir une position favorite
 
-Pour définir votre position favorite “my”, vous pouvez utiliser l’interface ESPSomfy RTS ou votre télécommande Somfy. ESPSomfy RTS détecte l’appui long du bouton my et enregistre la position favorite. Si vous aviez une position favorite avant l’installation, réinitialisez-la via ESPSomfy RTS. Somfy utilise la même commande pour définir et supprimer ses favoris.
+Pour définir votre position favorite "my", vous pouvez utiliser l’interface ESPSomfy RTS ou votre télécommande Somfy. ESPSomfy RTS détecte l’appui long du bouton my et enregistre la position favorite. Si vous aviez une position favorite avant l’installation, réinitialisez-la via ESPSomfy RTS. Somfy utilise la même commande pour définir et supprimer ses favoris.
 
 Pour définir ou supprimer une position favorite, appuyez longuement sur le bouton my. Après quelques secondes, un écran s’affiche. ESPSomfy RTS permet de définir une position favorite via un curseur (ex. 37 %) puis en appuyant sur `SET MY POSITION` Le store se déplacera et effectuera un petit mouvement pour confirmer l’enregistrement.
 ![image](https://user-images.githubusercontent.com/47839015/224559730-859d3f9c-177c-46c3-9fb4-1a7df2cac505.png)
