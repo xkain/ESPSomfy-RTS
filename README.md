@@ -55,6 +55,7 @@ Pour déplacer un store vers un pourcentage de fermeture précis, cliquez sur l�
 Pour définir votre position favorite "my", vous pouvez utiliser l’interface ESPSomfy RTS ou votre télécommande Somfy. ESPSomfy RTS détecte l’appui long du bouton my et enregistre la position favorite. Si vous aviez une position favorite avant l’installation, réinitialisez-la via ESPSomfy RTS. Somfy utilise la même commande pour définir et supprimer ses favoris.
 
 Pour définir ou supprimer une position favorite, appuyez longuement sur le bouton my. Après quelques secondes, un écran s’affiche. ESPSomfy RTS permet de définir une position favorite via un curseur (ex. 37 %) puis en appuyant sur `SET MY POSITION` Le store se déplacera et effectuera un petit mouvement pour confirmer l’enregistrement.
+
 ![image](https://user-images.githubusercontent.com/47839015/224559730-859d3f9c-177c-46c3-9fb4-1a7df2cac505.png)
 
 Pour supprimer une position favorite, effectuez un appui long sur le bouton my pour ouvrir l’interface des favoris, déplacez le curseur sur la position actuelle et appuyez sur `CLEAR MY POSITION`.  Le store effectuera un petit mouvement pour confirmer la suppression.
