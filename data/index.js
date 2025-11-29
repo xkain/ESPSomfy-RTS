@@ -962,7 +962,7 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Attempts: </span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Could not connect to server</div><hr></hr><div style="font-size:.7em">' + msg + '</div></div>';
+        div.innerHTML = '<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Tentatives: </span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Impossible de se connecter au serveur</div><hr></hr><div style="font-size:.7em">' + msg + '</div></div>';
         div.classList.add('error-message');
         div.classList.add('socket-error');
         div.classList.add('message-overlay');
@@ -975,7 +975,7 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div class="inner-error">' + msg + '</div><div class="sub-message"></div><button type="button" onclick="ui.clearErrors();">Close</button></div>';
+        div.innerHTML = '<div class="inner-error">' + msg + '</div><div class="sub-message"></div><button type="button" onclick="ui.clearErrors();">Fermer</button></div>';
         div.classList.add('error-message');
         div.classList.add('message-overlay');
         el.appendChild(div);
@@ -988,7 +988,7 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div class="prompt-text">' + msg + '</div><div class="sub-message"></div><div class="button-container"><button id="btnYes" type="button">Yes</button><button type="button" onclick="ui.clearErrors();">No</button></div></div>';
+        div.innerHTML = '<div class="prompt-text">' + msg + '</div><div class="sub-message"></div><div class="button-container"><button id="btnYes" type="button">Oui</button><button type="button" onclick="ui.clearErrors();">Non</button></div></div>';
         div.classList.add('prompt-message');
         div.classList.add('message-overlay');
         el.appendChild(div);
@@ -1304,6 +1304,7 @@ class General {
         document.location.reload();
     }
     timeZones = [
+    { city: 'Europe/Paris', code: 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00' },
     { city: 'Africa/Cairo', code: 'EET-2' },
     { city: 'Africa/Johannesburg', code: 'SAST-2' },
     { city: 'Africa/Juba', code: 'CAT-2' },
@@ -1393,7 +1394,6 @@ class General {
     { city: 'Europe/Lisbon',  code: 'WET0WEST,M3.5.0/1,M10.5.0' },
     { city: 'Europe/London', code: 'GMT0BST,M3.5.0/1,M10.5.0' },
     { city: 'Europe/Moscow', code: 'MSK-3' },
-    { city: 'Europe/Paris', code: 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00' },
     { city: 'Indian/Cocos',  code: '<+0630>-6:30' },
     { city: 'Pacific/Auckland', code: 'NZST-12NZDT,M9.5.0,M4.1.0/3' },
     { city: 'Pacific/Chatham', code: '<+1245>-12:45<+1345>,M9.5.0/2:45,M4.1.0/3:45' },
@@ -1467,19 +1467,19 @@ class General {
         let pnl = document.getElementById('divSystemSettings');
         let obj = ui.fromElement(pnl).general;
         if (typeof obj.hostname === 'undefined' || !obj.hostname || obj.hostname === '') {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'You must supply a valid Host Name.';
+            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'Vous devez fournir un nom d’hôte valide.';
             valid = false;
         }
         if (valid && !/^[a-zA-Z0-9-]+$/.test(obj.hostname)) {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'The host name must only include numbers, letters, or dash.';
+            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'Le nom d’hôte doit contenir uniquement des lettres, des chiffres ou un tiret.';
             valid = false;
         }
         if (valid && obj.hostname.length > 32) {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'The maximum Host Name length is 32 characters.';
+            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'La longueur maximale du nom d’hôte est de 32 caractères.';
             valid = false;
         }
         if (valid && typeof obj.ntpServer === 'string' && obj.ntpServer.length > 64) {
-            ui.errorMessage('Invalid NTP Server').querySelector('.sub-message').innerHTML = 'The maximum NTP Server length is 64 characters.';
+            ui.errorMessage('Invalid NTP Server').querySelector('.sub-message').innerHTML = 'La longueur maximale du serveur NTP est de 64 caractères.';
             valid = false;
         }
         if (valid) {
@@ -1507,7 +1507,7 @@ class General {
         this.onSecurityTypeChanged();
     }
     rebootDevice() {
-        ui.promptMessage(document.getElementById('divContainer'), 'Are you sure you want to reboot the device?', () => {
+        ui.promptMessage(document.getElementById('divContainer'), 'Êtes-vous sûr de vouloir redémarrer l’appareil', () => {
             if(typeof socket !== 'undefined') socket.close(3000, 'reboot');
             putJSONSync('/reboot', {}, (err, response) => {
                 document.getElementById('btnSaveGeneral').classList.remove('disabled');
@@ -1552,41 +1552,41 @@ class General {
         if (security.type === 1) { // Pin Entry
             // Make sure our pin is 4 digits.
             if (sec.pin.length !== 4) {
-                ui.errorMessage('Invalid Pin').querySelector('.sub-message').innerHTML = 'Pins must be exactly 4 alpha-numeric values in length.  Please enter a complete pin.';
+                ui.errorMessage('Code PIN invalide').querySelector('.sub-message').innerHTML = 'Le code PIN doit contenir exactement 4 caractères alphanumériques. Veuillez saisir un code complet.';
                 return;
             }
-            confirm = '<p>Please keep your PIN safe and above all remember it.  The only way to recover a lost PIN is to completely reload the onboarding firmware which will wipe out your configuration.</p><p>Have you stored your PIN in a safe place?</p>';
+            confirm = '<p>Veuillez conserver votre code PIN en lieu sûr et surtout ne pas l’oublier. Le seul moyen de récupérer un code PIN perdu est de recharger complètement le firmware d’initialisation, ce qui effacera toute votre configuration.</p><p>Avez-vous enregistré votre code PIN dans un endroit sécurisé ?</p>';
         }
         else if (security.type === 2) { // Password
             if (sec.username.length === 0) {
-                ui.errorMessage('No Username Provided').querySelector('.sub-message').innerHTML = 'You must provide a username for password security.';
+                ui.errorMessage('No Username Provided').querySelector('.sub-message').innerHTML = 'Vous devez fournir un nom d’utilisateur pour la sécurité par mot de passe.';
                 return;
             }
             if (sec.username.length > 32) {
-                ui.errorMessage('Invalid Username').querySelector('.sub-message').innerHTML = 'The maximum username length is 32 characters.';
+                ui.errorMessage('Invalid Username').querySelector('.sub-message').innerHTML = 'La longueur maximale du nom d’utilisateur est de 32 caractères.';
                 return;
             }
 
             if (sec.password.length === 0) {
-                ui.errorMessage('No Password Provided').querySelector('.sub-message').innerHTML = 'You must provide a password for password security.';
+                ui.errorMessage('No Password Provided').querySelector('.sub-message').innerHTML = 'Vous devez fournir un mot de passe pour la sécurité par mot de passe.';
                 return;
             }
             if (sec.password.length > 32) {
-                ui.errorMessage('Invalid Password').querySelector('.sub-message').innerHTML = 'The maximum password length is 32 characters.';
+                ui.errorMessage('Invalid Password').querySelector('.sub-message').innerHTML = 'La longueur maximale du mot de passe est de 32 caractères.';
                 return;
             }
 
             if (security.repeatpassword.length === 0) {
-                ui.errorMessage('Re-enter Password').querySelector('.sub-message').innerHTML = 'You must re-enter the password in the Re-enter Password field.';
+                ui.errorMessage('Re-enter Password').querySelector('.sub-message').innerHTML = 'Vous devez ressaisir le mot de passe dans le champ "Ressaisir le mot de passe".';
                 return;
             }
             if (sec.password !== security.repeatpassword) {
-                ui.errorMessage('Passwords do not Match').querySelector('.sub-message').innerHTML = 'Please re-enter the password exactly as you typed it in the Re-enter Password field.';
+                ui.errorMessage('Passwords do not Match').querySelector('.sub-message').innerHTML = 'Veuillez ressaisir le mot de passe exactement tel que vous l’avez saisi dans le champ "Ressaisir le mot de passe"..';
                 return;
             }
-            confirm = '<p>Please keep your password safe and above all remember it.  The only way to recover a password is to completely reload the onboarding firmware which will wipe out your configuration.</p><p>Have you stored your username and password in a safe place?</p>';
+            confirm = '<p>Veuillez conserver votre mot de passe en lieu sûr et surtout ne pas l’oublier. Le seul moyen de récupérer un mot de passe perdu est de recharger complètement le firmware d’initialisation, ce qui effacera toute votre configuration.</p><p>Avez-vous enregistré votre nom d’utilisateur et votre mot de passe dans un endroit sécurisé ?</p>';
         }
-        let prompt = ui.promptMessage('Confirm Security', () => {
+        let prompt = ui.promptMessage('Confirmation sécurité', () => {
             putJSONSync('/saveSecurity', sec, (err, objApiKey) => {
                 prompt.remove();
                 if (err) ui.serviceError(err);
@@ -1786,35 +1786,35 @@ class Wifi {
         if (!obj.dhcp) {
             let fnValidateIP = (addr) => { return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(addr); };
             if (typeof obj.ip !== 'string' || obj.ip.length === 0 || obj.ip === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid IP address for the Static IP Address');
+                ui.errorMessage('Vous devez fournir une adresse IP valide pour l’adresse IP statique');
                 return;
             }
             else if (!fnValidateIP(obj.ip)) {
-                ui.errorMessage('Invalid Static IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage('Adresse IP statique invalide. Le format attendu est XXX.XXX.XXX.XXX');
                 return;
             }
             if (typeof obj.subnet !== 'string' || obj.subnet.length === 0 || obj.subnet === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid IP address for the Subnet Mask');
+                ui.errorMessage('Vous devez fournir une adresse IP valide pour le masque de sous-réseau');
                 return;
             }
             else if (!fnValidateIP(obj.subnet)) {
-                ui.errorMessage('Invalid Subnet IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage('Adresse IP du masque de sous-réseau invalide. Le format attendu est XXX.XXX.XXX.XXX');
                 return;
             }
             if (typeof obj.gateway !== 'string' || obj.gateway.length === 0 || obj.gateway === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid Gateway IP address');
+                ui.errorMessage('Vous devez fournir une adresse IP valide pour la passerelle');
                 return;
             }
             else if (!fnValidateIP(obj.gateway)) {
-                ui.errorMessage('Invalid Gateway IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage('Adresse IP de la passerelle invalide. Le format attendu est XXX.XXX.XXX.XXX');
                 return;
             }
             if (obj.dns1.length !== 0 && !fnValidateIP(obj.dns1)) {
-                ui.errorMessage('Invalid Domain Name Server 1 IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage('Adresse IP du serveur DNS 1 invalide. Le format attendu est XXX.XXX.XXX.XXX');
                 return;
             }
             if (obj.dns2.length !== 0 && !fnValidateIP(obj.dns2)) {
-                ui.errorMessage('Invalid Domain Name Server 2 IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage('Adresse IP du serveur DNS 2 invalide. Le format attendu est XXX.XXX.XXX.XXX');
                 return;
             }
         }
@@ -1836,9 +1836,9 @@ class Wifi {
             let clkMode = this.ethClockModes.find(elem => obj.ethernet.CLKMode === elem.val);
             let div = document.createElement('div');
             let html = `<div id="divLanSettings" class="inst-overlay">`;
-            html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="padding:10px;display:inline-block;width:100%;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;">BEWARE ... WARNING ... DANGER<span></div>';
-            html += '<p style="font-size:14px;">Incorrect Ethernet settings can damage your ESP32.  Please verify the settings below and ensure they match the manufacturer spec sheet.</p>';
-            html += '<p style="font-size:14px;margin-bottom:0px;">If you are unsure do not press the Red button and press the Green button.  If any of the settings are incorrect please use the Custom Board type and set them to the correct values.';
+            html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="padding:10px;display:inline-block;width:100%;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;">ATTENTION ... AVERTISSEMENT ... DANGER<span></div>';
+            html += '<p style="font-size:14px;">Des paramètres Ethernet incorrects peuvent endommager votre ESP32. Veuillez vérifier les réglages ci-dessous et vous assurer qu’ils correspondent aux spécifications du fabricant.</p>';
+            html += '<p style="font-size:14px;margin-bottom:0px;">En cas de doute, n’appuyez pas sur le bouton rouge et utilisez le bouton vert. Si l’un des paramètres est incorrect, sélectionnez le type de carte personnalisé et définissez les valeurs correctes.';
             html += '<hr/><div>';
             html += `<div class="eth-setting-line"><label>Board Type</label><span>${boardType.label} [${boardType.val}]</span></div>`;
             html += `<div class="eth-setting-line"><label>PHY Chip Type</label><span>${phyType.label} [${phyType.val}]</span></div>`;
@@ -1849,8 +1849,8 @@ class Wifi {
             html += `<div class="eth-setting-line"><label>MDIO Pin</label><span>${obj.ethernet.MDIOPin}</span></div>`;
             html += '</div>';
             html += `<div class="button-container">`;
-            html += `<button id="btnSaveEthernet" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;">Save Ethernet Settings</button>`;
-            html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divLanSettings').remove();">Cancel</button>`;
+            html += `<button id="btnSaveEthernet" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;">Enregistrer paramètres Ethernet</button>`;
+            html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divLanSettings').remove();">Annuler</button>`;
             html += `</div><form>`;
             div.innerHTML = html;
             document.getElementById('divContainer').appendChild(div);
@@ -1923,23 +1923,23 @@ class Somfy {
     initialized = false;
     frames = [];
     shadeTypes = [
-        { type: 0, name: 'Roller Shade', ico: 'icss-window-shade', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 1, name: 'Blind', ico: 'icss-window-blind', lift: true, tilt: true, sun: true, fcmd: true, fpos: true },
-        { type: 2, name: 'Drapery (left)', ico: 'icss-ldrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 3, name: 'Awning', ico: 'icss-awning', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 4, name: 'Shutter', ico: 'icss-shutter', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 5, name: 'Garage (1-button)', ico: 'icss-garage', lift: true, light: true, fpos: true },
-        { type: 6, name: 'Garage (3-button)', ico: 'icss-garage', lift: true, light: true, fcmd: true, fpos: true },
-        { type: 7, name: 'Drapery (right)', ico: 'icss-rdrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 8, name: 'Drapery (center)', ico: 'icss-cdrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 9, name: 'Dry Contact (1-button)', ico: 'icss-lightbulb', fpos: true },
-        { type: 10, name: 'Dry Contact (2-button)', ico: 'icss-lightbulb', fcmd: true, fpos: true },
-        { type: 11, name: 'Gate (left)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
-        { type: 12, name: 'Gate (center)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
-        { type: 13, name: 'Gate (right)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
-        { type: 14, name: 'Gate (1-button left)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
-        { type: 15, name: 'Gate (1-button center)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
-        { type: 16, name: 'Gate (1-button right)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
+        { type: 0, name: 'Store enrouleur', ico: 'icss-window-shade', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 1, name: 'Store vénitien', ico: 'icss-window-blind', lift: true, tilt: true, sun: true, fcmd: true, fpos: true },
+        { type: 2, name: 'Rideau (gauche)', ico: 'icss-ldrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 3, name: 'Store banne', ico: 'icss-awning', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 4, name: 'Volet', ico: 'icss-shutter', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 5, name: 'Garage (1-bouton)', ico: 'icss-garage', lift: true, light: true, fpos: true },
+        { type: 6, name: 'Garage (3-bouton)', ico: 'icss-garage', lift: true, light: true, fcmd: true, fpos: true },
+        { type: 7, name: 'Rideau (droit)', ico: 'icss-rdrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 8, name: 'Rideau (centre)', ico: 'icss-cdrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 9, name: 'Contact sec (1 bouton)', ico: 'icss-lightbulb', fpos: true },
+        { type: 10, name: 'Contact sec (2 boutons)', ico: 'icss-lightbulb', fcmd: true, fpos: true },
+        { type: 11, name: 'Portail (gauche)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
+        { type: 12, name: 'Portail (centre)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
+        { type: 13, name: 'Portail (droit)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
+        { type: 14, name: 'Portail (1 bouton gauche)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
+        { type: 15, name: 'Portail (1 bouton centre)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
+        { type: 16, name: 'Portail (1 bouton droit)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
     ];
     init() {
         if (this.initialized) return;
@@ -1993,7 +1993,7 @@ class Somfy {
         let trans = ui.fromElement(document.getElementById('divTransceiverSettings')).transceiver;
         // Check to make sure we have a trans type.
         if (typeof trans.config.type === 'undefined' || trans.config.type === '' || trans.config.type === 'none') {
-            ui.errorMessage('You must select a radio type.');
+            ui.errorMessage('Vous devez sélectionner un type de radio.');
             valid = false;
         }
         // Check to make sure no pins were duplicated and defined
@@ -2001,14 +2001,14 @@ class Somfy {
             let fnValDup = (o, name) => {
                 let val = o[name];
                 if (typeof val === 'undefined' || isNaN(val)) {
-                    ui.errorMessage(document.getElementById('divSomfySettings'), 'You must define all the pins for the radio.');
+                    ui.errorMessage(document.getElementById('divSomfySettings'), 'Vous devez définir toutes les pins pour la radio.');
                     return false;
                 }
                 for (let s in o) {
                     if (s.endsWith('Pin') && s !== name) {
                         let sval = o[s];
                         if (typeof sval === 'undefined' || isNaN(sval)) {
-                            ui.errorMessage(document.getElementById('divSomfySettings'), 'You must define all the pins for the radio.');
+                            ui.errorMessage(document.getElementById('divSomfySettings'), 'Vous devez définir toutes les pins pour la radio.');
                             return false;
                         }
                         if (sval === val) {
@@ -2016,7 +2016,7 @@ class Somfy {
                                 (name === 'RXPin' && s === 'TXPin'))
                                 continue; // The RX and TX pins can share the same value.  In this instance the radio will only use GDO0.
                             else {
-                                ui.errorMessage(document.getElementById('divSomfySettings'), `The ${name.replace('Pin', '')} pin is duplicated by the ${s.replace('Pin', '')}.  All pin definitions must be unique`);
+                                ui.errorMessage(document.getElementById('divSomfySettings'), `The ${name.replace('Pin', '')} est dupliquée par la pin ${s.replace('Pin', '')}.  Toutes les définitions de pins doivent être uniques`);
                                 valid = false;
                                 return false;
                             }
@@ -2077,17 +2077,17 @@ class Somfy {
             div = document.createElement('div');
             div.setAttribute('id', 'divScanFrequency');
             div.classList.add('prompt-message');
-            let html = '<div class="sub-message">Frequency Scanning has started.  Press and hold any button on your remote and ESPSomfy RTS will find the closest frequency to the remote.</div>';
+            let html = '<div class="sub-message">Le balayage de fréquence a commencé.  Appuyez et maintenez n’importe quel bouton de votre télécommande et ESPSomfy RTS trouvera la fréquence la plus proche de la télécommande.</div>';
             html += '<hr style="width:100%;margin:0px;"></hr>';
             html += '<div style="width:100%;text-align:center;">';
-            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Scanning</label><span id="spanTestFreq" style="display:inline-block;width:4em;text-align:right;">433.00</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanTestRSSI">----</span><span>dBm</span></div>';
-            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Frequency</label><span id="spanBestFreq" style="display:inline-block;width:4em;text-align:right;">---.--</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanBestRSSI">----</span><span>dBm</span></div>';
+            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Balayage</label><span id="spanTestFreq" style="display:inline-block;width:4em;text-align:right;">433.00</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanTestRSSI">----</span><span>dBm</span></div>';
+            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Fréquence</label><span id="spanBestFreq" style="display:inline-block;width:4em;text-align:right;">---.--</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanBestRSSI">----</span><span>dBm</span></div>';
             html += '</div>';
             html += `<div class="button-container">`;
-            html += `<button id="btnStopScanning" type="button" style="padding-left:20px;padding-right:20px;" onclick="somfy.stopScanningFrequency(true);">Stop Scanning</button>`;
-            html += `<button id="btnRestartScanning" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.scanFrequency(true);">Start Scanning</button>`;
-            html += `<button id="btnCopyFrequency" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.setScannedFrequency();">Set Frequency</button>`;
-            html += `<button id="btnCloseScanning" type="button" style="padding-left:20px;padding-right:20px;width:100%;display:none;" onclick="document.getElementById('divScanFrequency').remove();">Close</button>`;
+            html += `<button id="btnStopScanning" type="button" style="padding-left:20px;padding-right:20px;" onclick="somfy.stopScanningFrequency(true);">Arrêter le balayage</button>`;
+            html += `<button id="btnRestartScanning" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.scanFrequency(true);">Démarrer le balayage</button>`;
+            html += `<button id="btnCopyFrequency" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.setScannedFrequency();">Définir la fréquence</button>`;
+            html += `<button id="btnCloseScanning" type="button" style="padding-left:20px;padding-right:20px;width:100%;display:none;" onclick="document.getElementById('divScanFrequency').remove();">Fermer</button>`;
             html += `</div>`;
             div.innerHTML = html;
             document.getElementById('divRadioSettings').appendChild(div);
@@ -2697,22 +2697,22 @@ class Somfy {
                 let shadeName = elname.innerHTML;
                 let html = `<div class="shade-name"><span>${shadeName}</span><div style="float:right;vertical-align:top;cursor:pointer;font-size:12px;margin-top:4px;">`;
                 if (myPos >= 0 && tiltType !== 3)
-                    html += `<div onclick="document.getElementById('slidShadeTarget').value = ${myPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Current:</span><span>${myPos}</span><span>%</span></div>`;
+                    html += `<div onclick="document.getElementById('slidShadeTarget').value = ${myPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Actuel:</span><span>${myPos}</span><span>%</span></div>`;
                 if (myTiltPos >= 0 && tiltType > 0)
-                    html += `<div onclick="document.getElementById('slidShadeTiltTarget').value = ${myTiltPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Tilt:</span><span>${myTiltPos}</span><span>%</span></div>`;
+                    html += `<div onclick="document.getElementById('slidShadeTiltTarget').value = ${myTiltPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Inclinaison :</span><span>${myTiltPos}</span><span>%</span></div>`;
                 html += `</div></div>`;
                 html += `<div id="divShadeTarget">`
                 html += `<input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />`;
-                html += `<label for="slidShadeTarget"><span>Target Position </span><span><span id="spanShadeTarget" class="shade-target">${currPos}</span><span>%</span></span></label>`;
+                html += `<label for="slidShadeTarget"><span>Position cible </span><span><span id="spanShadeTarget" class="shade-target">${currPos}</span><span>%</span></span></label>`;
                 html += `</div>`
                 html += '<div id="divTiltTarget" style="display:none;">';
                 html += `<input id="slidShadeTiltTarget" name="shadeTiltTarget" type="range" min="0" max="100" step="1" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />`;
-                html += `<label for="slidShadeTiltTarget"><span>Target Tilt </span><span><span id="spanShadeTiltTarget" class="shade-target">${currTiltPos}</span><span>%</span></span></label>`;
+                html += `<label for="slidShadeTiltTarget"><span>Inclinaison cible </span><span><span id="spanShadeTiltTarget" class="shade-target">${currTiltPos}</span><span>%</span></span></label>`;
                 html += '</div>';
                 html += `<hr></hr>`;
                 html += '<div style="text-align:right;width:100%;">';
-                html += `<button id="btnSetMyPosition" type="button" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;margin-right:7px;">Set My Position</button>`;
-                html += `<button id="btnCancel" type="button" onclick="somfy.closeShadePositioners();" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;">Cancel</button>`;
+                html += `<button id="btnSetMyPosition" type="button" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;margin-right:7px;">Définir "My" position</button>`;
+                html += `<button id="btnCancel" type="button" onclick="somfy.closeShadePositioners();" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;">Annuler</button>`;
                 html += `</div></div>`;
                 let div = document.createElement('div');
                 div.setAttribute('class', 'shade-positioner shade-my-positioner');
@@ -3015,7 +3015,7 @@ class Somfy {
             });
         }
         else {
-            document.getElementById('btnSaveRoom').innerText = 'Save Room';
+            document.getElementById('btnSaveRoom').innerText = 'Sauvegarder Pièce';
             getJSONSync(`/room?roomId=${roomId}`, (err, room) => {
                 if (err) ui.serviceError(err);
                 else {
@@ -3207,7 +3207,7 @@ class Somfy {
         let obj = ui.fromElement(document.getElementById('somfyRoom'));
         let valid = true;
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'You must provide a name for the room between 1 and 20 characters.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), 'Vous devez fournir un nom pour la pièce compris entre 1 et 20 caractères.');
             valid = false;
         }
         if (valid) {
@@ -3221,7 +3221,7 @@ class Somfy {
                     else {
                         console.log(room);
                         document.getElementById('spanRoomId').innerText = room.roomId;
-                        document.getElementById('btnSaveRoom').innerText = 'Save Room';
+                        document.getElementById('btnSaveRoom').innerText = 'Sauvegarder Pièce';
                         document.getElementById('btnSaveRoom').style.display = 'inline-block';
                         this.updateRoomsList();
                     }
@@ -3242,7 +3242,7 @@ class Somfy {
         let obj = ui.fromElement(document.getElementById('somfyShade'));
         let valid = true;
         if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'The remote address must be a number between 1 and 16777215.  This number must be unique for all shades.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), 'L’adresse de la télécommande doit être un nombre compris entre 1 et 16777215. Ce nombre doit être unique pour tous les volets.');
             valid = false;
         }
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
@@ -3250,11 +3250,11 @@ class Somfy {
             valid = false;
         }
         if (valid && (isNaN(obj.upTime) || obj.upTime < 1 || obj.upTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'Up Time must be a value between 0 and 4,294,967,295 milliseconds.  This is the travel time to go from full closed to full open.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), 'Le temps de montée doit être une valeur comprise entre 0 et 4294967295 millisecondes. Il correspond au temps de déplacement du volet de complètement fermé à complètement ouvert.');
             valid = false;
         }
         if (valid && (isNaN(obj.downTime) || obj.downTime < 1 || obj.downTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'Down Time must be a value between 0 and 4,294,967,295 milliseconds.  This is the travel time to go from full open to full closed.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), 'Le temps de descente doit être une valeur comprise entre 0 et 4294967295 millisecondes. Il correspond au temps de déplacement du volet de complètement ouvert à complètement fermé.');
             valid = false;
         }
         if (obj.proto === 8 || obj.proto === 9) {
@@ -3265,7 +3265,7 @@ class Somfy {
                 case 16: // Gate right 1-button
                 case 10: // Two button dry contact
                     if (obj.proto !== 9 && obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down GPIO selections must be unique.');
+                        ui.errorMessage(document.getElementById('divSomfySettings'), 'Pour les moteurs contrôlés par GPIO, les sélections GPIO de montée et de descente doivent être uniques.');
                         valid = false;
                     }
                     break;
@@ -3273,11 +3273,11 @@ class Somfy {
                     break;
                 default:
                     if (obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down GPIO selections must be unique.');
+                        ui.errorMessage(document.getElementById('divSomfySettings'), 'Pour les moteurs contrôlés par GPIO, les sélections GPIO de montée et de descente doivent être uniques.');
                         valid = false;
                     }
                     else if (obj.proto === 9 && (obj.gpioMy === obj.gpioUp || obj.gpioMy === obj.gpioDown)) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down and my GPIO selections must be unique.');
+                        ui.errorMessage(document.getElementById('divSomfySettings'), 'Pour les moteurs contrôlés par GPIO avec proto 9, les sélections GPIO de montée, descente et "my" doivent toutes être uniques.');
                         valid = false;
                     }
                     break;
@@ -3328,11 +3328,11 @@ class Somfy {
         let obj = ui.fromElement(document.getElementById('somfyGroup'));
         let valid = true;
         if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage('The remote address must be a number between 1 and 16777215.  This number must be unique for all shades.');
+            ui.errorMessage('L’adresse de la télécommande doit être un nombre compris entre 1 et 16777215. Ce nombre doit être unique pour tous les volets.');
             valid = false;
         }
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage('You must provide a name for the shade between 1 and 20 characters.');
+            ui.errorMessage('Vous devez fournir un nom pour le volet compris entre 1 et 20 caractères.');
             valid = false;
         }
         if (valid) {
@@ -3411,14 +3411,14 @@ class Somfy {
     deleteRoom(roomId) {
         let valid = true;
         if (isNaN(roomId) || roomId >= 255 || roomId <= 0) {
-            ui.errorMessage('A valid room id was not supplied.');
+            ui.errorMessage('Un identifiant de pièce valide n’a pas été fourni.');
             valid = false;
         }
         if (valid) {
             getJSONSync(`/room?roomId=${roomId}`, (err, room) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage(`Are you sure you want to delete this room?`, () => {
+                    let prompt = ui.promptMessage(`Êtes-vous sûr de vouloir supprimer cette pièce ?`, () => {
                         ui.clearErrors();
                         putJSONSync('/deleteRoom', { roomId: roomId }, (err, room) => {
                             prompt.remove();
@@ -3427,7 +3427,7 @@ class Somfy {
                                 this.updateRoomsList();
                         });
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<p>If this room was previously selected for motors or groups, they will be automatically assigned to the Home room.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<p>Si cette pièce était précédemment sélectionnée pour des moteurs ou des groupes, ils seront automatiquement assignés à la pièce "Accueil".</p>`;
                 }
             });
         }
@@ -3435,22 +3435,22 @@ class Somfy {
     deleteShade(shadeId) {
         let valid = true;
         if (isNaN(shadeId) || shadeId >= 255 || shadeId <= 0) {
-            ui.errorMessage('A valid shade id was not supplied.');
+            ui.errorMessage('Un identifiant de volet valide n’a pas été fourni.');
             valid = false;
         }
         if (valid) {
             getJSONSync(`/shade?shadeId=${shadeId}`, (err, shade) => {
                 if (err) ui.serviceError(err);
-                else if (shade.inGroup) ui.errorMessage(`You may not delete this shade because it is a member of a group.`);
+                else if (shade.inGroup) ui.errorMessage(`Vous ne pouvez pas supprimer ce volet car il fait partie d’un groupe.`);
                 else {
-                    let prompt = ui.promptMessage(`Are you sure you want to delete this shade?`, () => {
+                    let prompt = ui.promptMessage(`tes-vous sûr de vouloir supprimer ce volet ?`, () => {
                         ui.clearErrors();
                         putJSONSync('/deleteShade', { shadeId: shadeId }, (err, shade) => {
                             this.updateShadeList();
                             prompt.remove;
                         });
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<p>If this shade was previously paired with a motor, you should first unpair it from the motor and remove it from any groups.  Otherwise its address will remain in the motor memory.</p><p>Press YES to delete ${shade.name} or NO to cancel this operation.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<p>Si ce volet était précédemment appairé avec un moteur, vous devez d’abord le désappairer du moteur et le retirer de tous les groupes. Sinon, son adresse restera dans la mémoire du moteur.</p><p>Appuyez sur OUI pour supprimer ${shade.name} ou sur NON pour annuler cette opération..</p>`;
                 }
             });
         }
@@ -3458,7 +3458,7 @@ class Somfy {
     deleteGroup(groupId) {
         let valid = true;
         if (isNaN(groupId) || groupId >= 255 || groupId <= 0) {
-            ui.errorMessage('A valid shade id was not supplied.');
+            ui.errorMessage('Un identifiant de groupe valide n’a pas été fourni');
             valid = false;
         }
         if (valid) {
@@ -3466,10 +3466,10 @@ class Somfy {
                 if (err) ui.serviceError(err);
                 else {
                     if (group.linkedShades.length > 0) {
-                        ui.errorMessage('You may not delete this group until all shades have been removed from it.');
+                        ui.errorMessage('Vous ne pouvez pas supprimer ce groupe tant que tous les volets n’en ont pas été retirés.');
                     }
                     else {
-                        let prompt = ui.promptMessage(`Are you sure you want to delete this group?`, () => {
+                        let prompt = ui.promptMessage(`Êtes-vous sûr de vouloir supprimer ce groupe ?`, () => {
                             putJSONSync('/deleteGroup', { groupId: groupId }, (err, g) => {
                                 if (err) ui.serviceError(err);
                                 this.updateGroupList();
@@ -3477,7 +3477,7 @@ class Somfy {
                             });
 
                         });
-                        prompt.querySelector('.sub-message').innerHTML = `<p>Press YES to delete the ${group.name} group or NO to cancel this operation.</p>`;
+                        prompt.querySelector('.sub-message').innerHTML = `<p>Appuyez sur OUI pour supprimer le groupe ${group.name} ou sur NON pour annuler cette opération.</p>`;
                         
                     }
                 }
@@ -3572,17 +3572,17 @@ class Somfy {
                 let div = document.createElement('div');
                 div.setAttribute('id', 'divRollingCode');
                 let html = `<div class="instructions" data-shadeid="${shadeId}">`;
-                html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="background:yellow;padding:10px;display:inline-block;border-radius:5px;background:white;">BEWARE ... WARNING ... DANGER<span></div>';
+                html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="background:yellow;padding:10px;display:inline-block;border-radius:5px;background:white;">ATTENTION… AVERTISSEMENT… DANGER<span></div>';
                 html += '<hr style="width:100%;margin:0px;"></hr>';
-                html += '<p style="font-size:14px;">If this shade is already paired with a motor then changing the rolling code WILL cause it to stop working.  Rolling codes are tied to the remote address and the Somfy motor expects these to be sequential.</p>';
-                html += '<p style="font-size:14px;">If you hesitated just a little bit do not press the red button.  Green represents safety so press it, wipe the sweat from your brow, and go through the normal pairing process.';
+                html += '<p style="font-size:14px;">Si ce volet est déjà appairé avec un moteur, changer le code tournant entraînera son dysfonctionnement. Les codes tournants sont liés à l’adresse de la télécommande et le moteur Somfy attend qu’ils soient séquentiels.</p>';
+                html += '<p style="font-size:14px;">Si vous hésitez ne serait-ce qu’un peu, ne pressez pas le bouton rouge. Le vert représente la sécurité, appuyez dessus, essuyez la sueur de votre front et suivez le processus d’appairage normal.';
                 html += '<div class="field-group" style="border-radius:5px;background:white;width:50%;margin-left:25%;text-align:center">';
-                html += `<input id="fldNewRollingCode" min="0" max="65535" name="newRollingCode" type="number" length="12" style="text-align:center;font-size:24px;" placeholder="New Code" value="${shade.lastRollingCode}"></input>`;
-                html += '<label for="fldNewRollingCode">Rolling Code</label>';
+                html += `<input id="fldNewRollingCode" min="0" max="65535" name="newRollingCode" type="number" length="12" style="text-align:center;font-size:24px;" placeholder="Nouveau code" value="${shade.lastRollingCode}"></input>`;
+                html += '<label for="fldNewRollingCode">Code tournant</label>';
                 html += '</div>';
                 html += `<div class="button-container">`;
-                html += `<button id="btnChangeRollingCode" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;" onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">Set Rolling Code</button>`;
-                html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divRollingCode').remove();">Cancel</button>`;
+                html += `<button id="btnChangeRollingCode" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;" onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">Définir le code tournant</button>`;
+                html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divRollingCode').remove();">Annuler</button>`;
                 html += `</div>`;
                 div.innerHTML = html;
                 document.getElementById('somfyShade').appendChild(div);
@@ -3622,33 +3622,33 @@ class Somfy {
         let div = document.createElement('div');
         let html = `<div id="divPairing" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
         if (shadeType === 5 || shadeType === 6) {
-            html += '<div>Follow the instructions below to pair ESPSomfy RTS with an RTS Garage Door motor</div>';
+            html += '<div>Suivez les instructions ci-dessous pour appairer ESPSomfy RTS avec un moteur de porte de garage RTS</div>';
             html += '<hr style="width:100%;margin:0px;"></hr>';
             html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-            html += '<li>Open the garage door motor memory per instructions for your motor.</li>';
-            html += '<li>Once the memory is opened, press the prog button below</li>';
-            html += '<li>For single button control ESPSomfy RTS will send a toggle command but for a 3 button control it will send a prog command.</li>';
+            html += '<li>Ouvrez la mémoire du moteur de porte de garage selon les instructions de votre moteur.</li>';
+            html += '<li>Une fois la mémoire ouverte, appuyez sur le bouton Prog ci-dessous</li>';
+            html += '<li>Pour un contrôle à un seul bouton, ESPSomfy RTS enverra une commande bascule, mais pour un contrôle à 3 boutons, il enverra une commande Prog.</li>';
             html += '</ul>';
             html += `<div class="button-container">`;
             html += `<button id="btnSendPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Door Paired</button>`;
-            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Close</button>`;
+            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Porte appairée</button>`;
+            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Fermer</button>`;
             html += `</div>`;
         }
         else {
-            html += '<div>Follow the instructions below to pair this shade with a Somfy motor</div>';
+            html += '<div>Suivez les instructions ci-dessous pour appairer ce volet avec un moteur Somfy</div>';
             html += '<hr style="width:100%;margin:0px;"></hr>';
             html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-            html += '<li>Open the shade memory using an existing remote by pressing the prog button on the back until the shade jogs.</li>';
-            html += '<li>After the shade jogs press the Prog button below</li>';
-            html += '<li>The shade should jog again indicating that the shade is paired. NOTE: On some motors you may need to press and hold the Prog button.</li>';
-            html += '<li>If the shade jogs, you can press the shade paired button.</li>';
-            html += '<li>If the shade does not jog, try pressing the prog button again.</li>';
+            html += '<li>Ouvrez la mémoire du volet à l’aide d’une télécommande existante en appuyant sur le bouton Prog à l’arrière jusqu’à ce que le volet effectue un à-coup.</li>';
+            html += '<li>Après que le volet ait effectué l’à-coup, appuyez sur le bouton Prog ci-dessous</li>';
+            html += '<li>Le volet devrait effectuer un nouvel à-coup indiquant qu’il est appairé. REMARQUE : sur certains moteurs, vous devrez peut-être maintenir le bouton Prog enfoncé.</li>';
+            html += '<li>Si le volet effectue l’à-coup, vous pouvez appuyer sur le bouton "Volet appairé"</li>';
+            html += '<li>Si le volet n’effectue pas l’à-coup, essayez d’appuyer à nouveau sur le bouton Prog.</li>';
             html += '</ul>';
             html += `<div class="button-container">`;
             html += `<button id="btnSendPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Shade Paired</button>`;
-            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Close</button>`;
+            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Volet appairé</button>`;
+            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Fermer</button>`;
             html += `</div>`;
         }
         let fnRepeatProg = (err, shade) => {
@@ -3691,20 +3691,20 @@ class Somfy {
     unpairShade(shadeId) {
         let div = document.createElement('div');
         let html = `<div id="divPairing" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
-        html += '<div>Follow the instructions below to unpair this shade from a Somfy motor</div>';
+        html += '<div>Suivez les instructions ci-dessous pour dissocier ce volet d’un moteur Somfy.</div>';
         html += '<hr style="width:100%;margin:0px;"></hr>';
         html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-        html += '<li>Open the shade memory using an existing remote</li>';
-        html += '<li>Press the prog button on the back of the remote until the shade jogs</li>';
-        html += '<li>After the shade jogs press the Prog button below</li>';
-        html += '<li>The shade should jog again indicating that the shade is unpaired</li>';
-        html += '<li>If the shade jogs, you can press the shade unpaired button.</li>';
-        html += '<li>If the shade does not jog, press the prog button again until the shade jogs.</li>';
+        html += '<li>Ouvrez la mémoire du volet à l’aide d’une télécommande existante</li>';
+        html += '<li>Appuyez sur le bouton prog au dos de la télécommande jusqu’à ce que le volet effectue un à-coup.</li>';
+        html += '<li>Après que le volet ait effectué un à-coup, appuyez sur le bouton Prog ci-dessous</li>';
+        html += '<li>Le volet devrait effectuer à nouveau un à-coup, indiquant qu’il est dissocié</li>';
+        html += '<li>Si le volet effectue un à-coup, vous pouvez appuyer sur le bouton « Volet dissocié ».</li>';
+        html += '<li>Si le volet n’effectue pas d’à-coup, appuyez de nouveau sur le bouton prog jusqu’à ce qu’il réagisse.</li>';
         html += '</ul>';
         html += `<div class="button-container">`;
         html += `<button id="btnSendUnpairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-        html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, false);">Shade Unpaired</button>`;
-        html += `<button id="btnStopUnpairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" onclick="document.getElementById('divPairing').remove();">Close</button>`;
+        html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, false);">Volet dissocié</button>`;
+        html += `<button id="btnStopUnpairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" onclick="document.getElementById('divPairing').remove();">Fermer</button>`;
         html += `</div>`;
         div.innerHTML = html;
         let fnRepeatProg = (err, shade) => {
@@ -3856,9 +3856,9 @@ class Somfy {
     linkRemote(shadeId) {
         let div = document.createElement('div');
         let html = `<div id="divLinking" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
-        html += '<div>Press any button on the remote to link it to this shade.  This will not change the pairing for the remote and this screen will close when the remote is detected.</div>';
+        html += '<div>Appuyez sur n’importe quel bouton de la télécommande pour la lier à ce volet. Cela ne modifiera pas l’association de la télécommande et cet écran se fermera lorsque la télécommande sera détectée.</div>';
         html += '<hr></hr>';
-        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinking').remove();">Cancel</button></div>`;
+        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinking').remove();">Annuler</button></div>`;
         html += '</div>';
         div.innerHTML = html;
         document.getElementById('somfyShade').appendChild(div);
@@ -3867,13 +3867,13 @@ class Somfy {
     linkRepeatRemote() {
         let div = document.createElement('div');
         let html = `<div id="divLinkRepeater" class="instructions" data-type="link-repeatremote" style="border-radius:27px;">`;
-        html += '<div>Press any button on the remote to repeat its signals.</div>';
-        html += '<div class="sub-message">When assigned, ESPSomfy RTS will act as a repeater and repeat any frames for the identified remotes.</div>'
-        html += '<div class="sub-message" style="font-size:14px;">Only assign a repeater when ESPSomfy RTS reliably hears a physical remote but the motor does not.  Repeating unnecessary radio signals will degrade radio performance and never assign the same repeater to more than one ESPSomfy RTS device.  You will have created an insidious echo chamber.</div>'
+        html += '<div>Appuyez sur n’importe quel bouton de la télécommande pour répéter ses signaux.</div>';
+        html += '<div class="sub-message">Une fois assigné, ESPSomfy RTS agira comme un répéteur et répétera tous les signaux des télécommandes identifiées.</div>'
+        html += '<div class="sub-message" style="font-size:14px;">N’assignez un répéteur que lorsque ESPSomfy RTS capte de manière fiable une télécommande physique mais que le moteur ne le fait pas. Répéter des signaux radio inutiles dégradera les performances radio et n’assignez jamais le même répéteur à plus d’un appareil ESPSomfy RTS. Vous créeriez une chambre d’écho insidieuse.</div>'
 
-        html += '<div class="sub-message">Once a signal is detected from the remote this window will close and the remote signals will be repeated.</div>'
+        html += '<div class="sub-message">Une fois qu’un signal est détecté depuis la télécommande, cette fenêtre se fermera et les signaux de la télécommande seront répétés.</div>'
         html += '<hr></hr>';
-        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinkRepeater').remove();">Cancel</button></div>`;
+        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinkRepeater').remove();">Annuler</button></div>`;
         html += '</div>';
         div.innerHTML = html;
         document.getElementById('divConfigPnl').appendChild(div);
@@ -3883,35 +3883,35 @@ class Somfy {
     linkGroupShade(groupId) {
         let div = document.createElement('div');
         let html = `<div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">`;
-        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>ADD SHADE TO GROUP</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
+        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>AJOUTER VOLET AU GROUPE</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
 
         html += '<div class="wizard-step" data-stepid="1">';
-        html += '<p style="font-size:14px;">This wizard will walk you through the steps required to add shades into a group.  Follow all instructions at each step until the shade is added to the group.</p>';
-        html += '<p style="font-size:14px;">During this process the shade should jog exactly two times.  The first time indicates that the motor memory has been enabled and the second time adds the group to the motor memory</p>';
-        html += '<p style="font-size:14px;">Each shade must be paired individually to the group.  When you are ready to begin pairing your shade to the group press the NEXT button.</p><hr></hr>';
+        html += '<p style="font-size:14px;">Cet assistant vous guidera à travers les étapes nécessaires pour ajouter des volets dans un groupe. Suivez toutes les instructions à chaque étape jusqu’à ce que le volet soit ajouté au groupe.</p>';
+        html += '<p style="font-size:14px;">Pendant ce processus, le volet doit effectuer exactement deux à-coups. Le premier indique que la mémoire du moteur a été activée et le second ajoute le groupe à la mémoire du moteur.</p>';
+        html += '<p style="font-size:14px;">Chaque volet doit être associé individuellement au groupe. Lorsque vous êtes prêt à commencer l’association de votre volet au groupe, appuyez sur le bouton SUIVANT.</p><hr></hr>';
        
         html += '</div>';
 
         html += '<div class="wizard-step" data-stepid="2">';
-        html += '<p style="font-size:14px;">Choose a shade that you would like to include in this group.  Once you have chosen the shade to include in the link press the NEXT button.</p>';
-        html += '<p style="font-size:14px;">Only shades that have not already been included in this group are available the dropdown.  Each shade can be included in multiple groups.</p>';
+        html += '<p style="font-size:14px;">Choisissez un volet que vous souhaitez inclure dans ce groupe. Une fois que vous avez choisi le volet à inclure, appuyez sur le bouton SUIVANT.</p>';
+        html += '<p style="font-size:14px;">Seuls les volets qui n’ont pas déjà été inclus dans ce groupe sont disponibles dans la liste déroulante. Chaque volet peut être inclus dans plusieurs groupes.</p>';
         html += '<hr></hr>';
         html += `<div class="field-group" style="text-align:center;background-color:white;border-radius:5px;">`;
-        html += `<select id="selAvailShades" style="font-size:22px;min-width:277px;text-align:center;" data-bind="shadeId" data-datatype="int" onchange="document.getElementById('divWizShadeName').innerHTML = this.options[this.selectedIndex].text;"><options style="color:black;"></options></select><label for="selAvailShades">Select a Shade</label></div >`;
+        html += `<select id="selAvailShades" style="font-size:22px;min-width:277px;text-align:center;" data-bind="shadeId" data-datatype="int" onchange="document.getElementById('divWizShadeName').innerHTML = this.options[this.selectedIndex].text;"><options style="color:black;"></options></select><label for="selAvailShades">Sélectionner un volet</label></div >`;
         html += '</div>';
 
         html += '<div class="wizard-step" data-stepid="3">';
-        html += '<p style="font-size:14px;">Now that you have chosen a shade to pair.  Open the memory for the shade by pressing the OPEN MEMORY button.  The shade should jog to indicate the memory has been opened.</p>';
-        html += '<p style="font-size:14px;">The motor should jog only once.  If it jogs more than once then you have again closed the memory on the motor. Once the command is sent to the motor you will be asked if the motor successfully jogged.</p><p style="font-size:14px;">If it did then press YES if not press no and click the OPEN MEMORY button again.</p>';
+        html += '<p style="font-size:14px;">Maintenant que vous avez choisi un volet à associer, ouvrez la mémoire du volet en appuyant sur le bouton OUVRIR MÉMOIRE. Le volet doit effectuer un à-coup pour indiquer que la mémoire a été ouverte.</p>';
+        html += '<p style="font-size:14px;">Le moteur ne doit effectuer qu’un seul à-coup. S’il effectue plusieurs à-coups, vous avez à nouveau fermé la mémoire du moteur. Une fois la commande envoyée au moteur, vous serez invité à confirmer si le moteur a bien réagi.</p><p style="font-size:14px;">Si c’est le cas, appuyez sur OUI, sinon appuyez sur NON et cliquez de nouveau sur le bouton OUVRIR MÉMOIRE.</p>';
         html += '<hr></hr>';
         html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Open Memory</button></div>';
+        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Ouvrir Mémoir.</button></div>';
         html += '<hr></hr>';
         html += '</div>';
 
         html += '<div class="wizard-step" data-stepid="4">';
-        html += '<p style="font-size:14px;">Now that the memory is opened on the motor you need to send the pairing command for the group.</p>';
-        html += '<p style="font-size:14px;">To do this press the PAIR TO GROUP button below and once the motor jogs the process will be complete.</p>';
+        html += '<p style="font-size:14px;">Maintenant que la mémoire est ouverte sur le moteur, vous devez envoyer la commande d’association pour le groupe.</p>';
+        html += '<p style="font-size:14px;">Pour ce faire, appuyez sur le bouton ASSOCIER AU GROUPE ci-dessous et une fois que le moteur aura effectué l’à-coup, le processus sera terminé.</p>';
         html += '<hr></hr>';
         html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
         html += '<div class="button-container"><button type="button" id="btnPairToGroup">Pair to Group</button></div>';
@@ -3920,8 +3920,8 @@ class Somfy {
 
 
 
-        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">Go Back</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">Next</button></div>`;
-        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divLinkGroup').remove();">Cancel</button></div>`;
+        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">Retour</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">Suivant</button></div>`;
+        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divLinkGroup').remove();">Annuler</button></div>`;
         html += '</div>';
         div.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
@@ -3933,11 +3933,11 @@ class Somfy {
             putJSONSync('/shadeCommand', { shadeId: obj.shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage('Confirmer réponse du moteur', () => {
                         ui.wizSetNextStep(document.getElementById('divLinkGroup'));
                         prompt.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>Once the shade has jogged the motor memory will be ready to add the shade to the group.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Le volet a-t-il effectué un à-coup ? Si oui, appuyez sur le bouton OUI, sinon appuyez sur le bouton NON et réessayez.</p><p>Une fois que le volet aura effectué un à-coup, la mémoire du moteur sera prête pour ajouter le volet au groupe.</p>`;
                 }
             });
         });
@@ -3965,7 +3965,7 @@ class Somfy {
         btnPairToGroup.addEventListener('mouseup', (evt) => {
             mouseDown = false;
             let obj = ui.fromElement(div);
-            let prompt = ui.promptMessage('Confirm Motor Response', () => {
+            let prompt = ui.promptMessage('Confirmer  réponse du moteur', () => {
                 putJSONSync('/linkToGroup', { groupId: groupId, shadeId: obj.shadeId }, (err, group) => {
                     console.log(group);
                     somfy.setLinkedShadesList(group);
@@ -3974,7 +3974,7 @@ class Somfy {
                 prompt.remove();
                 div.remove();
             });
-            prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog?  If the shade jogged press the YES button and your shade will be linked to the group.  If it did not press the NO button and try again.</p></p><p>Once the shade has jogged the shade will be added to the group and this process will be finished.</p>`;
+            prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Le volet a-t-il effectué un à-coup ? Si oui, appuyez sur le bouton OUI et votre volet sera lié au groupe. Sinon, appuyez sur le bouton NON et réessayez.</p></p><p>Une fois que le volet aura effectué un à-coup, il sera ajouté au groupe et le processus sera terminé.</p>`;
 
         });
         getJSONSync(`/groupOptions?groupId=${groupId}`, (err, options) => {
@@ -3998,7 +3998,7 @@ class Somfy {
                 }
                 else {
                     div.remove();
-                    ui.errorMessage('There are no available shades to pair to this group.');
+                    ui.errorMessage('Aucun volet disponible à associer à ce groupe.');
                 }
             }
         });
@@ -4007,33 +4007,33 @@ class Somfy {
     unlinkGroupShade(groupId, shadeId) {
         let div = document.createElement('div');
         let html = `<div id="divUnlinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">`;
-        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>REMOVE SHADE FROM GROUP</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
+        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>Retirer le volet du groupe</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
 
         html += '<div class="wizard-step" data-stepid="1">';
-        html += '<p style="font-size:14px;">This wizard will walk you through the steps required to remove a shade from a group.  Follow all instructions at each step until the shade is removed from the group.</p>';
-        html += '<p style="font-size:14px;">During this process the shade should jog exactly two times.  The first time indicates that the motor memory has been enabled and the second time removes the group from the motor memory</p>';
-        html += '<p style="font-size:14px;">Each shade must be removed from the group individually.  When you are ready to begin unpairing your shade from the group press the NEXT button to begin.</p><hr></hr>';
+        html += '<p style="font-size:14px;">Cet assistant vous guidera à travers les étapes nécessaires pour retirer un volet d’un groupe. Suivez toutes les instructions à chaque étape jusqu’à ce que le volet soit retiré du groupe.</p>';
+        html += '<p style="font-size:14px;">Pendant ce processus, le volet doit effectuer exactement deux à-coups. Le premier indique que la mémoire du moteur est ouverte et le second que le groupe est supprimé de la mémoire du moteur.</p>';
+        html += '<p style="font-size:14px;">Chaque volet doit être retiré du groupe individuellement. Lorsque vous êtes prêt à commencer la dissociation du volet du groupe, appuyez sur le bouton SUIVANT pour démarrer.</p><hr></hr>';
         html += '</div>';
 
         html += '<div class="wizard-step" data-stepid="2">';
-        html += '<p style="font-size:14px;">You must first open the memory for the shade by pressing the OPEN MEMORY button.  The shade should jog to indicate the memory has been opened.</p>';
-        html += '<p style="font-size:14px;">The motor should jog only once.  If it jogs more than once then you have again closed the memory on the motor. Once the motor has jogged press the NEXT button to proceed.</p>';
+        html += '<p style="font-size:14px;">Vous devez d’abord ouvrir la mémoire du volet en appuyant sur le bouton OUVRIR LA MÉMOIRE. Le volet doit effectuer un à-coup pour indiquer que la mémoire est ouverte.</p>';
+        html += '<p style="font-size:14px;">Le moteur ne doit effectuer qu’un seul à-coup. S’il en effectue plus d’un, cela signifie que la mémoire du moteur a été refermée. Une fois l’à-coup effectué, appuyez sur le bouton SUIVANT pour continuer.</p>';
         html += '<hr></hr>';
         html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Open Memory</button></div>';
+        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Ouvrir la mémoire</button></div>';
         html += '<hr></hr>';
         html += '</div>';
 
         html += '<div class="wizard-step" data-stepid="3">';
-        html += '<p style="font-size:14px;">Now that the memory is opened on the motor you need to send the un-pairing command for the group.</p>';
-        html += '<p style="font-size:14px;">To do this press the UNPAIR FROM GROUP button below and once the motor jogs the process will be complete.</p>';
+        html += '<p style="font-size:14px;">Maintenant que la mémoire du moteur est ouverte, vous devez envoyer la commande de dissociation du groupe.</p>';
+        html += '<p style="font-size:14px;">Pour cela, appuyez sur le bouton RETIRER DU GROUPE ci-dessous. Une fois que le moteur effectue un à-coup, le processus sera terminé.</p>';
         html += '<hr></hr>';
         html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnUnpairFromGroup">Unpair from Group</button></div>';
+        html += '<div class="button-container"><button type="button" id="btnUnpairFromGroup">Retirer du groupe</button></div>';
         html += '<hr></hr>';
         html += '</div>';
-        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">Go Back</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">Next</button></div>`;
-        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divUnlinkGroup').remove();">Cancel</button></div>`;
+        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">Retour</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">Suivant</button></div>`;
+        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divUnlinkGroup').remove();">Annuler</button></div>`;
         html += '</div>';
         div.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
@@ -4045,11 +4045,11 @@ class Somfy {
             putJSONSync('/shadeCommand', { shadeId: shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage('Confirmer réponse du moteur', () => {
                         ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));
                         prompt.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>If you are having trouble getting the motor to jog on this step you may try to open the memory using a remote.  Most often this is done by selecting the channel, then a long press on the prog button.</p><p>If you opened the memory using the alternate method press the NO button to close this message, then press NEXT button to skip the step.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Le volet a-t-il effectué un à-coup ? Si oui, appuyez sur le bouton OUI, sinon appuyez sur le bouton NON et réessayez.</p><p>Si vous avez des difficultés à faire réagir le moteur à cette étape, vous pouvez essayer d’ouvrir la mémoire à l’aide d’une télécommande. Cela se fait généralement en sélectionnant le canal puis en maintenant le bouton PROG enfoncé.</p><p>Si vous avez ouvert la mémoire via cette méthode alternative, appuyez sur le bouton NON pour fermer ce message, puis sur le bouton SUIVANT pour ignorer cette étape.</p>`;
                 }
             });
         });
@@ -4059,7 +4059,7 @@ class Somfy {
             putJSONSync('/groupCommand', { groupId: groupId, command: 'prog', repeat: 1 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage('Confirmer réponse du moteur', () => {
                         putJSONSync('/unlinkFromGroup', { groupId: groupId, shadeId: shadeId }, (err, group) => {
                             console.log(group);
                             somfy.setLinkedShadesList(group);
@@ -4068,7 +4068,7 @@ class Somfy {
                         prompt.remove();
                         div.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>Once the shade has jogged the shade will be removed from the group and this process will be finished.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Le volet a-t-il effectué un à-coup ? Si oui, appuyez sur le bouton OUI, sinon appuyez sur le bouton NON et réessayez.</p><p>Une fois que le volet aura effectué un à-coup, il sera retiré du groupe et le processus sera terminé.</p>`;
                 }
             });
         });
@@ -4090,14 +4090,14 @@ class Somfy {
                 }
                 else {
                     div.remove();
-                    ui.errorMessage('The specified shade could not be found in this group.');
+                    ui.errorMessage('Le volet spécifié est introuvable dans ce groupe');
                 }
             }
         });
         return div;
     }
     unlinkRepeater(address) {
-        let prompt = ui.promptMessage('Are you sure you want to stop repeating frames from this address?', () => {
+        let prompt = ui.promptMessage('Êtes-vous sûr de vouloir arrêter la répétition des trames depuis cette adresse ?', () => {
             putJSONSync('/unlinkRepeater', { address: address }, (err, repeaters) => {
                 if (err) ui.serviceError(err);
                 else this.setRepeaterList(repeaters);
@@ -4108,7 +4108,7 @@ class Somfy {
     }
 
     unlinkRemote(shadeId, remoteAddress) {
-        let prompt = ui.promptMessage('Are you sure you want to unlink this remote from the shade?', () => {
+        let prompt = ui.promptMessage('Êtes-vous sûr de vouloir dissocier cette télécommande du volet ?', () => {
             let obj = {
                 shadeId: shadeId,
                 remoteAddress: remoteAddress
@@ -4239,27 +4239,27 @@ class MQTT {
         console.log(obj);
         if (obj.mqtt.enabled) {
             if (typeof obj.mqtt.hostname !== 'string' || obj.mqtt.hostname.length === 0) {
-                ui.errorMessage('Invalid host name').querySelector('.sub-message').innerHTML = 'You must supply a host name to connect to MQTT.';
+                ui.errorMessage('Nom d’hôte invalide').querySelector('.sub-message').innerHTML = 'Vous devez fournir un nom d’hôte pour vous connecter à MQTT.';
                 return;
             }
             if (obj.mqtt.hostname.length > 64) {
-                ui.errorMessage('Invalid host name').querySelector('.sub-message').innerHTML = 'The maximum length of the host name is 64 characters.';
+                ui.errorMessage('Nom d’hôte invalide').querySelector('.sub-message').innerHTML = 'La longueur maximale du nom d’hôte est de 64 caractères.';
                 return;
             }
             if (isNaN(obj.mqtt.port) || obj.mqtt.port < 0) {
-                ui.errorMessage('Invalid port number').querySelector('.sub-message').innerHTML = 'Likely ports are 1183, 8883 for MQTT/S or 80,443 for HTTP/S';
+                ui.errorMessage('Numéro de port invalide').querySelector('.sub-message').innerHTML = 'Les ports habituellement utilisés sont 1183 et 8883 pour MQTT/S ou 80 et 443 pour HTTP/S.';
                 return;
             }
             if (typeof obj.mqtt.username === 'string' && obj.mqtt.username.length > 32) {
-                ui.errorMessage('Invalid Username').querySelector('.sub-message').innerHTML = 'The maximum length of the username is 32 characters.';
+                ui.errorMessage('Nom d’utilisateur invalide').querySelector('.sub-message').innerHTML = 'La longueur maximale du nom d’utilisateur est de 32 caractères.';
                 return;
             }
             if (typeof obj.mqtt.password === 'string' && obj.mqtt.password.length > 32) {
-                ui.errorMessage('Invalid Password').querySelector('.sub-message').innerHTML = 'The maximum length of the password is 32 characters.';
+                ui.errorMessage('Mot de passe invalide').querySelector('.sub-message').innerHTML = 'La longueur maximale du mot de passe est de 32 caractères.';
                 return;
             }
             if (typeof obj.mqtt.rootTopic === 'string' && obj.mqtt.rootTopic.length > 64) {
-                ui.errorMessage('Invalid Root Topic').querySelector('.sub-message').innerHTML = 'The maximum length of the root topic is 64 characters.';
+                ui.errorMessage('Invalide Root Topic').querySelector('.sub-message').innerHTML = 'La longueur maximale du root topic est de 64 caractères.';
                 return;
             }
         }
@@ -4342,15 +4342,15 @@ class Firmware {
     restore() {
         let div = this.createFileUploader('/restore');
         let inst = div.querySelector('div[id=divInstText]');
-        let html = '<div style="font-size:14px;">Select a backup file that you would like to restore and the options you would like to restore then press the Upload File button.</div><hr />';
-        html += `<div style="font-size:14px;">Restoring network settings from a different board than the original will ignore Ethernet chip settings. Security, MQTT and WiFi connection information will also not be restored since backup files do not contain passwords.</div><hr/>`;
+        let html = '<div style="font-size:14px;">Sélectionnez un fichier de sauvegarde à restaurer ainsi que les options à restaurer, puis appuyez sur le bouton "Téléverser le fichier".</div><hr />';
+        html += `<div style="font-size:14px;">La restauration des paramètres réseau depuis une carte différente de l’original ignorera les réglages de la puce Ethernet. Les informations de sécurité, MQTT et WiFi ne seront pas restaurées, car les fichiers de sauvegarde ne contiennent pas les mots de passe.</div><hr/>`;
         html += '<div style="font-size:14px;margin-bottom:27px;text-align:left;margin-left:70px;">';
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreShades" type="checkbox" data-bind="shades" style="display:inline-block;" checked="true" /><label for="cbRestoreShades" style="display:inline-block;cursor:pointer;color:white;">Restore Shades and Groups</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreRepeaters" type="checkbox" data-bind="repeaters" style="display:inline-block;" /><label for="cbRestoreRepeaters" style="display:inline-block;cursor:pointer;color:white;">Restore Repeaters</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreSystem" type="checkbox" data-bind="settings" style="display:inline-block;" /><label for="cbRestoreSystem" style="display:inline-block;cursor:pointer;color:white;">Restore System Settings</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreNetwork" type="checkbox" data-bind="network" style="display:inline-block;" /><label for="cbRestoreNetwork" style="display:inline-block;cursor:pointer;color:white;">Restore Network Settings</label></div>`
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreMQTT" type="checkbox" data-bind="mqtt" style="display:inline-block;" /><label for="cbRestoreMQTT" style="display:inline-block;cursor:pointer;color:white;">Restore MQTT Settings</label></div>`
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreTransceiver" type="checkbox" data-bind="transceiver" style="display:inline-block;" /><label for="cbRestoreTransceiver" style="display:inline-block;cursor:pointer;color:white;">Restore Radio Settings</label></div>`;
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreShades" type="checkbox" data-bind="shades" style="display:inline-block;" checked="true" /><label for="cbRestoreShades" style="display:inline-block;cursor:pointer;color:white;">Restaurer volets et groupes</label></div>`;
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreRepeaters" type="checkbox" data-bind="repeaters" style="display:inline-block;" /><label for="cbRestoreRepeaters" style="display:inline-block;cursor:pointer;color:white;">Restaurer répéteurs</label></div>`;
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreSystem" type="checkbox" data-bind="settings" style="display:inline-block;" /><label for="cbRestoreSystem" style="display:inline-block;cursor:pointer;color:white;">Restaurer paramètres système</label></div>`;
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreNetwork" type="checkbox" data-bind="network" style="display:inline-block;" /><label for="cbRestoreNetwork" style="display:inline-block;cursor:pointer;color:white;">Restaurer paramètres réseau</label></div>`
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreMQTT" type="checkbox" data-bind="mqtt" style="display:inline-block;" /><label for="cbRestoreMQTT" style="display:inline-block;cursor:pointer;color:white;">Restaurer paramètres MQTT</label></div>`
+        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreTransceiver" type="checkbox" data-bind="transceiver" style="display:inline-block;" /><label for="cbRestoreTransceiver" style="display:inline-block;cursor:pointer;color:white;">Restaurer paramètres radio</label></div>`;
         html += '</div>';
         inst.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
@@ -4370,9 +4370,9 @@ class Firmware {
         html += `</label>`;
         html += `<div class="progress-bar" id="progFileUpload" style="--progress:0%;margin-top:10px;display:none;"></div>`;
         html += `<div class="button-container">`;
-        html += `<button id="btnBackupCfg" type="button" style="display:none;width:auto;padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">Backup</button>`;
-        html += `<button id="btnUploadFile" type="button" style="width:auto;padding-left:20px;padding-right:20px;margin-right:4px;display:inline-block;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">Upload File</button>`;
-        html += `<button id="btnClose" type="button" style="width:auto;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divUploadFile').remove();">Cancel</button></div>`;
+        html += `<button id="btnBackupCfg" type="button" style="display:none;width:auto;padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">Sauvegarde</button>`;
+        html += `<button id="btnUploadFile" type="button" style="width:auto;padding-left:20px;padding-right:20px;margin-right:4px;display:inline-block;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">Téléverser fichier</button>`;
+        html += `<button id="btnClose" type="button" style="width:auto;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divUploadFile').remove();">Annuler</button></div>`;
         html += `</form><div>`;
         div.innerHTML = html;
         return div;
@@ -4394,13 +4394,13 @@ class Firmware {
         let div = document.getElementById('divFirmwareUpdate');
         if (rel.available && rel.status === 0 && rel.checkForUpdate !== false) {
             div.style.color = 'black';
-            div.innerHTML = `<span>Firmware ${rel.fwVersion.name} Installed<span><span style="color:red"> ${rel.latest.name} Available</span>`;
+            div.innerHTML = `<span>Firmware ${rel.fwVersion.name} Installé<span><span style="color:red"> ${rel.latest.name} Disponible</span>`;
         }
         else {
             switch (rel.status) {
                 case 2: // Awaiting update.
                     div.style.color = 'red';
-                    div.innerHTML = `Preparing firmware update`;
+                    div.innerHTML = `Préparation de la mise à jour du firmware`;
                     break;
                 case 3: // Updating -- this will be set by the update progress.
                     break;
@@ -4416,23 +4416,23 @@ class Firmware {
                         div.innerHTML = e.desc;
                     }
                     else {
-                        div.innerHTML = `Firmware update complete`;
+                        div.innerHTML = `Mise à jour du firmware terminée`;
                         // Throw up a wait message this will be cleared on the reload.
                         ui.waitMessage(document.getElementById('divContainer'));
                     }
                     break;
                 case 5:
                     div.style.color = 'red';
-                    div.innerHTML = `Cancelling firmware update`;
+                    div.innerHTML = `Annulation de la mise à jour du firmware`;
                     break;
                 case 6:
                     div.style.color = 'red';
-                    div.innerHTML = `Firmware update cancelled`;
+                    div.innerHTML = `Mise à jour du firmware annulée`;
                     break;
 
                 default:
                     div.style.color = 'black';
-                    div.innerHTML = `Firmware ${rel.fwVersion.name} Installed`;
+                    div.innerHTML = `Firmware ${rel.fwVersion.name} Installé - fr`;
                     break;
             }
         }
@@ -4484,13 +4484,13 @@ class Firmware {
             else {
                 general.reloadApp = true;
                 // Change the display and allow the percentage to be shown when the socket emits the progress.
-                let html = `<div>Installing ${ver.name}</div><div style="font-size:.7em;margin-top:4px;">Please wait as the files are downloaded and installed.  Once the application update process starts you may no longer cancel the update as this will corrupt the downloaded files.</div>`;
+                let html = `<div>Installing ${ver.name}</div><div style="font-size:.7em;margin-top:4px;">Veuillez patienter pendant le téléchargement et l’installation des fichiers. Une fois que le processus de mise à jour de l’application aura commencé, il ne sera plus possible d’annuler la mise à jour, sous peine de corrompre les fichiers téléchargés.</div>`;
                 html += `<div class="progress-bar" id="progFirmwareDownload" style="--progress:0%;margin-top:10px;text-align:center;"></div>`;
-                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Firmware Install Progress</label>`;
+                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Progression de l’installation du firmware</label>`;
                 html += `<div class="progress-bar" id="progApplicationDownload" style="--progress:0%;margin-top:10px;text-align:center;"></div>`;
-                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Application Install Progress</label>`;
+                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Progression de l’installation de l’application</label>`;
                 html += `<hr></hr><div class="button-container" style="text-align:center;">`;
-                html += `<button id="btnCancelUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">Cancel</button>`;
+                html += `<button id="btnCancelUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">Annuler</button>`;
                 html += `</div>`;
                 div.innerHTML = html;
             }
@@ -4517,29 +4517,29 @@ class Firmware {
                 // Sort the releases so that the pre-releases are at the bottom.
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
-                let html = `<div>Select a version from the repository to install using the dropdown below.  Then press the update button to install that version.</div><div style="font-size:.7em;margin-top:4px;">Select Main to install the most recent alpha version from the repository.</div>`;
-                html += `<div id="divPrereleaseWarning" style="display:none;width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span><hr style="margin:0px" /><div style="font-size:.7em;padding-left:1em;padding-right:1em;color:black;font-weight:normal;">You have selected a pre-released beta version that has not been fully tested or published for general use.</div></div>`;
+                let html = `<div>Sélectionnez une version du dépôt à installer dans le menu ci-dessous. Puis appuyez sur le bouton Mettre à jour pour installer cette version.</div><div style="font-size:.7em;margin-top:4px;">Sélectionnez "Main" pour installer la version alpha la plus récente du dépôt.</div>`;
+                html += `<div id="divPrereleaseWarning" style="display:none;width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;padding:3px;display:inline-block;border-radius:5px;background:white;">ATTENTION<span><hr style="margin:0px" /><div style="font-size:.7em;padding-left:1em;padding-right:1em;color:black;font-weight:normal;">You have selected a pre-released beta version that has not been fully tested or published for general use.</div></div>`;
                 html += `<div class="field-group" style="text-align:center;">`;
                 html += `<select id="selVersion" data-bind="version" style="width:70%;font-size:2em;color:white;text-align-last:center;" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));">`
                 for (let i = 0; i < rel.releases.length; i++) {
                     if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0)
                         html += `<option style="text-align:left;font-size:.5em;color:black;" data-prerelease="${rel.releases[i].preRelease}" value="${rel.releases[i].version.name}">${rel.releases[i].name}${rel.releases[i].preRelease ? ' - Pre' : ''}</option>`
                 }
-                html += `</select><label for="selVersion">Select a version</label></div>`;
-                html += `<div class="button-container" id="divReleaseNotes" style="text-align:center;margin-top:-20px;display:none;"><button type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);" style="display:inline-block;width:auto;padding-left:20px;padding-right:20px;">Release Notes</button></div>`;
+                html += `</select><label for="selVersion">Sélectionnez une version</label></div>`;
+                html += `<div class="button-container" id="divReleaseNotes" style="text-align:center;margin-top:-20px;display:none;"><button type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);" style="display:inline-block;width:auto;padding-left:20px;padding-right:20px;">Notes de version</button></div>`;
                 if (this.isMobile()) {
-                    html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
+                    html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">ATTENTION<span></div>`;
+                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">Ce navigateur ne supporte pas les sauvegardes automatiques. Il est fortement recommandé de sauvegarder votre configuration avec le bouton Sauvegarder avant de continuer.</div>';
                 }
                 else {
-                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the firmware update process fails please restore this file using the restore button after going through the onboarding process.</div>'
+                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">Un fichier de sauvegarde de votre configuration sera téléchargé sur votre navigateur. Si la mise à jour échoue, restaurez ce fichier à l’aide du bouton Restaurer après le processus d’installation.</div>'
                 }
                 html += `<hr></hr><div class="button-container" style="text-align:center;">`;
                 if (this.isMobile()) {
-                    html += `<button id="btnBackupCfg" type="button" style="display:inline-block;width:calc(80% + 7px);padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">Backup</button>`;
+                    html += `<button id="btnBackupCfg" type="button" style="display:inline-block;width:calc(80% + 7px);padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">sauvegarde</button>`;
                 }
-                html += `<button id="btnUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;margin-right:7px;" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));">Update</button>`;
-                html += `<button id="btnClose" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divGitInstall').remove();">Cancel</button>`;
+                html += `<button id="btnUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;margin-right:7px;" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));">Mettre à jour</button>`;
+                html += `<button id="btnClose" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divGitInstall').remove();">Annuler</button>`;
 
                 html += `</div></div>`;
 
@@ -4655,13 +4655,13 @@ class Firmware {
     updateFirmware() {
         let div = this.createFileUploader('/updateFirmware');
         let inst = div.querySelector('div[id=divInstText]');
-        let html = '<div style="font-size:14px;margin-bottom:20px;">Select a binary file [SomfyController.ino.esp32.bin] containing the device firmware then press the Upload File button.</div>';
+        let html = '<div style="font-size:14px;margin-bottom:20px;">Sélectionnez un fichier binaire [SomfyController.ino.esp32.bin] contenant le firmware de l’appareil, puis cliquez sur le bouton « Téléverser le fichier</div>';
         if (this.isMobile()) {
-            html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
+            html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">AVERTISSEMENT<span></div>`;
+            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">Ce navigateur ne prend pas en charge les sauvegardes automatiques. Il est fortement recommandé de sauvegarder votre configuration à l’aide du bouton de sauvegarde avant de continuer.</div>';
         }
         else
-            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the firmware update process fails please restore this file using the restore button after going through the onboarding process.</div>'
+            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">Un fichier de sauvegarde de votre configuration sera téléchargé dans votre navigateur. Si la mise à jour du firmware échoue, restaurez ce fichier à l’aide du bouton de restauration après avoir terminé le processus d’initialisation.</div>'
         inst.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
         if (this.isMobile()) document.getElementById('btnBackupCfg').style.display = 'inline-block';
@@ -4670,13 +4670,13 @@ class Firmware {
         let div = this.createFileUploader('/updateApplication');
         general.reloadApp = true;
         let inst = div.querySelector('div[id=divInstText]');
-        inst.innerHTML = '<div style="font-size:14px;">Select a binary file [SomfyController.littlefs.bin] containing the littlefs data for the application then press the Upload File button.</div>';
+        inst.innerHTML = '<div style="font-size:14px;">Sélectionnez un fichier binaire [SomfyController.littlefs.bin] contenant les données LittleFS de l’application, puis cliquez sur le bouton "Téléverser le fichier"</div>';
         if (this.isMobile()) {
-            inst.innerHTML += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
+            inst.innerHTML += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">AVERTISSEMENT<span></div>`;
+            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">Ce navigateur ne prend pas en charge les sauvegardes automatiques. Il est fortement recommandé de sauvegarder votre configuration à l’aide du bouton de sauvegarde avant de continuer.</div>';
         }
         else
-            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the application update process fails please restore this file using the restore button</div>';
+            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">Un fichier de sauvegarde de votre configuration sera téléchargé dans votre navigateur. Si la mise à jour de l’application échoue, restaurez ce fichier à l’aide du bouton de restauration.</div>';
         document.getElementById('divContainer').appendChild(div);
         if(this.isMobile()) document.getElementById('btnBackupCfg').style.display = 'inline-block';
     }
@@ -4689,11 +4689,11 @@ class Firmware {
         switch (service) {
             case '/updateApplication':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a littleFS binary file to proceed.');
+                    ui.errorMessage('Vous devez sélectionner un fichier binaire LittleFS pour continuer.');
                     return;
                 }
                 else if (filename.indexOf('.littlefs') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage('This file is not a valid littleFS binary file.');
+                    ui.errorMessage('Ce fichier n’est pas un fichier binaire LittleFS valide.');
                     return;
                 }
                 if (!this.isMobile()) {
@@ -4710,11 +4710,11 @@ class Firmware {
                 break;
             case '/updateFirmware':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a valid firmware binary file to proceed.');
+                    ui.errorMessage('Vous devez sélectionner un fichier binaire de firmware valide pour continuer.');
                     return;
                 }
                 else if (filename.indexOf('.ino.') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage(el, 'This file is not a valid firmware binary file.');
+                    ui.errorMessage(el, 'Ce fichier n’est pas un fichier binaire de firmware valide.');
                     return;
                 }
                 if (!this.isMobile()) {
@@ -4731,19 +4731,19 @@ class Firmware {
                 break;
             case '/restore':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a valid backup file to proceed.');
+                    ui.errorMessage('Vous devez sélectionner un fichier de sauvegarde valide pour continuer.');
                     return;
                 }
                 else if (field.files[0].size > 20480) {
-                    ui.errorMessage(el, `This file is ${field.files[0].size.fmt("#,##0")} bytes in length.  This file is too large to be a valid backup file.`);
+                    ui.errorMessage(el, `Ce fichier a une taille de ${field.files[0].size.fmt("#,##0")} octets.  Il est trop volumineux pour être un fichier de sauvegarde valide.`);
                     return;
                 }
                 else if (!filename.endsWith('.backup')) {
-                    ui.errorMessage(el, 'This file is not a valid backup file');
+                    ui.errorMessage(el, 'Ce fichier n’est pas un fichier de sauvegarde valide.');
                     return;
                 }
                 if (!data.shades && !data.settings && !data.network && !data.transceiver && !data.repeaters && !data.mqtt) {
-                    ui.errorMessage(el, 'No restore options have been selected');
+                    ui.errorMessage(el, 'Aucune option de restauration n’a été sélectionnée.');
                     return;
                 }
                 console.log(data);
@@ -4800,4 +4800,6 @@ class Firmware {
     }
 }
 var firmware = new Firmware();
+
+
 
