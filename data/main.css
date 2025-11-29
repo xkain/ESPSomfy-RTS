@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --shade-color: #00bcd4;
 }
 * {
@@ -301,12 +301,13 @@ div.instructions {
         }
 .subtab-container {
     margin-top:3px;
-    margin-left: 3px;
+    margin-left: 0;
     display: flex;
-    width: calc(100% - 7px);
+    width: calc(100% - 0px);
     margin-bottom: -1px;
     overflow: visible;
     border-bottom: 1px solid #ccc;
+    font-size: 12px;
 }
     .subtab-container > span {
         display:inline-block;
@@ -334,7 +335,7 @@ div.instructions {
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 0 0 15px 15px;
     padding: 25px;
     position: relative;
 }
@@ -548,7 +549,7 @@ div.wait-overlay > .lds-roller {
 }
 .button-outline {
     background-color: #00bcd4;
-    border-radius:50%;
+    border-radius:35px;
     padding:3px 5px 5px 5px;
     margin-left:2px;
     margin-right:2px;
@@ -639,7 +640,7 @@ div.wait-overlay > .lds-roller {
     }
 .vr-button {
     align-items:center;
-    margin-top:-4px;
+    margin-top:5px;
 }
 .vr-button > span,
 .somfyGroupCtl .group-name,
@@ -862,4 +863,9 @@ div.frame-pulses {
         padding-left:14px;
         padding-right:14px;
     }
+    .subtab-container {
+        font-size: 10px;
+    }
 }
+
+
