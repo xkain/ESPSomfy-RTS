@@ -76,15 +76,33 @@ Une fois votre matériel prêt, il ne vous reste plus qu’à connecter l’ESP3
 ## Intégrations
 Bien que l’interface fournie avec ESPSomfy RTS soit déjà une grande amélioration, l’objectif de ce projet est de rendre les stores contrôlables depuis n’importe quel endroit. Pour cela, j’ai créé plusieurs interfaces que vous pouvez utiliser pour ajouter vos propres automatisations. Ces options s’adressent aux utilisateurs avancés, utilisant par exemple Node-Red ou leur propre interface web.
 
-Vous trouverez la documentation des interfaces dans le wik [Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations) Beaucoup de ressources pour ceux qui utilisent Node-Red ou des interfaces personnalisées.
+Vous trouverez la documentation des interfaces dans le wiki [Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations) Beaucoup de ressources pour ceux qui utilisent Node-Red ou des interfaces personnalisées.
   
 ## Sources du projet
 J’ai étudié de nombreux sujets, mais la source principale de ce projet provient de https://pushstack.wordpress.com/somfy-rts-protocol/.  Le travail réalisé sur le timing du protocole par pushstack a rendu ce projet réalisable sans passer beaucoup de temps à mesurer les impulsions. 
   
 La configuration du transceiver se fait avec la bibliothèque ELECHOUSE_CC1101, que vous devrez inclure dans votre projet si vous souhaitez compiler le code. Celle utilisée pour compiler ce module se trouve ici : https://github.com/LSatan/SmartRC-CC1101-Driver-Lib
 
-  
+
+## Traduction et modifications
+
+Dans ma version, le fuseau horaire est d'office Europ/Paris, quelques modifications visuelles très légères ont été faites et la configuration des GPIO ont été changé par defaut pour correspondre à ceux que j'utilise:
+* TX = 21 
+* RX = 22
+* 
+Pour les fréquences, j'ai mis celles qui correspondent au bon fonctionnement de mes volets. Étant donné que vous n'avez très certainement pas les mêmes volets que moi, il vous faudra de toutes les façons trouver vos propres fréquences.
  
+<img width="900" height="557" alt="Image" src="https://github.com/user-attachments/assets/0490384a-d166-4fd3-9324-6d8bbd30b140" />
+
+  
+## Boîtiers
+Je propose des boîtiers  tout fait sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)
+
+![Image](https://github.com/user-attachments/assets/e3bf97de-12a7-4c9a-8ed4-6d3a819818c0)
+![Image](https://github.com/user-attachments/assets/90c1fde9-2c4d-47c5-ab9a-a5f065e9f149)
+
+
+   
 
 
 
