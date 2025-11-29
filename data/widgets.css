@@ -1,4 +1,4 @@
-﻿.container {
+.container {
     margin: 0 auto;
     max-width: 450px;
     padding: 20px;
@@ -343,7 +343,7 @@
             color: var(--shade-color, gray);
         }
 span.tabname-virtual-remote:after {
-    content: "Virtual Remote";
+    content: "Télécommande Virtuelle";
 }
 
 @media only screen and (max-device-width: 480px) {
@@ -356,6 +356,7 @@ span.tabname-virtual-remote:after {
         padding-right: 10px;
     }
     span.tabname-virtual-remote:after {
-        content: "Remote";
+        content: "Télécommande";
     }
 }
+
