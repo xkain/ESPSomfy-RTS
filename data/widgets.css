@@ -1,26 +1,489 @@
+
+
+#divShadeControls {
+    min-height:130px;
+    padding: 20px;
+}
+
+.dragtxt {
+    font-size: .8em;
+    margin: 23px 0;
+    padding: 5px;
+}
+
+
+
+
+
+
+
+
+
+
+/***********************************************************************PAGE LOGIN*/
+
+/* 1. On s'assure que les parents laissent passer la hauteur */
+#divContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 800px; /* Votre minimum souhaité */
+}
+
+/* 2. Config du bloc Login */
+#divUnauthenticated {
+    display: flex;          /* Active Flexbox */
+    flex-direction: column; /* Aligne le logo, les inputs et le bouton en colonne */
+    justify-content: space-between;
+    justify-content: center; /* Centre verticalement */
+    align-items: center;     /* Centre horizontalement */
+    flex-grow: 1;           /* Force le bloc à occuper TOUT l'espace disponible */
+    width: 100%;            /* Prend toute la largeur */
+    background: var(--background-color);
+}
+
+/* Espace spécifique sous le logo uniquement */
+#divUnauthenticated .top-content {
+margin-bottom: 25%;
+}
+
+
+#divUnauthenticated .welcome-logo {
+    width: 50px;
+    height: 50px;
+    margin: 0;
+    padding: 0;
+    color: var(--accent-color);
+}
+
+#divUnauthenticated .title-description {
+    margin-top: 0;
+    color: var(--color);
+    font-size: large;
+    font-weight: bold;
+}
+
+
+
+/* Espace entre le code PIN et le bouton */
+#divUnauthenticated #divLoginPin {
+margin-bottom: 15px;
+}
+
+#divUnauthenticated label {
+    display: block;
+    margin-top: 19px;
+    color: var(--color);
+    font-size: initial;
+}
+
+.login-bouton {
+    display: inline-block;
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 30px;
+    color: #f0f0f0;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 1.1em;
+    font-weight: bold;
+    background-color: #1481e2;
+    -webkit-transition: background-color 250ms ease;
+    -moz-transition: background-color 250ms ease;
+    -o-transition: background-color 250ms ease;
+    transition: background-color 250ms ease;
+    box-shadow: 0 5px 12px 0 #b2b2b2;
+    cursor: pointer;
+}
+
+
+/* Conteneur de référence */
+.input-icon-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* À ajuster selon votre design */
+    margin: 0 auto;
+}
+
+/* Style de l'icône */
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666; /* Couleur de l'icône */
+    pointer-events: none; /* L'icône ne gêne pas le clic sur l'input */
+}
+
+/* Ajustement de l'input */
+.input-icon-wrapper input {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* 40px à gauche pour laisser la place à l'icône */
+    border: 1px solid #ccc;
+    border-radius: 25px; /* Pour correspondre à votre style arrondi */
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Effet au survol/focus */
+.input-icon-wrapper input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.input-icon-wrapper input:focus + .input-icon {
+    color: #007bff; /* L'icône change de couleur quand on tape */
+}
+
+/* 1. On s'assure que l'icône réagit quand l'input a le focus */
+.input-icon-wrapper input:focus + .input-icon {
+    color: #1e88e5; /* La même couleur bleue que votre bordure et bouton */
+
+}
+
+/* 2. Pour que la transition soit fluide (plus élégant) */
+.input-icon {
+    transition: color 0.3s ease;
+    pointer-events: none; /* L'icône ne doit pas bloquer le clic */
+}
+
+.input-icon-wrapper input:hover + .input-icon {
+    color: #1e88e5;
+}
+
+
+
+
+
+
+
+
+
+
+
+/***********************************************************************fin*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Conteneur des cartes */
+.setup-guide {
+    display: flex;
+    flex-direction: row;      /* Aligne les éléments horizontalement */
+    gap: 15px;               /* Espace entre les cartes */
+    padding: 0;
+    width: 100%;
+
+    margin: 0 auto;
+}
+
+/* La carte transformée en bouton */
+.setup-card {
+    display: flex;
+    flex-direction: column;   /* On empile le contenu de la carte verticalement */
+    align-items: self-start;      /* Centre les éléments horizontalement dans la carte */
+    justify-content: left;  /* Centre les éléments verticalement dans la carte */
+
+    flex: 1;                 /* FORCE chaque carte à prendre la même largeur */
+
+    background-color: var(--unibloc-color);
+    /*! border: 1px solid #e9ecef; */
+    border-radius: 25px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /*! min-height: 180px; */       /* Assure une hauteur minimale identique */
+}
+
+/* Effet au survol */
+.setup-card:hover {
+    background-color: #ffffff;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* Effet au clic (pression) */
+.setup-card:active {
+    transform: translateY(0);
+    background-color: #f0f0f0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.setup-card__icon {
+    font-size: 24px;
+    margin-right: 15px;
+}
+
+.setup-card__content {
+    display: flex;
+    flex-direction: column;
+    /*! align-items: flex-start; */      /* Centre le texte */
+    text-align: left;
+    margin-top: 0;
+}
+
+.setup-card__title {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--color);
+    margin-bottom: 5px;
+    font-size: inherit;
+}
+
+.setup-card__desc {
+    font-size: 0.8rem;
+    color: var(--soustxt-color);
+}
+
+.setup-card__chevron {
+    color: #ced4da;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* La carte blanche qui s'étend désormais sur toute la hauteur */
+.welcome-container {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* Espace régulier entre les blocs (top, middle, bottom) */
+    justify-content: space-between;
+
+    box-sizing: border-box;
+}
+
+
+
+/* --- Bloc du HAUT --- */
+.top-content {
+    text-align: center;
+}
+
+
+
+.title-description {
+    margin-top: 0;
+    font-size: large;
+    font-weight: bold;
+}
+.middle-content H1 {
+    color: var(--accent-color);
+    max-width: 235px;
+    margin: auto;
+}
+
+#divGetStarted {
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+flex: 1; /* Occupe tout l'espace disponible dans divHomePnl */
+padding: 20px;
+/*! background-color: #ffffff; */
+text-align: center;
+animation: fadeIn 0.4s ease-out; /* Petit effet pro à l'apparition */
+}
+
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-logo {
+    width: 36px;
+    height: 36px;
+    color: var(--accent-color);
+}
+
+/* Si tu préfères une icône directement avec la classe icss-window-shade */
+.welcome-icon {
+    font-size: 60px;
+    color: #007bff; /* Couleur bleue typique pour un élément Somfy */
+    margin-bottom: 20px;
+    display: block; /* Pour centrer l'icône si elle est seule */
+}
+
+/* Contrôle indépendant du texte principal */
+.main-description {
+    font-size: 1.2em;
+    line-height: 1.6;
+    text-align: center;
+    max-width: 331px;
+    margin: 15px auto 0 auto;
+}
+
+
+.welcomeBottom-desc {
+    font-size: 0.8em;
+    line-height: 1.6;
+    text-align: center;
+    max-width: 331px;
+    margin: 15px auto 0 auto;
+}
+
+
+#divEmptyHome,
+#divEmptyHome0 {
+display: flex;
+flex-direction: row;
+gap: 15px;
+margin-bottom: 15px;
+}
+
+
+
+
+
+
+/* --- Bloc du BAS --- */
+.bottom-content {
+    text-align: center;
+    margin-bottom: 20px; /* Ajustez pour monter/descendre le bloc du bas */
+}
+
+
+
+.get-started-button:hover {
+    /*! background-color: #0056b3; */ /* Effet au survol */
+}
+
+
+
+/* Contrôle indépendant du petit texte */
+.small-text {
+    font-size: 0.85em; /* Plus petit */
+    color: #888;
+    margin-top: 38px;
+    display: block;
+}
+
+/* Style du bouton */
+.get-started-button {
+    width: 100%;
+    max-width: 300px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1.1em;
+    cursor: pointer;
+    box-shadow: 0px 5px 12px 0px #b2b2b2;
+    /*! margin-bottom: 12px; */
+}
+
+
+/* *******************************************************************************************HEADER */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 12px 30px 12px;
+    border-radius: 24px 24px 0 0;
+}
+.hDeviceIdentity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    visibility: hidden;
+}
+.hDeviceIdentitySvg {
+    width: 41px;
+    height: auto;
+}
+
+.hDeviceLabel{
+    font-size: clamp(28px, 7vw, 36px);
+    font-weight: bold;
+}
+
+.hDeviceName   {
+    color: var(--color);
+    font-size: 0.5em;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.hBtnSvg{
+    background-color: transparent;
+    border: none;
+    padding: 7px;
+    display: flex;
+    cursor: pointer;
+}
+.hSvg {
+    width: 24px;
+    height: 24px;
+    color: var(--color);
+    pointer-events: none;
+}
+
+
+/* *******************************************************************************************HEADER FIN */
+
+
 .container {
     margin: 0 auto;
     max-width: 450px;
-    padding: 20px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-    background-color: #ffffff;
+    background: var(--background-color);
+
+
+    background-size: auto 40%;
     user-select: none;
     position: relative;
     border-radius: 27px;
+    overflow: hidden; /* force tout fils interne à rester dedans */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
+
+
+
+
 .main.container {
-    min-height:327px;
+    min-height:800px;
 }
 
 .header-message {
     text-align: center;
     background: gainsboro;
     color: gray;
-    margin-bottom: 7px;
     text-transform: uppercase;
     font-weight: bold;
     padding: 4px;
-    border-radius: 5px;
 }
 .firmware-message {
     text-align:center;
@@ -36,8 +499,8 @@
     align-content: flex-start;
     position: absolute;
     border-radius: 27px;
-    background: gray;
-    opacity: .9;
+    background-color: #2b2b2b;
+    opacity: .95;
     padding: 10px;
     font-size: 20px;
     height: auto;
@@ -47,27 +510,87 @@
     color: white;
 }
 #divLinkRepeat {
-    border-radius:24px;
+border-radius:24px;
 }
 .edit-repeaterlist,
 .edit-roomlist,
 .edit-grouplist,
 .edit-motorlist {
     overflow-y: auto;
-    max-height: 400px;
+
     padding-top: 2px;
     padding-bottom: 2px;
     min-height: 147px;
 }
+
+
+/* 1. On libère la hauteur de la liste */
+.edit-roomlist, .edit-repeaterlist, .edit-grouplist, .edit-motorlist {
+    max-height: none !important;
+    flex-grow: 1 !important;
+    display: flex;
+    flex-direction: column !important;
+}
+
+/* 2. On s'assure que TOUTE la hiérarchie parente est conductrice */
+#divAuthenticated,
+#divConfigPnl,
+#divPinSecurity,
+#divHomePnl,
+.tab-content,
+#divSomfySettings,
+#divSomfyRooms,
+#divSomfyMotors,
+#divSomfyGroups,
+#divRepeater,
+#divVirtualRemote,
+
+#divRoomListContainer,
+#divShadeListContainer,
+#divGroupListContainer,
+#divRepeaterListContainer
+{
+
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    height: 100% !important;
+    display: flex;
+    position: relative;
+}
+
+/* 3. On empêche le body de scroller pour forcer le scroll interne */
+.container.main {
+
+    flex-direction: column !important;
+    min-height: 800px;
+    /*  height: 800px; /* On fixe la hauteur pour forcer le contenu à s'étendre dedans */
+    overflow: hidden !important;
+}
+
+
+
+#divPinSecurity {
+justify-content: center;
+}
+
+#divPinSecurity label {
+margin: 20px;
+}
+
+
+
+
+
+
 .info-message .info-text {
     text-align:left;
     font-size:14px;
-    max-height:calc(100% - 77px);
+
     overflow:auto;
 }
 .instructions .sub-message,
 .prompt-message .sub-message {
-    font-size: 17px;
+    font-size: 14px;
     padding-left: 10px;
     padding-right: 10px;
 }
@@ -97,20 +620,20 @@
     padding-left: 4px;
     padding-right: 4px;
 }
-    .linked-shade > div,
-    .linked-shade > span,
-    .somfyRepeater > div,
-    .somfyRepeater > span,
-    .somfyRoom > div,
-    .somfyRoom > span,
-    .somfyGroup > div,
-    .somfyGroup > span,
-    .somfyShade > div,
-    .somfyShade > span {
-        display: table-cell;
-        padding-left: 4px;
-        padding-right: 4px;
-    }
+.linked-shade > div,
+.linked-shade > span,
+.somfyRepeater > div,
+.somfyRepeater > span,
+.somfyRoom > div,
+.somfyRoom > span,
+.somfyGroup > div,
+.somfyGroup > span,
+.somfyShade > div,
+.somfyShade > span {
+    display: table-cell;
+    padding-left: 9px;
+    padding-right: 9px;
+}
 .repeater-name,
 .linked-shade {
     width: 100%;
@@ -122,56 +645,101 @@
 .repeater-name {
     text-align:left;
 }
-    .linked-shade > .linkedshade-name { width: 100%; }
-.pin-digit {
+.linked-shade > .linkedshade-name { width: 100%; }
+
+
+.pin-digit:focus {
     margin: 0 0.3rem;
     padding: 0.5rem;
-    border: 1px solid #00bcd4;
-    border-radius:5px;
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    font-size: 3rem;
+    border: 2px solid var(--accent-color);
+    background-color: #e8e8e8;
 }
+.pin-digit {
+    margin: 0 0.3rem;
+    font-size: 1.5rem;
+    border: 1px solid #555; /* Couleur bleue claire */
+    box-shadow: 0 0 15px rgba(200, 200, 200, 0.5); /* Lueur externe */
+    background: transparent;
+    color: var(--color);
+    border-radius: 50%; /* Pour faire des cercles parfaits */
+    width: 60px;
+    height: 60px;
+    text-align: center;
+}
+
+
+
 .login-content {
     display: block;
     padding: 25px;
     position: relative;
 }
+
+
+
+
+
+
 #divSomfyButtons div.button-outline {
-    margin-top: -10px;
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-bottom: 0px;
-    padding: 7px;
-    cursor: pointer;
-    vertical-align: middle;
+margin-top: -10px;
+margin-left: 0px;
+margin-right: 0px;
+margin-bottom: 0px;
+padding: 7px;
+cursor: pointer;
+vertical-align: middle;
 }
 .shadectl-buttons div.button-outline {
     display: inline-block;
 }
+
+#divSomfyGroupButtons {
+display: flex;
+justify-content: center; /* Centre le contenu du groupe de boutons */
+margin-left: auto;       /* Ces deux lignes centrent le bloc lui-même */
+margin-right: auto;
+width: fit-content;      /* Le bloc ne prend que la place nécessaire */
+padding: 15px;
+margin-bottom: -15px;
+}
+
+
+
+/* 1. Cache UP, DOWN, MY pour les types Contact Sec (5, 9, 14, 15, 16) */
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="10"] .button-outline[data-cmd="my"] {
+    display: none !important;
+}
+
+/* 2. Cache le bouton TOGGLE pour tout ce qui n'est PAS un contact sec */
+.shadectl-buttons:not([data-shadetype="5"]):not([data-shadetype="9"]):not([data-shadetype="14"]):not([data-shadetype="15"]):not([data-shadetype="16"]) .button-outline[data-cmd="toggle"] {
+    display: none !important;
+}
+
+
+
+
 .shadectl-buttons[data-shadetype="14"] > .cmd-button[data-cmd="sunflag"],
 .shadectl-buttons[data-shadetype="15"] > .cmd-button[data-cmd="sunflag"],
 .shadectl-buttons[data-shadetype="16"] > .cmd-button[data-cmd="sunflag"],
 .shadectl-buttons[data-shadetype="6"] > .cmd-button[data-cmd="sunflag"],
 .shadectl-buttons[data-shadetype="5"] > .cmd-button[data-cmd="sunflag"],
-.shadectl-buttons[data-shadetype="9"] > .cmd-button[data-cmd="sunflag"],
-.shadectl-buttons[data-shadetype="9"] > .button-outline[data-cmd="my"],
-.shadectl-buttons[data-shadetype="9"] > .button-outline[data-cmd="up"],
-.shadectl-buttons[data-shadetype="9"] > .button-outline[data-cmd="down"],
-.shadectl-buttons[data-shadetype="5"] > .button-outline[data-cmd="my"],
-.shadectl-buttons[data-shadetype="5"] > .button-outline[data-cmd="up"],
-.shadectl-buttons[data-shadetype="5"] > .button-outline[data-cmd="down"],
-.shadectl-buttons[data-shadetype="14"] > .button-outline[data-cmd="my"],
-.shadectl-buttons[data-shadetype="14"] > .button-outline[data-cmd="up"],
-.shadectl-buttons[data-shadetype="14"] > .button-outline[data-cmd="down"],
-.shadectl-buttons[data-shadetype="15"] > .button-outline[data-cmd="my"],
-.shadectl-buttons[data-shadetype="15"] > .button-outline[data-cmd="up"],
-.shadectl-buttons[data-shadetype="15"] > .button-outline[data-cmd="down"],
-.shadectl-buttons[data-shadetype="16"] > .button-outline[data-cmd="my"],
-.shadectl-buttons[data-shadetype="16"] > .button-outline[data-cmd="up"],
-.shadectl-buttons[data-shadetype="16"] > .button-outline[data-cmd="down"],
-.shadectl-buttons[data-shadetype="10"] > .button-outline[data-cmd="my"] {
+.shadectl-buttons[data-shadetype="9"] > .cmd-button[data-cmd="sunflag"]
+{
     display: none;
 }
 
@@ -186,9 +754,11 @@
 .shadectl-buttons[data-shadetype="10"] > .button-outline[data-cmd="down"] i {
     top:.3em;
 }
-.shadectl-buttons:not([data-shadetype="5"]):not([data-shadetype="9"]):not([data-shadetype="14"]):not([data-shadetype="15"]):not([data-shadetype="16"]) > .button-outline[data-cmd="toggle"] {
-    display: none;
-}
+/*
+ * .shadectl-buttons:not([data-shadetype="5"]):not([data-shadetype="9"]):not([data-shadetype="14"]):not([data-shadetype="15"]):not([data-shadetype="16"]) > .button-outline[data-cmd="toggle"] {
+ *    display: none;
+ * }
+ */
 .somfyShadeCtl[data-shadetype="5"] .shadectl-mypos,
 .somfyShadeCtl[data-shadetype="14"] .shadectl-mypos,
 .somfyShadeCtl[data-shadetype="15"] .shadectl-mypos,
@@ -218,39 +788,34 @@
 }
 
 #somfyShade #divGPIOControl {
-    display: none;
+display: none;
 }
 #somfyShade #divShadeBitLength {
-    display:inline-block;
+display:inline-block;
 }
 #somfyShade[data-proto="8"] #divGPIOControl,
 #somfyShade[data-proto="9"] #divGPIOControl {
-    display: inline-block;
-    width: auto;
-    margin-top: -18px;
+display: inline-block;
+width: 100%;
+
 }
 #somfyShade[data-proto="8"] #divShadeBitLength,
 #somfyShade[data-proto="9"] #divShadeBitLength {
-    display: none;
+display: none;
 }
-#divGPIOControl {
-    text-align:center;
-    margin-left:7px;
-}
-    #divGPIOControl > div.field-group {
-        width: 70px;
-        display: inline-block;
-    }
+
+
 #somfyShade #divLLTrigger {
-    display:none;
+display:none;
 }
 
 #somfyShade[data-proto="8"] #divLLTrigger,
 #somfyShade[data-proto="9"] #divLLTrigger {
-    display: block;
+display: block;
 }
 #somfyShade[data-proto="8"] #divStepSettings,
 #somfyShade[data-proto="9"] #divStepSettings,
+#somfyShade[data-proto="8"] #hrGPIOMy,
 #somfyShade[data-proto="8"] #divGPIOMy,
 #somfyShade[data-bitlength="56"] #divStepSettings,
 #somfyShade[data-shadetype="5"] #divStepSettings,
@@ -258,7 +823,7 @@
 #somfyShade[data-shadetype="15"] #divStepSettings,
 #somfyShade[data-shadetype="16"] #divStepSettings,
 #somfyShade[data-shadetype="6"] #divStepSettings {
-    display: none;
+display: none;
 }
 #somfyShade[data-proto="9"][data-shadetype="5"] #divGPIOUp,
 #somfyShade[data-proto="9"][data-shadetype="5"] #divGPIOMy,
@@ -275,23 +840,26 @@
 #somfyShade[data-proto="9"][data-shadetype="9"] #divGPIOUp,
 #somfyShade[data-proto="9"][data-shadetype="9"] #divGPIOMy,
 #somfyShade[data-proto="8"][data-shadetype="9"] #divGPIOUp {
-    display: none;
+display: none;
 }
 .room-draggable,
 .group-draggable,
 .shade-draggable {
     height: 32px;
-    border-top: solid 2px transparent;
+    margin: 3px 0;
+    padding: 8px;
+    border-radius: 25px;
+    background-color: var(--unibloc-color);
     cursor: grab;
 }
-    .room-draggable.dragging *,
-    .room-draggable.over *,
-    .group-draggable.dragging *,
-    .group-draggable.over *,
-    .shade-draggable.dragging *,
-    .shade-draggable.over * {
-        pointer-events: none;
-    }
+.room-draggable.dragging *,
+.room-draggable.over *,
+.group-draggable.dragging *,
+.group-draggable.over *,
+.shade-draggable.dragging *,
+.shade-draggable.over * {
+    pointer-events: none;
+}
 .room-draggable.over,
 .group-draggable.over,
 .shade-draggable.over {
@@ -300,63 +868,71 @@
 .room-selector {
     display: flex;
     flex-flow: column;
-    font-size: 30px;
-    margin-top: -10px;
-    color: var(--shade-color, gray);
+    font-size: 25px;
+    color: #2b2b2b;
     font-weight:bold;
-    text-shadow:1px 1px 1px silver;
     justify-content:center;
     flex-wrap:nowrap;
     flex-direction:row;
     align-items:center;
-    
+    background: #d8d8d8;
+    border-radius: 25px;
+    margin: 0 10px;
+    padding: 3px 0;
 }
-    .room-selector > i {
-        font-size: 20px;
-        cursor: pointer;
-    }
-    .room-selector > span {
-        margin-left: .15em;
-        cursor: pointer;
-    }
+.room-selector > i {
+    font-size: 20px;
+    cursor: pointer;
+}
+.room-selector > span {
+    margin-left: .15em;
+    cursor: pointer;
+}
 .room-selector-list {
     position: absolute;
     min-width: 50%;
-    font-size: 1.37rem;
-    border: solid 1px gray;
-    box-shadow: 4px 4px 4px gray;
-    border-radius: 3px;
-    padding-left: 1rem;
-    padding-right:1rem;
-    background:white;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: solid 1px silver;
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 10px;
+    padding: 0.5rem;
+    background-color: #fcfcfc;
     z-index:1000;
     display:none;
     cursor:pointer;
     top:3px;
 }
-    .room-selector-list .room-row {
-        cursor: pointer;
-        color: gray;
-        text-shadow:none;
-    }
-        .room-selector-list .room-row:hover {
-            color: var(--shade-color, gray);
-        }
-span.tabname-virtual-remote:after {
-    content: "Télécommande Virtuelle";
+
+.room-selector-list .room-row {
+    cursor: pointer;
+    padding: 6px;
+    text-shadow:none;
+}
+.room-selector-list .room-row:hover {
+    color: #010101;
+    background-color: #ffe9c8;
+    border-radius: 10px;
+}
+
+
+.show-tabname-virtual-remote {
+    display: none !important;
 }
 
 @media only screen and (max-device-width: 480px) {
     body {
         margin-top: 0px;
     }
-
-    .container {
-        padding-left: 10px;
-        padding-right: 10px;
+    .main.container {
+        min-height: 100vh;
+        border-radius: 0;
     }
-    span.tabname-virtual-remote:after {
-        content: "Télécommande";
+
+    .hide-tabname-virtual-remote {
+        display: none !important; /* On cache le nom long */
+    }
+    .show-tabname-virtual-remote {
+        display: inline-block !important; /* On affiche le nom court */
     }
 }
-

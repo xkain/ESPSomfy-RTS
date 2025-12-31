@@ -1,4 +1,55 @@
-﻿i[class*="icss-"] {
+﻿/****************************************************************************************************************svg*/
+.icon-svg {
+    width: 1.2em;  /* S'adapte à la taille du texte */
+    height: 1.2em;
+    fill: currentColor; /* Permet à l'icône de prendre la couleur du texte */
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* Pour l'icône poubelle qui utilise un contour (stroke) */
+#trash-edit {
+stroke: currentColor;
+}
+
+.button-outline-svg {
+    font-size: 1.5em;
+    color: var(--color);
+    display: flex;
+    align-items: center;     /* Centre verticalement */
+    justify-content: center;  /* Centre horizontalement */
+    color: var(--bg-switch-color);
+}
+
+.button-outline-svg  svg {
+    width: 28px;             /* Taille de l'icône */
+    height: 28px;
+    display: block;          /* Supprime l'alignement sur la ligne de texte */
+    vertical-align: middle;
+}
+
+
+
+
+
+#lightbulb-color {
+color: rgba(255,255,0, var(--fpos, 0%));
+fill: currentColor;
+}
+#lightbulb-background0,
+#lightbulb-background1{
+color: var(--color);
+}
+
+
+
+/*****************************************************************************************************************/
+
+
+
+
+
+i[class*="icss-"] {
     position: relative;
     display: inline-block;
     font-style: normal;
@@ -401,6 +452,7 @@ i.icss-trash {
         border-radius: .07em;
         transform: translateX(-50%);
     }
+    /*
 i.icss-gear {
     width: .5em;
     height: .5em;
@@ -462,6 +514,9 @@ i.icss-gears {
         left: .695em;
         transform: translate(-50%, -50%) rotate(25deg);
     }
+
+
+    */
 i.icss-somfy-down {
     width: 1em;
     height: 1em;
@@ -528,7 +583,7 @@ i.icss-somfy-toggle {
     }
 
 
-
+/*
 i.icss-home {
     width: .8em;
     height: .45em;
@@ -559,6 +614,8 @@ i.icss-home {
         top: -0.4em;
         left: 50%;
     }
+
+*/
 i.icss-window {
     width: 1.1em;
     height: .75em;
@@ -799,14 +856,17 @@ i.icss-window-tilt {
     color:dimgray;
     background:transparent;
 }
+/**********************************************************************************************************************************************************/
     i.icss-window-tilt:after {
         content: attr(data-tiltposition)'%';
         width:100%;
         top: calc(50% - .25em);
         text-align:center;
         font-weight:bold;
-        font-size:.3em;
+        font-size:1.3em;
     }
+
+/**********************************************************************************************************************************************************/
 i.icss-garage {
     width: 1.1em;
     height: .7em;

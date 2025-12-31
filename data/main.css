@@ -1,25 +1,723 @@
-:root {
-    --shade-color: #00bcd4;
+/*
+ * orange text foncé: #ae7b2c
+ * orange text: #d9942a
+ * orange clair: #F8A525
+ * orange selection : #ffe9c8;
+ *
+ * gris header et onglet : #595d60
+ * texte presque noir : #2b2b2b
+ * texte blanc menu inactif : #dfdfdf;
+ *
+ *
+ * MODE CLAIR
+ * arrière plan #f0f0f0
+ * elements #fcfcfc
+ * arrière plan gris transparent #2b2b2b;
+ * arrière plan gris selection   #d8d8d8;
+ * text : 010101
+ */
+
+
+
+
+/* Animation fluide pour toutes les icônes de volets */
+.lattes-group {
+    transition: transform 0.4s ease-in-out;
+    transform-origin: center;
+    transform-box: fill-box; /* Crucial pour le rendu SVG */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+.tab-container {
+    display: flex;
+    /*! justify-content: space-around; */
+    /*! background-color: #2c2c2c; */ /* Gris foncé comme ton bandeau actuel */
+    /*! padding: 10px 0; */
+    border-bottom: 3px solid var(--tb-color);
+    /*! flex-direction: row; */
+    /*! flex-grow: 1; */
+    box-shadow: 0 2px 7px 0px var(--tb-color);
+}
+
+.tab-text {
+  font-size: 14px;
+  /*! text-transform: uppercase; */
+  font-weight: bold;
+}
+
+
+
+/* Aligner les boutons à droite horizontalement */
+.uniRight {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espace entre les boutons */
+}
+
+/* Redimensionner l'icône du volet (icoShade) */
+#icoShade.somfy-shade-icon {
+font-size: 24px !important; /* Agrandit l'icône du volet */
+width: 24px;
+height: 24px;
+display: inline-block;
+color: var(--soustxt-color);
+}
+
+/* Ajustement pour le conteneur des boutons */
+#divSomfyButtons.uniRow {
+display: flex;
+justify-content: space-between;
+align-items: center;
+width: 100%;
+min-height: 50px; /* Assure une hauteur constante */
+}
+
+/* Forcer l'alignement vertical des boutons SVG */
+.button-outline.btn-somfy-svg,
+.button-outline.btn-somfy-svg-wide {
+    margin: 0 !important; /* Supprime les marges parasites */
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Supprime les bordures par défaut pour laisser place aux cercles SVG */
+/* Pour Up, My, Down */
+.btn-somfy-svg {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Taille du SVG à l'intérieur du bouton */
+/* Pour le Toggle */
+.btn-somfy-svg-wide {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    width: 88px;
+    height: 44px;
+    /* AJOUTE CES LIGNES : */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Applique la taille à TOUS les SVG de boutons (ronds et larges) */
+.btn-somfy-svg svg,
+.btn-somfy-svg-wide svg {
+    width: 100%;
+    height: 100%;
+    display: block; /* Évite les décalages de ligne */
+    color: var(--accent-color);
+
+    /* SOLUTION ICI : Empêche le script de capturer le SVG */
+    pointer-events: none;
+}
+
+.btn-somfy-svg {
+    width: 44px;
+    height: 44px;
+}
+
+.btn-somfy-svg-wide {
+    width: 88px;
+    height: 44px;
+}
+
+
+
+
+/* Effet au clic pour simuler un bouton physique */
+.btn-somfy-svg:active {
+    transform: scale(0.92);
+    filter: brightness(1.1);
+}
+
+
+
+
+
+
+
+
+
+#fldAccentColor {
+-webkit-appearance: none;
+-moz-appearance: none;
+appearance: none;
+height: 40px;
+background-color: transparent;
+border: none;
+cursor: pointer;
+}
+#fldAccentColor::-webkit-color-swatch {
+border-radius: 15px;
+border: none;
+}
+#fldAccentColor::-moz-color-swatch {
+border-radius: 15px;
+border: none;
+}
+
+:root {
+    color-scheme: light dark;
+    --shade-color: #F8A525;
+    --accent-color: #F8A525;
+}
+
+
+:root[data-theme="light"] {
+    --body-color: #fff;
+    --color: #000000;
+    --invertxt-color: #e4e3e8;
+    --soustxt-color: #4a4a4a;
+    --hr-color: #e8e8e8;
+    --bg-switch-color: #c7cad1;
+    --tb-color: #c7cad1;
+    --bg-switch-ch-color: #595d60;
+    --button-color: #5e5e5e;
+    --background-color: #ecebeb;
+    --test-color: #F8A525;
+    --unibloc-color: #fcfcfc;
+    --fond-color: #f0f0f0;
+
+}
+
+:root[data-theme="dark"] {
+    --body-color: #1c1c1c;
+    --color: #e4e3e8;
+    --invertxt-color: #000000;
+    --soustxt-color: #9a999e;
+    --hr-color: #3a3a3c;
+    --bg-switch-ch-color: #ababab;
+    --bg-switch-color: #646368;
+    --tb-color: #0f0f0f;
+    --button-color: #2d2d2f;
+    --background-color: #010101;
+    --test-color: #f80707;
+    --unibloc-color: #1b1b1b;
+    --fond-color: #010101;
+}
+
+
+
+.tab-container > span.selected {
+    border-bottom-width: 3px;
+    font-weight: bold;
+    color: var(--background-color);
+}
+
+
 * {
     box-sizing: border-box;
 }
 
+
+
+.container.dark {
+    background-color: #333;
+}
+
+
 body {
-    color: #434343;
+    color: var(--color);
+
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 14px;
-    background-color: #eeeeee;
+
     box-sizing: border-box;
     margin-top: 77px;
 }
+
+
+
+
+
+
+
+/************************label et input V2*/
+
+.labelAndField {
+    /*! margin: 0 0 0 9px; */
+    position: absolute;
+    font-size: 14px;
+    color: var(--color);
+    word-break: break-word;
+}
+
+.field-group .inputAndField {
+    font-size: 11px;
+    color: var(--soustxt-color);
+    background: #fcfcfc;
+    background-color: rgb(252, 252, 252);
+    background-color: transparent;
+    border: none;
+    padding: 22px 0 5px 0px;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+
+
+
+
+
+.hackSelect  {
+    width: 100%;
+    border: none;
+    padding-top: 30px;
+    margin: -30px 0 0 -3px;
+}
+
+.select-block select {
+    font-size: 11px;
+    color: #4a4a4a;
+}
+.select-block {
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    padding: 0 17px;
+}
+.select-title {
+    display: block;
+    margin-bottom: -4px;
+}
+
+
+
+
+
+
+
+
+
+.field-group.textfieldLeft {
+    display:inline-block;
+    width:47%;
+    margin-right:7px;
+}
+.field-group.textfieldRight {
+    display:inline-block;
+    width:50%;
+}
+
+
+
+.wifi-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 12px;
+}
+
+.wifi-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.wifi-row {
+    display: flex;
+}
+
+.wifi-label {
+    margin-right: 4px;
+}
+
+.wifi-value {
+    color: var(--soustxt-color);
+    margin-left: 5px;
+}
+
+.wifi-right {
+    display: flex;
+    align-items: center;
+
+    gap: 2px;
+}
+
+
+
+hr {
+    border: 1px solid var(--hr-color);
+    display: block;
+}
+
+
+
+
+
+/*pour block mémory byte dans onglet firmware*/
+.firmwarMem {
+    display: inline-block;
+    padding: 8px 17px;
+    background-color: var(--unibloc-color);
+    width: 100%;
+    border-radius: 25px;
+    margin-bottom: 10px;
+}
+
+.firmwarblocupdate {
+    background-color: var(--unibloc-color);
+    padding: 9px;
+    border-radius: 25px;
+    margin: 15px 0 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+
+
+
+
+/*pour infos firmware*/
+.info-block {
+    display: flex;
+    flex-direction: column;
+
+    font-size: 0.9rem;
+    padding: 0 10px;
+    color: #666;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.info-value {
+    text-align: right;
+}
+
+#divFirmware a{
+color: #d9942a;
+position: inherit;
+text-decoration: none;
+border-bottom: none;
+font-size: 0.9rem;
+}
+
+/*pour rssi bloc radio*/
+.rssi-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 14px;
+    width: 100%;
+}
+
+.rssi-left {
+    font-size: 14px;
+    display: flex;
+    gap: 4px;
+}
+
+.rssi-right {
+    font-size: 32px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.rssi-unit {
+    font-size: 16px;
+    color: color-mix(in srgb, var(--accent-color) 40%, var(--invertxt-color));
+}
+
+
+
+/*pour les GPIO dans onglet radio*/
+
+.field-group2 .radioPins {
+    flex: 1;              /* chaque bloc SCLK / CSN / MOSI prend la même largeur */
+}
+
+.field-group2 {
+    display: flex;
+    padding: 4px 6px;
+    margin: 1px 0;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+
+
+/* Bloc principal */
+.field-group.unibloc {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 15px;
+    background-color: var(--unibloc-color);
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.field-group.uniblocRadio {
+    display: inline-block;
+    width: 100%;
+    margin-top: 15px;
+    vertical-align: top;
+    background-color: var(--unibloc-color);
+    border-radius: 25px;
+    padding: 11px 14px;
+}
+
+/* Lignes communes */
+.uniRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /*! padding: 5px 10px; */
+    border-radius: 25px;
+    transition: background-color 0.2s;
+}
+/* Zone textuelle commune */
+.uniText {
+    display: flex;
+    flex-direction: column;
+    max-width: 80%;
+}
+
+/* Statut commun */
+.uniStatus {
+    font-size: 11px;
+    color: var(--soustxt-color);
+    margin-bottom: 2px;
+    padding: 0px 0;
+}
+
+/* Libellé commun */
+.uniLabel {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Switch commun */
+.uniSwitch .switch {
+    display: flex;
+    align-items: center;
+}
+
+
+
+
+
+
+#stepButtons, #stepButtonsRx, #stepButtonsDeviation {
+display: flex;
+gap: 5px;
+align-content: flex-end;
+margin: 0;
+background-color: #5e5e5e;
+border-radius: 10px;
+}
+
+#stepButtons > .step-btn,
+#stepButtons > .step-btn.active,
+#stepButtonsRx > .step-btn,
+#stepButtonsRx > .step-btn.active,
+#stepButtonsDeviation > .step-btn,
+#stepButtonsDeviation > .step-btn.active {
+width: 33px;
+padding: 0;
+height: 25px;
+margin: 0;
+font-size: 10px;
+border-radius: 9px;
+background: #5e5e5e;
+color: #010101;
+border: none;
+}
+
+#stepButtons > .step-btn.active,
+#stepButtonsRx > .step-btn.active,
+#stepButtonsDeviation > .step-btn.active {
+background-color: var(--accent-color);
+}
+
+
+
+
+
+/*pour le bloc radio onglet radio*/
+.md3-numbfield {
+    display: flex;
+    background-color: #5e5e5e;
+    align-items: center;
+    padding: 9px;
+    border-radius: 11px;
+    width: 110px;
+}
+
+
+
+
+
+
+
+
+/* pour switch restauration*/
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+/***************Switch theme*/
+/* Switch base */
+
+
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    background: #fff;
+    transition: .4s;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 0.95em;
+    width: 0.95em;
+    border-radius: 16px;
+    left: 0.5px;
+    top: 0;
+    bottom: 0;
+    background-color: #595d60;
+
+    transition: .4s;
+}
+
+
+
+/*pour switch dans .js*/
+
+.sliderjs::before {
+    position: absolute;
+    content: "";
+    height: 1.15em;
+    width: 1.1em;
+    border-radius: 16px;
+    left: 1px;
+    top: 1px;
+    bottom: 0;
+    background-color: #595d60;
+    transition: .2s;
+}
+input:checked + .sliderjs::before {
+    transform: translateX(1.2em);
+}
+
+
+
+
+
+
+
+
+input:checked + .slider {
+    background-color: #5e5e5e;
+    border: 1px solid transparent;
+}
+
+input:checked + .slider:before {
+    transform: translateX(0.7em);
+}
+
+/***************Switch base*/
+/* --- RESET INPUT (inchangé) --- */
+.switch input {
+    position: absolute;
+    opacity: 0;
+}
+
+/* --- CONTAINER DU SWITCH --- */
+.switch {
+    display: inline-block;
+    position: relative;
+    width: 34px;        /* avant 42px */
+    height: 18px;       /* avant 24px */
+    border-radius: 9px;
+    background-color: var(--bg-switch-color);
+    transition: background 200ms ease;
+    cursor: pointer;
+    min-width: 34px;
+}
+
+.switch div {
+    width: 14px;        /* avant 20px */
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+    0px 1px 2px rgba(0,0,0,0.3),
+    0px 1px 3px rgba(0,0,0,0.15);
+}
+
+.switch:has(input:checked) {
+    background-color: var(--bg-switch-ch-color);
+}
+
+.switch input:checked + div {
+    transform: translateX(16px);  /* ajusté pour la taille réduite */
+}
+
+
+
 
 
 h1 {
     text-align: center;
     margin-bottom: 10px;
     margin-top: 0px;
-    color: #939393;
+    color: var(--accent-color);
     font-size: 28px;
 }
 hr {
@@ -28,13 +726,13 @@ hr {
 
 
 input[type="range"] {
-    accent-color: #00bcd4;
+    accent-color: var(--accent-color);
     outline:none;
 }
 
-    input[type="range"]:active {
-        outline: dotted 1px silver;
-    }
+input[type="range"]:active {
+    outline: dotted 1px silver;
+}
 
 
 
@@ -45,10 +743,10 @@ input[type="range"] {
     user-select: none;
     cursor:pointer;
 }
-    .button-outline:active {
-        -webkit-animation: flicker .5s infinite linear;
-        animation: flicker .5s infinite linear;
-    }
+.button-outline:active {
+    -webkit-animation: flicker .5s infinite linear;
+    animation: flicker .5s infinite linear;
+}
 @keyframes flicker {
     0% {
         transform: rotate(-4deg);
@@ -76,15 +774,15 @@ input[type="range"] {
     }
 }
 form {
-    margin-top:-18px;
+    margin-top: 0;
 }
 
 .field-group {
     box-sizing: border-box;
     clear: both;
-    padding: 4px 0;
+    padding: 0 0;
     position: relative;
-    margin: 1px 0;
+    /*! margin: 1px 0; */
     width: 100%;
 }
 
@@ -97,29 +795,44 @@ form {
     width: 100%;
 }
 
-    .field-group1 > span {
-        color: #757575;
-        display: inline-block;
-        margin: 0 0 5px 0;
-        padding: 5px 0 0;
-        position: relative;
-        word-wrap: break-word;
-        font-size: 15px;
-        font-weight: bold;
-    }
-
-.field-group > label {
-    display: block;
-    margin: 0px;
-    padding: 3px 0 0;
+.field-group1 > span {
+    color: #757575;
+    display: inline-block;
+    margin: 0 0 5px 0;
+    padding: 5px 0 0;
     position: relative;
     word-wrap: break-word;
-    line-height:4px;
-    font-size:14px;
-    margin-bottom:10px;
-    margin-top:-10px;
-    color:#00bcd4;
+    font-size: 15px;
+    font-weight: bold;
 }
+
+/*
+ * . *field-group > label {
+ * display: block;
+ * margin: 0px;
+ * padding: 3px 0 0;
+ * position: relative;
+ * word-wrap: break-word;
+ * line-height:4px;
+ * font-size:14px;
+ * margin-bottom:10px;
+ * margin-top:-10px;
+ * color:#d9942a
+ * }
+ */
+
+.labelfieldsmd3 {
+    background-color: #f0f0f0;
+    padding: 6px;
+    margin: -8px 0 0 14px;
+    position: absolute;
+    font-size: 10px;
+    color: #ae7b2c;
+    line-height: 4px;
+    word-break: break-word;
+}
+
+
 .field-group1 > div.field-group {
     display:inline-block;
     width:auto;
@@ -134,31 +847,54 @@ input[type=text] {
     font-size: 15px;
     margin-bottom: 14px;
     -webkit-appearance: none;
-    background: #fafafa;
-    color: #636363;
-    border: none;
-    border-radius: 0;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    border-bottom: 1px solid #00bcd4;
+    color: #0f0f0f;
+    background: #f0f0f0;
     background-color: transparent;
+    border: 1px solid #555;
+    padding: 8px;
+    border-radius: 8px;
 }
+
+
+
+
+
+
 
 select {
     font-size: 15px;
-    -webkit-appearance: none;
-    background: #fafafa;
+
+    background: #f0f0f0;
     color: #636363;
     border: none;
     border-radius: 0;
     border-top: none;
     border-left: none;
     border-right: none;
-    border-bottom: 1px solid #00bcd4;
+    border-bottom: 1px solid #ae7b2c;
     background-color: transparent;
     margin-bottom:14px;
 }
+
+
+.selectmd3 {
+    width: 100%;          /* les selects prennent toute la largeur du bloc */
+}
+
+.selectmd3 {
+    -webkit-appearance: none;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid;
+    color: #0f0f0f;
+    background: #f0f0f0;
+    margin-bottom: 14px;
+    border: 1px solid #555;
+    background-color: transparent;
+
+}
+
+
 
 .field-group input[type=password],
 .field-group input[type=number],
@@ -175,35 +911,137 @@ input[type=text]:focus {
     outline: 0;
 }
 
+
 .button-container {
     box-sizing: border-box;
     clear: both;
-    margin: 1px 0 0;
-    padding: 4px 0;
+    margin: 15px 0 0;
     position: relative;
     width: 100%;
+    display: flex;
+    gap: 24px;
 }
 
-button[type=button],
-button[type=submit] {
-    background: #00bcd4;
-    border: none;
-    border-radius: 30px;
-    color: #ffffff;
-    cursor: pointer;
-    display: block;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 10px 0;
-    margin-top: 10px;
+
+.bouton,
+.boutonOutline {
+    display: inline-block;
+    width: 100%;
+    padding: 15px;
     text-align: center;
     text-transform: uppercase;
-    width: 100%;
-    -webkit-transition: background 250ms ease;
-    -moz-transition: background 250ms ease;
-    -o-transition: background 250ms ease;
-    transition: background 250ms ease;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 30px;
 }
+.bouton {
+    border: none;
+    color: var(--color);
+    background-color: var(--accent-color);
+    transition: background-color 250ms ease, box-shadow 150ms ease;
+}
+.bouton:hover {
+    background-color: color-mix(in srgb, var(--accent-color), white 10%);
+}
+.bouton:active {
+    background-color: color-mix(in srgb, var(--accent-color), black 3%);
+}
+.boutonOutline {
+    border: 2px solid #555;
+    color: #555;
+    background-color: transparent;
+    transition: all 250ms ease; /* "all" couvre border, color et background */
+}
+.boutonOutline:hover {
+    background-color: var(--button-color);;
+    color: white;
+    border-color: #333;
+}
+.boutonOutline:active {
+    background-color: #555;
+    color: white;
+}
+
+
+
+
+#btnSaveShade,
+#btnBtnShadeGoBack {
+    width: 49%;
+}
+
+
+
+
+/*******************************************************************Systen > Firmware*/
+
+div#divFirmware div.uniStatus span{
+    color: var(--color);
+}
+#spanFreeMemory {
+    color: var(--soustxt-color) !important;;
+}
+#divFirmware .uniRight {
+    gap: 0;
+}
+#spanMaxMemory,
+#spanMinMemory {
+    font-size: 11px;
+    color: var(--soustxt-color);
+}
+.bouton-update {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 5px;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--color);
+}
+.btnSvg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    fill: currentColor;
+}
+.bouton-update span {
+    line-height: 1;
+}
+#UpdatePath,
+#svg-clear{
+fill: var(--color) !important;
+}
+
+#btnUpdateApplication use {
+fill: var(--accent-color) !important;
+}
+
+#btnUpdateFirmware use {
+fill: #f00101 !important;
+}
+
+
+
+/*******************************************************************Systen > Firmware end*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 button:active {
     opacity: .7;
@@ -211,12 +1049,12 @@ button:active {
 
 a {
     text-decoration: none;
-    color: #00bcd4;
+    color: #F8A525;
     position: fixed;
     right: 12px;
     font-size: 18px;
     bottom: 7px;
-    border-bottom: 1px solid #00bcd4;
+    border-bottom: 1px solid #F8A525
 }
 div.info-message,
 div.prompt-message,
@@ -226,11 +1064,10 @@ div.error-message {
     top:0px;
     width:100%;
     height:100%;
-    color:white;
+    color: var(--color);
     display:flex;
     flex-wrap:wrap;
-    background:gray;
-    opacity:.9;
+    background: var(--background-color);
     padding:10px;
     align-items:center;
     align-content:center;
@@ -238,6 +1075,9 @@ div.error-message {
     border-radius:27px;
     transition-duration:3s;
 }
+
+
+
 div.prompt-message,
 div.error-message > div {
     padding:10px;
@@ -267,8 +1107,8 @@ div.instructions {
     width: 100%;
     height: 100%;
     color: white;
-    background: gray;
-    opacity: .9;
+    background: #2b2b2b;
+    opacity: .95;
     padding: 10px;
     display: flex;
     flex-wrap: wrap;
@@ -278,66 +1118,90 @@ div.instructions {
     border-radius: 5px;
 }
 
-    div.instructions > div {
-        padding: 10px;
-    }
+div.instructions > div {
+    padding: 10px;
+}
 
-.tab-container {
-    font-size:20px;
-    text-align:center;
-}
-    .tab-container > span {
-        margin-left: 5px;
-        margin-right: 5px;
-        padding-bottom: 3px;
-        display: inline-block;
-        border-bottom: 1px solid #00bcd4;
-        color: #00bcd4;
-        cursor:pointer;
-    }
-        .tab-container > span.selected {
-            border-bottom-width: 3px;
-            font-weight: bold;
-        }
-.subtab-container {
-    margin-top:3px;
-    margin-left: 0;
+
+.tab-container span {
     display: flex;
-    width: calc(100% - 0px);
-    margin-bottom: -1px;
-    overflow: visible;
-    border-bottom: 1px solid #ccc;
-    font-size: 12px;
+    flex-direction: column;
+    align-items: center;
+
+    flex: 1;
 }
-    .subtab-container > span {
-        display:inline-block;
-        background:white;
-        margin-bottom:-1px;
-        padding-left: 10px;
-        padding-right:10px;
-        padding-top:5px;
-        padding-bottom:5px;
-        border-top: 1px solid #ccc;
-        border-left: 1px solid #ccc;
-        border-right: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-        cursor:pointer;
-        background:ghostwhite;
-    }
-    .subtab-container > span.selected {
-        border-bottom:none;
-        background:white;
-    }
+
+.tab-icon {
+    width: 28px;  /* Taille idéale pour le menu */
+    height: 28px;
+    margin-bottom: 0;
+    fill: currentColor;
+}
+
+
+
+.tab-container span * {
+    pointer-events: none; /* Empêche l'extension de "voir" le clic sur le SVG ou le texte */
+}
+
+.tab-container > span {
+    padding-bottom: 4px;
+    display: flex;
+    color: var(--soustxt-color);
+    cursor: pointer;
+    transition: color 0.5s ease;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tab-container > span.selected {
+    border-bottom-width: 3px;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: -2px;
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.subtab-container {
+    display: inline-flex !important; /* Force le mode compact */
+    width: auto;          /* Interdit le 100% */
+    max-width: max-content;          /* S'arrête pile au dernier texte */
+    align-self: flex-start;          /* Empêche le parent flex de l'étirer */
+    background-color: var(--body-color);
+    border-radius: 31px;
+    padding: 0;
+    margin: 10px 15px;
+    overflow: hidden;
+    gap: 2px;
+}
+.subtab-container::-webkit-scrollbar {
+    display: none; /* Cache la barre sur Chrome/Safari */
+}
+
+.subtab-container > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;       /* Espace interne des onglets */
+    font-size: 12px;
+    color: var(--color);
+    cursor: pointer;
+    border: none !important;
+    white-space: nowrap;     /* Empêche le texte de revenir à la ligne */
+}
+.subtab-container > span.selected {
+    background: var(--bg-switch-ch-color); /* Ton bleu */
+    color: var(--invertxt-color);
+    border-radius: 31px;     /* Arrondi l'onglet bleu pour matcher la pilule */
+}
+
 .subtab-content {
-    display: block;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    border-radius: 0 0 15px 15px;
+    display: flex;
     padding: 25px;
     position: relative;
+    /*! background: var(--background-color); */
+    flex-direction: column;
+    flex-grow: 1;
 }
 fieldset {
     display: block;
@@ -348,8 +1212,8 @@ fieldset {
     position: relative;
 }
 input[type=checkbox] {
-    width:20px;
-    height:20px;
+    width:30px;
+    height:16px;
     vertical-align:middle;
 }
 div.field-group1.inputPin {
@@ -364,70 +1228,92 @@ legend {
     top: -14px;
 }
 
-div.wifiSignal {
-    white-space: nowrap;
-    height: 37px;
-    cursor: pointer;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-    #divAps div.wifiSignal:hover {
-        background: #00bcd4;
-        color: white;
-    }
-    div.wifiSignal > span {
-        display: inline-block;
-        vertical-align: middle;
-    }
-span.ssid {
-    width: calc(100% - 50px);
-    margin-top: 10px;
-}
+
+
+
+/* --- 1. CONTENEUR DE LA LISTE (SCAN-WIFI) --- */
 #divAps {
+    height: 150px;
     max-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 150px;
-    padding-right: 7px;
+    padding-right: 5px;
 }
+.aps-title {
+    font-size: 11px;
+    color: var(--bg-switch-ch-color);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.no-wifi {
+    padding: 30px 10px;
+    text-align: center;
+    color: #ccc;
+    font-size: 13px;
+}
+hr.aps-divider {
+    border: 0;
+    border-top: 1px solid var(--hr-color);
+    margin: 5px 0;
+}
+div.wifiSignal {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#divAps div.wifiSignal:hover {
+    background: var(--hr-color);
+    color: var(--color);
+    border-radius: 12px;
+}
+span.ssid {
+    font-size: 14px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* --- 3. ICONES ET SIGNAUX SVG --- */
 div.signal {
-    margin: 0px;
-    color: lawngreen;
-    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 32px;
-    float: right;
+    height: 32px;
 }
-span.strength {
-    position: relative;
-    margin-top: 2px;
+#divNetworkStrength use {
+    fill: #ccc;
+    opacity: 0.3;
+    transition: fill 0.3s, opacity 0.3s;
+}
+#divNetworkStrength use.active,
+div.signal use.active {
+    fill: #069800 !important;
+    opacity: 1 !important;
+}
+#svgWifiElement {
+    fill: #069800 !important;
+    display: block !important;
+    overflow: visible;
+}
+#svgWifiElement circle,
+#svgWifiElement path {
+    fill: inherit;
+    transition: opacity 0.2s ease;
+}
+.wave-off {
+    opacity: 0.2 !important;
+    fill: #ccc !important;
 }
 
-.wave {
-    display: inline-block;
-    border: 4px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    border-style: solid;
-    margin: 2px;
-}
 
-.waveStrength-4 .wv4.wave,
-.waveStrength-3 .wv4.wave,
-.waveStrength-3 .wv3.wave,
-.waveStrength-2 .wv4.wave,
-.waveStrength-2 .wv3.wave,
-.waveStrength-2 .wv2.wave,
-.waveStrength-1 .wv4.wave,
-.waveStrength-1 .wv3.wave,
-.waveStrength-1 .wv2.wave,
-.waveStrength-1 .wv1.wave,
-.waveStrength-0 .wv4.wave,
-.waveStrength-0 .wv3.wave,
-.waveStrength-0 .wv2.wave,
-.waveStrength-0 .wv1.wave,
-.waveStrength-0 .wv0.wave {
-    border-top-color: #eee;
-}
+
+
 button.disabled {
     opacity:.3;
 }
@@ -455,83 +1341,83 @@ div.wait-overlay > .lds-roller {
     width: 80px;
     height: 80px;
 }
-    .lds-roller div {
-        animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        transform-origin: 40px 40px;
-    }
-        .lds-roller div:after {
-            content: " ";
-            display: block;
-            position: absolute;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: gray;
-            margin: -4px 0 0 -4px;
-        }
-        .lds-roller div:nth-child(1) {
-            animation-delay: -0.036s;
-        }
-            .lds-roller div:nth-child(1):after {
-                top: 63px;
-                left: 63px;
-            }
+.lds-roller div {
+    animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    transform-origin: 40px 40px;
+}
+.lds-roller div:after {
+    content: " ";
+    display: block;
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: gray;
+    margin: -4px 0 0 -4px;
+}
+.lds-roller div:nth-child(1) {
+    animation-delay: -0.036s;
+}
+.lds-roller div:nth-child(1):after {
+    top: 63px;
+    left: 63px;
+}
 
-        .lds-roller div:nth-child(2) {
-            animation-delay: -0.072s;
-        }
-            .lds-roller div:nth-child(2):after {
-                top: 68px;
-                left: 56px;
-            }
+.lds-roller div:nth-child(2) {
+    animation-delay: -0.072s;
+}
+.lds-roller div:nth-child(2):after {
+    top: 68px;
+    left: 56px;
+}
 
-        .lds-roller div:nth-child(3) {
-            animation-delay: -0.108s;
-        }
-            .lds-roller div:nth-child(3):after {
-                top: 71px;
-                left: 48px;
-            }
+.lds-roller div:nth-child(3) {
+    animation-delay: -0.108s;
+}
+.lds-roller div:nth-child(3):after {
+    top: 71px;
+    left: 48px;
+}
 
-        .lds-roller div:nth-child(4) {
-            animation-delay: -0.144s;
-        }
-            .lds-roller div:nth-child(4):after {
-                top: 72px;
-                left: 40px;
-            }
+.lds-roller div:nth-child(4) {
+    animation-delay: -0.144s;
+}
+.lds-roller div:nth-child(4):after {
+    top: 72px;
+    left: 40px;
+}
 
-        .lds-roller div:nth-child(5) {
-            animation-delay: -0.18s;
-        }
-            .lds-roller div:nth-child(5):after {
-                top: 71px;
-                left: 32px;
-            }
+.lds-roller div:nth-child(5) {
+    animation-delay: -0.18s;
+}
+.lds-roller div:nth-child(5):after {
+    top: 71px;
+    left: 32px;
+}
 
-        .lds-roller div:nth-child(6) {
-            animation-delay: -0.216s;
-        }
-            .lds-roller div:nth-child(6):after {
-                top: 68px;
-                left: 24px;
-            }
+.lds-roller div:nth-child(6) {
+    animation-delay: -0.216s;
+}
+.lds-roller div:nth-child(6):after {
+    top: 68px;
+    left: 24px;
+}
 
-        .lds-roller div:nth-child(7) {
-            animation-delay: -0.252s;
-        }
-            .lds-roller div:nth-child(7):after {
-                top: 63px;
-                left: 17px;
-            }
+.lds-roller div:nth-child(7) {
+    animation-delay: -0.252s;
+}
+.lds-roller div:nth-child(7):after {
+    top: 63px;
+    left: 17px;
+}
 
-        .lds-roller div:nth-child(8) {
-            animation-delay: -0.288s;
-        }
-            .lds-roller div:nth-child(8):after {
-                top: 56px;
-                left: 12px;
-            }
+.lds-roller div:nth-child(8) {
+    animation-delay: -0.288s;
+}
+.lds-roller div:nth-child(8):after {
+    top: 56px;
+    left: 12px;
+}
 @keyframes lds-roller {
     0% {
         transform: rotate(0deg);
@@ -541,15 +1427,14 @@ div.wait-overlay > .lds-roller {
     }
 }
 .radioPins > select {
-    width: 70px;
     text-align:center;
 }
 .radioPins > label {
     text-align:center;
 }
 .button-outline {
-    background-color: #00bcd4;
-    border-radius:35px;
+    background-color: var(--accent-color);
+    border-radius: 35px;
     padding:3px 5px 5px 5px;
     margin-left:2px;
     margin-right:2px;
@@ -592,52 +1477,55 @@ div.wait-overlay > .lds-roller {
     width:100%;
     background:white;
     border-radius:calc(1em / 2);
-    height:1em;
+    height:2em;
     overflow:hidden;
     position:relative;
 }
-    .progress-bar::after {
-        content: attr(data-progress);
-        display: block;
-        position: absolute;
-        width: 100%;
-        background: none;
-        font-size: .7em;
-        vertical-align: middle;
-        margin-top: .15em;
-        color: darkslategray;
-        top: 0;
-        left: 0;
-    }
-    .progress-bar::before {
-        content: "";
-        width: var(--progress);
-        text-align: right;
-        background-color: #00bcd4;
-        border-radius: .5em;
-        height: 1em;
-        display: block;
-        overflow: hidden;
-    }
+.progress-bar::after {
+    content: attr(data-progress);
+    display: block;
+    position: absolute;
+    width: 100%;
+    background: none;
+    font-size: .7em;
+    vertical-align: middle;
+    margin-top: .27em;
+    color: darkslategray;
+    top: 0;
+    left: 0;
+}
+.progress-bar::before {
+    content: "";
+    width: var(--progress);
+    text-align: right;
+    background-color: #F8A525;
+    border-radius: .5em;
+    height: 2em;
+    display: block;
+    overflow: hidden;
+}
 .vr-button,
 .somfyGroupCtl,
 .somfyShadeCtl {
-    height:60px;
-    border-bottom:dotted 2px gainsboro;
+    height:80px;
     position:relative;
     display:flex;
     vertical-align:middle;
     align-items:center;
     flex-direction:row;
+    background-color: var(--unibloc-color);
+    margin: 5px 0;
+    border-radius: 25px;
+    padding: 8px;
+
 }
-    .somfyShadeCtl .shade-icon {
-        display: inline-block;
-        padding-left: 0px;
-        padding-right: 0px;
-        vertical-align: middle;
-        font-size: 48px;
-        position:relative;
-    }
+.somfyShadeCtl .shade-icon {
+    display: flex;
+    padding-left: 0px;
+    padding-right: 0px;
+    vertical-align: middle;
+    font-size: 48px;
+}
 .vr-button {
     align-items:center;
     margin-top:5px;
@@ -649,81 +1537,79 @@ div.wait-overlay > .lds-roller {
     padding:7px;
     vertical-align:middle;
     width:100%;
-}   
-    .somfyGroupCtl .groupctl-shades {
-        font-size:12px;
-        margin-top:0px;
-    }
-    .somfyGroupCtl .groupctl-shades > label {
-        margin-right:3px;
-    }
-    .somfyGroupCtl .groupctl-name,
-    .somfyShadeCtl .shadectl-name {
-        font-size: 1.37em;
-        color: silver;
-        display: block;
-        vertical-align: middle;
-        white-space: nowrap;
-        width: 100%;
-    }
-    .somfyGroupCtl label,
-    .somfyShadeCtl label {
-        color:silver;
-    }
-    .somfyShadeCtl .shadectl-room,
-    .somfyGroupCtl .groupctl-room {
-        font-size:12px;
-        margin-bottom:-3px;
-        display:block;
-        color:darkorange;
-    }
-    .somfyGroupCtl[data-roomid="0"] .groupctl-room,
-    .somfyShadeCtl[data-roomid="0"] .shadectl-room {
-        display:none;
-    }
-    .somfyGroupCtl .groupctl-mypos,
-    .somfyShadeCtl .shadectl-mypos {
-        white-space: nowrap;
-        font-size: 12px;
-        display:block;
-        margin-top:-3px;
-    }
+}
+.somfyGroupCtl .groupctl-shades {
+    font-size:12px;
+    margin-top:0px;
+}
+.somfyGroupCtl .groupctl-shades > label {
+    margin-right:3px;
+}
+.somfyGroupCtl .groupctl-name,
+.somfyShadeCtl .shadectl-name {
+    font-size: 1.37em;
+    color: var(--tb-color);
+    display: block;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: 100%;
+}
+.somfyGroupCtl label,
+.somfyShadeCtl label {
+    color:silver;
+}
+.somfyShadeCtl .shadectl-room,
+.somfyGroupCtl .groupctl-room {
+    font-size:12px;
+    font-weight: bold;
+    margin-bottom:-3px;
+    display:block;
+    color:darkorange;
+}
+.somfyGroupCtl[data-roomid="0"] .groupctl-room,
+.somfyShadeCtl[data-roomid="0"] .shadectl-room {
+    display:none;
+}
+.somfyGroupCtl .groupctl-mypos,
+.somfyShadeCtl .shadectl-mypos {
+    white-space: nowrap;
+    font-size: 12px;
+    display:block;
+    margin-top:-3px;
+}
 .vr-button > div,
 .somfyGroupCtl .groupctl-buttons,
 .somfyShadeCtl .shadectl-buttons {
-    margin-top:3px;
+    margin-top:0;
     float:right;
     white-space:nowrap;
 }
 
-    .somfyGroupCtl .groupctl-buttons .button-outline,
-    .somfyShadeCtl .shadectl-buttons .button-outline {
-        display: inline-block;
-        padding: 7px;
-        cursor: pointer;
-    }
+.somfyGroupCtl .groupctl-buttons .button-outline,
+.somfyShadeCtl .shadectl-buttons .button-outline {
+    display: inline-block;
+    padding: 6px 10px 6px 10px;
+    cursor: pointer;
+}
 
 #divVirtualRemote[data-bitlength="56"] div.vr-button.vr-80bit {
-    display:none;
+display:none;
 }
 #divVirtualRemote[data-bitlength="none"] div.vr-button {
-    display:none;
+display:none;
 }
 .shade-positioner {
     position: absolute;
-    width: 100%;
-    background-color: oldlace;
+    width: 90%;
+    background-color: #fcfcfc;
     color: gray;
     min-height: 60px;
     top: 0px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-bottom: 7px;
+    padding: 7px;
     z-index: 100;
     margin-top: -7px;
-    box-shadow: 4px 4px 4px gray;
-    border: solid 1px silver;
-    border-radius: 5px;
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 10px;
 }
 .shade-positioner .shade-name {
     display:block;
@@ -740,13 +1626,13 @@ div.wait-overlay > .lds-roller {
     display:block;
     font-size:1em;
     margin-top:-3px;
-    margin-left:27px;
+    margin-left:15px;
     color:gray;
 }
-    .shade-positioner label > span:last-child {
-        float: right;
-        margin-right: 7px;
-    }
+.shade-positioner label > span:last-child {
+    float: right;
+    margin-right: 7px;
+}
 .shade-positioner label .shade-target {
     display:inline-block;
 }
@@ -765,27 +1651,23 @@ div.eth-setting-line label {
     text-align:right;
     color:mediumspringgreen;
 }
-div.frame-log {
-    background:gainsboro;
-}
+
 div.frame-list {
     position:relative;
     width: 100%;
     max-height:357px;
-    background:white;
+    background: var(--unibloc-color);
     min-height:127px;
     overflow-y:auto;
-    border-bottom:solid 1px silver;
+    border-radius: 0 0 11px 11px;
 }
 div.frame-header {
-    border-top-left-radius:5px;
-    border-top-right-radius:5px;
     position: relative;
     font-size: 12px;
-    background: #00bcd4;
+    background: #f8a525;
     width: 100%;
-    color:white;
-    padding-top:4px;
+    color: #1e1e1e;
+    padding-top: 4px;
 }
 div.frame-row > span,
 div.frame-header > span {
@@ -794,45 +1676,45 @@ div.frame-header > span {
     padding-left: 4px;
     padding-right: 4px;
 }
-    div.frame-header > span {
-        text-align:center;
-    }
-    div.frame-row > span {
-        text-align:right;
-        text-decoration:inherit;
-    }
-    div.frame-row > span:nth-child(1),
-    div.frame-header > span:nth-child(1) {
-        width:25px;
-    }
-    div.frame-row > span:nth-child(2),
-    div.frame-header > span:nth-child(2) {
-        width: 64px;
-    }
-    div.frame-row > span:nth-child(3),
-    div.frame-header > span:nth-child(3) {
-        white-space:nowrap;
-        width: 80px;
-        text-align:center;
-    }
-    div.frame-row > span:nth-child(4),
-    div.frame-header > span:nth-child(4) {
-        width: 43px;
-    }
-    div.frame-row > span:nth-child(5),
-    div.frame-header > span:nth-child(5) {
-        width: 57px;
-    }
-    div.frame-row > span:nth-child(6),
-    div.frame-header > span:nth-child(6) {
-        width: 42px;
-        text-align:center;
-    }
-    div.frame-row > span:nth-child(7),
-    div.frame-header > span:nth-child(7) {
-        text-align: right;
-        white-space:nowrap;
-    }
+div.frame-header > span {
+    text-align:center;
+}
+div.frame-row > span {
+    text-align:right;
+    text-decoration:inherit;
+}
+div.frame-row > span:nth-child(1),
+div.frame-header > span:nth-child(1) {
+    width:25px;
+}
+div.frame-row > span:nth-child(2),
+div.frame-header > span:nth-child(2) {
+    width: 64px;
+}
+div.frame-row > span:nth-child(3),
+div.frame-header > span:nth-child(3) {
+    white-space:nowrap;
+    width: 80px;
+    text-align:center;
+}
+div.frame-row > span:nth-child(4),
+div.frame-header > span:nth-child(4) {
+    width: 43px;
+}
+div.frame-row > span:nth-child(5),
+div.frame-header > span:nth-child(5) {
+    width: 57px;
+}
+div.frame-row > span:nth-child(6),
+div.frame-header > span:nth-child(6) {
+    width: 42px;
+    text-align:center;
+}
+div.frame-row > span:nth-child(7),
+div.frame-header > span:nth-child(7) {
+    text-align: right;
+    white-space:nowrap;
+}
 
 div.frame-list > div:nth-child(2n+1) {
     background: beige;
@@ -857,15 +1739,25 @@ div.frame-pulses {
 }
 @media only screen and (max-device-width: 480px) {
     body {
-        margin-top: 0px;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    .main.container {
+        min-height: 100vh;
+        border-radius: 0;
     }
     .subtab-content {
         padding-left:14px;
         padding-right:14px;
     }
     .subtab-container {
-        font-size: 10px;
+        font-size: 12px;
+    }
+
+    .field-group.textfieldLeft,
+    .field-group.textfieldRight {
+        width:50%;
     }
 }
-
-

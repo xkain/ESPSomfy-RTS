@@ -1,0 +1,718 @@
+{
+  "MSG_FW_UPDATE_AVAILABLE": "Firmware update available",
+  "MSG_RADIO_NOT_INIT": "Radio not initialized",
+  "LBL_HOSTNAME": "Hostname",
+  "PH_HOSTNAME": "Enter a hostname",
+  "LBL_TIMEZONE": "Time zone",
+  "PH_TIMEZONE": "Enter your time zone",
+  "LBL_NTP_SERVER": "NTP Server",
+  "PH_NTP_SERVER": "Enter your NTP server",
+  "LBL_UPNP": "uPnP Broadcast (SSDP)",
+"DESC_UPNP": "Broadcasts service announcements on the network to allow automatic device discovery by other equipment",
+  "LBL_UPDATES": "Updates",
+  "DESC_UPDATES": "Automatic check enabled",
+
+
+
+
+
+
+
+  "LBL_DISPLAY_MODE": "Display mode",
+  "OPT_THEME_AUTO": "Browser dependent",
+  "OPT_THEME_DARK": "Dark mode",
+  "OPT_THEME_LIGHT": "Light mode",
+  "LBL_SECURITY_TYPE": "Security type",
+  "LBL_SECURE_CONFIG_ONLY": "Secure configuration only",
+  "TXT_SECURE_CONFIG_DESC": "Restricts settings changes to secure connections only to prevent unauthorized modifications",
+
+
+
+
+
+
+
+
+
+
+
+"LBL_MEMORY": "Memory (bytes)",
+"LBL_FREE": "Free: ",
+"LBL_MAX": "Max: ",
+"LBL_MIN": "Min: ",
+"LBL_HARDWARE": "Hardware",
+"LBL_APPLICATION": "Application",
+"LBL_CREATOR": "Creator",
+"LBL_UIUX_CONTRIBUTOR": "UI/UX Contributor",
+"LBL_CONNECTION": "Connection",
+"LBL_DHCP_STATIC": "DHCP / Static IP",
+
+
+
+
+
+"LBL_WIFI_NETWORK": "Network:",
+"LBL_WIFI_CHANNEL": "Channel:",
+"LBL_WIFI_SIGNAL": "Signal strength",
+"LBL_ETH_STATUS": "Status",
+"LBL_ETH_SPEED": "Speed",
+"LBL_HIDDEN_SSID": "Hidden Wi-Fi network",
+"LBL_HIDDEN_SSID_DESC": "Allows connection to a network that does not broadcast its name",
+"LBL_ROAMING": "Enable roaming",
+"LBL_ROAMING_DESC": "Always targets the nearest Wi-Fi access point",
+"LBL_ETHERNET": "Ethernet connection",
+"LBL_ETHERNET_DESC": "Uses Ethernet cable instead of Wi-Fi",
+"LBL_WIFI_FALLBACK": "Wi-Fi fallback",
+"LBL_WIFI_FALLBACK_DESC": "Switches to Wi-Fi if Ethernet fails",
+"LBL_ETH_BOARD_TYPE": "Board type",
+"ERR_NO_WIFI_FOUND": "No networks found",
+"LBL_WIFI_AVAILABLE": "Available networks:",
+"LBL_SCANNING": "Scanning in progress...",
+"LBL_WIFI_SSID": "Network SSID",
+"PLH_WIFI_SSID": "Enter your SSID",
+"LBL_ETH_PHY_TYPE": "PHY chip type",
+"LBL_ETH_CLK_MODE": "Clock mode",
+"LBL_ETH_PWR_PIN": "Power pin",
+"LBL_ETH_MDC_PIN": "MDC pin",
+"LBL_ETH_MDIO_PIN": "MDIO pin",
+
+
+
+
+
+
+
+
+"LBL_CURRENT_IP": "IP Address",
+"LBL_DHCP": "DHCP",
+"LBL_DHCP_DESC": "Automatically obtain an IP address (DHCP)",
+"LBL_STATIC_IP": "Static IP Address",
+"PLH_STATIC_IP": "0.0.0.0",
+"LBL_SUBNET_MASK": "Subnet Mask",
+"PLH_SUBNET_MASK": "0.0.0.0",
+"LBL_GATEWAY": "Gateway",
+"PLH_GATEWAY": "0.0.0.0",
+"LBL_DNS1": "DNS Server 1",
+"PLH_DNS1": "0.0.0.0",
+"LBL_DNS2": "DNS Server 2",
+"PLH_DNS2": "0.0.0.0",
+"LBL_IP_REBOOT_INFO": "* Settings will only be applied after restarting the ESPSomfy RTS module",
+
+
+
+
+
+
+
+
+
+"LBL_MQTT_ENABLE": "MQTT Connection",
+"LBL_MQTT_ENABLE_DESC": "Enables communication with your MQTT server (broker)",
+"LBL_MQTT_PUB_DISCOVERY": "Publish Discovery",
+"LBL_MQTT_PUB_DISCOVERY_DESC": "Sends settings for automatic configuration in your system",
+"OPT_MQTT": "MQTT",
+"OPT_MQTTS": "MQTTS",
+"PLH_MQTT_USERNAME": "Your MQTT account username",
+"LBL_MQTT_ROOT_TOPIC": "Root Topic",
+"PLH_MQTT_ROOT_TOPIC": "Prefix used for all messages from this module",
+
+"LBL_MQTT_DISCOVERY_TOPIC": "Discovery Topic",
+"PLH_MQTT_DISCOVERY_TOPIC": "Path used for automatic discovery by your system, e.g.: homeassistant",
+
+
+
+
+
+"LBL_ROOMS": "Rooms",
+"LBL_SHADES": "Shades",
+"LBL_GROUPS": "Groups",
+"LBL_REPEATER": "Repeater",
+"TAB_VIRTUAL_REMOTE_LONG": "Virtual Remote",
+"TAB_VIRTUAL_REMOTE_SHORT": "Remote",
+"LBL_DRAG_SORT": "Drag each item to set the display order in the list.",
+"PLH_ROOM_NAME": "Enter a room name",
+"LBL_SHADE_TYPE": "Type",
+"LBL_GPIO_UP": "Up",
+"LBL_GPIO_DOWN": "Down",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "SHADE_ROLLER": "Roller shade",
+  "SHADE_BLIND": "Blind",
+  "SHADE_DRAPERY_LEFT": "Drapery (left)",
+
+
+
+  "SHADE_DRAPERY_RIGHT": "Drapery (right)",
+  "SHADE_DRAPERY_CENTER": "Drapery (center)",
+  "SHADE_AWNING": "Awning",
+  "SHADE_SHUTTER": "Shutter",
+  "SHADE_GARAGE_1BTN": "Garage (1-button)",
+  "SHADE_GARAGE_3BTN": "Garage (3-button)",
+  "SHADE_DRYCONTACT_1BTN": "Dry contact (1-button)",
+  "SHADE_DRYCONTACT_2BTN": "Dry contact (2-button)",
+  "SHADE_GATE_LEFT": "Gate (left)",
+  "SHADE_GATE_CENTER": "Gate (center)",
+  "SHADE_GATE_RIGHT": "Gate (right)",
+  "SHADE_GATE_1BTN_LEFT": "Gate (1-button left)",
+  "SHADE_GATE_1BTN_CENTER": "Gate (1-button center)",
+  "SHADE_GATE_1BTN_RIGHT": "Gate (1-button right)",
+
+
+
+
+
+
+"LBL_SHADE_UP_TIME": "Up Time (ms)",
+"LBL_SHADE_DOWN_TIME": "Down Time (ms)",
+"LBL_TILT_TYPE": "Tilt Type",
+"OPT_NONE": "None",
+"OPT_TILT_MOTOR": "Tilt Motor",
+"OPT_INTEGRATED": "Integrated",
+"OPT_TILT_ONLY": "Tilt Only",
+"OPT_TILT_EURO": "Euro Tilt",
+"LBL_TILT_TIME": "Tilt Time (ms)",
+"LBL_STEP_SIZE": "Step Size (smaller)",
+"LBL_STEP_SIZE_MAX": "(larger)",
+"LBL_LL_TRIGGER": "Low Level Trigger",
+"LBL_LL_TRIGGER_DESC": "For use with GP_* protocols",
+"LBL_SUN_SENSOR": "Sun Sensor",
+"LBL_SUN_SENSOR_DESC": "Activates the motor's sun sensor",
+"LBL_LIGHT_SENSOR": "Light Sensor",
+"LBL_LIGHT_SENSOR_DESC": "Activates the motor's light sensor",
+"LBL_POSITION": "Position",
+"LBL_POSITION_DESC": "Invert the position (% open)",
+"PLH_MS": "milliseconds",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"LBL_FAVORITE": "Favorite",
+"LBL_SIMULATE_FAVORITE_POSITION": "Simulate Favorite Position",
+"LBL_DRAG_TO_SORT": "Drag each item to set the display order in the list.",
+"LBL_REMOTE_ID": "Remote ID",
+"NAME": "Name",
+"PLH_ENTER_NAME": "Enter a name",
+"LBL_FLIP_COMMANDS": "Flip Commands",
+"LBL_DESC_FLIP_COMMANDS": "Reverses the direction of the commands",
+"LBL_REPEAT_COMMANDS": "Repeat Commands",
+"OPT_NO_REPEAT": "No Repeat",
+"OPT_1TIME": "1 time",
+"OPT_2TIME": "2 times",
+"OPT_3TIME": "3 times",
+"OPT_4TIME": "4 times",
+"OPT_5TIME": "5 times",
+"OPT_6TIME": "6 times",
+"OPT_7TIME": "7 times",
+"OPT_8TIME": "8 times",
+"OPT_9TIME": "9 times",
+"OPT_10TIME": "10 times",
+"OPT_11TIME": "11 times",
+"OPT_12TIME": "12 times",
+"OPT_13TIME": "13 times",
+"OPT_14TIME": "14 times",
+"OPT_15TIME": "15 times",
+"OPT_16TIME": "16 times",
+"OPT_17TIME": "17 times",
+"OPT_18TIME": "18 times",
+"OPT_19TIME": "19 times",
+"OPT_20TIME": "20 times",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    "LBL_ALL_DUPLICATE_REMOTES": "All duplicate remote addresses are listed below.",
+    "BT_SCAN_REMOTE": "Search Remote",
+    "LBL_SELECT_MOTOR_GROUP": "Select a motor or group",
+    "LBL_REMOTE_BUTTONS": "Remote buttons",
+    "MY": "my",
+    "LBL_STOP": "Stop",
+    "LBL_TOGGLE_SWITCH": "Toggle Button",
+    "LBL_STEP": "Step",
+    "LBL_STEP_SIZE": "Step Size:",
+    "LBL_FAVORITE": "Favorite",
+    "LBL_UP_DOWN": "Up + Down",
+    "LBL_MY_UP_DOWN": "Up + My + Down",
+    "LBL_MY_UP": "My + Up",
+    "LBL_MY_DOWN": "My + Down",
+    "LBL_PROG": "Prog",
+    "LBL_SUN_FLAG": "Sun Llag",
+    "LBL_SENSOR": "Sensor",
+    "LBL_SUN": "Sun",
+    "LBL_WIND": "Wind",
+    "LBL_SEND": "Send",
+
+
+
+
+"LBL_RADIO": "Radio",
+
+"LBL_LOGS": "Logs",
+
+  "RADIO_ENABLED": "Radio is enabled",
+  "RADIO_DISABLED": "Radio is disabled",
+
+
+  "PROTOCOL": "Protocol",
+
+  "RTS": "RTS",
+  "RTW": "RTW",
+  "RTV": "RTV",
+
+    "56BIT": "56-BIT",
+  "80BIT": "80-BIT",
+
+"GPIO_ASSIGN": "GPIO Assignment",
+  "SHOW_GPIO": "Show all Pins",
+
+"RADIO_BOARD_DEFAULT": "Default",
+
+"BASE_FREQUENCY": "Base Frequency",
+
+
+"RX_BANDWIDTH": "RX Bandwidth",
+
+"FREQ_DEVIATION": "Frequency Deviation",
+
+
+"TX_POWER": "TX Power",
+
+
+"SP_KEY": "Key",
+"SP_ADRESS" : "Adress",
+"SP_COMMAND": "Command",
+"SP_CODE": "Code",
+"SP_BITS": "Bits",
+"SP_TIME": "Time",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"TB_SYSTEM": "System",
+"TB_NETWORK": "Network",
+"TB_SOMFY": "Somfy",
+"TB_RADIO": "Radio",
+
+"SUB_OPTION": "Options",
+"SUB_SECURITY": "Security",
+"FIRMWARE": "Firmware",
+
+
+
+
+
+
+"LBL_ROOM": "Room",
+
+  "SOCKET_ATTEMPTS": "Attempts:",
+  "ERR_SOCKET_CONNECT": "Unable to connect to the server",
+
+
+
+
+  "PROMPT_REBOOT_CONFIRM": "Are you sure you want to reboot the device?",
+
+
+
+
+  "SEC_PIN_WARNING": "Please keep your PIN code in a safe place and do not forget it. The only way to recover a lost PIN code is to fully reload the initialization firmware, which will erase your entire configuration.",
+  "SEC_PIN_CONFIRM": "Have you saved your PIN code in a secure location?",
+
+  "SEC_PASSWORD_WARNING": "Please keep your password in a safe place and do not forget it. The only way to recover a lost password is to fully reload the initialization firmware, which will erase your entire configuration.",
+  "SEC_PASSWORD_CONFIRM": "Have you saved your username and password in a secure location?",
+
+
+
+
+  "ETH_BOARD_MANUAL": "Set manually",
+
+
+  "ETH_WARNING_TITLE": "WARNING ... CAUTION ... DANGER",
+  "ETH_WARNING_DESC_1": "Incorrect Ethernet settings may damage your ESP32. Please verify the settings below and ensure they match the manufacturer specifications.",
+  "ETH_WARNING_DESC_2": "If in doubt, do not press the red button and use the green one instead. If any setting is incorrect, select the custom board type and configure the correct values.",
+  "LBL_BOARD_TYPE": "Board Type",
+  "LBL_PHY_TYPE": "PHY Chip Type",
+  "LBL_PHY_ADDRESS": "PHY Address",
+  "LBL_CLOCK_MODE": "Clock Mode",
+  "LBL_POWER_PIN": "Power Pin",
+  "LBL_MDC_PIN": "MDC Pin",
+  "LBL_MDIO_PIN": "MDIO Pin",
+  "LBL_NONE": "None",
+
+
+  "SCAN_FREQ_DESC": "Frequency scanning has started. Press and hold any button on your remote control and ESPSomfy RTS will find the closest frequency to the remote.",
+  "LBL_SCAN": "Scanning",
+  "LBL_FREQUENCY": "Frequency",
+  "LBL_RSSI": "RSSI",
+  "DIV_RSSI": "RSSI:",
+  "LBL_MHZ": " MHz",
+  "LBL_DBM": " dBm",
+
+
+  "LBL_CURRENT": "Current:",
+  "LBL_TILT": "Tilt:",
+  "LBL_TARGET_POSITION": "Target position",
+  "LBL_TARGET_TILT": "Target tilt",
+
+
+
+  "PROMPT_DELETE_ROOM_WARNING": "If this room was previously assigned to motors or groups, they will be automatically reassigned to the \"Home\" room.",
+
+
+
+  "PROMPT_DELETE_SHADE_WARNING": "If this shade was previously paired with a motor, you must first unpair it from the motor and remove it from all groups. Otherwise, its address will remain stored in the motor memory.",
+  "PROMPT_DELETE_SHADE_CONFIRM": "Press YES to delete {SHADE_NAME}, or NO to cancel this operation.",
+
+
+
+  "ERR_INVALID_GROUP_ID": "A valid group ID was not provided",
+  "PROMPT_DELETE_GROUP_CONFIRM": "Press YES to delete the group {GROUP_NAME}, or NO to cancel this operation.",
+
+
+
+  "ROLLING_CODE_WARNING_TITLE": "WARNING… ALERT… DANGER",
+  "ROLLING_CODE_WARNING_DESC_1": "If this shade is already paired with a motor, changing the rolling code will cause it to malfunction. Rolling codes are tied to the remote address and the Somfy motor expects them to be sequential.",
+  "ROLLING_CODE_WARNING_DESC_2": "If you hesitate even slightly, do not press the red button. Green represents safety — press it, wipe the sweat from your forehead, and follow the normal pairing process.",
+
+
+
+  "PAIR_GARAGE_TITLE": "Follow the instructions below to pair ESPSomfy RTS with an RTS garage door motor",
+  "PAIR_GARAGE_STEP_1": "Open the garage door motor memory according to the motor instructions.",
+  "PAIR_GARAGE_STEP_2": "Once the memory is open, press the Prog button below.",
+  "PAIR_GARAGE_STEP_3": "For single-button control, ESPSomfy RTS will send a toggle command, but for 3-button control, it will send a Prog command.",
+  "PAIR_GARAGE_PAIRED": "Garage door paired",
+
+  "PAIR_SHADE_TITLE": "Follow the instructions below to pair this shade with a Somfy motor",
+  "PAIR_SHADE_STEP_1": "Open the shade memory using an existing remote by pressing the Prog button on the back until the shade performs a back-and-forth movement.",
+  "PAIR_SHADE_STEP_2": "After the shade performs the movement, press the Prog button below.",
+  "PAIR_SHADE_STEP_3": "The shade should perform another back-and-forth movement indicating it is paired. NOTE: on some motors, you may need to hold the Prog button.",
+  "PAIR_SHADE_STEP_4": "If the shade performs the movement, you can press the \"Shade paired\" button.",
+  "PAIR_SHADE_STEP_5": "If the shade does not perform the movement, try pressing the Prog button again.",
+
+
+
+
+
+"UNPAIR_SHADE_DESC_1": "Follow the instructions below to unpair this shade from a Somfy motor.",
+"UNPAIR_SHADE_STEP_1": "Open the shade motor memory using an existing remote control.",
+"UNPAIR_SHADE_STEP_2": "Press the PROG button on the back of the remote control until the shade performs a back-and-forth movement.",
+"UNPAIR_SHADE_STEP_3": "After the shade performs a back-and-forth movement, press the PROG button below.",
+"UNPAIR_SHADE_STEP_4": "The shade should perform another back-and-forth movement, indicating it has been unpaired.",
+"UNPAIR_SHADE_STEP_5": "If the shade performs a back-and-forth movement, you can press the “Shade Unpaired” button.",
+"UNPAIR_SHADE_STEP_6": "If the shade does not perform a back-and-forth movement, press the PROG button again until it reacts.",
+
+
+"LINK_REMOTE_DESC_1": "Press any button on the remote control to link it to this shade. This will not modify the remote control pairing, and this screen will close once the remote is detected.",
+
+
+"REPEAT_REMOTE_DESC_1": "Press any button on the remote control to repeat its signals.",
+"REPEAT_REMOTE_DESC_2": "Once assigned, ESPSomfy RTS will act as a repeater and repeat all signals from the identified remote controls.",
+"REPEAT_REMOTE_DESC_3": "Assign a repeater only when ESPSomfy RTS reliably receives a physical remote control but the motor does not.",
+"REPEAT_REMOTE_DESC_4": "Repeating unnecessary radio signals will degrade radio performance, and never assign the same repeater to more than one ESPSomfy RTS device. You would create an insidious echo chamber.",
+"REPEAT_REMOTE_DESC_5": "Once a signal is detected from the remote control, this window will close and the remote control signals will be repeated.",
+
+
+"TXT_ADD_SHADE_TO_GROUP_TITLE": "ADD SHADE TO GROUP",
+"WIZ_LINK_STEP1_DESC_1": "This wizard will guide you through the steps required to add shades to a group. Follow all instructions at each step until the shade is added to the group.",
+"WIZ_LINK_STEP1_DESC_2": "During this process, the shade must perform exactly two jogs. The first indicates that the motor memory has been activated, and the second adds the group to the motor memory.",
+"WIZ_LINK_STEP1_DESC_3": "Each shade must be paired individually to the group. When you are ready to start pairing your shade to the group, press the NEXT button.",
+"WIZ_LINK_STEP2_DESC_1": "Choose a shade that you want to include in this group. Once you have selected the shade to include, press the NEXT button.",
+"WIZ_LINK_STEP2_DESC_2": "Only shades that have not already been included in this group are available in the dropdown list. Each shade can be included in multiple groups.",
+"LBL_SELECT_SHADE": "Select a shade",
+"WIZ_LINK_STEP3_DESC_1": "Now that you have chosen a shade to pair, open the shade memory by pressing the OPEN MEMORY button. The shade must perform a jog to indicate that the memory has been opened.",
+"WIZ_LINK_STEP3_DESC_2": "The motor must perform only one jog. If it performs multiple jogs, you have closed the motor memory again. Once the command is sent to the motor, you will be asked to confirm whether the motor reacted correctly.",
+"WIZ_LINK_STEP3_DESC_3": "If so, press YES. Otherwise, press NO and click the OPEN MEMORY button again.",
+"WIZ_LINK_STEP4_DESC_1": "Now that the motor memory is open, you must send the pairing command for the group.",
+"WIZ_LINK_STEP4_DESC_2": "To do this, press the PAIR TO GROUP button below. Once the motor performs the jog, the process will be complete.",
+
+
+"PROMPT_SHADE_OPEN_MEMORY_CONFIRM": "Did the shade perform a back-and-forth movement? If yes, press the YES button. Otherwise, press the NO button and try again.",
+"TXT_SHADE_MEMORY_READY_FOR_GROUP": "Once the shade has performed a back-and-forth movement, the motor memory will be ready to add the shade to the group.",
+
+
+
+
+
+
+
+"PROMPT_SHADE_GROUP_LINK_CONFIRM": "Did the shade perform a back-and-forth movement? If yes, press the YES button and the shade will be linked to the group. Otherwise, press the NO button and try again.",
+"TXT_SHADE_GROUP_LINK_DONE": "Once the shade has performed a back-and-forth movement, it will be added to the group and the process will be completed.",
+
+"TITLE_UNLINK_SHADE_GROUP": "Remove shade from group",
+
+"TXT_UNLINK_WIZARD_INTRO_1": "This wizard will guide you through the steps required to remove a shade from a group. Follow all instructions at each step until the shade is removed from the group.",
+"TXT_UNLINK_WIZARD_INTRO_2": "During this process, the shade must perform exactly two back-and-forth movements. The first indicates that the motor memory is open and the second that the group is removed from the motor memory.",
+"TXT_UNLINK_WIZARD_INTRO_3": "Each shade must be removed from the group individually. When you are ready to start unlinking the shade from the group, press the NEXT button to begin.",
+
+"TXT_OPEN_MEMORY_STEP_1": "You must first open the shade memory by pressing the OPEN MEMORY button. The shade should perform a back-and-forth movement to indicate that the memory is open.",
+"TXT_OPEN_MEMORY_STEP_2": "The motor must perform only one back-and-forth movement. If it performs more than one, it means the motor memory has been closed. Once the movement is completed, press the NEXT button to continue.",
+
+"TXT_UNPAIR_GROUP_STEP_1": "Now that the motor memory is open, you must send the command to unlink the shade from the group.",
+"TXT_UNPAIR_GROUP_STEP_2": "To do this, press the UNPAIR FROM GROUP button below. Once the motor performs a back-and-forth movement, the process will be completed.",
+
+"TXT_ALT_METHOD_1": "If you have difficulty making the motor respond at this step, you can try opening the memory using a remote control. This is usually done by selecting the channel and holding the PROG button.",
+"TXT_ALT_METHOD_2": "If you opened the memory using this alternative method, press the NO button to close this message, then press the NEXT button to skip this step.",
+
+
+"PROMPT_SHADE_MOVE_CONFIRM": "Did the shade perform a back-and-forth movement? If yes, press the YES button. Otherwise, press the NO button and try again.",
+"PROMPT_SHADE_MOVE_DONE": "Once the shade has performed the back-and-forth movement, it will be removed from the group and the process will be completed.",
+"TXT_OPEN": "Open",
+"TXT_CLOSED": "Close",
+"TXT_TARGET_POSITION": "Target position",
+"TXT_TARGET_TILT_POSITION": "Target tilt position",
+"TXT_RESTORE_SELECT_FILE": "Select a backup file to restore along with the options to restore, then click the \"Upload file\" button.",
+"TXT_RESTORE_NETWORK_WARNING": "Restoring network settings from a different board than the original will ignore Ethernet chip settings. Security, MQTT, and WiFi information will not be restored because backup files do not contain passwords.",
+"TXT_RESTORE_SHADES_GROUPS": "Restore shades and groups",
+"TXT_RESTORE_REPEATERS": "Restore repeaters",
+"TXT_RESTORE_SYSTEM_SETTINGS": "Restore system settings",
+"TXT_RESTORE_NETWORK_SETTINGS": "Restore network settings",
+"TXT_RESTORE_MQTT_SETTINGS": "Restore MQTT settings",
+"TXT_RESTORE_RADIO_SETTINGS": "Restore radio settings",
+"TXT_FW_INSTALLED": "Firmware %1 installed",
+"TXT_FW_AVAILABLE": "%1 available",
+"TXT_FW_PREPARING_UPDATE": "Preparing firmware update",
+"TXT_FW_UPDATE_DONE": "Firmware update completed",
+"TXT_FW_UPDATE_CANCELING": "Canceling firmware update",
+"TXT_FW_UPDATE_CANCELED": "Firmware update canceled",
+"ERR_UNSPECIFIED": "Unspecified error",
+"TXT_INSTALLING_VERSION": "Installing %1",
+"TXT_INSTALL_WAIT_WARNING": "Please wait while the files are being downloaded and installed. Once the application update process has started, it can no longer be cancelled, otherwise the downloaded files may be corrupted.",
+"LBL_FIRMWARE_INSTALL_PROGRESS": "Firmware installation progress",
+"LBL_APPLICATION_INSTALL_PROGRESS": "Application installation progress",
+"TXT_SELECT_GITHUB_RELEASE": "Select a repository version to install from the menu below, then press the Update button to install.",
+"TXT_SELECT_MAIN_FOR_ALPHA": "Select \"Main\" to install the latest alpha version of the repository.",
+"TXT_PRE_RELEASE_DESC": "You have selected a pre-released beta version that has not been fully tested or published for general use.",
+"TXT_SELECT_VERSION": "Select a version",
+"TXT_BACKUP_DOWNLOAD_UP": "A backup of your configuration will be downloaded to your browser. If the update fails, restore this file using the restore button after the installation process.",
+"TXT_UPLOAD_FIRMWARE_DESC": "Select a binary file [SomfyController.ino.esp32.bin] containing the device firmware, then click the 'Upload File' button.",
+"TXT_BACKUP_DOWNLOAD_FIRMWARE": "A backup of your configuration will be downloaded to your browser. If the firmware update fails, restore this file using the restore button after finishing the initialization process.",
+"TXT_UPLOAD_LITTLEFS_DESC": "Select a binary file [SomfyController.littlefs.bin] containing the LittleFS application data, then click the 'Upload File' button.",
+"TXT_WARNING": "WARNING",
+"TXT_NO_AUTO_BACKUP": "This browser does not support automatic backups. It is strongly recommended to backup your configuration using the backup button before continuing.",
+"TXT_BACKUP_DOWNLOAD": "A backup of your configuration will be downloaded to your browser. If the application update fails, restore it using the restore button.",
+"PROMPT_RESTART_DEVICE": "Are you sure you want to restart the device?",
+"PROMPT_SECURITY_CONFIRM": "Confirm Security",
+"PROMPT_DELETE_ROOM": "Are you sure you want to delete this room?",
+"PROMPT_DELETE_SHADE": "Are you sure you want to delete this shade?",
+"PROMPT_DELETE_GROUP": "Are you sure you want to delete this group?",
+"PROMPT_CONFIRM_MOTOR_RESPONSE": "Confirm motor response",
+"PROMPT_UNLINK_REPEATER": "Are you sure you want to stop repeating frames from this address?",
+"PROMPT_UNLINK_REMOTE": "Are you sure you want to unlink this remote from the shade?",
+"LBL_HOME": "Home",
+"ERR_HOSTNAME": "Invalid Host Name",
+"ERR_INVALID_HOSTNAME": "You must supply a valid Host Name.",
+"ERR_HOSTNAME_CHARS": "The host name must only include numbers, letters, or dash.",
+"ERR_HOSTNAME_LENGTH": "The maximum Host Name length is 32 characters.",
+"ERR_NTP_LENGTH": "The maximum NTP Server length is 64 characters.",
+"ERR_PIN_INVALID": "Invalid PIN code",
+"ERR_PIN_INVALID_DESC": "The PIN code must contain exactly 4 alphanumeric characters. Please enter a complete code.",
+"ERR_USERNAME_MISSING": "No username provided",
+"ERR_USERNAME_MISSING_DESC": "You must provide a username for password security.",
+"ERR_USERNAME_INVALID_DESC": "The maximum length of the username is 32 characters.",
+"ERR_PASSWORD_MISSING": "No password provided",
+"ERR_PASSWORD_MISSING_DESC": "You must provide a password for password security.",
+"ERR_PASSWORD_INVALID_DESC": "The maximum length of the password is 32 characters.",
+"ERR_PASSWORD_CONFIRM_MISSING": "Re-enter password",
+"ERR_PASSWORD_CONFIRM_MISSING_DESC": "You must re-enter the password in the \"Re-enter password\" field.",
+"ERR_PASSWORD_MISMATCH": "Passwords do not match",
+"ERR_PASSWORD_MISMATCH_DESC": "Please re-enter the password exactly as entered in the confirmation field.",
+"ERR_STATIC_IP_REQUIRED": "You must provide a valid IP address for the static IP.",
+"ERR_STATIC_IP_INVALID": "Invalid static IP address. Expected format is XXX.XXX.XXX.XXX.",
+"ERR_NETMASK_REQUIRED": "You must provide a valid IP address for the subnet mask.",
+"ERR_NETMASK_INVALID": "Invalid subnet mask IP address. Expected format is XXX.XXX.XXX.XXX.",
+"ERR_GATEWAY_REQUIRED": "You must provide a valid IP address for the gateway.",
+"ERR_GATEWAY_INVALID": "Invalid gateway IP address. Expected format is XXX.XXX.XXX.XXX.",
+"ERR_DNS1_INVALID": "Invalid DNS server 1 IP address. Expected format is XXX.XXX.XXX.XXX.",
+"ERR_DNS2_INVALID": "Invalid DNS server 2 IP address. Expected format is XXX.XXX.XXX.XXX.",
+"ERR_WIFI_SSID_INVALID": "Invalid SSID",
+"ERR_WIFI_SSID_MAX_LENGTH_64": "The maximum length of the SSID is 64 characters.",
+"ERR_WIFI_PASSPHRASE_INVALID": "Invalid passphrase",
+"ERR_WIFI_PASSPHRASE_MAX_LENGTH_64": "The maximum length of the passphrase is 64 characters.",
+"ERR_RADIO_TYPE_REQUIRED": "You must select a radio type.",
+"ERR_RADIO_PINS_REQUIRED": "You must define all the pins for the radio.",
+"ERR_GPIO_PIN_DUPLICATED": "The %1 pin is duplicated by the %2.  All pin definitions must be unique",
+"ERR_ROOM_NAME_INVALID": "You must provide a name for the room between 1 and 20 characters.",
+"ERR_REMOTE_ADDRESS_INVALID": "The remote address must be a number between 1 and 16777215. This number must be unique for all shades.",
+"ERR_SHADE_NAME_INVALID": "You must provide a name for the shade between 1 and 20 characters.",
+"ERR_UP_TIME_INVALID": "The up time must be a value between 0 and 4294967295 milliseconds. It corresponds to the time it takes for the shade to move from fully closed to fully open.",
+"ERR_DOWN_TIME_INVALID": "The down time must be a value between 0 and 4294967295 milliseconds. It corresponds to the time it takes for the shade to move from fully open to fully closed.",
+"ERR_GPIO_UP_DOWN_NOT_UNIQUE": "For GPIO controlled motors the up and down GPIO selections must be unique.",
+"ERR_GPIO_UP_DOWN_MY_NOT_UNIQUE": "For GPIO controlled motors the up and down and my GPIO selections must be unique.",
+"ERR_ROOM_ID_REQUIRED": "A valid room id was not supplied.",
+"ERR_SHADE_ID_REQUIRED": "A valid shade id was not supplied.",
+"ERR_SHADE_IN_GROUP": "You cannot delete this shade because it is part of a group.",
+"ERR_GROUP_NOT_EMPTY": "You may not delete this group until all shades have been removed from it.",
+"ERR_NO_SHADE_AVAILABLE_FOR_GROUP": "There are no available shades to pair to this group.",
+"ERR_SHADE_NOT_FOUND_IN_GROUP": "The specified shade could not be found in this group.",
+"ERR_PORT_INVALID": "Invalid port number",
+"ERR_USERNAME_INVALID": "Invalid Username",
+"ERR_PASSWORD_INVALID": "Invalid Password",
+"ERR_ROOT_TOPIC_INVALID": "Invalid Root Topic",
+"ERR_MQTT_HOSTNAME_REQUIRED": "You must supply a host name to connect to MQTT.",
+"ERR_HOSTNAME_MAX_LENGTH_64": "The maximum length of the host name is 64 characters.",
+"ERR_MQTT_PORT_HINT": "Likely ports are 1183, 8883 for MQTT/S or 80,443 for HTTP/S",
+"ERR_USERNAME_MAX_LENGTH_32": "The maximum length of the username is 32 characters.",
+"ERR_PASSWORD_MAX_LENGTH_32": "The maximum length of the password is 32 characters.",
+"ERR_ROOT_TOPIC_MAX_LENGTH_64": "The maximum length of the root topic is 64 characters.",
+"ERR_MSG": "warning !",
+"ERR_NO_FILE_LITTLEFS_SELECTED": "You must select a littleFS binary file to proceed.",
+"ERR_INVALID_FILE_LITTLEFS": "This file is not a valid littleFS binary file.",
+"ERR_NO_FILE_FIRMWARE_SELECTED": "You must select a valid firmware binary file to proceed.",
+"ERR_INVALID_FILE_FIRMWARE": "This file is not a valid firmware binary file.",
+"ERR_NO_FILE_BACKUP_SELECTED": "You must select a valid backup file to proceed.",
+"ERR_BACKUP_TOO_LARGE": "This file is %s bytes in length.  This file is too large to be a valid backup file.",
+"ERR_INVALID_FILE_BACKUP": "This file is not a valid backup file",
+"ERR_NO_RESTORE_OPTION": "No restore options have been selected",
+"TXT_COLOR": "Color",
+"TXT_ACCENT_COLOR_DESC": "Change accent color",
+"PL_ROLLING_CODE_NEW": "New code",
+"BT_SAVE": "SAVE",
+"BT_BACK_UP": "Backup",
+"BT_UPDATE": "Update",
+"BT_SAVE_IP": "SAVE IP SETTINGS",
+"BT_SAVE_MQTT": "SAVE MQTT SETTINGS",
+"BT_SAVE_ETHERNET": "SAVE ETHERNET SETTINGS",
+"BT_SAVE_SECURITY": "SAVE SECURITY",
+"BT_UPDATE_GITHUB": "Github Firmware",
+"BT_UPDATE_FIRMWARE": "Update Firmware",
+"BT_UPDATE_APP": "Update Application",
+"BT_REFRESH_CACHE": "Refresh Cache",
+"BT_RESTORE": "Restore",
+"BT_SCANFREQUENCY": "Scan Frequency",
+"BT_SCAN_WIFI": "Scan WI-FI",
+"BT_COPY": "Copy",
+"BT_CLEAR": "Clear",
+"BT_LOGIN": "Login",
+"BT_CANCEL": "Cancel",
+"BT_CANCEL_1": "Cancel",
+"BT_GO_BACK": "Go Back",
+"BT_NEXT": "Next",
+"BT_CLOSE": "Close",
+"BT_YES": "Yes",
+"BT_NO": "No",
+"BT_OK": "Ok",
+"BT_ADD_ROOM": "Add Room",
+"BT_SAVE_ROOM": "Save Room",
+"BT_ADD_SHADE": "Add Shade",
+"BT_PAIR_SHADE": "Pair Shade",
+"BT_UNPAIR_SHADE": "Unpair Shade",
+"BT_SAVE_SHADE": "Save Shade",
+"BT_LINK_REMOTE": "Link Remote",
+"BT_ADD_GROUP": "Add Group",
+"BT_SAVE_GROUP": "Save Group",
+"BT_LINK_SHADE": "Link Shade",
+"BT_SCAN_REMOTE": "Scan Remote",
+"BT_STOP_SCAN": "Stop Scanning",
+"BT_START_SCAN": "Start Scanning",
+"BT_COPY_FREQUENCY": "Set Frequency",
+"BT_SET_MY_POSITION": "Set \"My\" Position",
+"BT_CLEAR_MY_POSITION": "Clear \"My\" Position",
+"BT_SET_ROLLING_CODE": "Set Rolling Code",
+"BT_ROLLING_CODE": "Rolling Code",
+"BT_PROG": "Prog",
+"BT_SHADE_PAIRED": "Shade Paired",
+"BT_SHADE_UNPAIRED": "Shade Unpaired",
+"BT_OPEN_MEMORY": "Open Memory",
+"BT_PAIR_TO_GROUP": "Pair to Group",
+"BT_UNPAIR_GROUP": "Unpair from Group",
+"BT_UPLOAD_FILE": "Upload File",
+"BT_RELEASE_NOTE": "Release Notes",
+"BT_REBOOT": "REBOOT",
+"BT_DONE": "DONE",
+
+
+"PIN_CODE": "Pin Code",
+
+    "LBL_ENTER_PIN": "Enter Pin Code",
+    "USERNAME": "Username",
+    "PH_USERNAME": "Enter your Username",
+    "PASSWORD": "Password",
+    "PH_PASSWORD": "Enter your password",
+
+
+  "LBL_LANGUAGE": "Language",
+  "OPT_FRENCH": "French",
+  "OPT_ENGLISH": "English",
+
+
+"PH_USERNAME_2": "Enter a Username",
+"CONFIRM_PASSWORD": "Confirm Password",
+"PH_CONFIRM_PASSWORD": "You must confirm the password"
+
+
+}

@@ -1,0 +1,720 @@
+{
+  "MSG_FW_UPDATE_AVAILABLE": "Mise à jour du firmware disponible",
+  "MSG_RADIO_NOT_INIT": "Radio non initialisée",
+  "LBL_HOSTNAME": "Nom d'hôte",
+  "PH_HOSTNAME": "Entrer un nom d'hôte",
+  "LBL_TIMEZONE": "Fuseau horaire",
+  "PH_TIMEZONE": "Entrer votre fuseau horaire",
+  "LBL_NTP_SERVER": "Serveur NTP",
+  "PH_NTP_SERVER": "Entrer votre serveur NTP",
+  "LBL_UPNP": "Diffusion uPnP (SSDP)",
+  "DESC_UPNP": "Diffuse les annonces de service sur le réseau pour permettre la détection automatique de l'appareil par vos autres équipements",
+  "LBL_UPDATES": "Mises à jour",
+  "DESC_UPDATES": "La vérification sera automatique",
+
+
+
+
+
+
+
+
+
+
+
+  "LBL_DISPLAY_MODE": "Mode d'affichage",
+  "OPT_THEME_AUTO": "Dépend du navigateur",
+  "OPT_THEME_DARK": "Mode sombre",
+  "OPT_THEME_LIGHT": "Mode clair",
+  "LBL_SECURITY_TYPE": "Type de sécurité",
+  "LBL_SECURE_CONFIG_ONLY": "Configuration sécurisée uniquement",
+  "TXT_SECURE_CONFIG_DESC": "Limite les modifications de paramètres aux connexions sécurisées uniquement afin d'empêcher les changements non autorisés",
+
+
+
+
+
+
+
+
+
+
+"PH_USERNAME_2": "Entrer un Nom d'Utilisateur",
+"LBL_MEMORY": "Memory (bytes)",
+"LBL_FREE": "Libre: ",
+"LBL_MAX": "Max: ",
+"LBL_MIN": "Min: ",
+"LBL_HARDWARE": "Hardware",
+"LBL_APPLICATION": "Application",
+"LBL_CREATOR": "Createur",
+"LBL_UIUX_CONTRIBUTOR": "Contributeur UI/UX",
+"LBL_CONNECTION": "Connexion",
+"LBL_DHCP_STATIC": "DHCP / IP Statique",
+
+
+
+
+
+
+
+
+
+"LBL_WIFI_NETWORK": "Réseau:",
+"LBL_WIFI_CHANNEL": "Canal:",
+"LBL_WIFI_SIGNAL": "Puissance du signal",
+"LBL_ETH_STATUS": "Statut",
+"LBL_ETH_SPEED": "Vitesse",
+"LBL_HIDDEN_SSID": "Réseau Wi-Fi caché",
+"LBL_HIDDEN_SSID_DESC": "Permet de se connecter à un réseau qui ne diffuse pas son nom",
+"LBL_ROAMING": "Activer l’itinérance",
+"LBL_ROAMING_DESC": "Cible toujours la borne Wi-Fi la plus proche",
+"LBL_ETHERNET": "Connexion Ethernet",
+"LBL_ETHERNET_DESC": "Utilise le câble Ethernet à la place du Wi-Fi",
+"LBL_WIFI_FALLBACK": "Secours Wi-Fi",
+"LBL_WIFI_FALLBACK_DESC": "Bascule sur le Wi-Fi en cas de panne Ethernet",
+"LBL_ETH_BOARD_TYPE": "Type de carte",
+"LBL_SCANNING": "Recherche en cours...",
+"ERR_NO_WIFI_FOUND": "Aucun réseau trouvé",
+"LBL_WIFI_AVAILABLE": "Réseaux disponibles:",
+
+"LBL_WIFI_SSID": "SSID du réseau",
+"PLH_WIFI_SSID": "Entrer votre SSID",
+"LBL_ETH_PHY_TYPE": "Type de puce PHY",
+"LBL_ETH_CLK_MODE": "Mode Clock",
+"LBL_ETH_PWR_PIN": "Pin alimentation",
+"LBL_ETH_MDC_PIN": "Pin MDC",
+"LBL_ETH_MDIO_PIN": "Pin MDIO",
+
+
+
+
+
+
+
+
+
+
+"LBL_CURRENT_IP": "Adresse IP",
+"LBL_DHCP": "DHCP",
+"LBL_DHCP_DESC": "Obtenir automatiquement une adresse IP (DHCP)",
+"LBL_STATIC_IP": "Adresse IP statique",
+"PLH_STATIC_IP": "0.0.0.0",
+"LBL_SUBNET_MASK": "Masque sous-réseau",
+"PLH_SUBNET_MASK": "0.0.0.0",
+"LBL_GATEWAY": "Passerelle",
+"PLH_GATEWAY": "0.0.0.0",
+"LBL_DNS1": "Nom serveur DNS 1",
+"PLH_DNS1": "0.0.0.0",
+"LBL_DNS2": "Nom serveur DNS 2",
+"PLH_DNS2": "0.0.0.0",
+"LBL_IP_REBOOT_INFO": "* Les paramètres ne seront appliqués qu’après le redémarrage du module ESPSomfy RTS",
+
+
+
+
+
+
+
+
+
+
+"LBL_MQTT_ENABLE": "Activer le client MQTT",
+"LBL_MQTT_ENABLE_DESC": "Active la communication avec votre serveur (broker) MQTT",
+"LBL_MQTT_PUB_DISCOVERY": "Publier découverte",
+"LBL_MQTT_PUB_DISCOVERY_DESC": "Envoie les paramètres pour une configuration automatique dans votre système",
+"OPT_MQTT": "MQTT",
+"OPT_MQTTS": "MQTTS",
+"PLH_MQTT_USERNAME": "Identifiant de votre compte MQTT",
+"LBL_MQTT_ROOT_TOPIC": "Root Topic",
+"PLH_MQTT_ROOT_TOPIC": "Chemin de base pour les messages de ce module",
+
+"LBL_MQTT_DISCOVERY_TOPIC": "Discovery Topic",
+"PLH_MQTT_DISCOVERY_TOPIC": "Chemin utilisé pour la détection automatique par votre système, exemple: homeassistant",
+
+
+
+
+
+"LBL_ROOMS": "Pièces",
+"LBL_SHADES": "Volets",
+"LBL_GROUPS": "Groupes",
+"LBL_REPEATER": "Répéteur",
+"TAB_VIRTUAL_REMOTE_LONG": "Télécommande virtuelle",
+"TAB_VIRTUAL_REMOTE_SHORT": "Télécommande",
+"LBL_DRAG_SORT": "Glissez chaque élément pour définir l’ordre d’affichage dans la liste.",
+"PLH_ROOM_NAME": "Entrer un nom de pièce",
+"LBL_SHADE_TYPE": "Type",
+"UP": "Monter",
+"DOWN": "Descendre",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "SHADE_ROLLER": "Store enrouleur",
+  "SHADE_BLIND": "Store vénitien",
+  "SHADE_DRAPERY_LEFT": "Rideau (gauche)",
+  "SHADE_DRAPERY_CENTER": "Rideau (centre)",
+  "SHADE_DRAPERY_RIGHT": "Rideau (droit)",
+
+
+  "SHADE_AWNING": "Store banne",
+  "SHADE_SHUTTER": "Volet",
+  "SHADE_GARAGE_1BTN": "Garage (1 bouton)",
+  "SHADE_GARAGE_3BTN": "Garage (3 boutons)",
+  "SHADE_DRYCONTACT_1BTN": "Contact sec (1 bouton)",
+  "SHADE_DRYCONTACT_2BTN": "Contact sec (2 boutons)",
+  "SHADE_GATE_LEFT": "Portail (gauche)",
+  "SHADE_GATE_CENTER": "Portail (centre)",
+  "SHADE_GATE_RIGHT": "Portail (droit)",
+  "SHADE_GATE_1BTN_LEFT": "Portail 1 bouton (gauche)",
+  "SHADE_GATE_1BTN_CENTER": "Portail 1 bouton (centre)",
+  "SHADE_GATE_1BTN_RIGHT": "Portail 1 bouton (droit)",
+
+
+
+
+
+
+
+"LBL_SHADE_UP_TIME": "Temps montée (ms)",
+"LBL_SHADE_DOWN_TIME": "Temps descente (ms)",
+"LBL_TILT_TYPE": "Type d’inclinaison",
+"OPT_NONE": "Aucun",
+"OPT_TILT_MOTOR": "Moteur inclinaison",
+"OPT_INTEGRATED": "Intégré",
+"OPT_TILT_ONLY": "Inclinaison seule",
+"OPT_TILT_EURO": "Inclinaison Euro",
+"LBL_TILT_TIME": "Temps inclinaison (ms)",
+"LBL_STEP_SIZE": "Taille du pas (plus petit)",
+"LBL_STEP_SIZE_MAX": "(plus grand)",
+"LBL_LL_TRIGGER": "Déclenchement niveau bas",
+"LBL_LL_TRIGGER_DESC": "Pour utilisation des protocoles GP_*",
+"LBL_SUN_SENSOR": "Capteur solaire",
+"LBL_SUN_SENSOR_DESC": "Active le capteur solaire du moteur",
+"LBL_LIGHT_SENSOR": "Capteur lumière",
+"LBL_LIGHT_SENSOR_DESC": "Active le capteur lumière du moteur",
+"LBL_POSITION": "Position",
+"LBL_POSITION_DESC": "Inverser la position (% d’ouverture)",
+"PLH_MS": "millisecondes",
+
+
+
+
+
+  "LBL_FAVORITE": "Favoris",
+  "LBL_SIMULATE_FAVORITE_POSITION": "Simule la position favorite",
+  "LBL_DRAG_TO_SORT": "Faire glisser chaque élément pour définir l’ordre d’apparition dans la liste.",
+  "LBL_REMOTE_ID": "ID Télécommande",
+  "NAME": "Nom",
+  "PLH_ENTER_NAME": "Entrer un nom",
+  "LBL_FLIP_COMMANDS": "Inverser Commandes",
+  "LBL_DESC_FLIP_COMMANDS": "Inverse la direction des commandes",
+  "LBL_REPEAT_COMMANDS": "Répéter commandes",
+  "OPT_NO_REPEAT": "Aucune répétition",
+  "OPT_1TIME":"1 fois",
+  "OPT_2TIME":"2 fois",
+  "OPT_3TIME":"3 fois",
+  "OPT_4TIME":"4 fois",
+  "OPT_5TIME":"5 fois",
+  "OPT_6TIME":"6 fois",
+  "OPT_7TIME":"7 fois",
+  "OPT_8TIME":"8 fois",
+  "OPT_9TIME":"9 fois",
+  "OPT_10TIME":"10 fois",
+  "OPT_11TIME":"11 fois",
+  "OPT_12TIME":"12 fois",
+  "OPT_13TIME":"13 fois",
+  "OPT_14TIME":"14 fois",
+  "OPT_15TIME":"15 fois",
+  "OPT_16TIME":"16 fois",
+  "OPT_17TIME":"17 fois",
+  "OPT_18TIME":"18 fois",
+  "OPT_19TIME":"19 fois",
+  "OPT_20TIME":"20 fois",
+
+
+
+
+    "LBL_ALL_DUPLICATE_REMOTES": "Toutes les adresses de télécommande dupliquées sont listées ci-dessous.",
+    "BT_SCAN_REMOTE": "Chercher Télécommande",
+    "LBL_SELECT_MOTOR_GROUP": "Sélectionner un moteur ou un groupe",
+    "LBL_REMOTE_BUTTONS": "Boutons télécommande",
+    "MY": "my",
+    "LBL_STOP": "Stop",
+    "LBL_TOGGLE_SWITCH": "Interrupteur à Bascule",
+    "LBL_STEP": "Pas",
+    "LBL_STEP_SIZE": "Taille des Pas:",
+    "LBL_FAVORITE": "Favori",
+    "LBL_UP_DOWN": "Up + Descendre",
+    "LBL_MY_UP_DOWN": "Monter + My + Descendre",
+    "LBL_MY_UP": "My + Monter",
+    "LBL_MY_DOWN": "My + Descendre",
+    "LBL_PROG": "Prog",
+    "LBL_SUN_FLAG": "Indicateur soleil",
+    "LBL_SENSOR": "Capteur",
+    "LBL_SUN": "Soleil",
+    "LBL_WIND": "Vent",
+    "LBL_SEND": "Envoyer",
+
+
+
+
+
+"LBL_RADIO": "Radio",
+
+"LBL_LOGS": "Journaux",
+
+
+  "RADIO_ENABLED": "La radio est activée",
+  "RADIO_DISABLED": "La radio est désactivée",
+
+
+
+
+
+  "PROTOCOL": "Protocole",
+
+  "RTS": "RTS",
+  "RTW": "RTW",
+  "RTV": "RTV",
+  "IO_RELAY": "IO-Relay",
+  "IO_REMOTE": "IO_Remote",
+
+
+  "56BIT": "56-BIT",
+  "80BIT": "80-BIT",
+
+  "GPIO_ASSIGN": "Assignation GPIO",
+  "SHOW_GPIO": "Affiche l'ensemble des Pins",
+
+"RADIO_BOARD_DEFAULT": "Par défaut",
+
+"BASE_FREQUENCY": "Fréquence De Base",
+
+"RX_BANDWIDTH": "Largeur bande RX",
+
+"FREQ_DEVIATION": "Déviation De Fréquence",
+
+"TX_POWER": "TX Puissance",
+
+
+"SP_KEY": "clé",
+"SP_ADRESS" : "Adresse",
+"SP_COMMAND": "Commandes",
+"SP_CODE": "Code",
+"SP_BITS": "Bits",
+"SP_TIME": "Temps",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"TB_SYSTEM": "Système",
+"TB_NETWORK": "Réseau",
+"TB_SOMFY": "Somfy",
+"TB_RADIO": "Radio",
+
+"SUB_OPTION": "Options",
+"SUB_SECURITY": "Sécurité",
+"FIRMWARE": "Firmware",
+
+
+"LBL_ROOM": "Pièce",
+
+
+
+  "SOCKET_ATTEMPTS": "Tentatives :",
+  "ERR_SOCKET_CONNECT": "Impossible de se connecter au serveur",
+
+
+
+
+
+
+  "PROMPT_REBOOT_CONFIRM": "Êtes-vous sûr de vouloir redémarrer l’appareil ?",
+
+
+
+  "SEC_PIN_WARNING": "Veuillez conserver votre code PIN en lieu sûr et surtout ne pas l’oublier. Le seul moyen de récupérer un code PIN perdu est de recharger complètement le firmware d’initialisation, ce qui effacera toute votre configuration.",
+  "SEC_PIN_CONFIRM": "Avez-vous enregistré votre code PIN dans un endroit sécurisé ?",
+
+  "SEC_PASSWORD_WARNING": "Veuillez conserver votre mot de passe en lieu sûr et surtout ne pas l’oublier. Le seul moyen de récupérer un mot de passe perdu est de recharger complètement le firmware d’initialisation, ce qui effacera toute votre configuration.",
+  "SEC_PASSWORD_CONFIRM": "Avez-vous enregistré votre nom d’utilisateur et votre mot de passe dans un endroit sécurisé ?",
+
+
+
+
+  "ETH_BOARD_MANUAL": "Définir manuellement",
+
+
+  "ETH_WARNING_TITLE": "ATTENTION ... AVERTISSEMENT ... DANGER",
+  "ETH_WARNING_DESC_1": "Des paramètres Ethernet incorrects peuvent endommager votre ESP32. Veuillez vérifier les réglages ci-dessous et vous assurer qu’ils correspondent aux spécifications du fabricant.",
+  "ETH_WARNING_DESC_2": "En cas de doute, n’appuyez pas sur le bouton rouge et utilisez le bouton vert. Si l’un des paramètres est incorrect, sélectionnez le type de carte personnalisé et définissez les valeurs correctes.",
+  "LBL_BOARD_TYPE": "Type de carte",
+  "LBL_PHY_TYPE": "Type de puce PHY",
+  "LBL_PHY_ADDRESS": "Adresse PHY",
+  "LBL_CLOCK_MODE": "Mode d’horloge",
+  "LBL_POWER_PIN": "Broche d’alimentation",
+  "LBL_MDC_PIN": "Broche MDC",
+  "LBL_MDIO_PIN": "Broche MDIO",
+  "LBL_NONE": "Aucune",
+
+
+  "SCAN_FREQ_DESC": "Le balayage de fréquence a commencé. Appuyez et maintenez n’importe quel bouton de votre télécommande et ESPSomfy RTS trouvera la fréquence la plus proche de la télécommande.",
+  "LBL_SCAN": "Balayage",
+  "LBL_FREQUENCY": "Fréquence",
+  "LBL_RSSI": "RSSI",
+  "DIV_RSSI": "RSSI:",
+  "LBL_MHZ": " MHz",
+  "LBL_DBM": " dBm",
+
+
+  "BT_STOP_SCAN": "Arrêter le balayage",
+  "BT_START_SCAN": "Démarrer le balayage",
+  "BT_COPY_FREQUENCY": "Définir la fréquence",
+
+
+
+
+  "LBL_CURRENT": "Actuel :",
+  "LBL_TILT": "Inclinaison :",
+  "LBL_TARGET_POSITION": "Position cible",
+  "LBL_TARGET_TILT": "Inclinaison cible",
+
+
+
+  "PROMPT_DELETE_ROOM_WARNING": "Si cette pièce était précédemment sélectionnée pour des moteurs ou des groupes, ils seront automatiquement assignés à la pièce \"Accueil\".",
+
+
+  "PROMPT_DELETE_SHADE_WARNING": "Si ce volet était précédemment appairé avec un moteur, vous devez d’abord le désappairer du moteur et le retirer de tous les groupes. Sinon, son adresse restera dans la mémoire du moteur.",
+  "PROMPT_DELETE_SHADE_CONFIRM": "Appuyez sur OUI pour supprimer {SHADE_NAME} ou sur NON pour annuler cette opération.",
+
+
+
+
+  "ERR_INVALID_GROUP_ID": "Un identifiant de groupe valide n’a pas été fourni",
+  "PROMPT_DELETE_GROUP_CONFIRM": "Appuyez sur OUI pour supprimer le groupe {GROUP_NAME} ou sur NON pour annuler cette opération.",
+
+
+
+
+
+  "ROLLING_CODE_WARNING_TITLE": "ATTENTION… AVERTISSEMENT… DANGER",
+  "ROLLING_CODE_WARNING_DESC_1": "Si ce volet est déjà appairé avec un moteur, changer le code tournant entraînera son dysfonctionnement. Les codes tournants sont liés à l’adresse de la télécommande et le moteur Somfy attend qu’ils soient séquentiels.",
+  "ROLLING_CODE_WARNING_DESC_2": "Si vous hésitez ne serait-ce qu’un peu, ne pressez pas le bouton rouge. Le vert représente la sécurité, appuyez dessus, essuyez la sueur de votre front et suivez le processus d’appairage normal.",
+
+
+  "PAIR_GARAGE_TITLE": "Suivez les instructions ci-dessous pour appairer ESPSomfy RTS avec un moteur de porte de garage RTS",
+  "PAIR_GARAGE_STEP_1": "Ouvrez la mémoire du moteur de porte de garage selon les instructions de votre moteur.",
+  "PAIR_GARAGE_STEP_2": "Une fois la mémoire ouverte, appuyez sur le bouton Prog ci-dessous.",
+  "PAIR_GARAGE_STEP_3": "Pour un contrôle à un seul bouton, ESPSomfy RTS enverra une commande bascule, mais pour un contrôle à 3 boutons, il enverra une commande Prog.",
+  "PAIR_GARAGE_PAIRED": "Porte appairée",
+
+  "PAIR_SHADE_TITLE": "Suivez les instructions ci-dessous pour appairer ce volet avec un moteur Somfy",
+  "PAIR_SHADE_STEP_1": "Ouvrez la mémoire du volet à l’aide d’une télécommande existante en appuyant sur le bouton Prog à l’arrière jusqu’à ce que le volet effectue un va-et-vient.",
+  "PAIR_SHADE_STEP_2": "Après que le volet ait effectué le va-et-vient, appuyez sur le bouton Prog ci-dessous.",
+  "PAIR_SHADE_STEP_3": "Le volet devrait effectuer un nouveau va-et-vient indiquant qu’il est appairé. REMARQUE : sur certains moteurs, vous devrez peut-être maintenir le bouton Prog enfoncé.",
+  "PAIR_SHADE_STEP_4": "Si le volet effectue le va-et-vient, vous pouvez appuyer sur le bouton \"Volet appairé\".",
+  "PAIR_SHADE_STEP_5": "Si le volet n’effectue pas le va-et-vient, essayez d’appuyer à nouveau sur le bouton Prog.",
+
+
+
+
+"UNPAIR_SHADE_DESC_1": "Suivez les instructions ci-dessous pour dissocier ce volet d’un moteur Somfy.",
+"UNPAIR_SHADE_STEP_1": "Ouvrez la mémoire du volet à l’aide d’une télécommande existante.",
+"UNPAIR_SHADE_STEP_2": "Appuyez sur le bouton PROG au dos de la télécommande jusqu’à ce que le volet effectue un va-et-vient.",
+"UNPAIR_SHADE_STEP_3": "Après que le volet ait effectué un va-et-vient, appuyez sur le bouton PROG ci-dessous.",
+"UNPAIR_SHADE_STEP_4": "Le volet devrait effectuer à nouveau un va-et-vient, indiquant qu’il est désappairé.",
+"UNPAIR_SHADE_STEP_5": "Si le volet effectue un va-et-vient, vous pouvez appuyer sur le bouton « Volet désappairé ».",
+"UNPAIR_SHADE_STEP_6": "Si le volet n’effectue pas de va-et-vient, appuyez de nouveau sur le bouton PROG jusqu’à ce qu’il réagisse.",
+
+
+
+
+
+"LINK_REMOTE_DESC_1": "Appuyez sur n’importe quel bouton de la télécommande pour la lier à ce volet. Cela ne modifiera pas l’association de la télécommande et cet écran se fermera lorsque la télécommande sera détectée.",
+
+
+"REPEAT_REMOTE_DESC_1": "Appuyez sur n’importe quel bouton de la télécommande pour répéter ses signaux.",
+"REPEAT_REMOTE_DESC_2": "Une fois assigné, ESPSomfy RTS agira comme un répéteur et répétera tous les signaux des télécommandes identifiées.",
+"REPEAT_REMOTE_DESC_3": "N’assignez un répéteur que lorsque ESPSomfy RTS capte de manière fiable une télécommande physique mais que le moteur ne le fait pas.",
+"REPEAT_REMOTE_DESC_4": "Répéter des signaux radio inutiles dégradera les performances radio et n’assignez jamais le même répéteur à plus d’un appareil ESPSomfy RTS. Vous créeriez une chambre d’écho insidieuse.",
+"REPEAT_REMOTE_DESC_5": "Une fois qu’un signal est détecté depuis la télécommande, cette fenêtre se fermera et les signaux de la télécommande seront répétés.",
+
+
+
+
+"TXT_ADD_SHADE_TO_GROUP_TITLE": "AJOUTER VOLET AU GROUPE",
+"WIZ_LINK_STEP1_DESC_1": "Cet assistant vous guidera à travers les étapes nécessaires pour ajouter des volets dans un groupe. Suivez toutes les instructions à chaque étape jusqu’à ce que le volet soit ajouté au groupe.",
+"WIZ_LINK_STEP1_DESC_2": "Pendant ce processus, le volet doit effectuer exactement deux va-et-vient. Le premier indique que la mémoire du moteur a été activée et le second ajoute le groupe à la mémoire du moteur.",
+"WIZ_LINK_STEP1_DESC_3": "Chaque volet doit être associé individuellement au groupe. Lorsque vous êtes prêt à commencer l’association de votre volet au groupe, appuyez sur le bouton SUIVANT.",
+"WIZ_LINK_STEP2_DESC_1": "Choisissez un volet que vous souhaitez inclure dans ce groupe. Une fois que vous avez choisi le volet à inclure, appuyez sur le bouton SUIVANT.",
+"WIZ_LINK_STEP2_DESC_2": "Seuls les volets qui n’ont pas déjà été inclus dans ce groupe sont disponibles dans la liste déroulante. Chaque volet peut être inclus dans plusieurs groupes.",
+
+"LBL_SELECT_SHADE": "Sélectionner un volet",
+
+"WIZ_LINK_STEP3_DESC_1": "Maintenant que vous avez choisi un volet à associer, ouvrez la mémoire du volet en appuyant sur le bouton OUVRIR MÉMOIRE. Le volet doit effectuer un va-et-vient pour indiquer que la mémoire a été ouverte.",
+"WIZ_LINK_STEP3_DESC_2": "Le moteur ne doit effectuer qu’un seul va-et-vient. S’il effectue plusieurs va-et-vient, vous avez à nouveau fermé la mémoire du moteur. Une fois la commande envoyée au moteur, vous serez invité à confirmer si le moteur a bien réagi.",
+"WIZ_LINK_STEP3_DESC_3": "Si c’est le cas, appuyez sur OUI, sinon appuyez sur NON et cliquez de nouveau sur le bouton OUVRIR MÉMOIRE.",
+
+"WIZ_LINK_STEP4_DESC_1": "Maintenant que la mémoire est ouverte sur le moteur, vous devez envoyer la commande d’association pour le groupe.",
+"WIZ_LINK_STEP4_DESC_2": "Pour ce faire, appuyez sur le bouton APPAIRER AU GROUPE ci-dessous et une fois que le moteur aura effectué le va-et-vient, le processus sera terminé.",
+
+
+
+
+
+
+
+
+"PROMPT_SHADE_OPEN_MEMORY_CONFIRM": "Le volet a-t-il effectué un va-et-vient ? Si oui, appuyez sur le bouton OUI, sinon appuyez sur le bouton NON et réessayez.",
+
+
+
+
+
+"TXT_SHADE_MEMORY_READY_FOR_GROUP": "Une fois que le volet aura effectué un va-et-vient, la mémoire du moteur sera prête pour ajouter le volet au groupe.",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"PROMPT_SHADE_GROUP_LINK_CONFIRM": "Le volet a-t-il effectué un va-et-vient ? Si oui, appuyez sur le bouton OUI et votre volet sera lié au groupe. Sinon, appuyez sur le bouton NON et réessayez.",
+"TXT_SHADE_GROUP_LINK_DONE": "Une fois que le volet aura effectué un va-et-vient, il sera ajouté au groupe et le processus sera terminé.",
+
+
+"TITLE_UNLINK_SHADE_GROUP": "Retirer le volet du groupe",
+
+"TXT_UNLINK_WIZARD_INTRO_1": "Cet assistant vous guidera à travers les étapes nécessaires pour retirer un volet d’un groupe. Suivez toutes les instructions à chaque étape jusqu’à ce que le volet soit retiré du groupe.",
+"TXT_UNLINK_WIZARD_INTRO_2": "Pendant ce processus, le volet doit effectuer exactement deux va-et-vient. Le premier indique que la mémoire du moteur est ouverte et le second que le groupe est supprimé de la mémoire du moteur.",
+"TXT_UNLINK_WIZARD_INTRO_3": "Chaque volet doit être retiré du groupe individuellement. Lorsque vous êtes prêt à commencer la dissociation du volet du groupe, appuyez sur le bouton SUIVANT pour démarrer.",
+
+"TXT_OPEN_MEMORY_STEP_1": "Vous devez d’abord ouvrir la mémoire du volet en appuyant sur le bouton OUVRIR LA MÉMOIRE. Le volet doit effectuer un va-et-vient pour indiquer que la mémoire est ouverte.",
+"TXT_OPEN_MEMORY_STEP_2": "Le moteur ne doit effectuer qu’un seul va-et-vient. S’il en effectue plus d’un, cela signifie que la mémoire du moteur a été refermée. Une fois le va-et-vient effectué, appuyez sur le bouton SUIVANT pour continuer.",
+
+"TXT_UNPAIR_GROUP_STEP_1": "Maintenant que la mémoire du moteur est ouverte, vous devez envoyer la commande de dissociation du groupe.",
+"TXT_UNPAIR_GROUP_STEP_2": "Pour cela, appuyez sur le bouton DÉSAPPARIER DU GROUPE ci-dessous. Une fois que le moteur effectue un va-et-vient, le processus sera terminé.",
+
+"TXT_ALT_METHOD_1": "Si vous avez des difficultés à faire réagir le moteur à cette étape, vous pouvez essayer d’ouvrir la mémoire à l’aide d’une télécommande. Cela se fait généralement en sélectionnant le canal puis en maintenant le bouton PROG enfoncé.",
+"TXT_ALT_METHOD_2": "Si vous avez ouvert la mémoire via cette méthode alternative, appuyez sur le bouton NON pour fermer ce message, puis sur le bouton SUIVANT pour ignorer cette étape.",
+
+
+  "PROMPT_SHADE_MOVE_CONFIRM": "Le volet a-t-il effectué un va-et-vient ? Si oui, appuyez sur le bouton OUI, sinon appuyez sur le bouton NON et réessayez.",
+  "PROMPT_SHADE_MOVE_DONE": "Une fois que le volet aura effectué un va-et-vient, il sera retiré du groupe et le processus sera terminé.",
+  "TXT_OPEN": "Ouvert",
+  "TXT_CLOSED": "Fermé",
+  "TXT_TARGET_POSITION": "Position souhaitée",
+  "TXT_TARGET_TILT_POSITION": "Position d’inclinaison cible",
+  "TXT_RESTORE_SELECT_FILE": "Sélectionnez un fichier de sauvegarde à restaurer ainsi que les options à restaurer, puis appuyez sur le bouton \"Téléverser le fichier\".",
+  "TXT_RESTORE_NETWORK_WARNING": "La restauration des paramètres réseau depuis une carte différente de l’original ignorera les réglages de la puce Ethernet. Les informations de sécurité, MQTT et WiFi ne seront pas restaurées, car les fichiers de sauvegarde ne contiennent pas les mots de passe.",
+  "TXT_RESTORE_SHADES_GROUPS": "Restaurer volets et groupes",
+  "TXT_RESTORE_REPEATERS": "Restaurer répéteurs",
+  "TXT_RESTORE_SYSTEM_SETTINGS": "Restaurer paramètres système",
+  "TXT_RESTORE_NETWORK_SETTINGS": "Restaurer paramètres réseau",
+  "TXT_RESTORE_MQTT_SETTINGS": "Restaurer paramètres MQTT",
+  "TXT_RESTORE_RADIO_SETTINGS": "Restaurer paramètres radio",
+  "TXT_FW_INSTALLED": "Firmware %1 installé",
+  "TXT_FW_AVAILABLE": "%1 disponible",
+  "TXT_FW_PREPARING_UPDATE": "Préparation de la mise à jour du firmware",
+  "TXT_FW_UPDATE_DONE": "Mise à jour du firmware terminée",
+  "TXT_FW_UPDATE_CANCELING": "Annulation de la mise à jour du firmware",
+  "TXT_FW_UPDATE_CANCELED": "Mise à jour du firmware annulée",
+  "ERR_UNSPECIFIED": "Erreur non spécifiée",
+  "TXT_INSTALLING_VERSION": "Installation de %1",
+  "TXT_INSTALL_WAIT_WARNING": "Veuillez patienter pendant le téléchargement et l’installation des fichiers. Une fois que le processus de mise à jour de l’application aura commencé, il ne sera plus possible d’annuler la mise à jour, sous peine de corrompre les fichiers téléchargés.",
+  "LBL_FIRMWARE_INSTALL_PROGRESS": "Progression de l’installation du firmware",
+  "LBL_APPLICATION_INSTALL_PROGRESS": "Progression de l’installation de l’application",
+  "TXT_SELECT_GITHUB_RELEASE": "Sélectionnez une version du dépôt à installer dans le menu ci-dessous. Puis appuyez sur le bouton Mettre à jour pour installer cette version.",
+  "TXT_SELECT_MAIN_FOR_ALPHA": "Sélectionnez \"Main\" pour installer la version alpha la plus récente du dépôt.",
+  "TXT_PRE_RELEASE_DESC": "Vous avez sélectionné une version bêta préliminaire qui n’a pas été entièrement testée ou publiée pour une utilisation générale.",
+  "TXT_SELECT_VERSION": "Sélectionnez une version",
+  "TXT_BACKUP_DOWNLOAD_UP": "Un fichier de sauvegarde de votre configuration sera téléchargé sur votre navigateur. Si la mise à jour échoue, restaurez ce fichier à l’aide du bouton Restaurer après le processus d’installation.",
+  "TXT_UPLOAD_FIRMWARE_DESC": "Sélectionnez un fichier binaire [SomfyController.ino.esp32.bin] contenant le firmware de l’appareil, puis cliquez sur le bouton « Téléverser le fichier ».",
+  "TXT_BACKUP_DOWNLOAD_FIRMWARE": "Un fichier de sauvegarde de votre configuration sera téléchargé dans votre navigateur. Si la mise à jour du firmware échoue, restaurez ce fichier à l’aide du bouton de restauration après avoir terminé le processus d’initialisation.",
+  "TXT_UPLOAD_LITTLEFS_DESC": "Sélectionnez un fichier binaire [SomfyController.littlefs.bin] contenant les données LittleFS de l’application, puis cliquez sur le bouton « Téléverser le fichier ».",
+  "TXT_WARNING": "AVERTISSEMENT",
+  "TXT_NO_AUTO_BACKUP": "Ce navigateur ne prend pas en charge les sauvegardes automatiques. Il est fortement recommandé de sauvegarder votre configuration à l’aide du bouton de sauvegarde avant de continuer.",
+  "TXT_BACKUP_DOWNLOAD": "Un fichier de sauvegarde de votre configuration sera téléchargé dans votre navigateur. Si la mise à jour de l’application échoue, restaurez ce fichier à l’aide du bouton de restauration.",
+  "PROMPT_RESTART_DEVICE": "Êtes-vous sûr de vouloir redémarrer l’appareil ?",
+  "PROMPT_SECURITY_CONFIRM": "Confirmation sécurité",
+  "PROMPT_DELETE_ROOM": "Êtes-vous sûr de vouloir supprimer cette pièce ?",
+  "PROMPT_DELETE_SHADE": "Êtes-vous sûr de vouloir supprimer ce volet ?",
+  "PROMPT_DELETE_GROUP": "Êtes-vous sûr de vouloir supprimer ce groupe ?",
+  "PROMPT_CONFIRM_MOTOR_RESPONSE": "Confirmer réponse du moteur",
+  "PROMPT_UNLINK_REPEATER": "Êtes-vous sûr de vouloir arrêter la répétition des trames depuis cette adresse ?",
+  "PROMPT_UNLINK_REMOTE": "Êtes-vous sûr de vouloir dissocier cette télécommande du volet ?",
+
+
+  "LBL_HOME": "Accueil",
+  "ERR_HOSTNAME": "Nom d'hôte invalide",
+  "ERR_INVALID_HOSTNAME": "Vous devez fournir un nom d’hôte valide.",
+  "ERR_HOSTNAME_CHARS": "Le nom d’hôte doit contenir uniquement des lettres, des chiffres ou un tiret.",
+  "ERR_HOSTNAME_LENGTH": "La longueur maximale du nom d’hôte est de 32 caractères.",
+  "ERR_NTP_LENGTH": "La longueur maximale du serveur NTP est de 64 caractères.",
+  "ERR_PIN_INVALID": "Code PIN invalide",
+  "ERR_PIN_INVALID_DESC": "Le code PIN doit contenir exactement 4 caractères alphanumériques. Veuillez saisir un code complet.",
+  "ERR_USERNAME_MISSING": "Nom d’utilisateur manquant",
+  "ERR_USERNAME_MISSING_DESC": "Vous devez fournir un nom d’utilisateur pour la sécurité par mot de passe.",
+  "ERR_USERNAME_INVALID_DESC": "La longueur maximale du nom d’utilisateur est de 32 caractères.",
+  "ERR_PASSWORD_MISSING": "Mot de passe manquant",
+  "ERR_PASSWORD_MISSING_DESC": "Vous devez fournir un mot de passe pour la sécurité par mot de passe.",
+  "ERR_PASSWORD_INVALID_DESC": "La longueur maximale du mot de passe est de 32 caractères.",
+  "ERR_PASSWORD_CONFIRM_MISSING": "Confirmation du mot de passe requise",
+  "ERR_PASSWORD_CONFIRM_MISSING_DESC": "Vous devez ressaisir le mot de passe dans le champ « Ressaisir le mot de passe ».",
+  "ERR_PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas",
+  "ERR_PASSWORD_MISMATCH_DESC": "Veuillez ressaisir le mot de passe exactement tel qu’il a été saisi dans le champ de confirmation.",
+  "ERR_STATIC_IP_REQUIRED": "Vous devez fournir une adresse IP valide pour l’adresse IP statique.",
+  "ERR_STATIC_IP_INVALID": "Adresse IP statique invalide. Le format attendu est XXX.XXX.XXX.XXX.",
+  "ERR_NETMASK_REQUIRED": "Vous devez fournir une adresse IP valide pour le masque de sous-réseau.",
+  "ERR_NETMASK_INVALID": "Adresse IP du masque de sous-réseau invalide. Le format attendu est XXX.XXX.XXX.XXX.",
+  "ERR_GATEWAY_REQUIRED": "Vous devez fournir une adresse IP valide pour la passerelle.",
+  "ERR_GATEWAY_INVALID": "Adresse IP de la passerelle invalide. Le format attendu est XXX.XXX.XXX.XXX.",
+  "ERR_DNS1_INVALID": "Adresse IP du serveur DNS 1 invalide. Le format attendu est XXX.XXX.XXX.XXX.",
+  "ERR_DNS2_INVALID": "Adresse IP du serveur DNS 2 invalide. Le format attendu est XXX.XXX.XXX.XXX.",
+  "ERR_WIFI_SSID_INVALID": "SSID invalide",
+  "ERR_WIFI_SSID_MAX_LENGTH_64": "La longueur maximale du SSID est de 64 caractères.",
+  "ERR_WIFI_PASSPHRASE_INVALID": "Mot de passe invalide",
+  "ERR_WIFI_PASSPHRASE_MAX_LENGTH_64": "La longueur maximale du mot de passe est de 64 caractères.",
+  "ERR_RADIO_TYPE_REQUIRED": "Vous devez sélectionner un type de radio.",
+  "ERR_RADIO_PINS_REQUIRED": "Vous devez définir toutes les pins pour la radio.",
+  "ERR_GPIO_PIN_DUPLICATED": "La pin %1 est dupliquée par la pin %2. Toutes les définitions de pins doivent être uniques.",
+  "ERR_ROOM_NAME_INVALID": "Vous devez fournir un nom pour la pièce compris entre 1 et 20 caractères.",
+  "ERR_SHADE_NAME_INVALID": "Vous devez fournir un nom pour le volet compris entre 1 et 20 caractères.",
+  "ERR_UP_TIME_INVALID": "Le temps de montée doit être une valeur comprise entre 0 et 4294967295 millisecondes. Il correspond au temps de déplacement du volet de complètement fermé à complètement ouvert.",
+  "ERR_DOWN_TIME_INVALID": "Le temps de descente doit être une valeur comprise entre 0 et 4294967295 millisecondes. Il correspond au temps de déplacement du volet de complètement ouvert à complètement fermé.",
+  "ERR_GPIO_UP_DOWN_NOT_UNIQUE": "Pour les moteurs contrôlés par GPIO, les sélections GPIO de montée et de descente doivent être uniques.",
+  "ERR_GPIO_UP_DOWN_MY_NOT_UNIQUE": "Pour les moteurs contrôlés par GPIO avec proto 9, les sélections GPIO de montée, descente et \"my\" doivent toutes être uniques.",
+  "ERR_REMOTE_ADDRESS_INVALID": "L’adresse de la télécommande doit être un nombre compris entre 1 et 16777215. Ce nombre doit être unique pour tous les volets.",
+  "ERR_ROOM_ID_REQUIRED": "A valid room id was not supplied.",
+  "ERR_SHADE_ID_REQUIRED": "A valid shade id was not supplied",
+  "ERR_SHADE_IN_GROUP": "You may not delete this shade because it is a member of a group.",
+  "ERR_GROUP_NOT_EMPTY": "Vous ne pouvez pas supprimer ce groupe tant que tous les volets n’en ont pas été retirés.",
+  "ERR_NO_SHADE_AVAILABLE_FOR_GROUP": "Aucun volet disponible à associer à ce groupe.",
+  "ERR_SHADE_NOT_FOUND_IN_GROUP": "Le volet spécifié est introuvable dans ce groupe",
+  "ERR_PORT_INVALID": "Numéro de port invalide",
+  "ERR_USERNAME_INVALID": "Nom d’utilisateur invalide",
+  "ERR_PASSWORD_INVALID": "Mot de passe invalide",
+  "ERR_ROOT_TOPIC_INVALID": "Invalide Root Topic",
+  "ERR_MQTT_HOSTNAME_REQUIRED": "Vous devez fournir un nom d’hôte pour vous connecter à MQTT.",
+  "ERR_HOSTNAME_MAX_LENGTH_64": "La longueur maximale du nom d’hôte est de 64 caractères.",
+  "ERR_MQTT_PORT_HINT": "Les ports habituellement utilisés sont 1183 et 8883 pour MQTT/S ou 80 et 443 pour HTTP/S.",
+  "ERR_USERNAME_MAX_LENGTH_32": "La longueur maximale du nom d’utilisateur est de 32 caractères.",
+  "ERR_PASSWORD_MAX_LENGTH_32": "La longueur maximale du mot de passe est de 32 caractères.",
+  "ERR_ROOT_TOPIC_MAX_LENGTH_64": "La longueur maximale du root topic est de 64 caractères.",
+  "ERR_MSG": "Attention !",
+  "ERR_NO_FILE_LITTLEFS_SELECTED": "Vous devez sélectionner un fichier binaire LittleFS pour continuer.",
+  "ERR_INVALID_FILE_LITTLEFS": "Ce fichier n’est pas un fichier binaire LittleFS valide.",
+  "ERR_NO_FILE_FIRMWARE_SELECTED": "Vous devez sélectionner un fichier binaire de firmware valide pour continuer.",
+  "ERR_INVALID_FILE_FIRMWARE": "Ce fichier n’est pas un fichier binaire de firmware valide.",
+  "ERR_NO_FILE_BACKUP_SELECTED": "Vous devez sélectionner un fichier de sauvegarde valide pour continuer",
+  "ERR_BACKUP_TOO_LARGE": "Ce fichier a une taille de %s octets. Il est trop volumineux pour être un fichier de sauvegarde valide",
+  "ERR_INVALID_FILE_BACKUP": "Ce fichier n’est pas un fichier de sauvegarde valide.",
+  "ERR_NO_RESTORE_OPTION": "Aucune option de restauration n’a été sélectionnée.",
+  "TXT_COLOR": "Couleur",
+  "TXT_ACCENT_COLOR_DESC": "Changer la couleur d’accentuation",
+  "PL_ROLLING_CODE_NEW": "Nouveau code",
+  "BT_SAVE": "Sauvegarder",
+  "BT_BACK_UP": "Sauvegarde",
+  "BT_UPDATE": "Mettre à jour",
+  "BT_SAVE_IP": "Sauvegarder paramètres IP",
+  "BT_SAVE_MQTT": "Sauvegarder paramètres MQTT",
+  "BT_SAVE_ETHERNET": "Sauvegarder paramètres Ethernet",
+  "BT_SAVE_SECURITY": "Sauvegarder Securité",
+  "BT_UPDATE_GITHUB": "Github mise à jour",
+  "BT_UPDATE_FIRMWARE": "Mise à jour Firmware",
+  "BT_UPDATE_APP": "Mise à jour Application",
+  "BT_REFRESH_CACHE": "Vider le cache",
+  "BT_RESTORE": "Restorer",
+  "BT_SCANFREQUENCY": "Balayer les fréquences",
+  "BT_SCAN_WIFI": "Chercher réseau WI-FI",
+  "BT_COPY": "Copier",
+  "BT_CLEAR": "Effacer",
+  "BT_LOGIN": "Se connecter",
+  "BT_CANCEL": "Effacer",
+  "BT_CANCEL_1": "Annuler",
+  "BT_GO_BACK": "Retour",
+  "BT_NEXT": "Suivant",
+  "BT_CLOSE": "Fermer",
+  "BT_YES": "Oui",
+  "BT_NO": "Non",
+  "BT_OK": "Ok",
+  "BT_ADD_ROOM": "Ajouter Pièce",
+  "BT_SAVE_ROOM": "Sauvegarder Pièce",
+  "BT_ADD_SHADE": "Ajouter volet",
+  "BT_PAIR_SHADE": "Appairer Volet",
+  "BT_UNPAIR_SHADE": "Désappairer Volet",
+
+  "BT_SAVE_SHADE": "Sauvegarder Volet",
+  "BT_LINK_REMOTE": "Appairer Télécommande",
+  "BT_ADD_GROUP": "Ajouter Groupe",
+  "BT_SAVE_GROUP": "Sauvegarder Groupe",
+  "BT_LINK_SHADE": "Associer Volet",
+  "BT_SCAN_REMOTE": "Chercher Télécommande",
+  "BT_STOP_SCAN": "Arrêter le balayage",
+  "BT_START_SCAN": "Démarrer le balayage",
+  "BT_COPY_FREQUENCY": "Définir la fréquence",
+  "BT_SET_MY_POSITION": "Définir \"My\" position",
+  "BT_CLEAR_MY_POSITION": "Effacer \"My\" position",
+
+  "BT_SET_ROLLING_CODE": "Définir Code",
+  "BT_ROLLING_CODE": "Code Tournant",
+
+  "BT_PROG": "Prog",
+  "BT_SHADE_PAIRED": "Volet Appairé",
+  "BT_SHADE_UNPAIRED": "Volet Désappairé",
+  "BT_OPEN_MEMORY": "Ouvrir Mémoire",
+  "BT_PAIR_TO_GROUP": "Appairer au groupe",
+  "BT_UNPAIR_GROUP": "Désappairer du groupe",
+  "BT_UPLOAD_FILE": "Téléverser un Fichier",
+  "BT_RELEASE_NOTE": "Notes de version",
+  "BT_REBOOT": "Redémarrer",
+  "BT_DONE": "Terminé",
+
+    "PIN_CODE": "Code Pin",
+    "LBL_ENTER_PIN": "Entrer Code Pin",
+    "USERNAME": "Nom d'Utilisateur",
+    "PH_USERNAME": "Entrer votre Nom d'Utilisateur",
+    "PH_USERNAME_2": "Entrer un Nom d'Utilisateur",
+    "PASSWORD": "Mot de Passe",
+    "PH_PASSWORD": "Entrer votre Mot de passe",
+    "CONFIRM_PASSWORD": "Confirmer le mot de passe",
+    "PH_CONFIRM_PASSWORD": "Vous devez Confirmer le Mot de Passe",
+  "LBL_LANGUAGE": "Langue",
+  "OPT_FRENCH": "Français",
+  "OPT_ENGLISH": "Anglais"
+
+
+}
+
