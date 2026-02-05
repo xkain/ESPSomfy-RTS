@@ -2607,14 +2607,6 @@ class Somfy {
                 divCtl += `<div class="groupctl-shades">`;
                 if (typeof group.linkedShades !== 'undefined') {
                     divCtl += `<label>Members:</label><span>${group.linkedShades.length}`;
-                    /*
-                    for (let j = 0; j < group.linkedShades.length; j++) {
-                        divCtl += '<span>';
-                        if (j !== 0) divCtl += ', ';
-                        divCtl += group.linkedShades[j].name;
-                        divCtl += '</span>';
-                    }
-                    */
                 }
                 divCtl += '</div></div>';
                 divCtl += `<div class="groupctl-buttons">`;
