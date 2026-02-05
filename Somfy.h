@@ -423,8 +423,8 @@ struct transceiver_config_t {
     uint8_t type = 56;                // 56 or 80 bit protocol.
     radio_proto proto = radio_proto::RTS;
     uint8_t SCKPin = 18;
-    uint8_t TXPin = 22;
-    uint8_t RXPin = 21;
+    uint8_t TXPin = 21;
+    uint8_t RXPin = 22;
     uint8_t MOSIPin = 23;
     uint8_t MISOPin = 19;
     uint8_t CSNPin = 5;
