@@ -1578,7 +1578,7 @@ div.wait-overlay > .lds-roller {
     align-items:center;
     flex-direction:row;
     background-color: var(--unibloc-color);
-    margin: 5px 0;
+    margin-top: 25px;
     border-radius: 25px;
     padding: 8px;
 
@@ -2392,20 +2392,14 @@ margin: auto;
     .somfyShadeCtl .shadectl-buttons {
         gap: 2px;
     }
-
-
     .inst-overlay {
         max-height: 100vh;
         padding: 0 !important;
     }
-
-
-    .message-content,
     .overlay-content,
     .instructions-content  {
         width: 100%;
         max-width: 100%;
-      /*  font-size: 19px;*/
         background: var(--background-color);
         border-radius: 0;
         border: none;
@@ -2414,8 +2408,6 @@ margin: auto;
         flex-grow: 1;
         gap: 20px;
     }
-
-
     .welcomeTop {
     display: block;
     }
@@ -2432,12 +2424,7 @@ margin: auto;
     #divUnauthenticated .button-container-row {
         gap: 12px;
     }
-
-
 }
-
-
-
 @media screen and (max-width: 480px) {
     body {
         height: 100%;
