@@ -22,17 +22,17 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Checkout mklittlefs
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: earlephilhower/mklittlefs
           path: mklittlefs
           ref: ${{ env.MKLITTLEFS_VERSION }}
 
       - name: Checkout LittleFS
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: littlefs-project/littlefs
           path: mklittlefs/littlefs
@@ -47,7 +47,7 @@ jobs:
           ./mklittlefs/mklittlefs --create data --size 1441792 SomfyController.littlefs.bin
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: LittleFS
           path: SomfyController.littlefs.bin
@@ -85,12 +85,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: SomfyController
 
       - name: Get LittleFS
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: LittleFS
 
@@ -140,7 +140,7 @@ jobs:
             0x290000 SomfyController.littlefs.bin
 
       - name: Upload ${{ matrix.name }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: |
