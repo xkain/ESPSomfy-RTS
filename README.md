@@ -31,19 +31,6 @@ In the last few months, this version has been significantly updated with a focus
 
 ---
 
-## 📦 Ready-to-use Hardware (Plug & Play)
-
-If you don't want to build the hardware yourself, I offer **fully assembled and tested units**. These boxes are ready to be powered up and configured with this enhanced firmware.
-
-🛒 **Available on Leboncoin:** [View my Seller Profile](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/e3bf97de-12a7-4c9a-8ed4-6d3a819818c0" width="45%" />
-  <img src="https://github.com/user-attachments/assets/90c1fde9-2c4d-47c5-ab9a-a5f065e9f149" width="45%" />
-</p>
-
----
-
 ## 🚧 Project Status & Roadmap
 
 This version is in **active development**. 
@@ -51,6 +38,29 @@ This version is in **active development**.
 - [ ] **Automations:** Native scheduling (opening/closing shades by time/day).
 - [ ] **Enhanced Logs:** Improved visual feedback for system events.
 
+---
+
+## 📸 Screenshots
+
+
+<p align="center">
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile03.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile01.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile02.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile03.png" width="16%" />  
+</p>
+
+<p align="center">
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair00.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair02.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair03.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark00.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark02.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark03.png" width="16%" />
+</p>
+   
 ---
 
 ## 📚 Documentation & Resources
@@ -79,8 +89,8 @@ Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **uni
 > **Note sur le Firmware :** Tant que mon interface (Fork) est en phase de construction, les boîtiers sont livrés avec la version officielle de **rstrouse** afin de garantir une stabilité maximale. Vous pourrez installer ma version manuellement dès qu'elle sera finalisée !
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e3bf97de-12a7-4c9a-8ed4-6d3a819818c0" width="45%" />
-  <img src="https://github.com/user-attachments/assets/90c1fde9-2c4d-47c5-ab9a-a5f065e9f149" width="45%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin00.jpg" width="45%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin01.jpg" width="45%" />
 </p>
 
 
