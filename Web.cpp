@@ -136,43 +136,46 @@ bool Web::createAPIToken(const IPAddress ipAddress, char *token) {
     return true;
 }
 void Web::handleLang(WebServer &server) {
-  webServer.sendCORSHeaders(server);
-  if (server.method() == HTTP_OPTIONS) {
-    server.send(200, "OK");
-    return;
-  }
-  String filename = (settings.language == 0) ? "/locale/fr.json" : "/locale/en.json";
+    webServer.sendCORSHeaders(server);
+    if (server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
 
-  if (LittleFS.exists(filename)) {
-    File file = LittleFS.open(filename, "r");
-    server.streamFile(file, _encoding_json);
-    file.close();
-  } else {
-    server.send(404, "text/plain", "Lang file not found");
-  }
+    String filename = "/locale/en.json"; // Par défaut
+
+    // On définit une liste de correspondance
+    if (settings.language == 0) filename = "/locale/en.json";
+    else if (settings.language == 1) filename = "/locale/fr.json";
+    else if (settings.language == 2) filename = "/locale/de.json"; // Allemand
+    //else if (settings.language == 3) filename = "/locale/es.json"; // Espagnol
+
+    if (LittleFS.exists(filename)) {
+      File file = LittleFS.open(filename, "r");
+      server.streamFile(file, _encoding_json);
+      file.close();
+    } else {
+      server.send(404, "text/plain", "Lang file not found");
+    }
 }
 void Web::handleSetLang(WebServer &server) {
-  webServer.sendCORSHeaders(server);
-  if(server.method() == HTTP_OPTIONS) {
-    server.send(200, "OK");
-    return;
-  }
+    webServer.sendCORSHeaders(server);
+    if(server.method() == HTTP_OPTIONS) {
+      server.send(200, "OK");
+      return;
+    }
 
-  if(!server.hasArg("lang")) {
-    server.send(400, _encoding_json, "{\"error\":\"missing lang\"}");
-    return;
-  }
+    if(!server.hasArg("lang")) {
+      server.send(400, _encoding_json, "{\"error\":\"missing lang\"}");
+      return;
+    }
 
-  String lang = server.arg("lang");
+    String lang = server.arg("lang");
 
-  // Mise à jour des réglages
-  if(lang == "fr") settings.language = 0;
-  else settings.language = 1;
+    if(lang == "en") settings.language = 0;
+    else if(lang == "fr") settings.language = 1;
+    else if(lang == "de") settings.language = 2;
+    //else if(lang == "es") settings.language = 3;
 
-  settings.save(); // Sauvegarde en flash des réglages
-
-  // Réponse de succès
-  server.send(200, _encoding_json, "{\"status\":\"ok\"}");
+    settings.save();
+    server.send(200, _encoding_json, "{\"status\":\"ok\"}");
 }
 void Web::handleLogout(WebServer &server) {
   Serial.println("Logging out of webserver");

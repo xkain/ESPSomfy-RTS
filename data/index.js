@@ -1685,9 +1685,22 @@ class General {
                 if (typeof wifi !== 'undefined') wifi.init();
 
             if (typeof somfy !== 'undefined') somfy.loadSomfy();
+
+
+
             const langSelect = document.getElementById('langSelect');
                 if (langSelect) {
-                    langSelect.value = (settings.language === 0) ? 'fr' : 'en';
+                    // On crée un tableau ou un objet pour faire le lien entre l'index (0,1,2...) et le code langue
+                    const languages =
+                    [
+                        'en',
+                        'fr',
+                        'de',
+                        //'es',
+                        //'it'
+                    ];
+
+                    langSelect.value = languages[settings.language] || 'en';
                     langSelect.onchange = (e) => {
                         this.onLanguageChanged(e.target.value);
                     };
