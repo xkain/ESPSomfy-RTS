@@ -1,81 +1,108 @@
+# Version traduite en français du projet de  [rstrouse](https://github.com/rstrouse/ESPSomfy-RTS) 
+
+
 # ESPSomfy-RTS <image src="https://user-images.githubusercontent.com/47839015/218898940-3541b360-5c49-4e38-a918-392cd0408b76.png" align="right" style="width:177px;display:inline-block;float:right"></image>
 
-A controller for Somfy RTS blinds and shades that supports up to 32 individual shades and 16 groups over 433MHz RTx protocols.  If you have IO Home Control motors this project is not for you but you can use the IO Remote protocol to connect the ESPSomfy RTS device to a disected remote.  Look in the [Wiki](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Controlling-Motors-with-GPIO) for options and verify whether the solution is workable for you.
+Un contrôleur pour stores et volets Somfy RTS, capable de gérer jusqu’à 32 stores individuels et 16 groupes via les protocoles RTx 433 MHz. Si vous utilisez des moteurs IO Home Control, ce projet n’est pas pour vous, mais vous pouvez utiliser le protocole IO Remote pour connecter le dispositif ESPSomfy RTS à une télécommande disectée. Consultez le [Wiki](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Controlling-Motors-with-GPIO) pour les options et vérifiez si la solution est compatible avec votre matériel.
 
-Most of the 433MHz protocols are supported to include RTS, RTW, RTV/L and 433.92MHz radio transceivers.  You can even mix and match these on the same device as long as the base frequency is tuned within the same range.  For instance, you cannot have 433.92MHz and 433.42MHz motors on the same device.
+La plupart des protocoles 433 MHz sont supportés, y compris RTS, RTW, RTV/L et les transceivers radio 433,92 MHz. Vous pouvez même combiner ces protocoles sur le même dispositif tant que la fréquence de base est réglée dans la même plage. Par exemple, vous ne pouvez pas avoir des moteurs 433,92 MHz et 433,42 MHz sur le même appareil.
 
-If you have bare motors you can control these with a connected relay module using a simple configuration.  So if you have a bunch of motors that don't have any radio module then I have you covered there as well.  When you are done you can use any of the supported remotes for RTS, RTW, or RTV protocols on the 433MHz range.
+Si vous avez des moteurs nus, vous pouvez les contrôler via un module relais connecté avec une configuration simple. Donc, si vous possédez plusieurs moteurs sans module radio, cette solution les couvre également. Une fois configuré, vous pourrez utiliser n’importe quelle télécommande supportant les protocoles RTS, RTW ou RTV sur la bande 433 MHz.
 
-## Why does this exist?
-Most of my home is automated and one of the more annoying aspects was that there were three very expensive patio roller shades that still didn't have any type of automation attached to them.  Since they were on the patio I had to run around on the patio looking for the Telis torpedo remote any time I wanted to move the outside shades.  I have a rather large patio and the shades do a really good job at keeping the hot late afternoon sun from baking the house.  These little remotes are sneaky and they tend to hide in plain sight and often move just out of reach when you are relaxing so that you have to extract your butt from your chair.  Imagine just barking out commands at them and having them just work.
+## Pourquoi ce projet existe-t-il ?
+La majeure partie de ma maison est automatisée, et l’un des aspects les plus gênants était que trois stores de patio très coûteux n’avaient toujours aucune automatisation. Comme ils étaient sur le patio, je devais courir pour chercher la télécommande Telis torpedo chaque fois que je voulais manipuler les stores extérieurs. Mon patio est assez grand et les stores font très bien leur travail pour bloquer le soleil brûlant de fin d’après-midi. Ces petites télécommandes sont sournoises : elles se cachent en pleine vue et bougent souvent hors de portée quand on se détend, vous obligeant à vous lever. Imaginez simplement donner des ordres et qu’ils s’exécutent automatiquement.
 
-So I went searching for libraries that could automate my shades and relieve me from damning the torpedo.  I didn't just want to move them I wanted to interact with them and manage their position.  And because that Telis torpedo has been with me for so long I still wanted to be able to use that sneaky bugger as well.
+J’ai donc cherché des bibliothèques capables d’automatiser mes stores et de m’épargner de maudire le torpedo. Je ne voulais pas seulement les déplacer, je voulais interagir avec eux et gérer leur position. Et comme cette télécommande Telis torpedo m’accompagne depuis longtemps, je voulais aussi pouvoir continuer à l’utiliser.
 
-The research led me to several projects that looked like they would do what I want.  Most of them however, could send commands using a CC1101 radio attached to an ESP32 but I really wanted to be able to capture information from any external remotes as well.  In the end I did not find what I wanted so this repository was born. ESPSomfy RTS is capable of not only controlling the shades but it can also manage the current position even when an old school remote is used to move the shades.
+Mes recherches m’ont conduit à plusieurs projets prometteurs. La plupart pouvaient envoyer des commandes via un CC1101 attaché à un ESP32, mais je voulais aussi pouvoir capter les informations de toutes télécommandes externes. Ne trouvant pas exactement ce que je voulais, ce dépôt est né. ESPSomfy RTS peut non seulement contrôler les stores, mais aussi gérer la position actuelle même lorsqu’une télécommande classique est utilisée.
 
-This software uses a couple of readily available hardware components.  These include an ESP32 module and a CC1101 Transceiver module.  The CC1101 is connected via SPI to the ESP32 and controlled using SmartRC-CC1101-Driver library.  All in at the start of 2023 the total cost for me was about $12us for the final components.
+Ce logiciel utilise quelques composants matériels faciles à trouver, incluant un module ESP32 et un transceiver CC1101. Le CC1101 est connecté à l’ESP32 via SPI et contrôlé avec la bibliothèque SmartRC-CC1101-Driver. Début 2023, le coût total pour moi des composants finaux était d’environ 12 $ US.
 
-# ESPSomfy RTS Device Updates
-If you are here looking for how to install the latest software on your device. The wiki for instructions on how to do this is located here. [Updating ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)
+# Mises à jour du dispositif ESPSomfy RTS
 
-# Functionality
-After you get this up and running you will have the ability to interact with your shades using the built-in web interface, socket interface, and MQTT.  There is also a full [Home Assistant integration](https://github.com/rstrouse/ESPSomfy-RTS-HA) that can be installed through HACS that can control your shades remotely and provide automations.
+Si vous cherchez à installer le dernier logiciel sur votre appareil, le wiki fournit les instructions ici : [Updating ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)
+
+# Fonctionnalités
+
+Une fois opérationnel, vous pourrez interagir avec vos stores via l’interface web intégrée, l’interface socket et MQTT. Il existe également une [Home Assistant integration](https://github.com/rstrouse/ESPSomfy-RTS-HA) installable via HACS, permettant de contrôler vos stores à distance et de créer des automatisations.
 
 ![image](https://user-images.githubusercontent.com/47839015/224559426-c81422c0-cdfe-45f9-a9c2-0c727619cdf9.png)
 
 ![image](https://github.com/rstrouse/ESPSomfy-RTS/assets/47839015/2a605e54-4487-49ba-9a7a-07e153db1c02)
 
-* Identify each device by motor type (Awning, Shade, Shutter, Blind, or Drapery)
-* Control movement using up, down, and my buttons
-* Set and remove my button favorite
-* Interactive positioning
-* Tilt blinds
-* Set blind tilt by percentage
-* Control Awning Sun/Wind Sensors
+* Identifier chaque dispositif par type de moteur (Store, Volet, Rideau, Persienne, ou Tente)
+* Contrôler les mouvements avec les boutons haut, bas et my
+* Définir et supprimer la position favorite “my”
+* Positionnement interactif
+* Incliner les stores
+* Définir l’inclinaison du store par pourcentage
+* Contrôler les capteurs de soleil/vent pour les stores extérieurs
 
-## Moving a Shade
-You can move the shade to the full up position by clicking the up button.  To stop the shade during travel, press the my button and the shade will stop.  To move the shade to the full down position press the down button.  At any point during the movement you can press the my button to stop the shade.
 
-If you would like to move the shade to a favorite position.  Press the my button while the shade is at rest and the shade will move to the position set for the my button.  These are displayed under the shade name so you do not have to guess what the current favorite is set to.
+## Déplacer un store
 
-To move a shade to a target percentage of closed, click or tap on the shade icon.  An interface will open that will allow you to select the position using a slider control.  Move the slider to the desired position.  When you release the slider the shade will begin to open or close to reach the desired position.  You can change this position even when the shade is moving.
+Vous pouvez monter complètement le store avec le bouton haut. Pour l’arrêter pendant le mouvement, appuyez sur le bouton my. Pour le descendre complètement, appuyez sur le bouton bas. À tout moment, le bouton my permet d’arrêter le store.
+
+Pour déplacer le store vers une position favorite, appuyez sur le bouton my lorsque le store est à l’arrêt : il ira à la position favorite. Ces positions sont affichées sous le nom du store.
+
+Pour déplacer un store vers un pourcentage de fermeture précis, cliquez sur l’icône du store. Une interface s’ouvre pour sélectionner la position via un curseur. Relâchez le curseur et le store se déplacera pour atteindre la position souhaitée. La position peut être modifiée même pendant le mouvement.
 
 ![image](https://user-images.githubusercontent.com/47839015/224559596-aa98d015-ee74-41f1-a852-3018f861e354.png)
 
 
-## Setting a Favorite
-To set your favorite my position you can either use the ESPSomfy RTS interface or your Somfy remote.  ESPSomfy RTS listens for the long press of the my button so if you use the remote it will pick up this favorite.  However, if you previously had a favorite set before installing ESPSomfy RTS you should reset it using ESPSomfy RTS.  Somfy uses the same command to set and unset its favorites.
+## Définir une position favorite
 
-To set or unset a favorite long press the my button.  After a few seconds a screen like below will appear.  ESPSomfy RTS allows you to set a favorite by position, so you can drag the slider to 37% and press the `SET MY POSITION` button.  After pressing the button the shade will move to that position and jog briefly indicating that the favorite has been saved.
+Pour définir votre position favorite "my", vous pouvez utiliser l’interface ESPSomfy RTS ou votre télécommande Somfy. ESPSomfy RTS détecte l’appui long du bouton my et enregistre la position favorite. Si vous aviez une position favorite avant l’installation, réinitialisez-la via ESPSomfy RTS. Somfy utilise la même commande pour définir et supprimer ses favoris.
+
+Pour définir ou supprimer une position favorite, appuyez longuement sur le bouton my. Après quelques secondes, un écran s’affiche. ESPSomfy RTS permet de définir une position favorite via un curseur (ex. 37 %) puis en appuyant sur `SET MY POSITION` Le store se déplacera et effectuera un petit mouvement pour confirmer l’enregistrement.
 
 ![image](https://user-images.githubusercontent.com/47839015/224559730-859d3f9c-177c-46c3-9fb4-1a7df2cac505.png)
 
-To unset a favorite perform the long press on the my button to open the favorites interface.  Then move the slider to the current my position and the button will turn red and the text will change to `CLEAR MY POSITION`.  Once you press the button the shade will jog indicating that the favorite has been cleared.
+Pour supprimer une position favorite, effectuez un appui long sur le bouton my pour ouvrir l’interface des favoris, déplacez le curseur sur la position actuelle et appuyez sur `CLEAR MY POSITION`.  Le store effectuera un petit mouvement pour confirmer la suppression.
 
 ![image](https://user-images.githubusercontent.com/47839015/224559837-ad28b843-49ab-468c-8b8c-1ad470775750.png)
 
-# Getting Started
-To get started you must create a radio device.  The wiki contains full instructions on how to get this up and running.  You don't need a soldering iron to make this project work. Dupont connections between the radio and the ESP32 will suffice.  However, I have also included some instructions on how to make an inconspicuous radio enclosure for a few bucks.  Here is the [Simple Hardware Guide](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Simple-ESPSomfy-RTS-device)
+## Démarrage
+Pour commencer, vous devez créer un dispositif radio. Le wiki fournit toutes les instructions : Guide matériel simple. Des connexions Dupont entre le module radio et l’ESP32 suffisent. Des instructions pour fabriquer un boîtier discret sont également incluses.
+Ensuite, installez le firmware initial sur l’ESP32. Le guide d’installation est ici : [Simple Hardware Guide](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Simple-ESPSomfy-RTS-device)
 
-Next you need to get the initial firmware installed onto the ESP32.  Once the firmware built and installed for your ESP32.  The firmware installation process is a matter of uploading the onboard file to your ESP32.  You will find the firmware guide in the wiki [Firmware Guide](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Installing-the-Firmware)
+Ensuite, vous devez installer le firmware initial sur l’ESP32. Une fois le firmware compilé et installé pour votre ESP32, le processus d’installation consiste simplement à téléverser le fichier embarqué sur votre ESP32. Vous trouverez le guide d’installation du firmware dans le wiki :[Firmware Guide](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Installing-the-Firmware)
 
-Once you have your hardware built, the only thing left to do is connect the ESP32 to your network and begin pariing your shades.  The software guide in the wiki will walk you through pairing your shades, linking remotes, and configuring your shades.  The wiki also includes a comprehensive software guide that you can use to configure your shades.  The good news is that this process is pretty easy to follow and you can be up and running very quickly.
+Une fois votre matériel prêt, il ne vous reste plus qu’à connecter l’ESP32 à votre réseau et commencer l’appairage de vos stores. Le guide logiciel du wiki vous accompagnera pour appairer vos stores, lier les télécommandes et configurer vos stores. Le wiki contient également un guide logiciel complet pour la configuration. La bonne nouvelle est que ce processus est assez simple à suivre et vous permet de tout mettre en service rapidement.
 
 [Configuring ESPSomfy-RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software)
 
 
-## Integrations
-While the interface that comes with the ESPSomfy RTS is a huge improvement, the whole idea of this project is to make the shades controllable from everywhere that I want to control them.  So for that I created a couple of interfaces that you can use to bolt on your own automation.  These options are for those people that have a propeller on their hat.  They do things make red nodes (using Node-Red) or have their own web interface.
+## Intégrations
+Bien que l’interface fournie avec ESPSomfy RTS soit déjà une grande amélioration, l’objectif de ce projet est de rendre les stores contrôlables depuis n’importe quel endroit. Pour cela, j’ai créé plusieurs interfaces que vous pouvez utiliser pour ajouter vos propres automatisations. Ces options s’adressent aux utilisateurs avancés, utilisant par exemple Node-Red ou leur propre interface web.
 
-You can find the documentation for the interfaces in the [Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations) wiki.  Plenty of stuff there for you folks that make red nodes and stuff.
+Vous trouverez la documentation des interfaces dans le wiki [Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations) Beaucoup de ressources pour ceux qui utilisent Node-Red ou des interfaces personnalisées.
   
-## Sources for this Project
-I spent some time reading about a myriad of topics but in the end the primary source for this project comes from https://pushstack.wordpress.com/somfy-rts-protocol/.  The work done on pushstack regarding the protocol timing made this feasible without burning a bunch of time measuring pulses.  
+## Sources du projet
+J’ai étudié de nombreux sujets, mais la source principale de ce projet provient de https://pushstack.wordpress.com/somfy-rts-protocol/.  Le travail réalisé sur le timing du protocole par pushstack a rendu ce projet réalisable sans passer beaucoup de temps à mesurer les impulsions. 
   
-Configuration of the Transceiver is done with the ELECHOUSE_CC1101 library which you will need to include in your project should you want to compile the code.  The one used for compiling this module can be found here. https://github.com/LSatan/SmartRC-CC1101-Driver-Lib
+La configuration du transceiver se fait avec la bibliothèque ELECHOUSE_CC1101, que vous devrez inclure dans votre projet si vous souhaitez compiler le code. Celle utilisée pour compiler ce module se trouve ici : https://github.com/LSatan/SmartRC-CC1101-Driver-Lib
 
-  
+
+## Traduction et modifications
+
+Dans ma version, le fuseau horaire est d'office Europ/Paris, quelques modifications visuelles très légères ont été faites et la configuration des GPIO ont été changé par defaut pour correspondre à ceux que j'utilise:
+* TX = 21 
+* RX = 22
+* 
+Pour les fréquences, j'ai mis celles qui correspondent au bon fonctionnement de mes volets. Étant donné que vous n'avez très certainement pas les mêmes volets que moi, il vous faudra de toutes les façons trouver vos propres fréquences.
  
+<img width="900" height="557" alt="Image" src="https://github.com/user-attachments/assets/0490384a-d166-4fd3-9324-6d8bbd30b140" />
+
+  
+## Boîtiers
+Je propose des boîtiers  tout fait sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)
+
+![Image](https://github.com/user-attachments/assets/e3bf97de-12a7-4c9a-8ed4-6d3a819818c0)
+![Image](https://github.com/user-attachments/assets/90c1fde9-2c4d-47c5-ab9a-a5f065e9f149)
+
+
+   
 
 
 

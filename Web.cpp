@@ -15,6 +15,9 @@
 #include "GitOTA.h"
 #include "Network.h"
 
+
+
+
 extern ConfigSettings settings;
 extern SSDPClass SSDP;
 extern rebootDelay_t rebootDelay;
@@ -37,6 +40,9 @@ static const char _response_404[] = "404: Service Not Found";
 static const char _encoding_text[] = "text/plain";
 static const char _encoding_html[] = "text/html";
 static const char _encoding_json[] = "application/json";
+
+
+
 
 WebServer apiServer(8081);
 WebServer server(80);
@@ -128,6 +134,45 @@ bool Web::createAPIToken(const IPAddress ipAddress, char *token) {
     else if(settings.Security.type == security_types::PinEntry) createAPIPinToken(ipAddress, settings.Security.pin, token);
     else createAPIToken(ipAddress.toString().c_str(), token);
     return true;
+}
+void Web::handleLang(WebServer &server) {
+  webServer.sendCORSHeaders(server);
+  if (server.method() == HTTP_OPTIONS) {
+    server.send(200, "OK");
+    return;
+  }
+  String filename = (settings.language == 0) ? "/locale/fr.json" : "/locale/en.json";
+
+  if (LittleFS.exists(filename)) {
+    File file = LittleFS.open(filename, "r");
+    server.streamFile(file, _encoding_json);
+    file.close();
+  } else {
+    server.send(404, "text/plain", "Lang file not found");
+  }
+}
+void Web::handleSetLang(WebServer &server) {
+  webServer.sendCORSHeaders(server);
+  if(server.method() == HTTP_OPTIONS) {
+    server.send(200, "OK");
+    return;
+  }
+
+  if(!server.hasArg("lang")) {
+    server.send(400, _encoding_json, "{\"error\":\"missing lang\"}");
+    return;
+  }
+
+  String lang = server.arg("lang");
+
+  // Mise à jour des réglages
+  if(lang == "fr") settings.language = 0;
+  else settings.language = 1;
+
+  settings.save(); // Sauvegarde en flash des réglages
+
+  // Réponse de succès
+  server.send(200, _encoding_json, "{\"status\":\"ok\"}");
 }
 void Web::handleLogout(WebServer &server) {
   Serial.println("Logging out of webserver");
@@ -1084,6 +1129,10 @@ void Web::begin() {
   apiServer.on("/reboot", []() { webServer.handleReboot(apiServer); });
   
   // Web Interface
+  server.on("/lang", HTTP_GET, [this]() { this->handleLang(server); });
+  server.on("/setLang", HTTP_GET, [this]() { this->handleSetLang(server); });
+
+
   server.on("/tiltCommand", []() { webServer.handleTiltCommand(server); });
   server.on("/repeatCommand", []() { webServer.handleRepeatCommand(server); });
   server.on("/shadeCommand", []() { webServer.handleShadeCommand(server); });
@@ -1179,14 +1228,15 @@ void Web::begin() {
       }
 
     });
+
+
+
+
   server.on("/index.js", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/index.js", "text/javascript"); });
   server.on("/main.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css", "text/css"); });
   server.on("/widgets.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/widgets.css", "text/css"); });
   server.on("/icons.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/icons.css", "text/css"); });
-  server.on("/favicon.png", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.png", "image/png"); });
-  server.on("/icon.png", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/icon.png", "image/png"); });
-  server.on("/icon.svg", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/icon.svg", "image/svg+xml"); });
-  server.on("/apple-icon.png", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/apple-icon.png", "image/png"); });
+  server.on("/favicon.svg", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.svg", "image/svg+xml"); });
   server.onNotFound([]() { webServer.handleNotFound(server); });
   server.on("/controller", []() { webServer.handleController(server); });
   server.on("/rooms", []() { webServer.handleGetRooms(server); });

@@ -1,29 +1,97 @@
-//var hst = '192.168.1.208';
-var hst = '192.168.1.152';
-//var hst = '192.168.1.159';
-var _rooms = [{ roomId: 0, name: 'Home' }];
+//var hst = '192.168.1.45';
+var hst = '192.168.4.1';
+var _rooms = [];
+let LANG = {};
+var baseUrl = window.location.protocol === 'file:' ? `http://${hst}` : '';
+var waitLoad;
 
+if (typeof ui !== 'undefined' && ui.waitMessage) {
+    waitLoad = ui.waitMessage(document.body);
+}
+
+window.tr = function(id) {
+    return (LANG && LANG[id]) ? LANG[id] : id;
+};
+
+const translator = {
+    translate(el) {
+        if (!el || !el.dataset.txt) return;
+        const key = el.dataset.txt;
+        const text = tr(key);
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = text;
+        }
+        else if (el.hasAttribute('title')) {
+            el.title = text;
+        }
+        else {
+            el.textContent = text;
+        }
+    },
+    init() {
+        document.querySelectorAll('[data-txt]').forEach(el => this.translate(el));
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(m => m.addedNodes.forEach(node => {
+                if (node.nodeType === 1) {
+                    if (node.dataset.txt) this.translate(node);
+                    node.querySelectorAll('[data-txt]').forEach(el => this.translate(el));
+                }
+            }));
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+};
+
+function loadLang(callback) {
+    fetch(baseUrl + '/lang')
+    .then(r => r.json())
+    .then(dict => {
+        LANG = dict;
+        translator.init();
+
+        document.body.classList.add('lang-loaded');
+
+        if (waitLoad && waitLoad.remove) waitLoad.remove();
+        if(callback) callback();
+    })
+    .catch(err => {
+        console.error("Erreur langue, mode secours activé");
+        LANG = { "BT_LOGIN": "Login", "HOME": "Maison" };
+        translator.init();
+
+        document.body.classList.add('lang-loaded');
+        if (waitLoad && waitLoad.remove) waitLoad.remove();
+        if(callback) callback();
+    });
+}
 var errors = [
-    { code: -10, desc: "Pin setting in use for Transceiver.  Output pins cannot be re-used." },
-    { code: -11, desc: "Pin setting in use for Ethernet Adapter.  Output pins cannot be re-used." },
-    { code: -12, desc: "Pin setting in use on another motor.  Output pins cannot be re-used." },
-    { code: -21, desc: "Git Update: Flash write failed." },
-    { code: -22, desc: "Git Update: Flash erase failed." },
-    { code: -23, desc: "Git Update: Flash read failed." },
-    { code: -24, desc: "Git Update: Not enough space." },
-    { code: -25, desc: "Git Update: Invalid file size given." },
-    { code: -26, desc: "Git Update: Stream read timeout." },
-    { code: -27, desc: "Git Update: MD5 check failed." },
-    { code: -28, desc: "Git Update: Wrong Magic Byte." },
-    { code: -29, desc: "Git Update: Could not activate firmware." },
-    { code: -30, desc: "Git Update: Partition could not be found." },
-    { code: -31, desc: "Git Update: Bad Argument." },
-    { code: -32, desc: "Git Update: Aborted." },
-    { code: -40, desc: "Git Download: Http Error." },
-    { code: -41, desc: "Git Download: Buffer Allocation Error." },
-    { code: -42, desc: "Git Download: Download Connection Error." },
-    { code: -43, desc: 'Git Download: Timeout Error.' }
-]
+    { code: -10, key: 'ERR_PIN_TRANSCEIVER' },
+    { code: -11, key: 'ERR_PIN_ETHERNET' },
+    { code: -12, key: 'ERR_PIN_MOTOR' },
+    { code: -21, key: 'ERR_GIT_FLASH_WRITE' },
+    { code: -22, key: 'ERR_GIT_FLASH_ERASE' },
+    { code: -23, key: 'ERR_GIT_FLASH_READ' },
+    { code: -24, key: 'ERR_GIT_SPACE' },
+    { code: -25, key: 'ERR_GIT_FILE_SIZE' },
+    { code: -26, key: 'ERR_GIT_TIMEOUT' },
+    { code: -27, key: 'ERR_GIT_MD5' },
+    { code: -28, key: 'ERR_GIT_MAGIC_BYTE' },
+    { code: -29, key: 'ERR_GIT_ACTIVATE' },
+    { code: -30, key: 'ERR_GIT_PARTITION' },
+    { code: -31, key: 'ERR_GIT_ARGUMENT' },
+    { code: -32, key: 'ERR_GIT_ABORTED' },
+    { code: -40, key: 'ERR_GIT_HTTP' },
+    { code: -41, key: 'ERR_GIT_BUFFER' },
+    { code: -42, key: 'ERR_GIT_CONNECT' },
+    { code: -43, key: 'ERR_GIT_DL_TIMEOUT' }
+].map(err => {
+
+    return {
+        code: err.code,
+        key: err.key,
+        get desc() { return tr(this.key); }
+    };
+});
 document.oncontextmenu = (event) => {
     if (event.target && event.target.tagName.toLowerCase() === 'input' && (event.target.type.toLowerCase() === 'text' || event.target.type.toLowerCase() === 'password'))
         return;
@@ -92,7 +160,7 @@ Number.prototype.fmt = function (format, empty) {
     let tok = ['#', '0'];
     let pfx = '', sfx = '', fmt = format.replace(/[^#\.0\,]/g, '');
     let dec = fmt.lastIndexOf('.') > 0 ? fmt.length - (fmt.lastIndexOf('.') + 1) : 0,
-        fw = '', fd = '', vw = '', vd = '', rw = '', rd = '';
+    fw = '', fd = '', vw = '', vd = '', rw = '', rd = '';
     let val = String(Math.abs(this).round(dec));
     let ret = '', commaChar = ',', decChar = '.';
     for (var i = 0; i < format.length; i++) {
@@ -175,8 +243,7 @@ Number.prototype.fmt = function (format, empty) {
     if (rd.length === 0 && rw.length === 0) return '';
     return pfx + rw + rd + sfx;
 };
-var baseUrl = window.location.protocol === 'file:' ? `http://${hst}` : '';
-//var baseUrl = '';
+
 function makeBool(val) {
     if (typeof val === 'boolean') return val;
     if (typeof val === 'undefined') return false;
@@ -290,23 +357,23 @@ function getJSONSync(url, cb) {
         }
         if (typeof overlay !== 'undefined') overlay.remove();
     };
-    
-    xhr.onerror = (evt) => {
-        let err = {
-            htmlError: xhr.status || 500,
-            service: `GET ${url}`
+
+        xhr.onerror = (evt) => {
+            let err = {
+                htmlError: xhr.status || 500,
+                service: `GET ${url}`
+            };
+            if (typeof err.desc === 'undefined') err.desc = xhr.statusText || httpStatusText[xhr.status || 500];
+            cb(err, null);
+            if (typeof overlay !== 'undefined') overlay.remove();
         };
-        if (typeof err.desc === 'undefined') err.desc = xhr.statusText || httpStatusText[xhr.status || 500];
-        cb(err, null);
-        if (typeof overlay !== 'undefined') overlay.remove();
-    };
-    xhr.onabort = (evt) => {
-        console.log('Aborted');
-        if (typeof overlay !== 'undefined') overlay.remove();
-    };
-    xhr.open('GET', baseUrl.length > 0 ? `${baseUrl}${url}` : url, true);
-    xhr.setRequestHeader('apikey', security.apiKey);
-    xhr.send();
+            xhr.onabort = (evt) => {
+                console.log('Aborted');
+                if (typeof overlay !== 'undefined') overlay.remove();
+            };
+                xhr.open('GET', baseUrl.length > 0 ? `${baseUrl}${url}` : url, true);
+                xhr.setRequestHeader('apikey', security.apiKey);
+                xhr.send();
 }
 function getText(url, cb) {
     let xhr = new XMLHttpRequest();
@@ -469,7 +536,9 @@ async function initSockets() {
     ui.waitMessage(document.getElementById('divContainer')).classList.add('socket-wait');
     let host = window.location.protocol === 'file:' ? hst : window.location.hostname;
     try {
-        socket = new WebSocket(`ws://${host}:8080/`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const port = window.location.protocol === 'https:' ? '' : ':8080';
+        socket = new WebSocket(`${protocol}//${host}${port}/`);
         socket.onmessage = (evt) => {
             if (evt.data.startsWith('42')) {
                 let ndx = evt.data.indexOf(',');
@@ -534,7 +603,6 @@ async function initSockets() {
                         case 'frequencyScan':
                             somfy.procFrequencyScan(msg);
                             break;
-
                     }
                 } catch (err) {
                     console.log({ eventName: eventName, data: data, err: err });
@@ -567,11 +635,6 @@ async function initSockets() {
                     await somfy.loadSomfy();
                     await mqtt.loadMQTT();
                     if (ui.isConfigOpen()) socket.send('join:0');
-
-                    //await general.init();
-                    //await somfy.init();
-                    //await mqtt.init();
-                    //await wifi.init();
                 })();
             }
         };
@@ -603,15 +666,12 @@ async function initSockets() {
                         }
                         let spanAttempts = document.getElementById('spanSocketAttempts');
                         if (spanAttempts) spanAttempts.innerHTML = connectFailed.fmt("#,##0");
-
                     }
                     else {
                         console.log('Connecting socket in .5 seconds');
                         tConnect = setTimeout(async () => { await reopenSocket(); }, 500);
                     }
-
                 }
-
             }
             connecting = false;
         };
@@ -625,6 +685,92 @@ async function initSockets() {
         tConnect = setTimeout(async () => { await reopenSocket(); }, 5000);
     }
 }
+function clearOverlays() {
+    const selectors = ['.inst-overlay', '.info-message', '.prompt-message', '.error-message', '.instructions', '#divGitInstall'];
+    selectors.forEach(s => document.querySelectorAll(s).forEach(el => el.remove()));
+}
+
+/**
+ * Gère la synchronisation visuelle entre Sidebar et Tabs
+ * @param {string} groupId - L'ID du groupe à activer
+ * @param {boolean} isSubTab - Si c'est un sous-onglet
+ */
+function syncNavigationState(groupId, isSubTab = false) {
+    if (!groupId) return;
+
+    if (!isSubTab) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.getAttribute('data-grpid') === groupId));
+        document.querySelectorAll('.submenu').forEach(s => {
+            const isTarget = s.previousElementSibling?.getAttribute('data-grpid') === groupId;
+            s.style.display = isTarget ? 'flex' : 'none';
+        });
+        document.querySelectorAll('.tab-container > span').forEach(t => t.classList.toggle('selected', t.getAttribute('data-grpid') === groupId));
+    } else {
+        document.querySelectorAll('.sub-nav-item').forEach(i => i.classList.toggle('active', i.getAttribute('data-grpid') === groupId));
+        document.querySelectorAll('.subtab-container > span').forEach(t => t.classList.toggle('selected', t.getAttribute('data-grpid') === groupId));
+    }
+}
+function bindNavigation() {
+    document.querySelectorAll('.nav-item, .sub-nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            clearOverlays();
+            const groupId = item.getAttribute('data-grpid');
+            const isSub = item.classList.contains('sub-nav-item');
+
+            if (groupId === 'divHomePnl') {
+                if (typeof ui !== 'undefined') ui.setHomePanel();
+                syncNavigationState(groupId);
+                return;
+            }
+            if (typeof ui !== 'undefined' && !ui.isConfigOpen()) {
+                if (typeof security !== 'undefined' && !security.authenticated && security.type !== 0) {
+                    document.getElementById('divContainer').addEventListener('afterlogin', () => {
+                        if (security.authenticated) {
+                            ui.setConfigPanel();
+                            item.click();
+                        }
+                    }, { once: true });
+                    security.authUser();
+                    return;
+                }
+                ui.setConfigPanel();
+            }
+            const selector = isSub ? `.subtab-container > span[data-grpid="${groupId}"]` : `.tab-container > span[data-grpid="${groupId}"]`;
+            const originalTab = document.querySelector(selector);
+
+            if (originalTab) {
+                originalTab.click();
+            } else if (!isSub) {
+                syncNavigationState(groupId);
+                const firstSub = item.nextElementSibling?.querySelector('.sub-nav-item');
+                if (firstSub) firstSub.click();
+            }
+        });
+    });
+    document.querySelectorAll('.tab-container > span, .subtab-container > span').forEach(tab => {
+        tab.addEventListener('click', (evt) => {
+            const groupId = tab.getAttribute('data-grpid');
+            const isSub = tab.parentElement.classList.contains('subtab-container');
+
+            syncNavigationState(groupId, isSub);
+
+            if (!isSub) {
+                if (groupId !== 'divSomfySettings' && typeof somfy !== 'undefined') {
+                    somfy.showEditShade(false); somfy.showEditGroup(false);
+                }
+                if (groupId === 'divNetworkSettings' && typeof wifi !== 'undefined') wifi.loadNetwork();
+
+                document.querySelectorAll('.tab-container > span').forEach(t => {
+                    const panel = document.getElementById(t.getAttribute('data-grpid'));
+                    if (panel) panel.style.display = (t.getAttribute('data-grpid') === groupId) ? '' : 'none';
+                });
+            } else {
+                if (typeof ui !== 'undefined') ui.selectTab(tab);
+            }
+        });
+    });
+}
 async function reopenSocket() {
     if (tConnect) clearTimeout(tConnect);
     tConnect = null;
@@ -637,6 +783,17 @@ async function init() {
     somfy.init();
     mqtt.init();
     firmware.init();
+    somfy.setStep('freq', 1);
+    somfy.setStep('bandwidth', 1);
+    somfy.setStep('deviation', 1);
+
+    bindNavigation();
+
+    // État initial (Home actif par défaut)
+    if (typeof ui !== 'undefined' && !ui.isConfigOpen()) {
+        const hBtn = document.querySelector('.nav-item[data-grpid="divHomePnl"]');
+        if (hBtn) syncNavigationState('divHomePnl'); // Utilise la nouvelle fonction de synchro
+    }
 }
 class UIBinder {
     setValue(el, val) {
@@ -667,9 +824,9 @@ class UIBinder {
                             break;
                     }
                     break;
-                default:
-                    el.value = val;
-                    break;
+                        default:
+                            el.value = val;
+                            break;
             }
         }
         else if (el instanceof HTMLSelectElement) {
@@ -709,9 +866,9 @@ class UIBinder {
                             break;
                     }
                     break;
-                default:
-                    val = el.value;
-                    break;
+                        default:
+                            val = el.value;
+                            break;
             }
         }
         else if (el instanceof HTMLSelectElement) val = el.value;
@@ -741,24 +898,24 @@ class UIBinder {
                 else {
                     switch (fld.getAttribute('data-fmttype')) {
                         case 'time':
-                            {
-                                var dt = new Date();
-                                dt.setHours(0, 0, 0);
-                                dt.addMinutes(tval);
-                                tval = dt.fmt(fld.getAttribute('data-fmtmask'), fld.getAttribute('data-fmtempty') || '');
-                            }
-                            break;
+                        {
+                            var dt = new Date();
+                            dt.setHours(0, 0, 0);
+                            dt.addMinutes(tval);
+                            tval = dt.fmt(fld.getAttribute('data-fmtmask'), fld.getAttribute('data-fmtempty') || '');
+                        }
+                        break;
                         case 'date':
                         case 'datetime':
-                            {
-                                let dt = new Date(tval);
-                                tval = dt.fmt(fld.getAttribute('data-fmtmask'), fld.getAttribute('data-fmtempty') || '');
-                            }
-                            break;
+                        {
+                            let dt = new Date(tval);
+                            tval = dt.fmt(fld.getAttribute('data-fmtmask'), fld.getAttribute('data-fmtempty') || '');
+                        }
+                        break;
                         case 'number':
                             if (typeof tval !== 'number') tval = parseFloat(tval);
                             tval = tval.fmt(fld.getAttribute('data-fmtmask'), fld.getAttribute('data-fmtempty') || '');
-                            break;
+                        break;
                         case 'duration':
                             tval = ui.formatDuration(tval, $this.attr('data-fmtmask'));
                             break;
@@ -962,7 +1119,7 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Attempts: </span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Could not connect to server</div><hr></hr><div style="font-size:.7em">' + msg + '</div></div>';
+        div.innerHTML = `<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>${tr("SOCKET_ATTEMPTS")}</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>${tr("ERR_SOCKET_CONNECT")}</div><hr><div style="font-size:.7em">${msg}</div></div>`;
         div.classList.add('error-message');
         div.classList.add('socket-error');
         div.classList.add('message-overlay');
@@ -975,9 +1132,9 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div class="inner-error">' + msg + '</div><div class="sub-message"></div><button type="button" onclick="ui.clearErrors();">Close</button></div>';
-        div.classList.add('error-message');
-        div.classList.add('message-overlay');
+        div.innerHTML = `
+        <div class="message-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton" type="button" onclick="ui.clearErrors();">${tr('BT_CLOSE')}</button></div>`;
+        div.classList.add('error-message', 'message-overlay');
         el.appendChild(div);
         return div;
     }
@@ -988,7 +1145,8 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div class="prompt-text">' + msg + '</div><div class="sub-message"></div><div class="button-container"><button id="btnYes" type="button">Yes</button><button type="button" onclick="ui.clearErrors();">No</button></div></div>';
+        div.innerHTML = `
+        <div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" class="bouton" type="button">${tr('BT_YES')}</button><button class="boutonOutline" type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
         div.classList.add('prompt-message');
         div.classList.add('message-overlay');
         el.appendChild(div);
@@ -1002,28 +1160,55 @@ class UIBinder {
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = '<div class="info-text">' + msg + '</div><div class="sub-message"></div><div class="button-container" style="text-align:center;"><button id="btnOk" type="button" style="width:40%;display:inline-block;">Ok</button></div></div>';
-        div.classList.add('info-message');
-        div.classList.add('message-overlay');
+        div.innerHTML = `
+        <div class="message-content">
+        <div class="info-text">${msg}</div>
+        <div class="sub-message"></div>
+        <div class="button-container-row">
+        <button id="btnOk" class="bouton" type="button">${tr('BT_OK')}</button>
+        </div>
+        </div>`;
+        div.classList.add('info-message', 'message-overlay');
         el.appendChild(div);
-        if (typeof onOk === 'function') div.querySelector('#btnOk').addEventListener('click', onOk);
-        else div.querySelector('#btnOk').addEventListener('click', (e) => { div.remove() });
-        //div.querySelector('#btnYes').addEventListener('click', onYes);
-        return div;
 
+        const btnOk = div.querySelector('#btnOk');
+        if (typeof onOk === 'function') {
+            btnOk.addEventListener('click', onOk);
+        } else {
+            btnOk.addEventListener('click', () => div.remove());
+        }
+        return div;
     }
     clearErrors() {
         let errors = document.querySelectorAll('div.message-overlay');
         if (errors && errors.length > 0) errors.forEach((el) => { el.remove(); });
     }
     selectTab(elTab) {
-        for (let tab of elTab.parentElement.children) {
-            if (tab.classList.contains('selected')) tab.classList.remove('selected');
-            document.getElementById(tab.getAttribute('data-grpid')).style.display = 'none';
+        const groupId = elTab.getAttribute('data-grpid');
+        if (!groupId) return;
+
+        const siblings = elTab.parentElement.querySelectorAll('span, a');
+        for (let sibling of siblings) {
+            sibling.classList.remove('selected', 'active');
+
+            let sid = sibling.getAttribute('data-grpid');
+            if (sid && sid !== groupId) {
+                let section = document.getElementById(sid);
+                if (section) section.style.display = 'none';
+            }
         }
-        if (!elTab.classList.contains('selected')) elTab.classList.add('selected');
-        document.getElementById(elTab.getAttribute('data-grpid')).style.display = '';
+        elTab.classList.add(elTab.classList.contains('sub-nav-item') ? 'active' : 'selected');
+
+        const targetSection = document.getElementById(groupId);
+        if (targetSection) targetSection.style.display = '';
     }
+
+
+
+
+
+
+
     wizSetPrevStep(el) { this.wizSetStep(el, Math.max(this.wizCurrentStep(el) - 1, 1)); }
     wizSetNextStep(el) { this.wizSetStep(el, this.wizCurrentStep(el) + 1); }
     wizSetStep(el, step) {
@@ -1031,10 +1216,10 @@ class UIBinder {
         let max = parseInt(el.getAttribute('data-maxsteps'), 10);
         if (!isNaN(max)) {
             let next = el.querySelector(`#btnNextStep`);
-            if (next) next.style.display = max < step ? 'inline-block' : 'none';
+            if (next) next.style.display = max < step ? 'flex' : 'none';
         }
         let prev = el.querySelector(`#btnPrevStep`);
-        if (prev) prev.style.display = step <= 1 ? 'none' : 'inline-block';
+        if (prev) prev.style.display = step <= 1 ? 'none' : 'flex';
         if (curr !== step) {
             el.setAttribute('data-stepid', step);
             let evt = new CustomEvent('stepchanged', { detail: { oldStep: curr, newStep: step }, bubbles: true, cancelable: true, composed: false });
@@ -1043,76 +1228,59 @@ class UIBinder {
     }
     wizCurrentStep(el) { return parseInt(el.getAttribute('data-stepid') || 1, 10); }
     pinKeyPressed(evt) {
-        let parent = evt.srcElement.parentElement;
-        let digits = parent.querySelectorAll('.pin-digit');
+        let el = evt.srcElement;
+        let parent = el.parentElement;
+        let digits = Array.from(parent.querySelectorAll('.pin-digit'));
+        let index = digits.indexOf(el);
+
         switch (evt.key) {
             case 'Backspace':
-                setTimeout(() => {
-                    // Focus to the previous element.
-                    for (let i = 0; i < digits.length; i++) {
-                        if (digits[i] === evt.srcElement && i > 0) {
-                            digits[i - 1].focus();
-                            break;
-                        }
-                    }
-                }, 0);
+                if (el.value === '' && index > 0) {
+                    digits[index - 1].focus();
+                }
                 return;
             case 'ArrowLeft':
-                setTimeout(() => {
-                    for (let i = 0; i < digits.length; i++) {
-                        if (digits[i] === evt.srcElement && i > 0) {
-                            digits[i - 1].focus();
-                        }
-                    }
-                });
-                return;
-            case 'CapsLock':
-            case 'Control':
-            case 'Shift':
-            case 'Enter':
-            case 'Tab':
+                if (index > 0) digits[index - 1].focus();
                 return;
             case 'ArrowRight':
-                if (evt.srcElement.value !== '') {
-                    setTimeout(() => {
-                        for (let i = 0; i < digits.length; i++) {
-                            if (digits[i] === evt.srcElement && i < digits.length - 1) {
-                                digits[i + 1].focus();
-                            }
-                        }
-                    });
-                }
+                if (index < digits.length - 1) digits[index + 1].focus();
                 return;
-            default:
-                if (evt.srcElement.value !== '') evt.srcElement.value = '';
-                setTimeout(() => {
-                    let e = new CustomEvent('digitentered', { detail: {}, bubbles: true, cancelable: true, composed: false });
-                    evt.srcElement.dispatchEvent(e);
-                }, 100);
-                break;
+            case 'Enter':
+                if (typeof security !== 'undefined') security.login();
+                return;
+            case 'Tab':
+            case 'Shift':
+            case 'Control':
+                return;
         }
-        setTimeout(() => {
-            // Focus to the first empty element.
-            for (let i = 0; i < digits.length; i++) {
-                if (digits[i].value === '') {
-                    if (digits[i] !== evt.srcElement) digits[i].focus();
-                    break;
-                }
-            }
-        }, 0);
 
-    }
-    pinDigitFocus(evt) {
-        // Find the first empty digit and place the cursor there.
-        if (evt.srcElement.value !== '') return;
-        let parent = evt.srcElement.parentElement;
-        let digits = parent.querySelectorAll('.pin-digit');
-        for (let i = 0; i < digits.length; i++) {
-            if (digits[i].value === '') {
-                if (digits[i] !== evt.srcElement) digits[i].focus();
-                break;
-            }
+        // Si ce n'est pas un chiffre, on bloque
+        if (!/^\d$/.test(evt.key)) {
+            evt.preventDefault();
+            return;
         }
+
+        // Si on tape un chiffre
+        el.value = ''; // On vide pour accepter la nouvelle valeur
+
+        // On attend un micro-instant que le caractère soit écrit pour passer au suivant
+        setTimeout(() => {
+            if (index < digits.length - 1) {
+                digits[index + 1].focus();
+            }
+
+            // --- VERIFICATION FINALE ---
+            const pin = digits.map(d => d.value).join('');
+            if (pin.length === 4) {
+                console.log("PIN complet détecté, connexion...");
+                if (typeof security !== 'undefined') security.login();
+            }
+        }, 10);
+    }
+
+    pinDigitFocus(evt) {
+        // Sélectionne le contenu pour permettre d'écraser le chiffre si on clique dessus
+        evt.srcElement.select();
     }
     isConfigOpen() { return window.getComputedStyle(document.getElementById('divConfigPnl')).display !== 'none'; }
     setConfigPanel() {
@@ -1121,7 +1289,9 @@ class UIBinder {
         let divHome = document.getElementById('divHomePnl');
         divHome.style.display = 'none';
         divCfg.style.display = '';
-        document.getElementById('icoConfig').className = 'icss-home';
+        somfy.checkEmptyState();
+        document.querySelector('#btnConfig use').setAttribute('xlink:href', '#icon-tabHome');
+
         if (sockIsOpen) socket.send('join:0');
         let overlay = ui.waitMessage(document.getElementById('divSecurityOptions'));
         overlay.style.borderRadius = '5px';
@@ -1140,7 +1310,8 @@ class UIBinder {
         let divHome = document.getElementById('divHomePnl');
         divHome.style.display = '';
         divCfg.style.display = 'none';
-        document.getElementById('icoConfig').className = 'icss-gear';
+        somfy.checkEmptyState();
+        document.querySelector('#btnConfig use').setAttribute('xlink:href', '#icon-tabSettings');
         if (sockIsOpen) socket.send('leave:0');
         general.setSecurityConfig({ type: 0, username: '', password: '', pin: '', permissions: 0 });
     }
@@ -1152,16 +1323,44 @@ class UIBinder {
                 document.getElementById('divContainer').addEventListener('afterlogin', (evt) => {
                     if (security.authenticated) this.setConfigPanel();
                 }, { once: true });
-                security.authUser();
+                    security.authUser();
             }
             else this.setConfigPanel();
         }
         somfy.showEditShade(false);
         somfy.showEditGroup(false);
     }
+    showNetworkConfig() {
+        this.setConfigPanel();
+        const tab = document.querySelector('.tab-container [data-grpid="divNetworkSettings"]');
+        if (tab) {
+            this.selectTab(tab);
+            if (typeof wifi !== 'undefined') wifi.loadNetwork();
+        }
+    }
+    showRadioConfig() {
+        this.setConfigPanel();
+        const tab = document.querySelector('.tab-container [data-grpid="divRadioSettings"]');
+        if (tab) this.selectTab(tab);
+    }
+    showSystemConfig() {
+        this.setConfigPanel();
+        const tab = document.querySelector('.tab-container [data-grpid="divSystemSettings"]');
+        if (tab) this.selectTab(tab);
+    }
+    showShadeConfig() {
+        this.setConfigPanel();
+        const parentTab = document.querySelector('.tab-container [data-grpid="divSomfySettings"]');
+        if (parentTab) this.selectTab(parentTab);
+        const motorTab = document.querySelector('.subtab-container [data-grpid="divSomfyMotors"]');
+        if (motorTab) this.selectTab(motorTab);
+        if (typeof somfy !== 'undefined') {
+            somfy.showEditShade(true);
+            somfy.openEditShade();
+        }
+    }
 }
 var ui = new UIBinder();
-
 class Security {
     type = 0;
     authenticated = false;
@@ -1182,34 +1381,54 @@ class Security {
         }
     }
     async loadContext() {
-        let pnl = document.getElementById('divUnauthenticated');
+        const pnl = document.getElementById('divUnauthenticated');
+        if (!pnl) return;
+
+        pnl.style.display = 'none';
         pnl.querySelector('#loginButtons').style.display = 'none';
         pnl.querySelector('#divLoginPassword').style.display = 'none';
         pnl.querySelector('#divLoginPin').style.display = 'none';
-        await new Promise((resolve, reject) => {
-            getJSONSync('/loginContext', (err, ctx) => {
-                pnl.querySelector('#loginButtons').style.display = '';
-                resolve();
-                if (err) ui.serviceError(err);
-                else {
-                    console.log(ctx);
-                    document.getElementById('divContainer').setAttribute('data-securitytype', ctx.type);
+
+        return new Promise((resolve) => {
+            loadLang(() => {
+                getJSONSync('/loginContext', (err, ctx) => {
+                    if (err) {
+                        ui.serviceError(err);
+                        resolve();
+                        return;
+                    }
+
+                    console.log("Contexte reçu:", ctx);
                     this.type = ctx.type;
                     this.permissions = ctx.permissions;
-                    switch (ctx.type) {
-                        case 1:
-                            pnl.querySelector('#divLoginPin').style.display = '';
-                            pnl.querySelector('#divLoginPassword').style.display = 'none';
-                            pnl.querySelector('.pin-digit[data-bind="login.pin.d0"]').focus();
-                            break;
-                        case 2:
-                            pnl.querySelector('#divLoginPassword').style.display = '';
-                            pnl.querySelector('#divLoginPin').style.display = 'none';
-                            pnl.querySelector('#fldLoginUsername').focus();
-                            break;
+
+                    const container = document.getElementById('divContainer');
+                    if (container) {
+                        container.setAttribute('data-securitytype', ctx.type);
                     }
-                    pnl.querySelector('#fldLoginType').value = ctx.type;
-                }
+                    if (ctx.type !== 0) {
+                        pnl.querySelector('#loginButtons').style.display = '';
+
+                        switch (ctx.type) {
+                            case 1:
+                                pnl.querySelector('#divLoginPin').style.display = '';
+                                const pinFld = pnl.querySelector('.pin-digit[data-bind="login.pin.d0"]');
+                                if (pinFld) setTimeout(() => pinFld.focus(), 100);
+                                break;
+
+                            case 2:
+                                pnl.querySelector('#divLoginPassword').style.display = '';
+                                const userFld = pnl.querySelector('#fldLoginUsername');
+                                if (userFld) setTimeout(() => userFld.focus(), 100);
+                                break;
+                        }
+                        const typeFld = pnl.querySelector('#fldLoginType');
+                        if (typeFld) typeFld.value = ctx.type;
+
+                        pnl.style.display = 'flex';
+                    }
+                    resolve();
+                });
             });
         });
     }
@@ -1250,7 +1469,6 @@ class Security {
                 console.log(log);
                 if (log.success) {
                     if (typeof socket === 'undefined' || !socket) (async () => { await initSockets(); })();
-                    //ui.setMode(mode);
 
                     document.getElementById('divUnauthenticated').style.display = 'none';
                     document.getElementById('divAuthenticated').style.display = '';
@@ -1265,20 +1483,60 @@ class Security {
             }
         });
     }
+    toggleFieldPassword(fieldId, el) {
+        const fld = document.getElementById(fieldId);
+        const ico = el.querySelector('use'); // On trouve l'icône à l'intérieur du div cliqué
+
+        if (fld.type === 'password') {
+            fld.type = 'text';
+            if(ico) ico.setAttribute('href', '#icon-eyeOn');
+        } else {
+            fld.type = 'password';
+            if(ico) ico.setAttribute('href', '#icon-eyeOff');
+        }
+    }
 }
 var security = new Security();
 
 class General {
-    initialized = false; 
+    initialized = false;
     appVersion = 'v2.4.7';
     reloadApp = false;
     init() {
         if (this.initialized) return;
+
+        const savedTheme = localStorage.getItem('themeMode') || '0';
+        this.applyTheme(savedTheme);
+        const savedColor = localStorage.getItem('accentColor');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--accent-color', savedColor);
+        }
         this.setAppVersion();
         this.setTimeZones();
         if (sockIsOpen && ui.isConfigOpen()) socket.send('join:0');
-        ui.toElement(document.getElementById('divSystemSettings'), { general: { hostname: 'ESPSomfyRTS', username: '', password: '', posixZone: 'UTC0', ntpServer: 'pool.ntp.org' } });
+        ui.toElement(document.getElementById('divSystemSettings'), {
+            general: { hostname: 'ESPSomfyRTS', username: '', password: '', posixZone: 'UTC0', ntpServer: 'pool.ntp.org' }
+        });
+
         this.initialized = true;
+    }
+    applyTheme(val) {
+        if (val === '1') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (val === '2') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        }
+        const sel = document.getElementById('selThemeMode');
+        if (sel) sel.value = val;
+    }
+    onModeThemeChanged() {
+        const sel = document.getElementById('selThemeMode');
+        const val = sel.value;
+        localStorage.setItem('themeMode', val);
+        this.applyTheme(val);
     }
     getCookie(cname) {
         let n = cname + '=';
@@ -1304,125 +1562,158 @@ class General {
         document.location.reload();
     }
     timeZones = [
-    { city: 'Africa/Cairo', code: 'EET-2' },
-    { city: 'Africa/Johannesburg', code: 'SAST-2' },
-    { city: 'Africa/Juba', code: 'CAT-2' },
-    { city: 'Africa/Lagos', code: 'WAT-1' },
-    { city: 'Africa/Mogadishu', code: 'EAT-3' },
-    { city: 'Africa/Tunis', code: 'CET-1' },
-    { city: 'America/Adak', code: 'HST10HDT,M3.2.0,M11.1.0' },
-    { city: 'America/Anchorage', code: 'AKST9AKDT,M3.2.0,M11.1.0' },
-    { city: 'America/Asuncion', code: '<-04>4<-03>,M10.1.0/0,M3.4.0/0' },
-    { city: 'America/Bahia_Banderas', code: 'CST6CDT,M4.1.0,M10.5.0' },
-    { city: 'America/Barbados', code: 'AST4' },
-    { city: 'America/Bermuda', code: 'AST4ADT,M3.2.0,M11.1.0' },
-    { city: 'America/Cancun', code: 'EST5' },
-    { city: 'America/Central_Time', code: 'CST6CDT,M3.2.0,M11.1.0' },
-    { city: 'America/Chihuahua', code: 'MST7MDT,M4.1.0,M10.5.0' },
-    { city: 'America/Eastern_Time', code: 'EST5EDT,M3.2.0,M11.1.0' },
-    { city: 'America/Godthab', code: '<-03>3<-02>,M3.5.0/-2,M10.5.0/-1' },
-    { city: 'America/Havana', code: 'CST5CDT,M3.2.0/0,M11.1.0/1' },
-    { city: 'America/Mexico_City', code: 'CST6' },
-    { city: 'America/Miquelon', code: '<-03>3<-02>,M3.2.0,M11.1.0' },
-    { city: 'America/Mountain_Time', code: 'MST7MDT,M3.2.0,M11.1.0' },
-    { city: 'America/Pacific_Time', code: 'PST8PDT,M3.2.0,M11.1.0' },
-    { city: 'America/Phoenix', code: 'MST7' },
-    { city: 'America/Santiago', code: '<-04>4<-03>,M9.1.6/24,M4.1.6/24' },
-    { city: 'America/St_Johns', code: 'NST3:30NDT,M3.2.0,M11.1.0' },
-    { city: 'Antarctica/Troll', code: '<+00>0<+02>-2,M3.5.0/1,M10.5.0/3' },
-    { city: 'Asia/Amman', code: 'EET-2EEST,M2.5.4/24,M10.5.5/1' },
-    { city: 'Asia/Beirut', code: 'EET-2EEST,M3.5.0/0,M10.5.0/0' },
-    { city: 'Asia/Colombo', code: '<+0530>-5:30' },
-    { city: 'Asia/Damascus', code: 'EET-2EEST,M3.5.5/0,M10.5.5/0' },
-    { city: 'Asia/Gaza', code: 'EET-2EEST,M3.4.4/50,M10.4.4/50' },
-    { city: 'Asia/Hong_Kong', code: 'HKT-8' },
-    { city: 'Asia/Jakarta', code: 'WIB-7' },
-    { city: 'Asia/Jayapura', code: 'WIT-9' },
-    { city: 'Asia/Jerusalem', code: 'IST-2IDT,M3.4.4/26,M10.5.0' },
-    { city: 'Asia/Kabul', code: '<+0430>-4:30' },
-    { city: 'Asia/Karachi', code: 'PKT-5' },
-    { city: 'Asia/Kathmandu', code: '<+0545>-5:45' },
-    { city: 'Asia/Kolkata', code: 'IST-5:30' },
-    { city: 'Asia/Makassar', code: 'WITA-8' },
-    { city: 'Asia/Manila', code: 'PST-8' },
-    { city: 'Asia/Seoul', code: 'KST-9' },
-    { city: 'Asia/Shanghai', code: 'CST-8' },
-    { city: 'Asia/Tehran', code: '<+0330>-3:30' },
-    { city: 'Asia/Tokyo', code: 'JST-9' },
-    { city: 'Atlantic/Azores', code: '<-01>1<+00>,M3.5.0/0,M10.5.0/1' },
-    { city: 'Australia/Adelaide', code: 'ACST-9:30ACDT,M10.1.0,M4.1.0/3' },
-    { city: 'Australia/Brisbane', code: 'AEST-10' },
-    { city: 'Australia/Darwin', code: 'ACST-9:30' },
-    { city: 'Australia/Eucla', code: '<+0845>-8:45' },
-    { city: 'Australia/Lord_Howe', code: '<+1030>-10:30<+11>-11,M10.1.0,M4.1.0' },
-    { city: 'Australia/Melbourne', code: 'AEST-10AEDT,M10.1.0,M4.1.0/3' },
-    { city: 'Australia/Perth', code: 'AWST-8' },
-    { city: 'Etc/GMT-1', code: '<+01>-1' },
-    { city: 'Etc/GMT-2', code: '<+02>-2' },
-    { city: 'Etc/GMT-3', code: '<+03>-3' },
-    { city: 'Etc/GMT-4', code: '<+04>-4' },
-    { city: 'Etc/GMT-5', code: '<+05>-5' },
-    { city: 'Etc/GMT-6', code: '<+06>-6' },
-    { city: 'Etc/GMT-7', code: '<+07>-7' },
-    { city: 'Etc/GMT-8', code: '<+08>-8' },
-    { city: 'Etc/GMT-9', code: '<+09>-9' },
-    { city: 'Etc/GMT-10',code: '<+10>-10' },
-    { city: 'Etc/GMT-11', code: '<+11>-11' },
-    { city: 'Etc/GMT-12', code: '<+12>-12' },
-    { city: 'Etc/GMT-13', code: '<+13>-13' },
-    { city: 'Etc/GMT-14', code: '<+14>-14' },
-    { city: 'Etc/GMT+0', code: 'GMT0' },
-    { city: 'Etc/GMT+1', code: '<-01>1' },
-    { city: 'Etc/GMT+2', code: '<-02>2' },
-    { city: 'Etc/GMT+3', code: '<-03>3' },
-    { city: 'Etc/GMT+4', code: '<-04>4' },
-    { city: 'Etc/GMT+5', code: '<-05>5' },
-    { city: 'Etc/GMT+6', code: '<-06>6' },
-    { city: 'Etc/GMT+7', code: '<-07>7' },
-    { city: 'Etc/GMT+8', code: '<-08>8' },
-    { city: 'Etc/GMT+9', code: '<-09>9' },
-    { city: 'Etc/GMT+10', code: '<-10>10' },
-    { city: 'Etc/GMT+11', code: '<-11>11' },
-    { city: 'Etc/GMT+12', code: '<-12>12' },
-    { city: 'Etc/UTC', code: 'UTC0' },
-    { city: 'Europe/Athens', code: 'EET-2EEST,M3.5.0/3,M10.5.0/4' },
-    { city: "Europe/Berlin", code: "CEST-1CET,M3.2.0/2:00:00,M11.1.0/2:00:00" },
-    { city: 'Europe/Brussels', code: 'CET-1CEST,M3.5.0,M10.5.0/3' },
-    { city: 'Europe/Chisinau', code: 'EET-2EEST,M3.5.0,M10.5.0/3' },
-    { city: 'Europe/Dublin', code: 'IST-1GMT0,M10.5.0,M3.5.0/1' },
-    { city: 'Europe/Lisbon',  code: 'WET0WEST,M3.5.0/1,M10.5.0' },
-    { city: 'Europe/London', code: 'GMT0BST,M3.5.0/1,M10.5.0' },
-    { city: 'Europe/Moscow', code: 'MSK-3' },
-    { city: 'Europe/Paris', code: 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00' },
-    { city: 'Indian/Cocos',  code: '<+0630>-6:30' },
-    { city: 'Pacific/Auckland', code: 'NZST-12NZDT,M9.5.0,M4.1.0/3' },
-    { city: 'Pacific/Chatham', code: '<+1245>-12:45<+1345>,M9.5.0/2:45,M4.1.0/3:45' },
-    { city: 'Pacific/Easter', code: '<-06>6<-05>,M9.1.6/22,M4.1.6/22' },
-    { city: 'Pacific/Fiji', code: '<+12>-12<+13>,M11.2.0,M1.2.3/99' },
-    { city: 'Pacific/Guam',  code: 'ChST-10' },
-    { city: 'Pacific/Honolulu', code: 'HST10' },
-    { city: 'Pacific/Marquesas', code: '<-0930>9:30' },
-    { city: 'Pacific/Midway',  code: 'SST11' },
-    { city: 'Pacific/Norfolk', code: '<+11>-11<+12>,M10.1.0,M4.1.0/3' }
+        { city: 'Africa/Cairo', code: 'EET-2' },
+        { city: 'Africa/Johannesburg', code: 'SAST-2' },
+        { city: 'Africa/Juba', code: 'CAT-2' },
+        { city: 'Africa/Lagos', code: 'WAT-1' },
+        { city: 'Africa/Mogadishu', code: 'EAT-3' },
+        { city: 'Africa/Tunis', code: 'CET-1' },
+        { city: 'America/Adak', code: 'HST10HDT,M3.2.0,M11.1.0' },
+        { city: 'America/Anchorage', code: 'AKST9AKDT,M3.2.0,M11.1.0' },
+        { city: 'America/Asuncion', code: '<-04>4<-03>,M10.1.0/0,M3.4.0/0' },
+        { city: 'America/Bahia_Banderas', code: 'CST6CDT,M4.1.0,M10.5.0' },
+        { city: 'America/Barbados', code: 'AST4' },
+        { city: 'America/Bermuda', code: 'AST4ADT,M3.2.0,M11.1.0' },
+        { city: 'America/Cancun', code: 'EST5' },
+        { city: 'America/Central_Time', code: 'CST6CDT,M3.2.0,M11.1.0' },
+        { city: 'America/Chihuahua', code: 'MST7MDT,M4.1.0,M10.5.0' },
+        { city: 'America/Eastern_Time', code: 'EST5EDT,M3.2.0,M11.1.0' },
+        { city: 'America/Godthab', code: '<-03>3<-02>,M3.5.0/-2,M10.5.0/-1' },
+        { city: 'America/Havana', code: 'CST5CDT,M3.2.0/0,M11.1.0/1' },
+        { city: 'America/Mexico_City', code: 'CST6' },
+        { city: 'America/Miquelon', code: '<-03>3<-02>,M3.2.0,M11.1.0' },
+        { city: 'America/Mountain_Time', code: 'MST7MDT,M3.2.0,M11.1.0' },
+        { city: 'America/Pacific_Time', code: 'PST8PDT,M3.2.0,M11.1.0' },
+        { city: 'America/Phoenix', code: 'MST7' },
+        { city: 'America/Santiago', code: '<-04>4<-03>,M9.1.6/24,M4.1.6/24' },
+        { city: 'America/St_Johns', code: 'NST3:30NDT,M3.2.0,M11.1.0' },
+        { city: 'Antarctica/Troll', code: '<+00>0<+02>-2,M3.5.0/1,M10.5.0/3' },
+        { city: 'Asia/Amman', code: 'EET-2EEST,M2.5.4/24,M10.5.5/1' },
+        { city: 'Asia/Beirut', code: 'EET-2EEST,M3.5.0/0,M10.5.0/0' },
+        { city: 'Asia/Colombo', code: '<+0530>-5:30' },
+        { city: 'Asia/Damascus', code: 'EET-2EEST,M3.5.5/0,M10.5.5/0' },
+        { city: 'Asia/Gaza', code: 'EET-2EEST,M3.4.4/50,M10.4.4/50' },
+        { city: 'Asia/Hong_Kong', code: 'HKT-8' },
+        { city: 'Asia/Jakarta', code: 'WIB-7' },
+        { city: 'Asia/Jayapura', code: 'WIT-9' },
+        { city: 'Asia/Jerusalem', code: 'IST-2IDT,M3.4.4/26,M10.5.0' },
+        { city: 'Asia/Kabul', code: '<+0430>-4:30' },
+        { city: 'Asia/Karachi', code: 'PKT-5' },
+        { city: 'Asia/Kathmandu', code: '<+0545>-5:45' },
+        { city: 'Asia/Kolkata', code: 'IST-5:30' },
+        { city: 'Asia/Makassar', code: 'WITA-8' },
+        { city: 'Asia/Manila', code: 'PST-8' },
+        { city: 'Asia/Seoul', code: 'KST-9' },
+        { city: 'Asia/Shanghai', code: 'CST-8' },
+        { city: 'Asia/Tehran', code: '<+0330>-3:30' },
+        { city: 'Asia/Tokyo', code: 'JST-9' },
+        { city: 'Atlantic/Azores', code: '<-01>1<+00>,M3.5.0/0,M10.5.0/1' },
+        { city: 'Australia/Adelaide', code: 'ACST-9:30ACDT,M10.1.0,M4.1.0/3' },
+        { city: 'Australia/Brisbane', code: 'AEST-10' },
+        { city: 'Australia/Darwin', code: 'ACST-9:30' },
+        { city: 'Australia/Eucla', code: '<+0845>-8:45' },
+        { city: 'Australia/Lord_Howe', code: '<+1030>-10:30<+11>-11,M10.1.0,M4.1.0' },
+        { city: 'Australia/Melbourne', code: 'AEST-10AEDT,M10.1.0,M4.1.0/3' },
+        { city: 'Australia/Perth', code: 'AWST-8' },
+        { city: 'Etc/GMT-1', code: '<+01>-1' },
+        { city: 'Etc/GMT-2', code: '<+02>-2' },
+        { city: 'Etc/GMT-3', code: '<+03>-3' },
+        { city: 'Etc/GMT-4', code: '<+04>-4' },
+        { city: 'Etc/GMT-5', code: '<+05>-5' },
+        { city: 'Etc/GMT-6', code: '<+06>-6' },
+        { city: 'Etc/GMT-7', code: '<+07>-7' },
+        { city: 'Etc/GMT-8', code: '<+08>-8' },
+        { city: 'Etc/GMT-9', code: '<+09>-9' },
+        { city: 'Etc/GMT-10',code: '<+10>-10' },
+        { city: 'Etc/GMT-11', code: '<+11>-11' },
+        { city: 'Etc/GMT-12', code: '<+12>-12' },
+        { city: 'Etc/GMT-13', code: '<+13>-13' },
+        { city: 'Etc/GMT-14', code: '<+14>-14' },
+        { city: 'Etc/GMT+0', code: 'GMT0' },
+        { city: 'Etc/GMT+1', code: '<-01>1' },
+        { city: 'Etc/GMT+2', code: '<-02>2' },
+        { city: 'Etc/GMT+3', code: '<-03>3' },
+        { city: 'Etc/GMT+4', code: '<-04>4' },
+        { city: 'Etc/GMT+5', code: '<-05>5' },
+        { city: 'Etc/GMT+6', code: '<-06>6' },
+        { city: 'Etc/GMT+7', code: '<-07>7' },
+        { city: 'Etc/GMT+8', code: '<-08>8' },
+        { city: 'Etc/GMT+9', code: '<-09>9' },
+        { city: 'Etc/GMT+10', code: '<-10>10' },
+        { city: 'Etc/GMT+11', code: '<-11>11' },
+        { city: 'Etc/GMT+12', code: '<-12>12' },
+        { city: 'Etc/UTC', code: 'UTC0' },
+        { city: 'Europe/Athens', code: 'EET-2EEST,M3.5.0/3,M10.5.0/4' },
+        { city: "Europe/Berlin", code: "CEST-1CET,M3.2.0/2:00:00,M11.1.0/2:00:00" },
+        { city: 'Europe/Brussels', code: 'CET-1CEST,M3.5.0,M10.5.0/3' },
+        { city: 'Europe/Chisinau', code: 'EET-2EEST,M3.5.0,M10.5.0/3' },
+        { city: 'Europe/Dublin', code: 'IST-1GMT0,M10.5.0,M3.5.0/1' },
+        { city: 'Europe/Lisbon',  code: 'WET0WEST,M3.5.0/1,M10.5.0' },
+        { city: 'Europe/London', code: 'GMT0BST,M3.5.0/1,M10.5.0' },
+        { city: 'Europe/Moscow', code: 'MSK-3' },
+        { city: 'Europe/Paris', code: 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00' },
+        { city: 'Indian/Cocos',  code: '<+0630>-6:30' },
+        { city: 'Pacific/Auckland', code: 'NZST-12NZDT,M9.5.0,M4.1.0/3' },
+        { city: 'Pacific/Chatham', code: '<+1245>-12:45<+1345>,M9.5.0/2:45,M4.1.0/3:45' },
+        { city: 'Pacific/Easter', code: '<-06>6<-05>,M9.1.6/22,M4.1.6/22' },
+        { city: 'Pacific/Fiji', code: '<+12>-12<+13>,M11.2.0,M1.2.3/99' },
+        { city: 'Pacific/Guam',  code: 'ChST-10' },
+        { city: 'Pacific/Honolulu', code: 'HST10' },
+        { city: 'Pacific/Marquesas', code: '<-0930>9:30' },
+        { city: 'Pacific/Midway',  code: 'SST11' },
+        { city: 'Pacific/Norfolk', code: '<+11>-11<+12>,M10.1.0,M4.1.0/3' }
     ];
     loadGeneral() {
-        let pnl = document.getElementById('divSystemOptions');
+        const pnl = document.getElementById('divSystemOptions');
+
         getJSONSync('/modulesettings', (err, settings) => {
             if (err) {
-                console.log(err);
+                console.error(err);
+                return;
             }
-            else {
-                console.log(settings);
+            console.log("Settings reçus:", settings);
+            if (typeof somfy !== 'undefined') somfy.initPins();
+
+            loadLang(() => {
                 document.getElementById('spanFwVersion').innerText = settings.fwVersion;
                 document.getElementById('spanHwVersion').innerText = settings.chipModel.length > 0 ? '-' + settings.chipModel : '';
                 document.getElementById('divContainer').setAttribute('data-chipmodel', settings.chipModel);
-                somfy.initPins();
-                general.setAppVersion();
+
+                this.setAppVersion();
                 ui.toElement(pnl, { general: settings });
-            }
+
+                if (typeof wifi !== 'undefined') wifi.init();
+
+            if (typeof somfy !== 'undefined') somfy.loadSomfy();
+            const langSelect = document.getElementById('langSelect');
+                if (langSelect) {
+                    langSelect.value = (settings.language === 0) ? 'fr' : 'en';
+                    langSelect.onchange = (e) => {
+                        this.onLanguageChanged(e.target.value);
+                    };
+                }
+                if (settings.accentColor) {
+                    document.documentElement.style.setProperty('--accent-color', settings.accentColor);
+                    localStorage.setItem('accentColor', settings.accentColor);
+
+                    const accentInput = document.getElementById('fldAccentColor');
+                    if (accentInput) {
+                        accentInput.value = settings.accentColor;
+                        accentInput.addEventListener('input', (e) => {
+                            document.documentElement.style.setProperty('--accent-color', e.target.value);
+                            localStorage.setItem('accentColor', e.target.value);
+                        });
+                    }
+                }
+            });
         });
     }
     loadLogin() {
+
+        const savedColor = localStorage.getItem('accentColor');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--accent-color', savedColor);
+        }
         getJSONSync('/loginContext', (err, ctx) => {
             if (err) ui.serviceError(err);
             else {
@@ -1466,20 +1757,21 @@ class General {
         let valid = true;
         let pnl = document.getElementById('divSystemSettings');
         let obj = ui.fromElement(pnl).general;
+        const msg = tr('ERR_HOSTNAME');
         if (typeof obj.hostname === 'undefined' || !obj.hostname || obj.hostname === '') {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'You must supply a valid Host Name.';
+            ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_HOSTNAME');
             valid = false;
         }
         if (valid && !/^[a-zA-Z0-9-]+$/.test(obj.hostname)) {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'The host name must only include numbers, letters, or dash.';
+            ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_HOSTNAME_CHARS');
             valid = false;
         }
         if (valid && obj.hostname.length > 32) {
-            ui.errorMessage('Invalid Host Name').querySelector('.sub-message').innerHTML = 'The maximum Host Name length is 32 characters.';
+            ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_HOSTNAME_LENGTH');
             valid = false;
         }
         if (valid && typeof obj.ntpServer === 'string' && obj.ntpServer.length > 64) {
-            ui.errorMessage('Invalid NTP Server').querySelector('.sub-message').innerHTML = 'The maximum NTP Server length is 64 characters.';
+            ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_NTP_LENGTH');
             valid = false;
         }
         if (valid) {
@@ -1490,7 +1782,6 @@ class General {
         }
     }
     setSecurityConfig(security) {
-        // We need to transform the security object so that it can be set to the configuration.
         let obj = {
             security: {
                 type: security.type, username: security.username, password: security.password,
@@ -1507,7 +1798,7 @@ class General {
         this.onSecurityTypeChanged();
     }
     rebootDevice() {
-        ui.promptMessage(document.getElementById('divContainer'), 'Are you sure you want to reboot the device?', () => {
+        ui.promptMessage(document.getElementById('divContainer'), tr('PROMPT_REBOOT_CONFIRM'), () => {
             if(typeof socket !== 'undefined') socket.close(3000, 'reboot');
             putJSONSync('/reboot', {}, (err, response) => {
                 document.getElementById('btnSaveGeneral').classList.remove('disabled');
@@ -1515,6 +1806,36 @@ class General {
             });
             ui.clearErrors();
         });
+    }
+    onLanguageChanged(lang) {
+        const sel = document.getElementById('langSelect');
+        if (sel) sel.disabled = true;
+        fetch(baseUrl + '/setLang?lang=' + lang)
+        .then(r => r.json())
+        .then(resp => {
+            if (resp.status === "ok") {
+                window.location.reload();
+            }
+        })
+        .catch(err => {
+            console.error("Erreur lors du changement de langue:", err);
+            if (sel) sel.disabled = false;
+        });
+    }
+    onModeThemeChanged() {
+        const sel = document.getElementById('selThemeMode');
+        const val = sel.value;
+
+        localStorage.setItem('themeMode', val);
+
+        if (val === '1') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (val === '2') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        }
     }
     onSecurityTypeChanged() {
         let pnl = document.getElementById('divSecurityOptions');
@@ -1535,7 +1856,6 @@ class General {
                 pnl.querySelector('#divPinSecurity').style.display = 'none';
                 pnl.querySelector('#divPasswordSecurity').style.display = '';
                 break;
-
         }
     }
     saveSecurity() {
@@ -1552,41 +1872,41 @@ class General {
         if (security.type === 1) { // Pin Entry
             // Make sure our pin is 4 digits.
             if (sec.pin.length !== 4) {
-                ui.errorMessage('Invalid Pin').querySelector('.sub-message').innerHTML = 'Pins must be exactly 4 alpha-numeric values in length.  Please enter a complete pin.';
+                ui.errorMessage(tr('ERR_PIN_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_PIN_INVALID_DESC');
                 return;
             }
-            confirm = '<p>Please keep your PIN safe and above all remember it.  The only way to recover a lost PIN is to completely reload the onboarding firmware which will wipe out your configuration.</p><p>Have you stored your PIN in a safe place?</p>';
+            confirm =  `<p>${tr('SAVESECURITY_PIN_WARNING')}</p><p>${tr('SAVESECURITY_PIN_CONFIRM')}</p>`;
         }
         else if (security.type === 2) { // Password
             if (sec.username.length === 0) {
-                ui.errorMessage('No Username Provided').querySelector('.sub-message').innerHTML = 'You must provide a username for password security.';
+                ui.errorMessage(tr('ERR_USERNAME_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_USERNAME_MISSING_DESC');
                 return;
             }
             if (sec.username.length > 32) {
-                ui.errorMessage('Invalid Username').querySelector('.sub-message').innerHTML = 'The maximum username length is 32 characters.';
+                ui.errorMessage(tr('ERR_USERNAME_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_USERNAME_INVALID_DESC');
                 return;
             }
 
             if (sec.password.length === 0) {
-                ui.errorMessage('No Password Provided').querySelector('.sub-message').innerHTML = 'You must provide a password for password security.';
+                ui.errorMessage(tr('ERR_PASSWORD_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_MISSING_DESC');
                 return;
             }
             if (sec.password.length > 32) {
-                ui.errorMessage('Invalid Password').querySelector('.sub-message').innerHTML = 'The maximum password length is 32 characters.';
+                ui.errorMessage(tr('ERR_PASSWORD_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_INVALID_DESC');
                 return;
             }
 
             if (security.repeatpassword.length === 0) {
-                ui.errorMessage('Re-enter Password').querySelector('.sub-message').innerHTML = 'You must re-enter the password in the Re-enter Password field.';
+                ui.errorMessage(tr('ERR_PASSWORD_CONFIRM_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_CONFIRM_MISSING_DESC');
                 return;
             }
             if (sec.password !== security.repeatpassword) {
-                ui.errorMessage('Passwords do not Match').querySelector('.sub-message').innerHTML = 'Please re-enter the password exactly as you typed it in the Re-enter Password field.';
+                ui.errorMessage(tr('ERR_PASSWORD_MISMATCH')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_MISMATCH_DESC');
                 return;
             }
-            confirm = '<p>Please keep your password safe and above all remember it.  The only way to recover a password is to completely reload the onboarding firmware which will wipe out your configuration.</p><p>Have you stored your username and password in a safe place?</p>';
+            confirm = `<p>${tr('SAVESECURITY_PASSWORD_WARNING')}</p><p>${tr('SAVESECURITY_PASSWORD_CONFIRM')}</p>`;
         }
-        let prompt = ui.promptMessage('Confirm Security', () => {
+        let prompt = ui.promptMessage(tr('PROMPT_SECURITY_CONFIRM'), () => {
             putJSONSync('/saveSecurity', sec, (err, objApiKey) => {
                 prompt.remove();
                 if (err) ui.serviceError(err);
@@ -1596,38 +1916,73 @@ class General {
             });
         });
         prompt.querySelector('.sub-message').innerHTML = confirm;
-
     }
 }
 var general = new General();
+
 class Wifi {
     initialized = false;
-    ethBoardTypes = [{ val: 0, label: 'Custom Config' },
-    { val: 7, label: 'EST-PoE-32 - Everything Smart', clk: 3, ct: 0, addr: 0, pwr: 12, mdc: 23, mdio: 18 },
-    { val: 3, label: 'ESP32-EVB - Olimex', clk: 0, ct: 0, addr: 0, pwr: -1, mdc: 23, mdio: 18 },
-    { val: 2, label: 'ESP32-POE - Olimex', clk: 3, ct: 0, addr: 0, pwr: 12, mdc: 23, mdio: 18 },
-    { val: 4, label: 'T-Internet POE - LILYGO', clk: 3, ct: 0, addr: 0, pwr: 16, mdc: 23, mdio: 18 },
-    { val: 5, label: 'wESP32 v7+ - Silicognition', clk: 0, ct: 2, addr: 0, pwr: -1, mdc: 16, mdio: 17 },
-    { val: 6, label: 'wESP32 < v7 - Silicognition', clk: 0, ct: 0, addr: 0, pwr: -1, mdc: 16, mdio: 17 },
-    { val: 1, label: 'WT32-ETH01 - Wireless Tag', clk: 0, ct: 0, addr: 1, pwr: 16, mdc: 23, mdio: 18 }
-    ];
-    ethClockModes = [{ val: 0, label: 'GPIO0 IN' }, { val: 1, label: 'GPIO0 OUT' }, { val: 2, label: 'GPIO16 OUT' }, { val: 3, label: 'GPIO17 OUT' }];
-    ethPhyTypes = [{ val: 0, label: 'LAN8720' }, { val: 1, label: 'TLK110' }, { val: 2, label: 'RTL8201' }, { val: 3, label: 'DP83848' }, { val: 4, label: 'DM9051' }, { val: 5, label: 'KZ8081' }];
+    ethBoardTypes = [];
+    ethClockModes = [];
+    ethPhyTypes = [];
+
     init() {
-        document.getElementById("divNetworkStrength").innerHTML = this.displaySignal(-100);
+        this.ethBoardTypes = [
+            { val: 0, label: tr("MANUAL_SETTINGS") || "Configuration Manuelle" },
+            { val: 7, label: 'EST-PoE-32 - Everything Smart', clk: 3, ct: 0, addr: 0, pwr: 12, mdc: 23, mdio: 18 },
+            { val: 3, label: 'ESP32-EVB - Olimex', clk: 0, ct: 0, addr: 0, pwr: -1, mdc: 23, mdio: 18 },
+            { val: 2, label: 'ESP32-POE - Olimex', clk: 3, ct: 0, addr: 0, pwr: 12, mdc: 23, mdio: 18 },
+            { val: 4, label: 'T-Internet POE - LILYGO', clk: 3, ct: 0, addr: 0, pwr: 16, mdc: 23, mdio: 18 },
+            { val: 5, label: 'wESP32 v7+ - Silicognition', clk: 0, ct: 2, addr: 0, pwr: -1, mdc: 16, mdio: 17 },
+            { val: 6, label: 'wESP32 < v7 - Silicognition', clk: 0, ct: 0, addr: 0, pwr: -1, mdc: 16, mdio: 17 },
+            { val: 1, label: 'WT32-ETH01 - Wireless Tag', clk: 0, ct: 0, addr: 1, pwr: 16, mdc: 23, mdio: 18 }
+        ];
+
+        this.ethClockModes = [
+            { val: 0, label: 'GPIO0 IN' },
+            { val: 1, label: 'GPIO0 OUT' },
+            { val: 2, label: 'GPIO16 OUT' },
+            { val: 3, label: 'GPIO17 OUT' }
+        ];
+
+        this.ethPhyTypes = [
+            { val: 0, label: 'LAN8720' },
+            { val: 1, label: 'TLK110' },
+            { val: 2, label: 'RTL8201' },
+            { val: 3, label: 'DP83848' },
+            { val: 4, label: 'DM9051' },
+            { val: 5, label: 'KZ8081' }
+        ];
+
+        const divStrength = document.getElementById("divNetworkStrength");
+        this.procWifiStrength({strength: -100, ssid: '', channel: -1});
+
         if (this.initialized) return;
-        let addr = [];
+
         this.loadETHDropdown(document.getElementById('selETHClkMode'), this.ethClockModes);
         this.loadETHDropdown(document.getElementById('selETHPhyType'), this.ethPhyTypes);
         this.loadETHDropdown(document.getElementById('selETHBoardType'), this.ethBoardTypes);
-        for (let i = 0; i < 32; i++) addr.push({ val: i, label: `PHY ${i}` });
+
+        let addr = [];
+        for (let i = 0; i < 32; i++) {
+            addr.push({ val: i, label: `PHY ${i}` });
+        }
         this.loadETHDropdown(document.getElementById('selETHAddress'), addr);
         this.loadETHPins(document.getElementById('selETHPWRPin'), 'power');
         this.loadETHPins(document.getElementById('selETHMDCPin'), 'mdc', 23);
         this.loadETHPins(document.getElementById('selETHMDIOPin'), 'mdio', 18);
+
         ui.toElement(document.getElementById('divNetAdapter'), {
-            wifi: {ssid:'', passphrase:''},
-            ethernet: { boardType: 1, wirelessFallback: false, dhcp: true, dns1: '', dns2: '', ip: '', gateway: '' }
+            wifi: { ssid: '', passphrase: '' },
+            ethernet: {
+                boardType: 1,
+                wirelessFallback: false,
+                dhcp: true,
+                dns1: '',
+                dns2: '',
+                ip: '',
+                gateway: ''
+            }
         });
         this.onETHBoardTypeChanged(document.getElementById('selETHBoardType'));
         this.initialized = true;
@@ -1676,37 +2031,42 @@ class Wifi {
                 document.getElementById('cbHardwired').checked = settings.connType >= 2;
                 document.getElementById('cbFallbackWireless').checked = settings.connType === 3;
                 ui.toElement(pnl, settings);
-                /*
-                if (settings.connType >= 2) {
-                    document.getElementById('divWiFiMode').style.display = 'none';
-                    document.getElementById('divEthernetMode').style.display = '';
-                    document.getElementById('divRoaming').style.display = 'none';
-                    document.getElementById('divFallbackWireless').style.display = 'inline-block';
-                }
-                else {
-                    document.getElementById('divWiFiMode').style.display = '';
-                    document.getElementById('divEthernetMode').style.display = 'none';
-                    document.getElementById('divFallbackWireless').style.display = 'none';
-                    document.getElementById('divRoaming').style.display = 'inline-block';
-                }
-                */
                 ui.toElement(document.getElementById('divDHCP'), settings);
                 document.getElementById('divETHSettings').style.display = settings.ethernet.boardType === 0 ? '' : 'none';
                 document.getElementById('divStaticIP').style.display = settings.ip.dhcp ? 'none' : '';
                 document.getElementById('spanCurrentIP').innerHTML = settings.ip.ip;
+                this.updateStatusBadge(settings);
                 this.useEthernetClicked();
                 this.hiddenSSIDClicked();
             }
         });
+    }
+    updateStatusBadge(settings) {
+        const badge = document.querySelector('.status-badge');
+        if (!badge) return;
 
+        const connType = parseInt(settings.connType);
+        let statusText = "WiFi";
+
+        if (connType >= 2) {
+            const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined)
+            ? parseInt(settings.ethernet.PWRPin)
+            : -1;
+
+            statusText = (pwrPin !== -1) ? "PoE" : "LAN";
+        }
+        badge.innerHTML = statusText;
+        badge.setAttribute('data-type', statusText.toLowerCase());
     }
     useEthernetClicked() {
         let useEthernet = document.getElementById('cbHardwired').checked;
         document.getElementById('divWiFiMode').style.display = useEthernet ? 'none' : '';
+        document.getElementById('hrIdName').style.display = useEthernet ? '' : 'none';
         document.getElementById('divEthernetMode').style.display = useEthernet ? '' : 'none';
-        document.getElementById('divFallbackWireless').style.display = useEthernet ? 'inline-block' : 'none';
-        document.getElementById('divRoaming').style.display = useEthernet ? 'none' : 'inline-block';
-        document.getElementById('divHiddenSSID').style.display = useEthernet ? 'none' : 'inline-block';
+        document.getElementById('divTypeCardMode').style.display = useEthernet ? '' : 'none';
+        document.getElementById('divFallbackWireless').style.display = useEthernet ? '' : 'none';
+        document.getElementById('divRoaming').style.display = useEthernet ? 'none' : '';
+        document.getElementById('divHiddenSSID').style.display = useEthernet ? 'none' : '';
     }
     hiddenSSIDClicked() {
         let hidden = document.getElementById('cbHiddenSSID').checked;
@@ -1714,48 +2074,85 @@ class Wifi {
         document.getElementById('cbRoaming').disabled = hidden;
     }
     async loadAPs() {
-        if (document.getElementById('btnScanAPs').classList.contains('disabled')) return;
-        document.getElementById('divAps').innerHTML = '<div style="display:flex;justify-content:center;align-items:center;"><div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>';
-        document.getElementById('btnScanAPs').classList.add('disabled');
-        //document.getElementById('btnConnectWiFi').classList.add('disabled');
+        const btnScan = document.getElementById('btnScanAPs');
+        const divAps = document.getElementById('divAps');
+
+        if (btnScan.classList.contains('disabled')) return;
+        divAps.innerHTML = `
+        <div class="no-wifi">
+        <div style="display:flex;justify-content:center;align-items:center;margin-bottom:10px;">
+        <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        </div>
+        <div>${tr("CONNECTION_SCANNING")}</div>
+        </div>`;
+
+        btnScan.classList.add('disabled');
+
         getJSON('/scanaps', (err, aps) => {
-            document.getElementById('btnScanAPs').classList.remove('disabled');
-            //document.getElementById('btnConnectWiFi').classList.remove('disabled');
-            console.log(aps);
-            if (err) {
-                this.displayAPs({ connected: { name: '', passphrase: '' }, accessPoints: [] });
-            }
-            else {
+            btnScan.classList.remove('disabled');
+
+            if (err || !aps || !aps.accessPoints) {
+                this.displayAPs({ accessPoints: [] });
+            } else {
                 this.displayAPs(aps);
             }
         });
     }
     displayAPs(aps) {
-        let div = '';
         let nets = [];
-        for (let i = 0; i < aps.accessPoints.length; i++) {
-            let ap = aps.accessPoints[i];
-            let p = nets.find(elem => elem.name === ap.name);
-            if (typeof p !== 'undefined' && p) {
-                p.channel = p.strength > ap.strength ? p.channel : ap.channel;
-                p.macAddress = p.strength > ap.strength ? p.macAddress : ap.macAddress;
-                p.strength = Math.max(p.strength, ap.strength);
+
+        if (aps && aps.accessPoints) {
+            for (let i = 0; i < aps.accessPoints.length; i++) {
+                let ap = aps.accessPoints[i];
+                let p = nets.find(elem => elem.name === ap.name);
+                if (p) {
+                    p.channel = p.strength > ap.strength ? p.channel : ap.channel;
+                    p.macAddress = p.strength > ap.strength ? p.macAddress : ap.macAddress;
+                    p.strength = Math.max(p.strength, ap.strength);
+                } else {
+                    nets.push(ap);
+                }
             }
-            else
-                nets.push(ap);
         }
-        // Sort by the best signal strength.
+
         nets.sort((a, b) => b.strength - a.strength);
-        for (let i = 0; i < nets.length; i++) {
-            let ap = nets[i];
-            div += `<div class="wifiSignal" onclick="wifi.selectSSID(this);" data-channel="${ap.channel}" data-encryption="${ap.encryption}" data-strength="${ap.strength}" data-mac="${ap.macAddress}"><span class="ssid">${ap.name}</span><span class="strength">${this.displaySignal(ap.strength)}</span></div>`;
+
+        let div = "";
+
+        if (nets.length > 0) {
+            div = `<div class="aps-title">${tr("CONNECTION_WIFI_AVAILABLE")}</div><hr class="aps-divider">`;
+            for (let i = 0; i < nets.length; i++) {
+                let ap = nets[i];
+                div += `
+                <div class="wifiSignal" onclick="wifi.selectSSID(this);" data-channel="${ap.channel}" data-encryption="${ap.encryption}" data-strength="${ap.strength}" data-mac="${ap.macAddress}">
+                <span class="ssid">${ap.name}</span>
+                <span class="strength">${this.displaySignal(ap.strength)}</span>
+                </div>`;
+            }
+        } else {
+            div = `
+            <div class="no-wifi" style="padding: 20px 10px; text-align: center;">
+            <div style="margin-bottom: 20px; color: #ff4444; font-weight: bold;">
+            ${tr("ERR_NO_WIFI_FOUND")}
+            </div>
+            <div class="button-container-row">
+            <button id="btnRetryWifi" class="bouton" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button>
+            <button id="btnCancelWifi" class="boutonOutline" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
+            </div>`;
         }
+
         let divAps = document.getElementById('divAps');
         divAps.setAttribute('data-lastloaded', new Date().getTime());
         divAps.innerHTML = div;
-        //document.getElementsByName('ssid')[0].value = aps.connected.name;
-        //document.getElementsByName('passphrase')[0].value = aps.connected.passphrase;
-        //this.procWifiStrength(aps.connected);
+    }
+
+    cancelScan() {
+        const btnScan = document.getElementById('btnScanAPs');
+        if (btnScan) btnScan.classList.remove('disabled');
+
+        const divAps = document.getElementById('divAps');
+        if (divAps) divAps.innerHTML = '';
+        if (typeof ui !== 'undefined' && ui.unlock) ui.unlock();
     }
     selectSSID(el) {
         let obj = {
@@ -1769,15 +2166,30 @@ class Wifi {
     }
     calcWaveStrength(sig) {
         let wave = 0;
-        if (sig > -90) wave++;
-        if (sig > -80) wave++;
-        if (sig > -70) wave++;
-        if (sig > -67) wave++;
-        if (sig > -30) wave++;
+        if (sig > -90) wave = 0;
+        if (sig > -80) wave = 1;
+        if (sig > -70) wave = 2;
+        if (sig > -60) wave = 3;
         return wave;
     }
     displaySignal(sig) {
-        return `<div class="signal waveStrength-${this.calcWaveStrength(sig)}"><div class="wv4 wave"><div class="wv3 wave"><div class="wv2 wave"><div class="wv1 wave"><div class="wv0 wave"></div></div></div></div></div></div>`;
+        let level = this.calcWaveStrength(sig);
+        if (level > 3) level = 3;
+
+        const getPart = (idNum) => {
+            const active = idNum <= level;
+            return `<use xlink:href="#icon-wifi-${idNum}" fill="${active ? '#069800' : '#ccc'}" style="opacity:${active ? '1' : '0.3'}" />`;
+        };
+
+        return `
+        <div class="signal">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+        ${getPart(0)}
+        ${getPart(1)}
+        ${getPart(2)}
+        ${getPart(3)}
+        </svg>
+        </div>`;
     }
     saveIPSettings() {
         let pnl = document.getElementById('divDHCP');
@@ -1786,35 +2198,35 @@ class Wifi {
         if (!obj.dhcp) {
             let fnValidateIP = (addr) => { return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(addr); };
             if (typeof obj.ip !== 'string' || obj.ip.length === 0 || obj.ip === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid IP address for the Static IP Address');
+                ui.errorMessage(tr('ERR_STATIC_IP_REQUIRED'));
                 return;
             }
             else if (!fnValidateIP(obj.ip)) {
-                ui.errorMessage('Invalid Static IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage(tr('ERR_STATIC_IP_INVALID'));
                 return;
             }
             if (typeof obj.subnet !== 'string' || obj.subnet.length === 0 || obj.subnet === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid IP address for the Subnet Mask');
+                ui.errorMessage(tr('ERR_NETMASK_REQUIRED'));
                 return;
             }
             else if (!fnValidateIP(obj.subnet)) {
-                ui.errorMessage('Invalid Subnet IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage(tr('ERR_NETMASK_INVALID'));
                 return;
             }
             if (typeof obj.gateway !== 'string' || obj.gateway.length === 0 || obj.gateway === '0.0.0.0') {
-                ui.errorMessage('You must supply a valid Gateway IP address');
+                ui.errorMessage(tr('ERR_GATEWAY_REQUIRED'));
                 return;
             }
             else if (!fnValidateIP(obj.gateway)) {
-                ui.errorMessage('Invalid Gateway IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage(tr('ERR_GATEWAY_INVALID'));
                 return;
             }
             if (obj.dns1.length !== 0 && !fnValidateIP(obj.dns1)) {
-                ui.errorMessage('Invalid Domain Name Server 1 IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage(tr('ERR_DNS1_INVALID'));
                 return;
             }
             if (obj.dns2.length !== 0 && !fnValidateIP(obj.dns2)) {
-                ui.errorMessage('Invalid Domain Name Server 2 IP Address.  IP addresses are in the form XXX.XXX.XXX.XXX');
+                ui.errorMessage(tr('ERR_DNS2_INVALID'));
                 return;
             }
         }
@@ -1829,38 +2241,78 @@ class Wifi {
         let pnl = document.getElementById('divNetAdapter');
         let obj = ui.fromElement(pnl);
         obj.connType = obj.ethernet.hardwired ? (obj.ethernet.wirelessFallback ? 3 : 2) : 1;
-        console.log(obj);
+
         if (obj.connType >= 2) {
-            let boardType = this.ethBoardTypes.find(elem => obj.ethernet.boardType === elem.val);
-            let phyType = this.ethPhyTypes.find(elem => obj.ethernet.phyType === elem.val);
-            let clkMode = this.ethClockModes.find(elem => obj.ethernet.CLKMode === elem.val);
-            let div = document.createElement('div');
-            let html = `<div id="divLanSettings" class="inst-overlay">`;
-            html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="padding:10px;display:inline-block;width:100%;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;">BEWARE ... WARNING ... DANGER<span></div>';
-            html += '<p style="font-size:14px;">Incorrect Ethernet settings can damage your ESP32.  Please verify the settings below and ensure they match the manufacturer spec sheet.</p>';
-            html += '<p style="font-size:14px;margin-bottom:0px;">If you are unsure do not press the Red button and press the Green button.  If any of the settings are incorrect please use the Custom Board type and set them to the correct values.';
-            html += '<hr/><div>';
-            html += `<div class="eth-setting-line"><label>Board Type</label><span>${boardType.label} [${boardType.val}]</span></div>`;
-            html += `<div class="eth-setting-line"><label>PHY Chip Type</label><span>${phyType.label} [${phyType.val}]</span></div>`;
-            html += `<div class="eth-setting-line"><label>PHY Address</label><span>${obj.ethernet.phyAddress}</span ></div >`;
-            html += `<div class="eth-setting-line"><label>Clock Mode</label><span>${clkMode.label} [${clkMode.val}]</span></div >`;
-            html += `<div class="eth-setting-line"><label>Power Pin</label><span>${obj.ethernet.PWRPin === -1 ? 'None' : obj.ethernet.PWRPin}</span></div>`;
-            html += `<div class="eth-setting-line"><label>MDC Pin</label><span>${obj.ethernet.MDCPin}</span></div>`;
-            html += `<div class="eth-setting-line"><label>MDIO Pin</label><span>${obj.ethernet.MDIOPin}</span></div>`;
-            html += '</div>';
-            html += `<div class="button-container">`;
-            html += `<button id="btnSaveEthernet" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;">Save Ethernet Settings</button>`;
-            html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divLanSettings').remove();">Cancel</button>`;
-            html += `</div><form>`;
-            div.innerHTML = html;
+            const boardType = this.ethBoardTypes.find(elem => obj.ethernet.boardType === elem.val);
+            const phyType = this.ethPhyTypes.find(elem => obj.ethernet.phyType === elem.val);
+            const clkMode = this.ethClockModes.find(elem => obj.ethernet.CLKMode === elem.val);
+
+            const div = document.createElement('div');
+            div.id = 'divLanSettings';
+            div.className = 'inst-overlay message-overlay';
+
+            div.innerHTML = `
+            <div class="overlay-content">
+            <div class="boutonOverlayClose" onclick="document.getElementById('divLanSettings').remove();">
+            <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+            <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+            </div>
+            <div id="jsHeadLan" class="instructions-header">
+            <div>
+            <h2>${tr('ETH_SETTINGS_TITLE')}</h2>
+            <p>${tr('ETH_SETTINGS_DESC')}</p>
+            </div>
+            <svg class="instructions-headerLogo"><use xlink:href="#svg-ethernet"></use></svg>
+            </div>
+            <div class="field-group unibloc" style="margin-bottom:20px; padding: 5px 15px;">
+            <p style="font-size:14px; text-align:left;">${tr("ETH_SETTINGS_WARNING_DESC_1")}</p>
+            </div>
+            <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
+            <div style="text-align: left; display: inline-block;">
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_BOARD_TYPE")}</label><span>${boardType.label} [${boardType.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_TYPE")}</label><span>${phyType.label} [${phyType.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_ADDRESS")}</label><span>${obj.ethernet.phyAddress}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_CLOCK_MODE")}</label><span>${clkMode.label} [${clkMode.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_POWER_PIN")}</label><span>${obj.ethernet.PWRPin === -1 ? tr("LBL_NONE") : obj.ethernet.PWRPin}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDC_PIN")}</label><span>${obj.ethernet.MDCPin}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${obj.ethernet.MDIOPin}</span></div>
+            </div>
+            </div>
+            <div class="field-group error" style="padding: 15px;">
+            <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; cursor:pointer; width:100%; margin:0; text-align:left;">
+            <div>
+            <input type="checkbox" id="chkConfirmEth" style="display:none;">
+            <span class="custom-checkbox"></span>
+            </div>
+            <div style="flex:1; line-height:1.4;">
+            <b style="display:block; margin-bottom:2px;">${tr('MSG_DANGER')}</b>
+            <span style="font-size:13px; opacity:0.9;">${tr("ETH_SETTINGS_WARNING_DESC_2")}</span>
+            </div>
+            </label>
+            </div>
+            <div class="button-container-row" style="margin-top:30px; width:100%;">
+            <button id="btnSaveEthernet" class="bouton" type="button" disabled style="background:#ccc; cursor:not-allowed; flex:1;">${tr("BT_SAVE_ETHERNET")}</button>
+            <button id="btnCancel" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
+            </div>
+            </div>`;
+
             document.getElementById('divContainer').appendChild(div);
-            div.querySelector('#btnSaveEthernet').addEventListener('click', (el, event) => {
-                console.log(obj);
+
+            const checkbox = div.querySelector('#chkConfirmEth');
+            const saveBtn = div.querySelector('#btnSaveEthernet');
+
+            checkbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                saveBtn.disabled = !isChecked;
+                saveBtn.style.background = isChecked ? "var(--txtwarning-color)" : "#ccc";
+                saveBtn.style.cursor = isChecked ? "pointer" : "not-allowed";
+            });
+
+            saveBtn.onclick = () => {
                 this.sendNetworkSettings(obj);
                 setTimeout(() => { div.remove(); }, 1);
-            });
-        }
-        else {
+            };
+        } else {
             this.sendNetworkSettings(obj);
         }
     }
@@ -1880,35 +2332,47 @@ class Wifi {
             passphrase: document.getElementsByName('passphrase')[0].value
         };
         if (obj.ssid.length > 64) {
-            ui.errorMessage('Invalid SSID').querySelector('.sub-message').innerHTML = 'The maximum length of the SSID is 64 characters.';
+            ui.errorMessage(tr('ERR_WIFI_SSID_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_WIFI_SSID_MAX_LENGTH_64');
             return;
         }
         if (obj.passphrase.length > 64) {
-            ui.errorMessage('Invalid Passphrase').querySelector('.sub-message').innerHTML = 'The maximum length of the passphrase is 64 characters.';
+            ui.errorMessage(tr('ERR_WIFI_PASSPHRASE_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_WIFI_PASSPHRASE_MAX_LENGTH_64');
             return;
         }
-
-
         let overlay = ui.waitMessage(document.getElementById('divNetAdapter'));
         putJSON('/connectwifi', obj, (err, response) => {
             overlay.remove();
             document.getElementById('btnConnectWiFi').classList.remove('disabled');
             console.log(response);
-
         });
     }
     procWifiStrength(strength) {
-        //console.log(strength);
-        let ssid = strength.ssid || strength.name;
-        document.getElementById('spanNetworkSSID').innerHTML = !ssid || ssid === '' ? '-------------' : ssid;
-        document.getElementById('spanNetworkChannel').innerHTML = isNaN(strength.channel) || strength.channel < 0 ? '--' : strength.channel;
-        let cssClass = 'waveStrength-' + (isNaN(strength.strength) || strength > 0 ? -100 : this.calcWaveStrength(strength.strength));
-        let elWave = document.getElementById('divNetworkStrength').children[0];
-        if (typeof elWave !== 'undefined' && !elWave.classList.contains(cssClass)) {
-            elWave.classList.remove('waveStrength-0', 'waveStrength-1', 'waveStrength-2', 'waveStrength-3', 'waveStrength-4');
-            elWave.classList.add(cssClass);
+        if (!strength) return;
+
+        const ssid = strength.ssid || strength.name;
+        const sVal = parseInt(strength.strength);
+
+        const elSSID = document.getElementById('spanNetworkSSID');
+        const elChan = document.getElementById('spanNetworkChannel');
+        const elStrength = document.getElementById('spanNetworkStrength');
+
+        if (elSSID) elSSID.innerHTML = !ssid || ssid === '' ? '-------------' : ssid;
+        if (elChan) elChan.innerHTML = isNaN(strength.channel) || strength.channel < 0 ? '--' : strength.channel;
+        if (elStrength) elStrength.innerHTML = isNaN(sVal) || sVal <= -100 ? '----' : sVal;
+
+        let level = (isNaN(sVal) || sVal >= 0 || sVal <= -100) ? -1 : this.calcWaveStrength(sVal);
+        if (level >= 3) level = 3;
+
+        for (let i = 0; i <= 3; i++) {
+            const part = document.getElementById('wifi_' + i);
+            if (part) {
+                if (i <= level) {
+                    part.classList.add('active');
+                } else {
+                    part.classList.remove('active');
+                }
+            }
         }
-        document.getElementById('spanNetworkStrength').innerHTML = isNaN(strength.strength) || strength.strength <= -100 ? '----' : strength.strength;
     }
     procEthernet(ethernet) {
         console.log(ethernet);
@@ -1918,108 +2382,201 @@ class Wifi {
         document.getElementById('spanEthernetSpeed').innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed}Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
     }
 }
+
+
+
 var wifi = new Wifi();
 class Somfy {
     initialized = false;
     frames = [];
+    isScanClosing = false;
+    scanObserver = null;
     shadeTypes = [
-        { type: 0, name: 'Roller Shade', ico: 'icss-window-shade', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 1, name: 'Blind', ico: 'icss-window-blind', lift: true, tilt: true, sun: true, fcmd: true, fpos: true },
-        { type: 2, name: 'Drapery (left)', ico: 'icss-ldrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 3, name: 'Awning', ico: 'icss-awning', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 4, name: 'Shutter', ico: 'icss-shutter', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 5, name: 'Garage (1-button)', ico: 'icss-garage', lift: true, light: true, fpos: true },
-        { type: 6, name: 'Garage (3-button)', ico: 'icss-garage', lift: true, light: true, fcmd: true, fpos: true },
-        { type: 7, name: 'Drapery (right)', ico: 'icss-rdrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 8, name: 'Drapery (center)', ico: 'icss-cdrapery', lift: true, sun: true, fcmd: true, fpos: true },
-        { type: 9, name: 'Dry Contact (1-button)', ico: 'icss-lightbulb', fpos: true },
-        { type: 10, name: 'Dry Contact (2-button)', ico: 'icss-lightbulb', fcmd: true, fpos: true },
-        { type: 11, name: 'Gate (left)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
-        { type: 12, name: 'Gate (center)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
-        { type: 13, name: 'Gate (right)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
-        { type: 14, name: 'Gate (1-button left)', ico: 'icss-lgate', lift: true, fcmd: true, fpos: true },
-        { type: 15, name: 'Gate (1-button center)', ico: 'icss-cgate', lift: true, fcmd: true, fpos: true },
-        { type: 16, name: 'Gate (1-button right)', ico: 'icss-rgate', lift: true, fcmd: true, fpos: true },
+        { type: 0, name: 'Roller Shade', ico: 'svg-window-shade', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 1, name: 'Blind', ico: 'svg-window-blind', lift: true, tilt: true, sun: true, fcmd: true, fpos: true },
+        { type: 2, name: 'Drapery (left)', ico: 'svg-ldrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 3, name: 'Awning', ico: 'svg-awning', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 4, name: 'Shutter', ico: 'svg-shutter', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 5, name: 'Garage (1-button)', ico: 'svg-garage', lift: true, light: true, fpos: true },
+        { type: 6, name: 'Garage (3-button)', ico: 'svg-garage', lift: true, light: true, fcmd: true, fpos: true },
+        { type: 7, name: 'Drapery (right)', ico: 'svg-rdrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 8, name: 'Drapery (center)', ico: 'svg-cdrapery', lift: true, sun: true, fcmd: true, fpos: true },
+        { type: 9, name: 'Dry Contact (1-button)', ico: 'svg-contactBulb', fpos: true },
+        { type: 10, name: 'Dry Contact (2-button)', ico: 'svg-contactBulb', fcmd: true, fpos: true },
+        { type: 11, name: 'Gate (left)', ico: 'svg-lgate', lift: true, fcmd: true, fpos: true },
+        { type: 12, name: 'Gate (center)', ico: 'svg-cgate', lift: true, fcmd: true, fpos: true },
+        { type: 13, name: 'Gate (right)', ico: 'svg-rgate', lift: true, fcmd: true, fpos: true },
+        { type: 14, name: 'Gate (1-button left)', ico: 'svg-lgate', lift: true, fcmd: true, fpos: true },
+        { type: 15, name: 'Gate (1-button center)', ico: 'svg-cgate', lift: true, fcmd: true, fpos: true },
+        { type: 16, name: 'Gate (1-button right)', ico: 'svg-rgate', lift: true, fcmd: true, fpos: true },
+    ];
+
+    radioBoardTypes = [
+        { val: 0, label: 'DEFAULT', showGPIO: false },
+        { val: 1, label: 'CC1101 – ESP32-D1', showGPIO: false, pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 } },
+        { val: 2, label: 'MANUAL_SETTINGS', showGPIO: true }
     ];
     init() {
         if (this.initialized) return;
         this.initialized = true;
     }
+
     initPins() {
+        document
+        .getElementById('selRadioBoardType')
+        .addEventListener('change', e => this.onRadioBoardTypeChanged(e.target));
+
+        const sel = document.getElementById('selRadioBoardType');
+
+        sel.addEventListener('change', e => this.onRadioBoardTypeChanged(e.target));
+
         this.loadPins('inout', document.getElementById('selTransSCKPin'));
         this.loadPins('inout', document.getElementById('selTransCSNPin'));
         this.loadPins('inout', document.getElementById('selTransMOSIPin'));
         this.loadPins('input', document.getElementById('selTransMISOPin'));
         this.loadPins('out', document.getElementById('selTransTXPin'));
         this.loadPins('input', document.getElementById('selTransRXPin'));
-        //this.loadSomfy();
+
         ui.toElement(document.getElementById('divTransceiverSettings'), {
-            transceiver: { config: { proto: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 12, RXPin: 13, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
+            transceiver: { config: { proto: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
         });
+
         this.loadPins('out', document.getElementById('selShadeGPIOUp'));
         this.loadPins('out', document.getElementById('selShadeGPIODown'));
         this.loadPins('out', document.getElementById('selShadeGPIOMy'));
+        this.loadRadioBoardTypes(document.getElementById('selRadioBoardType'));
+        this.loadRadioBoardTypes(sel);
+        this.onRadioBoardTypeChanged(sel);
+    }
+    loadRadioBoardTypes(sel) {
+        while (sel.firstChild) sel.removeChild(sel.firstChild);
+
+        const cm = (document.getElementById('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
+        const isStandard = (cm === "" || cm === "esp32");
+
+        this.radioBoardTypes.forEach(t => {
+            if (!isStandard && t.val === 1) return;
+
+            const labelText = tr(t.label);
+            sel.options.add(new Option(labelText, t.val));
+        });
+    }
+    onRadioBoardTypeChanged(sel) {
+        const val = parseInt(sel.value, 10);
+        const cm = (document.getElementById('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
+        const divSummary = document.getElementById('divGPIOSummary');
+        const divShowGpio = document.getElementById('divShowGpio');
+
+        let targetPins = null;
+
+        if (val === 0) {
+            if (cm === "s3") targetPins = { SCKPin: 12, CSNPin: 10, MOSIPin: 11, MISOPin: 13, TXPin: 15, RXPin: 14 };
+            else if (cm === "s2") targetPins = { SCKPin: 36, CSNPin: 34, MOSIPin: 35, MISOPin: 37, TXPin: 15, RXPin: 14 };
+            else if (cm === "c3") targetPins = { SCKPin: 15, CSNPin: 14, MOSIPin: 16, MISOPin: 17, TXPin: 13, RXPin: 12 };
+            else targetPins = { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12 };
+        }
+        else if (val === 1) {
+            targetPins = { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 };
+        }
+        if (targetPins) {
+            const map = { SCKPin: 'SCLK:', CSNPin: 'CSN:', MOSIPin: 'MOSI:', MISOPin: 'MISO:', TXPin: 'TX:', RXPin: 'RX:' };
+            let infoArray = [];
+
+            for (const [key, label] of Object.entries(map)) {
+                const pinVal = targetPins[key];
+                document.getElementById(`selTrans${key}`).value = pinVal;
+                infoArray.push(`<span style="color: #888;">${label}</span> <span style="color: var(--accent-color); font-weight: bold;">${pinVal}</span>`);
+            }
+            divSummary.innerHTML = `<div style="font-size: 0.8em; text-align: left; padding: 5px 0;">${infoArray.join(' | ')}</div>`;
+            divSummary.style.display = 'block';
+            divShowGpio.style.display = 'none';
+        }
+        else {
+            divSummary.style.display = 'none';
+            divShowGpio.style.display = 'inline-block';
+        }
     }
     async loadSomfy() {
         getJSONSync('/controller', (err, somfy) => {
             if (err) {
                 console.log(err);
                 ui.serviceError(err);
-            }
-            else {
-                console.log(somfy);
+            } else {
                 document.getElementById('spanMaxRooms').innerText = somfy.maxRooms || 0;
                 document.getElementById('spanMaxShades').innerText = somfy.maxShades;
                 document.getElementById('spanMaxGroups').innerText = somfy.maxGroups;
+
                 ui.toElement(document.getElementById('divTransceiverSettings'), somfy);
-                if (somfy.transceiver.config.radioInit) {
-                    document.getElementById('divRadioError').style.display = 'none';
+
+                const cbRadio = document.getElementById('cbEnableRadio');
+                const txtStatus = document.getElementById('divRadioEnableStatus');
+                const row = document.getElementById('divRadioEnableColor');
+                const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
+
+                const updateRadioText = () => {
+                    const currentState = cbRadio.checked;
+                    const isActuallyEnabled = radioTab && !radioTab.classList.contains('radio-error');
+
+                    if (currentState === isActuallyEnabled) {
+                        txtStatus.textContent = currentState ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');
+                    } else {
+                        txtStatus.textContent = tr('RADIO_SAVE_REQUIRED');
+                    }
+                };
+                const isRadioInit = somfy.transceiver.config.radioInit;
+                if (radioTab) {
+                    radioTab.classList.toggle('radio-error', !isRadioInit);
+                    row.style.backgroundColor = isRadioInit
+                    ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
+                    : "var(--unibloc-color)";
                 }
-                else {
-                    document.getElementById('divRadioError').style.display = '';
-                }
-                // Create the shades list.
+                cbRadio.addEventListener('change', updateRadioText);
+                updateRadioText();
+
                 this.setRoomsList(somfy.rooms);
                 this.setShadesList(somfy.shades);
                 this.setGroupsList(somfy.groups);
                 this.setRepeaterList(somfy.repeaters);
-                if (typeof somfy.version !== 'undefined') firmware.procFwStatus(somfy.version);
+                if (typeof somfy.version !== 'undefined') {
+                    firmware.procFwStatus(somfy.version);
+                }
             }
         });
     }
     saveRadio() {
         let valid = true;
         let getIntValue = (fld) => { return parseInt(document.getElementById(fld).value, 10); };
+        const form = ui.fromElement(document.getElementById('divTransceiverSettings'));
+
         let trans = ui.fromElement(document.getElementById('divTransceiverSettings')).transceiver;
-        // Check to make sure we have a trans type.
         if (typeof trans.config.type === 'undefined' || trans.config.type === '' || trans.config.type === 'none') {
-            ui.errorMessage('You must select a radio type.');
+            ui.errorMessage(tr('ERR_RADIO_TYPE_REQUIRED'));
             valid = false;
         }
-        // Check to make sure no pins were duplicated and defined
         if (valid) {
             let fnValDup = (o, name) => {
                 let val = o[name];
                 if (typeof val === 'undefined' || isNaN(val)) {
-                    ui.errorMessage(document.getElementById('divSomfySettings'), 'You must define all the pins for the radio.');
+                    ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
                     return false;
                 }
                 for (let s in o) {
                     if (s.endsWith('Pin') && s !== name) {
                         let sval = o[s];
                         if (typeof sval === 'undefined' || isNaN(sval)) {
-                            ui.errorMessage(document.getElementById('divSomfySettings'), 'You must define all the pins for the radio.');
+                            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
                             return false;
                         }
                         if (sval === val) {
                             if ((name === 'TXPin' && s === 'RXPin') ||
                                 (name === 'RXPin' && s === 'TXPin'))
                                 continue; // The RX and TX pins can share the same value.  In this instance the radio will only use GDO0.
-                            else {
-                                ui.errorMessage(document.getElementById('divSomfySettings'), `The ${name.replace('Pin', '')} pin is duplicated by the ${s.replace('Pin', '')}.  All pin definitions must be unique`);
-                                valid = false;
-                                return false;
-                            }
+                                else {
+                                    ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_PIN_DUPLICATED').replace('%1', name.replace('Pin', '')).replace('%2', s.replace('Pin', ''))
+                                    );
+                                    valid = false;
+                                    return false;
+                                }
                         }
                     }
                 }
@@ -2033,29 +2590,42 @@ class Somfy {
             if (valid) valid = fnValDup(trans.config, 'RXPin');
             if (valid) {
                 putJSONSync('/saveRadio', trans, (err, trans) => {
-                    if (err)
+                    if (err) {
                         ui.serviceError(err);
+                    }
                     else {
                         document.getElementById('btnSaveRadio').classList.remove('disabled');
-                        if (trans.config.radioInit) {
-                            document.getElementById('divRadioError').style.display = 'none';
+
+                        const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
+                        const row = document.getElementById('divRadioEnableColor');
+                        const txtStatus = document.getElementById('divRadioEnableStatus');
+                        const cbRadio = document.getElementById('cbEnableRadio');
+
+                        if (radioTab) {
+                            radioTab.classList.toggle('radio-error', !trans.config.radioInit);
+                            row.style.backgroundColor = trans.config.radioInit
+                            ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
+                            : "var(--unibloc-color)";
                         }
-                        else {
-                            document.getElementById('divRadioError').style.display = '';
+                        const isActuallyEnabled = radioTab && !radioTab.classList.contains('radio-error');
+                        if (cbRadio.checked === isActuallyEnabled) {
+                            txtStatus.textContent = cbRadio.checked ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');
+                        } else {
+                            txtStatus.textContent = tr('RADIO_SAVE_REQUIRED');
                         }
                     }
-                    console.log(trans);
                 });
             }
         }
     }
     procFrequencyScan(scan) {
-        //console.log(scan);
+        // console.log(scan);
         let div = this.scanFrequency();
         let spanTestFreq = document.getElementById('spanTestFreq');
         let spanTestRSSI = document.getElementById('spanTestRSSI');
         let spanBestFreq = document.getElementById('spanBestFreq');
         let spanBestRSSI = document.getElementById('spanBestRSSI');
+
         if (spanBestFreq) {
             spanBestFreq.innerHTML = scan.RSSI !== -100 ? scan.frequency.fmt('###.00') : '----';
         }
@@ -2067,30 +2637,150 @@ class Somfy {
         }
         if (spanTestRSSI) {
             spanTestRSSI.innerHTML = scan.testRSSI !== -100 ? scan.testRSSI : '----';
+
+            if (this.rssiGraph) {
+                this.rssiGraph.update(scan.testRSSI);
+            }
         }
         if (scan.RSSI !== -100)
             div.setAttribute('data-frequency', scan.frequency);
     }
     scanFrequency(initScan) {
+        if (this.isScanClosing) return;
         let div = document.getElementById('divScanFrequency');
-        if (!div || typeof div === 'undefined') {
+
+        if (!div) {
             div = document.createElement('div');
             div.setAttribute('id', 'divScanFrequency');
-            div.classList.add('prompt-message');
-            let html = '<div class="sub-message">Frequency Scanning has started.  Press and hold any button on your remote and ESPSomfy RTS will find the closest frequency to the remote.</div>';
-            html += '<hr style="width:100%;margin:0px;"></hr>';
-            html += '<div style="width:100%;text-align:center;">';
-            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Scanning</label><span id="spanTestFreq" style="display:inline-block;width:4em;text-align:right;">433.00</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanTestRSSI">----</span><span>dBm</span></div>';
-            html += '<div class="" style="font-size:20px;"><label style="padding-right:7px;display:inline-block;width:87px;">Frequency</label><span id="spanBestFreq" style="display:inline-block;width:4em;text-align:right;">---.--</span><span>MHz</span><label style="padding-left:12px;padding-right:7px;">RSSI</label><span id="spanBestRSSI">----</span><span>dBm</span></div>';
-            html += '</div>';
-            html += `<div class="button-container">`;
-            html += `<button id="btnStopScanning" type="button" style="padding-left:20px;padding-right:20px;" onclick="somfy.stopScanningFrequency(true);">Stop Scanning</button>`;
-            html += `<button id="btnRestartScanning" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.scanFrequency(true);">Start Scanning</button>`;
-            html += `<button id="btnCopyFrequency" type="button" style="padding-left:20px;padding-right:20px;display:none;" onclick="somfy.setScannedFrequency();">Set Frequency</button>`;
-            html += `<button id="btnCloseScanning" type="button" style="padding-left:20px;padding-right:20px;width:100%;display:none;" onclick="document.getElementById('divScanFrequency').remove();">Close</button>`;
-            html += `</div>`;
-            div.innerHTML = html;
-            document.getElementById('divRadioSettings').appendChild(div);
+            div.classList.add('inst-overlay', 'message-overlay');
+
+            div.innerHTML = `
+            <div class="overlay-content">
+            <div class="boutonOverlayClose" onclick="somfy.terminateScanUI(true);">
+            <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+            <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+            </div>
+            <div id="jsHeadScanRadio" class="instructions-header">
+            <div style="position: relative;">
+            <h2>${tr('SCANFREQ_TITLE')}</h2>
+            <p>${tr('SCANFREQ_DESC')}</p>
+            </div>
+            <svg class="instructions-headerLogo"><use xlink:href="#svg-radio"></use></svg>
+            </div>
+            <div class="field-group unibloc" style="padding: 15px; display: block; text-align: left;">
+            <div style="font-size:12px;">${tr("SCANFREQ_SCAN_DESC")}</div>
+            </div>
+            <div class="field-group unibloc" style="padding: 10px 15px;">
+            <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_SCAN")}</div>
+            <div style="font-size: 18px;"><span id="spanTestFreq" style="font-family: monospace; font-weight: bold;">433.00</span> <span style="font-size: 14px;">${tr("SCANFREQ_MHZ")}</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
+            <div style="font-size: 18px;"><span id="spanTestRSSI" style="font-family: monospace; font-weight: bold;">----</span> <span style="font-size: 14px;">${tr("DBM")}</span></div>
+            </div>
+            </div>
+            <hr style="margin: 8px 0;">
+            <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_FREQUENCY")}</div>
+            <div style="font-size: 18px;"><span id="spanBestFreq" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">---.--</span> <span style="font-size: 14px;">${tr("SCANFREQ_MHZ")}</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
+            <div style="font-size: 18px;"><span id="spanBestRSSI" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">----</span> <span style="font-size: 14px;">${tr("DBM")}</span></div>
+            </div>
+            </div>
+            </div>
+            <div class="field-group unibloc" style="padding: 10px; height: 200px; background:#333;">
+            <canvas id="rssiCanvas" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <div class="button-container-row">
+            <button id="btnStopScanning" class="bouton" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
+            <div style="display:flex; gap:10px; width:100%;">
+            <button id="btnRestartScanning" class="bouton" type="button" style="display:none; flex:1;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
+            <button id="btnCopyFrequency" class="bouton" type="button" style="display:none; flex:1;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
+            </div>
+            <button id="btnCloseScanning" class="boutonOutline" type="button" style="width:100%; display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
+            </div>
+            <div class="field-group unibloc" style="margin-top:15px; padding:15px; font-size:13px; line-height:1.4;">
+            <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-color); display:flex; align-items:center;">
+            <span style="margin-right:8px; font-size:16px;">💡</span> ${tr('SCANFREQ_UNDERSTANDING_RSSI')}
+            </div>
+            <p style="margin:0 0 8px 0; opacity:0.8;">${tr('SCANFREQ_RSSI_EXPLANATION')}</p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="success"><svg style="width:20px; height:20px;"><use xlink:href="#icon-succes"></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
+            <div class="warning"><svg style="width:20px; height:20px;"><use xlink:href="#icon-warning"></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
+            <div class="error"><svg style="width:20px; height:20px;"><use xlink:href="#icon-error"></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
+            </div>
+            </div>
+            </div>`;
+
+            document.getElementById('divContainer').appendChild(div);
+            window.scrollTo(0, 0);
+
+            if (this.scanObserver) this.scanObserver.disconnect();
+            this.scanObserver = new MutationObserver(() => {
+                if (!document.getElementById('divScanFrequency')) this.terminateScanUI(true);
+            });
+                this.scanObserver.observe(document.getElementById('divContainer'), { childList: true });
+
+                this.rssiGraph = {
+                    points: [],
+                    maxPoints: 100,
+                    canvas: document.getElementById('rssiCanvas'),
+                    update(val) {
+                        if (!this.canvas) return;
+                        const ctx = this.canvas.getContext('2d');
+                        const w = this.canvas.width = this.canvas.clientWidth;
+                        const h = this.canvas.height = this.canvas.clientHeight;
+                        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#f8a525';
+
+                        const labelWidth = 50;
+                        const graphWidth = w - labelWidth;
+                        let v = parseInt(val);
+                        if (isNaN(v) || v === -100) v = -110;
+
+                        this.points.push(v);
+                        if (this.points.length > this.maxPoints) this.points.shift();
+
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                        ctx.setLineDash([5, 5]);
+                        ctx.font = "10px Arial";
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
+                        [-40, -70, -100].forEach(level => {
+                            const y = h - (((level + 110) / 90) * h);
+                            ctx.beginPath();
+                            ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                            ctx.fillText(level + " dBm", 5, y - 5);
+                        });
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.strokeStyle = accentColor;
+                        ctx.lineWidth = 2;
+                        ctx.lineJoin = 'round';
+
+                        const step = graphWidth / (this.maxPoints - 1);
+                        this.points.forEach((p, i) => {
+                            const x = labelWidth + (i * step);
+                            const y = h - (((p + 110) / 90) * h);
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        });
+                            ctx.stroke();
+
+                            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+                            gradient.addColorStop(0, accentColor.includes('#') ? accentColor + '4D' : accentColor);
+                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                            ctx.lineTo(labelWidth + ((this.points.length - 1) * step), h);
+                            ctx.lineTo(labelWidth, h);
+                            ctx.fillStyle = gradient;
+                            ctx.fill();
+                    }
+                };
         }
         if (initScan) {
             div.setAttribute('data-initscan', true);
@@ -2115,30 +2805,149 @@ class Somfy {
     }
     stopScanningFrequency(killScan) {
         let div = document.getElementById('divScanFrequency');
-        if (div && killScan !== true) {
+        if (!div) return;
+        if (killScan !== true) {
             div.remove();
+            return;
         }
-        else {
-            putJSONSync('/endFrequencyScan', {}, (err, trans) => {
-                if (err) ui.serviceError(err);
-                else {
-                    let freq = parseFloat(div.getAttribute('data-frequency'));
-                    document.getElementById('btnStopScanning').style.display = 'none';
-                    document.getElementById('btnRestartScanning').style.display = '';
-                    if (typeof freq === 'number' && !isNaN(freq)) document.getElementById('btnCopyFrequency').style.display = '';
-                    document.getElementById('btnCloseScanning').style.display = '';
+        putJSONSync('/endFrequencyScan', {}, (err, trans) => {
+            if (err) {
+                ui.serviceError(err);
+            } else {
+                let freqAttr = div.getAttribute('data-frequency');
+                let freq = parseFloat(freqAttr);
+
+                document.getElementById('btnStopScanning').style.display = 'none';
+                document.getElementById('btnRestartScanning').style.display = '';
+                if (typeof freq === 'number' && !isNaN(freq) && freq > 0) {
+                    document.getElementById('btnCopyFrequency').style.display = '';
                 }
+                document.getElementById('btnCloseScanning').style.display = '';
+            }
+        });
+    }
+    terminateScanUI(killScan) {
+        this.isScanClosing = true;
+
+        if (this.scanObserver) {
+            this.scanObserver.disconnect();
+            this.scanObserver = null;
+        }
+        if (killScan) {
+            putJSONSync('/endFrequencyScan', {}, (err) => {
+                if (err) console.error(err);
             });
         }
+        let div = document.getElementById('divScanFrequency');
+        if (div) div.remove();
+        setTimeout(() => { this.isScanClosing = false; }, 1000);
     }
+
     btnDown = null;
     btnTimer = null;
+
+    setStep(type, stepValue) {
+        const map = {
+            'freq':      { slider: 'slidFrequency',   container: '#stepButtons' },
+            'bandwidth': { slider: 'slidRxBandwidth', container: '#stepButtonsRx' },
+            'deviation': { slider: 'slidDeviation',   container: '#stepButtonsDeviation' }
+        };
+
+        const config = map[type];
+        if (!config) return;
+
+        const slider = document.getElementById(config.slider);
+        if (slider) slider.step = stepValue;
+
+        const container = document.querySelector(config.container);
+        if (container) {
+            container.querySelectorAll(".step-btn").forEach(btn => btn.classList.remove("active"));
+            const activeBtn = container.querySelector(`.step-btn[onclick*="${stepValue}"]`);
+            if (activeBtn) activeBtn.classList.add("active");
+        }
+    }
+    checkEmptyState() {
+        const divGetStarted = document.getElementById('divGetStarted');
+        const divGroupControls = document.getElementById('divGroupControls');
+        const divShadeControls = document.getElementById('divShadeControls');
+        const divNoDevice = document.getElementById('divNoDevice');
+        const divConfigPnl = document.getElementById('divConfigPnl');
+        const showLogoHeader = document.getElementById('showLogoHeader');
+        const divRepeatList = document.getElementById('divRepeatList');
+
+        if (!divShadeControls || !divGroupControls) return;
+
+        const activePill = document.querySelector('.room-pill.active');
+        const currentRoomId = activePill ? parseInt(activePill.getAttribute('data-roomid'), 10) : 0;
+        const isConfigOpen = divConfigPnl && divConfigPnl.style.display !== 'none';
+        const shades = divShadeControls.querySelectorAll('.somfyShadeCtl');
+        const groups = divGroupControls.querySelectorAll('.somfyGroupCtl');
+        const hasRooms = _rooms.length > 1;
+        const totalDevices = shades.length + groups.length;
+        const roomEmpty = document.getElementById('divRoomEmptyState');
+        const roomContent = document.getElementById('divRoomListContent');
+        if (roomEmpty && roomContent) {
+            roomEmpty.style.display = !hasRooms ? 'block' : 'none';
+            roomContent.style.display = !hasRooms ? 'none' : 'block';
+        }
+        const groupEmpty = document.getElementById('divGroupEmptyState');
+        const groupContent = document.getElementById('divGroupListContent');
+        if (groupEmpty && groupContent) {
+            const hasGroups = groups.length > 0;
+            groupEmpty.style.display = hasGroups ? 'none' : 'block';
+            groupContent.style.display = hasGroups ? 'block' : 'none';
+        }
+        const shadeEmpty = document.getElementById('divShadeEmptyState');
+        const shadeContent = document.getElementById('divShadeListContent');
+        if (shadeEmpty && shadeContent) {
+            const hasShades = shades.length > 0;
+            shadeEmpty.style.display = hasShades ? 'none' : 'block';
+            shadeContent.style.display = hasShades ? 'block' : 'none';
+        }
+        const repeatEmpty = document.getElementById('divRepeaterEmptyState');
+        const repeatContent = document.getElementById('divRepeaterListContent');
+        if (repeatEmpty && repeatContent && divRepeatList) {
+            const hasRepeated = divRepeatList.children.length > 0;
+            repeatEmpty.style.display = hasRepeated ? 'none' : 'block';
+            repeatContent.style.display = hasRepeated ? 'block' : 'none';
+        }
+        let visibleCount = 0;
+        shades.forEach(s => {
+            const rId = parseInt(s.getAttribute('data-roomid'), 10);
+            if (currentRoomId === 0 || rId === currentRoomId) visibleCount++;
+        });
+            groups.forEach(g => {
+                const rId = parseInt(g.getAttribute('data-roomid'), 10);
+                if (currentRoomId === 0 || rId === currentRoomId) visibleCount++;
+            });
+                if (showLogoHeader) {
+                    showLogoHeader.style.visibility = (isConfigOpen || totalDevices > 0 || hasRooms) ? 'visible' : 'hidden';
+                }
+                if (totalDevices === 0 && !hasRooms) {
+                    divGetStarted.style.display = isConfigOpen ? 'none' : 'flex';
+                    if (divNoDevice) divNoDevice.style.display = 'none';
+                    divShadeControls.style.display = 'none';
+                    divGroupControls.style.display = 'none';
+                } else {
+                    divGetStarted.style.display = 'none';
+                    if (visibleCount === 0) {
+                        if (divNoDevice) divNoDevice.style.display = isConfigOpen ? 'none' : 'flex';
+                        divShadeControls.style.display = 'none';
+                        divGroupControls.style.display = 'none';
+                    } else {
+                        if (divNoDevice) divNoDevice.style.display = 'none';
+                        divShadeControls.style.display = '';
+                        divGroupControls.style.display = '';
+                    }
+                }
+    }
     procRoomAdded(room) {
         let r = _rooms.find(x => x.roomId === room.roomId);
         if (typeof r === 'undefined' || !r) {
             _rooms.push(room);
             _rooms.sort((a, b) => { return a.sortOrder - b.sortOrder });
             this.setRoomsList(_rooms);
+            this.checkEmptyState();
         }
     }
     procRoomRemoved(room) {
@@ -2148,6 +2957,7 @@ class Somfy {
             _rooms = _rooms.filter(x => x.roomId === room.roomId);
             _rooms.sort((a, b) => { return a.sortOrder - b.sortOrder });
             this.setRoomsList(_rooms);
+            this.checkEmptyState();
             let rs = document.getElementById('divRoomSelector');
             let ss = document.getElementById('divShadeControls');
             let gs = document.getElementById('divGroupControls');
@@ -2167,87 +2977,147 @@ class Somfy {
         }
     }
     selectRoom(roomId) {
-        let room = _rooms.find(x => x.roomId === roomId) || { roomId: 0, name: '' };
-        let rs = document.getElementById('divRoomSelector');
-        rs.setAttribute('data-roomid', roomId);
-        rs.querySelector('span').innerHTML = room.name;
-        document.getElementById('divRoomSelector-list').style.display = 'none';
-        let ss = document.getElementById('divShadeControls');
-        ss.setAttribute('data-roomid', roomId);
-        let ctls = ss.querySelectorAll('.somfyShadeCtl');
-        for (let i = 0; i < ctls.length; i++) {
-            let x = ctls[i];
-            if (roomId !== 0 && parseInt(x.getAttribute('data-roomid'), 10) !== roomId)
-                x.style.display = 'none';
-            else
-                x.style.display = '';
-        }
-        let gs = document.getElementById('divGroupControls');
-        ctls = gs.querySelectorAll('.somfyGroupCtl');
-        for (let i = 0; i < ctls.length; i++) {
-            let x = ctls[i];
-            if (roomId !== 0 && parseInt(x.getAttribute('data-roomid'), 10) !== roomId)
-                x.style.display = 'none';
-            else
-                x.style.display = '';
-        }
+        document.querySelectorAll('.room-pill').forEach(pill => {
+            const pId = parseInt(pill.getAttribute('data-roomid'), 10);
+            pill.classList.toggle('active', pId === roomId);
+        });
+
+        const ctls = document.querySelectorAll('.somfyShadeCtl');
+        ctls.forEach(x => {
+            const rId = parseInt(x.getAttribute('data-roomid'), 10);
+            x.style.display = (roomId === 0 || rId === roomId) ? '' : 'none';
+        });
+        this.checkEmptyState();
     }
     setRoomsList(rooms) {
         let divCfg = '';
-        let divCtl = `<div class='room-row' data-roomid="${0}" onclick="somfy.selectRoom(0);event.stopPropagation();">Home</div>`;
-        let divOpts = '<option value="0">Home</option>';
-        _rooms = [{ roomId: 0, name: 'Home' }];
-        rooms.sort((a, b) => { return a.sortOrder - b.sortOrder });
+        const homeName = tr('HOME');
+
+        let divPills = `<div class="room-pill active" data-roomid="0" onclick="somfy.selectRoom(0)">${homeName}</div>`;
+        let divOpts = `<option value="0">${homeName}</option>`;
+
+        _rooms = [{ roomId: 0, name: homeName }];
+        rooms.sort((a, b) => a.sortOrder - b.sortOrder);
+
         for (let i = 0; i < rooms.length; i++) {
             let room = rooms[i];
-            divCfg += `<div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">`;
-            divCfg += `<div class="button-outline" onclick="somfy.openEditRoom(${room.roomId});"><i class="icss-edit"></i></div>`;
-            divCfg += `<span class="room-name">${room.name}</span>`;
-            divCfg += `<div class="button-outline" onclick="somfy.deleteRoom(${room.roomId});"><i class="icss-trash"></i></div>`;
-            divCfg += '</div>';
+            divPills += `<div class="room-pill" data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId})">${room.name}</div>`;
+
+            divCfg += `<div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">
+            <div class="button-outline-svg" onclick="somfy.openEditRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
+            <span class="room-name">${room.name}</span>
+            <div class="button-outline-svg" onclick="somfy.deleteRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
+            </div>`;
+
             divOpts += `<option value="${room.roomId}">${room.name}</option>`;
             _rooms.push(room);
-            divCtl += `<div class='room-row' data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId});event.stopPropagation();">${room.name}</div>`;
         }
-        document.getElementById('divRoomSelector').style.display = rooms.length === 0 ? 'none' : '';
-        document.getElementById('divRoomSelector-list').innerHTML = divCtl;
+        const slider = document.getElementById('divRoomSelector');
+        slider.innerHTML = divPills;
+        slider.style.display = 'flex';
+
+        document.querySelector('.room-nav-container').style.display = rooms.length === 0 ? 'none' : 'flex';
         document.getElementById('divRoomList').innerHTML = divCfg;
         document.getElementById('selShadeRoom').innerHTML = divOpts;
         document.getElementById('selGroupRoom').innerHTML = divOpts;
-        //roomControls.innerHTML = divCtl;
+
+        this.checkEmptyState();
         this.setListDraggable(document.getElementById('divRoomList'), '.room-draggable', (list) => {
-            // Get the shade order
             let items = list.querySelectorAll('.room-draggable');
             let order = [];
             for (let i = 0; i < items.length; i++) {
                 order.push(parseInt(items[i].getAttribute('data-roomid'), 10));
-                // Reorder the shades on the main page.
             }
             putJSONSync('/roomSortOrder', order, (err) => {
                 if (err) ui.serviceError(err);
                 else this.updateRoomsList();
             });
         });
+        const newSlider = slider.cloneNode(true);
+        slider.parentNode.replaceChild(newSlider, slider);
+        const scrollContainer = newSlider;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        const updateArrows = () => {
+            const btnLeft = document.getElementById('btnScrollLeft');
+            const btnRight = document.getElementById('btnScrollRight');
+            if (btnLeft && btnRight) {
+                btnLeft.style.display = scrollContainer.scrollLeft > 5 ? 'flex' : 'none';
+                const hasMoreRight = scrollContainer.scrollWidth > (scrollContainer.scrollLeft + scrollContainer.clientWidth + 5);
+                btnRight.style.display = hasMoreRight ? 'flex' : 'none';
+            }
+        };
+
+        scrollContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                scrollContainer.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            scrollContainer.style.cursor = 'grabbing';
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+        });
+
+        scrollContainer.addEventListener('mouseleave', () => { isDown = false; scrollContainer.style.cursor = 'grab'; });
+        scrollContainer.addEventListener('mouseup', () => { isDown = false; scrollContainer.style.cursor = 'grab'; });
+        scrollContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            scrollContainer.scrollLeft = scrollLeft - walk;
+        });
+
+        scrollContainer.addEventListener('scroll', updateArrows);
+        window.addEventListener('resize', updateArrows);
+        setTimeout(updateArrows, 100);
+    }
+    scrollRooms(direction) {
+        const container = document.getElementById('divRoomSelector');
+        if (container) {
+            container.scrollBy({
+                left: direction * 200,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    checkArrows() {
+        const container = document.getElementById('divRoomSelector');
+        const btnLeft = document.getElementById('btnScrollLeft');
+        const btnRight = document.getElementById('btnScrollRight');
+
+        if (!container || !btnLeft || !btnRight) return;
+
+        btnLeft.style.display = container.scrollLeft > 10 ? 'block' : 'none';
+
+        const hasMoreRight = container.scrollWidth > (container.scrollLeft + container.clientWidth + 10);
+        btnRight.style.display = hasMoreRight ? 'block' : 'none';
     }
     setRepeaterList(addresses) {
         let divCfg = '';
         if (typeof addresses !== 'undefined') {
             for (let i = 0; i < addresses.length; i++) {
                 divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="repeater-name">${addresses[i]}</div>`;
-                divCfg += `<div class="button-outline" onclick="somfy.unlinkRepeater(${addresses[i]});"><i class="icss-trash"></i></div>`;
+                divCfg += `<div class="button-outline-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>`;
                 divCfg += '</div>';
             }
         }
         document.getElementById('divRepeatList').innerHTML = divCfg;
-
+        this.checkEmptyState();
     }
     setShadesList(shades) {
         let divCfg = '';
         let divCtl = '';
         shades.sort((a, b) => { return a.sortOrder - b.sortOrder });
         console.log(shades);
-        let roomId = parseInt(document.getElementById('divRoomSelector').getAttribute('data-roomid'), 10)
-
+        let roomId = document.querySelector('.room-pill.active') ? parseInt(document.querySelector('.room-pill.active').getAttribute('data-roomid'), 10) : 0;
         let vrList = document.getElementById('selVRMotor');
         // First get the optiongroup for the shades.
         let optGroup = document.getElementById('optgrpVRShades');
@@ -2268,49 +3138,52 @@ class Somfy {
         for (let i = 0; i < shades.length; i++) {
             let shade = shades[i];
             let room = _rooms.find(x => x.roomId === shade.roomId) || { roomId: 0, name: '' };
-            let st = this.shadeTypes.find(x => x.type === shade.shadeType) || { type: shade.shadeType, ico: 'icss-window-shade' };
-
-            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType} data-flipposition="${shade.flipPosition ? 'true' : 'false'}">`;
-            divCfg += `<div class="button-outline" onclick="somfy.openEditShade(${shade.shadeId});"><i class="icss-edit"></i></div>`;
-            //divCfg += `<i class="shade-icon" data-position="${shade.position || 0}%"></i>`;
-            //divCfg += `<span class="shade-name">${shade.name}</span>`;
-            divCfg += '<div class="shade-name">';
-            divCfg += `<div class="cfg-room">${room.name}</div>`;
-            divCfg += `<div class="">${shade.name}</div>`;
-            divCfg += '</div>'
-
+            let isLightOn = (shade.flags & 0x08);
+            let isSunOn = (shade.flags & 0x01);
+            let st = this.shadeTypes.find(x => x.type === shade.shadeType) || { type: shade.shadeType, ico: 'svg-window-shade' };
+            // --- SECTION CONFIG (Correction du guillemet sur data-shadetype) ---
+            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}">`;
+            divCfg += `<div class="button-outline-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>`;
+            divCfg += `<div class="shade-name"><div class="cfg-room">${room.name}</div><div class="">${shade.name}</div></div>`;
             divCfg += `<span class="shade-address">${shade.remoteAddress}</span>`;
-            divCfg += `<div class="button-outline" onclick="somfy.deleteShade(${shade.shadeId});"><i class="icss-trash"></i></div>`;
-            divCfg += '</div>';
-
-            divCtl += `<div class="somfyShadeCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-shadeId="${shade.shadeId}" data-roomid="${shade.roomId}" data-direction="${shade.direction}" data-remoteaddress="${shade.remoteAddress}" data-position="${shade.position}" data-target="${shade.target}" data-mypos="${shade.myPos}" data-mytiltpos="${shade.myTiltPos}" data-shadetype="${shade.shadeType}" data-tilt="${shade.tiltType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"`;
-            divCtl += ` data-windy="${(shade.flags & 0x10) === 0x10 ? 'true' : 'false'}" data-sunny=${(shade.flags & 0x20) === 0x20 ? 'true' : 'false'}`;
-            if (shade.tiltType !== 0) {
-                divCtl += ` data-tiltposition="${shade.tiltPosition}" data-tiltdirection="${shade.tiltDirection}" data-tilttarget="${shade.tiltTarget}"`;
-            }
-            divCtl += `><div class="shade-icon" data-shadeid="${shade.shadeId}" onclick="event.stopPropagation(); console.log(event); somfy.openSetPosition(${shade.shadeId});">`;
-            divCtl += `<i class="somfy-shade-icon ${st.ico}`;
-            divCtl += `" data-shadeid="${shade.shadeId}" style="--shade-position:${shade.flipPosition ? 100 - shade.position : shade.position}%;--fpos:${shade.position}%;vertical-align: top;"><span class="icss-panel-left"></span><span class="icss-panel-right"></span></i>`;
-            //divCtl += `" data-shadeid="${shade.shadeId}" style="--shade-position:${shade.position}%;vertical-align: top;"><span class="icss-panel-left"></span><span class="icss-panel-right"></span></i>`;
-
-            divCtl += shade.tiltType !== 0 ? `<i class="icss-window-tilt" data-shadeid="${shade.shadeId}" data-tiltposition="${shade.tiltPosition}"></i></div>` : '</div>';
-            divCtl += `<div class="indicator indicator-wind"><i class="icss-warning"></i></div><div class="indicator indicator-sun"><i class="icss-sun"></i></div>`;
-            divCtl += `<div class="shade-name">`;
-            divCtl += `<span class="shadectl-room">${room.name}</span>`;
-            divCtl += `<span class="shadectl-name">${shade.name}</span>`;
-            divCtl += `<span class="shadectl-mypos"><label class="my-pos"></label><span class="my-pos">${shade.myPos === -1 ? '---' : shade.myPos + '%'}</span><label class="my-pos-tilt"></label><span class="my-pos-tilt">${shade.myTiltPos === -1 ? '---' : shade.myTiltPos + '%'}</span >`;
-            divCtl += '</div>';
+            divCfg += `<div class="button-outline-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            // --- SECTION CONTROLE ---
+            divCtl += `<div class="somfyShadeCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-shadeid="${shade.shadeId}" data-roomid="${shade.roomId}" data-direction="${shade.direction}" data-remoteaddress="${shade.remoteAddress}" data-position="${shade.position}" data-target="${shade.target}" data-mypos="${shade.myPos}" data-mytiltpos="${shade.myTiltPos}" data-shadetype="${shade.shadeType}" data-tilt="${shade.tiltType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"`;
+            divCtl += ` data-windy="${(shade.flags & 0x10) === 0x10 ? 'true' : 'false'}" data-sunny="${(shade.flags & 0x20) === 0x20 ? 'true' : 'false'}">`;
+            divCtl += `<div class="shadectl-side-handle" onclick="event.stopPropagation(); somfy.openSetPosition(${shade.shadeId});"><svg class="handle-icon"><use href="#svg-arrowRight"></use></svg></div>`;
+            divCtl += `<div class="shadectl-right-content"><div class="shadectl-main-content" style="padding: 8px; width: 100%; display: flex; flex-wrap: wrap; align-items: center;">`;
+            divCtl += `<div class="shadectl-header-row"><span class="shadectl-name">${shade.name}</span></div>`;
+            // Bloc Icône
+            divCtl += `<div class="shade-icon" data-shadeid="${shade.shadeId}">`;
+            divCtl += `<svg class="somfy-shade-icon" data-shadeid="${shade.shadeId}" style="--shade-position:${shade.flipPosition ? 100 - shade.position : shade.position}; --fpos:${shade.flipPosition ? 100 - shade.position : shade.position}%;vertical-align: top;">`;
+            divCtl += `<use href="#${st.ico}"></use></svg></div>`;
+            // Infos pièce et position
+            divCtl += `<div class="shade-name">
+                <span class="shadectl-room">${room.name}</span>`;
+            divCtl += `<span class="shadectl-mypos"><span class="val-pos">Pos: ${shade.position}%</span>`;
+            if (shade.tiltType !== 0) divCtl += `<span class="val-pos"> Tilt: ${shade.tiltPosition}%</span>`;
+            divCtl += `</span></div>`;
+            // Boutons de commande
             divCtl += `<div class="shadectl-buttons" data-shadeType="${shade.shadeType}">`;
-            divCtl += `<div class="button-light cmd-button" data-cmd="light" data-shadeid="${shade.shadeId}" data-on="${shade.flags & 0x08 ? 'true' : 'false'}" style="${!shade.light ? 'display:none' : ''}"><i class="icss-lightbuld-c"></i><i class="icss-lightbulb-o"></i></div>`;
-            divCtl += `<div class="button-sunflag cmd-button" data-cmd="sunflag" data-shadeid="${shade.shadeId}" data-on="${shade.flags & 0x01 ? 'true' : 'false'}" style="${!shade.sunSensor ? 'display:none' : ''}"><i class="icss-sun-c"></i><i class="icss-sun-o"></i></div>`;
-            divCtl += `<div class="button-outline cmd-button" data-cmd="up" data-shadeid="${shade.shadeId}"><i class="icss-somfy-up"></i></div>`;
-            divCtl += `<div class="button-outline cmd-button my-button" data-cmd="my" data-shadeid="${shade.shadeId}" style="font-size:2em;padding:10px;"><span>my</span></div>`;
-            divCtl += `<div class="button-outline cmd-button" data-cmd="down" data-shadeid="${shade.shadeId}"><i class="icss-somfy-down" style="margin-top:-4px;"></i></div>`;
-            divCtl += `<div class="button-outline cmd-button toggle-button" style="width:127px;text-align:center;border-radius:33%;font-size:2em;padding:10px;" data-cmd="toggle" data-shadeid="${shade.shadeId}"><i class="icss-somfy-toggle" style="margin-top:-4px;"></i></div>`;
-            divCtl += '</div></div>';
-            divCtl += '</div>';
+            divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="up" data-shadeid="${shade.shadeId}"><svg><use href="#icon-up"></use></svg></div>`;
+            divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="my" data-shadeid="${shade.shadeId}"><svg><use href="#icon-my"></use></svg></div>`;
+            divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="down" data-shadeid="${shade.shadeId}"><svg><use href="#icon-down"></use></svg></div>`;
+            divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg-wide" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#icon-toggle"></use></svg></div></div>`;
+            divCtl += `<div class="shadectl-status-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 5px 5px 0 5px;">`;
+            divCtl += `<div style="display: flex; gap: 5px; color: #666; align-items: center;">`;
+            divCtl += `<div class="indicator indicator-wind"><svg style="width:18px; height:18px;"><use href="#indic-wind"></use></svg></div><div class="indicator indicator-sun"><svg style="width:18px; height:18px;"><use href="#indic-sun"></use></svg></div>`;
+            divCtl += `<div class="val-my myShade-badge">My: ${shade.myPos === -1 ? '---' : shade.myPos + '%'}</div>`;
+            if (shade.tiltType !== 0) divCtl += `<div class="val-tilt myShade-badge">My Tilt: ${shade.myTiltPos === -1 ? '---' : shade.myTiltPos + '%'}</div>`;
+            divCtl += `</div>`;
+            divCtl += `<div class="status-group-right" style="display: flex; gap: 4px; align-items: center; justify-content: flex-end;">`;
+            divCtl += `<div class="button-light cmd-button" data-cmd="light" data-shadeid="${shade.shadeId}" data-on="${isLightOn ? 'true' : 'false'}" style="${!shade.light ? 'display:none' : ''}"><svg><use href="#svg-lightbulb"></use></svg></div>`;
+            if (shade.sunSensor) divCtl += `<div class="button-sunflag cmd-button" data-cmd="sunflag" data-shadeid="${shade.shadeId}" data-on="${isSunOn ? 'true' : 'false'}"><svg><use href="#icon-sun"></use></svg></div>`;
+            divCtl += `<div class="button-my" onclick="event.stopPropagation(); somfy.openSetMyPosition(${shade.shadeId});"><svg><use href="#svg-favori"></use></svg></div></div></div>`;
+            divCtl += `</div></div></div></div></div>`;
+
             let opt = document.createElement('option');
             opt.innerHTML = shade.name;
+
             opt.setAttribute('data-address', shade.remoteAddress);
             opt.setAttribute('data-type', 'shade');
             opt.setAttribute('data-shadetype', shade.shadeType);
@@ -2323,6 +3196,7 @@ class Somfy {
         document.getElementById('divShadeList').innerHTML = divCfg;
         let shadeControls = document.getElementById('divShadeControls');
         shadeControls.innerHTML = divCtl;
+        this.checkEmptyState();
         // Attach the timer for setting the My Position for the shade.
         let btns = shadeControls.querySelectorAll('div.cmd-button');
         for (let i = 0; i < btns.length; i++) {
@@ -2579,27 +3453,23 @@ class Somfy {
                 optGroup.innerHTML = '';
             }
         }
-        let roomId = parseInt(document.getElementById('divRoomSelector').getAttribute('data-roomid'), 10)
-
+        let roomId = document.querySelector('.room-pill.active') ? parseInt(document.querySelector('.room-pill.active').getAttribute('data-roomid'), 10) : 0;
         if (typeof groups !== 'undefined') {
             groups.sort((a, b) => { return a.sortOrder - b.sortOrder });
-
-
             for (let i = 0; i < groups.length; i++) {
                 let group = groups[i];
                 let room = _rooms.find(x => x.roomId === group.roomId) || { roomId: 0, name: '' };
 
                 divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}">`;
-                divCfg += `<div class="button-outline" onclick="somfy.openEditGroup(${group.groupId});"><i class="icss-edit"></i></div>`;
+                divCfg += `<div class="button-outline-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>`;
                 //divCfg += `<i class="Group-icon" data-position="${Group.position || 0}%"></i>`;
                 divCfg += '<div class="group-name">';
                 divCfg += `<div class="cfg-room">${room.name}</div>`;
                 divCfg += `<div class="">${group.name}</div>`;
                 divCfg += '</div>'
                 divCfg += `<span class="group-address">${group.remoteAddress}</span>`;
-                divCfg += `<div class="button-outline" onclick="somfy.deleteGroup(${group.groupId});"><i class="icss-trash"></i></div>`;
+                divCfg += `<div class="button-outline-svg" onclick="somfy.deleteGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>`;
                 divCfg += '</div>';
-
                 divCtl += `<div class="somfyGroupCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-groupId="${group.groupId}" data-roomid="${group.roomId}" data-remoteaddress="${group.remoteAddress}">`;
                 divCtl += `<div class="group-name">`;
                 divCtl += `<span class="groupctl-room">${room.name}</span>`;
@@ -2607,23 +3477,17 @@ class Somfy {
                 divCtl += `<div class="groupctl-shades">`;
                 if (typeof group.linkedShades !== 'undefined') {
                     divCtl += `<label>Members:</label><span>${group.linkedShades.length}`;
-                    /*
-                    for (let j = 0; j < group.linkedShades.length; j++) {
-                        divCtl += '<span>';
-                        if (j !== 0) divCtl += ', ';
-                        divCtl += group.linkedShades[j].name;
-                        divCtl += '</span>';
-                    }
-                    */
                 }
                 divCtl += '</div></div>';
                 divCtl += `<div class="groupctl-buttons">`;
-                divCtl += `<div class="button-sunflag cmd-button" data-cmd="sunflag" data-groupid="${group.groupId}" data-on="${group.flags & 0x20 ? 'true' : 'false'}" style="${!group.sunSensor ? 'display:none' : ''}"><i class="icss-sun-c"></i><i class="icss-sun-o"></i></div>`;
-                divCtl += `<div class="button-outline cmd-button" data-cmd="up" data-groupid="${group.groupId}"><i class="icss-somfy-up"></i></div>`;
-                divCtl += `<div class="button-outline cmd-button my-button" data-cmd="my" data-groupid="${group.groupId}" style="font-size:2em;padding:10px;"><span>my</span></div>`;
-                divCtl += `<div class="button-outline cmd-button" data-cmd="down" data-groupid="${group.groupId}"><i class="icss-somfy-down" style="margin-top:-4px;"></i></div>`;
+                divCtl += `<div class="button-sunflag cmd-button" data-cmd="sunflag" data-groupid="${group.groupId}" data-on="${group.flags & 0x20 ? 'true' : 'false'}" style="${!group.sunSensor ? 'display:none' : ''}"><svg><use href="#icon-sun"></use></svg></div>`;
+                divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="up" data-groupid="${group.groupId}"><svg><use href="#icon-up"></use></svg></div>`;
+                divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="my" data-groupid="${group.groupId}"><svg><use href="#icon-my"></use></svg></div>`;
+                divCtl += `<div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="down" data-groupid="${group.groupId}"><svg><use href="#icon-down"></use></svg></div>`;
                 divCtl += '</div></div>';
+
                 let opt = document.createElement('option');
+
                 opt.innerHTML = group.name;
                 opt.setAttribute('data-address', group.remoteAddress);
                 opt.setAttribute('data-type', 'group');
@@ -2634,10 +3498,10 @@ class Somfy {
         }
         let sopt = vrList.options[vrList.selectedIndex];
         document.getElementById('divVirtualRemote').setAttribute('data-bitlength', sopt ? sopt.getAttribute('data-bitlength') : 'none');
-
         document.getElementById('divGroupList').innerHTML = divCfg;
         let groupControls = document.getElementById('divGroupControls');
         groupControls.innerHTML = divCtl;
+        this.checkEmptyState();
         // Attach the timer for setting the My Position for the Group.
         let btns = groupControls.querySelectorAll('div.cmd-button');
         for (let i = 0; i < btns.length; i++) {
@@ -2673,7 +3537,6 @@ class Somfy {
                 }
             });
         });
-
     }
     closeShadePositioners() {
         let ctls = document.querySelectorAll('.shade-positioner');
@@ -2684,82 +3547,107 @@ class Somfy {
     }
     openSetMyPosition(shadeId) {
         if (typeof shadeId === 'undefined') return;
-        else {
-            let shade = document.querySelector(`div.somfyShadeCtl[data-shadeid="${shadeId}"]`);
-            if (shade) {
-                this.closeShadePositioners();
-                let currPos = parseInt(shade.getAttribute('data-position'), 10);
-                let currTiltPos = parseInt(shade.getAttribute('data-tiltposition'), 10);
-                let myPos = parseInt(shade.getAttribute('data-mypos'), 10);
-                let tiltType = parseInt(shade.getAttribute('data-tilt'), 10);
-                let myTiltPos = parseInt(shade.getAttribute('data-mytiltpos'), 10);
-                let elname = shade.querySelector(`.shadectl-name`);
-                let shadeName = elname.innerHTML;
-                let html = `<div class="shade-name"><span>${shadeName}</span><div style="float:right;vertical-align:top;cursor:pointer;font-size:12px;margin-top:4px;">`;
-                if (myPos >= 0 && tiltType !== 3)
-                    html += `<div onclick="document.getElementById('slidShadeTarget').value = ${myPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Current:</span><span>${myPos}</span><span>%</span></div>`;
-                if (myTiltPos >= 0 && tiltType > 0)
-                    html += `<div onclick="document.getElementById('slidShadeTiltTarget').value = ${myTiltPos}; document.getElementById('slidShadeTarget').dispatchEvent(new Event('change'));"><span style="display:inline-block;width:47px;">Tilt:</span><span>${myTiltPos}</span><span>%</span></div>`;
-                html += `</div></div>`;
-                html += `<div id="divShadeTarget">`
-                html += `<input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />`;
-                html += `<label for="slidShadeTarget"><span>Target Position </span><span><span id="spanShadeTarget" class="shade-target">${currPos}</span><span>%</span></span></label>`;
-                html += `</div>`
-                html += '<div id="divTiltTarget" style="display:none;">';
-                html += `<input id="slidShadeTiltTarget" name="shadeTiltTarget" type="range" min="0" max="100" step="1" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />`;
-                html += `<label for="slidShadeTiltTarget"><span>Target Tilt </span><span><span id="spanShadeTiltTarget" class="shade-target">${currTiltPos}</span><span>%</span></span></label>`;
-                html += '</div>';
-                html += `<hr></hr>`;
-                html += '<div style="text-align:right;width:100%;">';
-                html += `<button id="btnSetMyPosition" type="button" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;margin-right:7px;">Set My Position</button>`;
-                html += `<button id="btnCancel" type="button" onclick="somfy.closeShadePositioners();" style="width:auto;display:inline-block;padding-left:10px;padding-right:10px;margin-top:0px;margin-bottom:10px;">Cancel</button>`;
-                html += `</div></div>`;
-                let div = document.createElement('div');
-                div.setAttribute('class', 'shade-positioner shade-my-positioner');
-                div.setAttribute('data-shadeid', shadeId);
-                div.style.height = 'auto';
-                div.innerHTML = html;
-                shade.appendChild(div);
-                let elTarget = div.querySelector('input#slidShadeTarget');
-                let elTiltTarget = div.querySelector('input#slidShadeTiltTarget');
-                elTarget.value = currPos;
-                elTiltTarget.value = currTiltPos;
-                let elBtn = div.querySelector('button#btnSetMyPosition');
-                if (tiltType === 3) {
-                    div.querySelector('div#divTiltTarget').style.display = '';
-                    div.querySelector('div#divShadeTarget').style.display = 'none';
-                }
-                else if (tiltType > 0) div.querySelector('div#divTiltTarget').style.display = '';
-                let fnProcessChange = () => {
-                    let pos = parseInt(elTarget.value, 10);
-                    let tilt = parseInt(elTiltTarget.value, 10);
-                    if (tiltType === 3 && tilt === myTiltPos) {
-                        elBtn.innerHTML = 'Clear My Position';
-                        elBtn.style.background = 'orangered';
-                    }
-                    else if (pos === myPos && (tiltType === 0 || tilt === myTiltPos)) {
-                        elBtn.innerHTML = 'Clear My Position';
-                        elBtn.style.background = 'orangered';
-                    }
-                    else {
-                        elBtn.innerHTML = 'Set My Position';
-                        elBtn.style.background = '';
-                    }
-                    document.getElementById('spanShadeTiltTarget').innerHTML = tilt;
-                    document.getElementById('spanShadeTarget').innerHTML = pos;
-                };
-                let fnSetMyPosition = () => {
-                    let pos = parseInt(elTarget.value, 10);
-                    let tilt = parseInt(elTiltTarget.value, 10);
-                    somfy.sendShadeMyPosition(shadeId, pos, tilt);
-                };
-                fnProcessChange();
-                elTarget.addEventListener('change', (event) => { fnProcessChange(); });
-                elTiltTarget.addEventListener('change', (event) => { fnProcessChange(); });
-                elBtn.addEventListener('click', (event) => { fnSetMyPosition(); });
 
+        const shade = document.querySelector(`div.somfyShadeCtl[data-shadeid="${shadeId}"]`);
+        if (!shade) return;
+
+        const arrowUse = shade.querySelector('.handle-icon use');
+
+        document.querySelectorAll('.shade-positioner').forEach(el => {
+            el.remove();
+            document.querySelectorAll('.handle-icon use').forEach(u => u.setAttribute('href', '#svg-arrowRight'));
+        });
+
+        const currPos = parseInt(shade.getAttribute('data-position'), 10) || 0;
+        const currTiltPos = parseInt(shade.getAttribute('data-tiltposition'), 10) || 0;
+        const myPos = parseInt(shade.getAttribute('data-mypos'), 10);
+        const myTiltPos = parseInt(shade.getAttribute('data-mytiltpos'), 10);
+        const tiltType = parseInt(shade.getAttribute('data-tilt'), 10) || 0;
+        const lbl = makeBool(shade.getAttribute('data-flipposition')) ? `% ${tr('POPUP_OPEN')}` : `% ${tr('POPUP_CLOSED')}`;
+        const positionSlider = (tiltType !== 3) ? `
+        <div class="slider-group">
+        <div class="slider-header">
+        <span class="title">${tr('POPUP_TARGET_POSITION')}</span>
+        <span class="val"><span id="spanShadeTarget" class="shade-target">${currPos}</span> ${lbl}</span>
+        </div>
+        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />
+        </div>` : '';
+
+        const tiltSlider = (tiltType > 0) ? `
+        <div class="slider-group" ${(tiltType !== 3) ? 'style="margin-top:2px;"' : ''}>
+        <div class="slider-header">
+        <span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span>
+        <span class="val"><span id="spanShadeTiltTarget" class="shade-tilt-target">${currTiltPos}</span> ${lbl}</span>
+        </div>
+        <input id="slidShadeTiltTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />
+        </div>` : '';
+
+        const div = document.createElement('div');
+        div.className = 'shade-positioner shade-positioner-popup';
+        div.setAttribute('data-shadeid', shadeId);
+        div.onclick = (e) => e.stopPropagation();
+
+        div.innerHTML = `
+        <div class="shade-positioner-inner">
+        ${positionSlider}
+        ${tiltSlider}
+        <div class="popup-actions" style="display:flex; justify-content: flex-end; gap: 8px;">
+        <button id="btnSetMyPosition" class="bouton-pop" type="button">${tr("BT_SET_MY_POSITION")}</button>
+        <button id="btnCancelMy" class="boutonOutline-pop" type="button">${tr("BT_CANCEL_1")}</button>
+        </div>
+        </div>`;
+
+        shade.appendChild(div);
+        if (arrowUse) arrowUse.setAttribute('href', '#svg-arrowLeft');
+
+        const animateClose = () => {
+            div.classList.add('popup-slide-out');
+            if (arrowUse) arrowUse.setAttribute('href', '#svg-arrowRight');
+            setTimeout(() => { div.remove(); }, 300);
+        };
+
+        const elTarget = div.querySelector('#slidShadeTarget');
+        const elTiltTarget = div.querySelector('#slidShadeTiltTarget');
+        const elBtnSave = div.querySelector('#btnSetMyPosition');
+        const elBtnCancel = div.querySelector('#btnCancelMy');
+
+        const fnUpdateUI = () => {
+            const pos = elTarget ? parseInt(elTarget.value, 10) : 0;
+            const tilt = elTiltTarget ? parseInt(elTiltTarget.value, 10) : 0;
+            const isSameAsMy = (tiltType === 3) ? (tilt === myTiltPos) : (pos === myPos && (tiltType === 0 || tilt === myTiltPos));
+
+            if (isSameAsMy) {
+                elBtnSave.innerHTML = tr('BT_CLEAR_MY_POSITION');
+                elBtnSave.style.background = 'var(--txtwarning-color)';
+            } else {
+                elBtnSave.innerHTML = tr('BT_SET_MY_POSITION');
+                elBtnSave.style.background = '';
             }
-        }
+        };
+        if (elTarget) elTarget.oninput = () => {
+            document.getElementById('spanShadeTarget').innerHTML = elTarget.value;
+            fnUpdateUI();
+        };
+        if (elTiltTarget) elTiltTarget.oninput = () => {
+            document.getElementById('spanShadeTiltTarget').innerHTML = elTiltTarget.value;
+            fnUpdateUI();
+        };
+
+        elBtnCancel.onclick = (e) => { e.preventDefault(); animateClose(); };
+
+        elBtnSave.onclick = (e) => {
+            e.preventDefault();
+            const pos = elTarget ? parseInt(elTarget.value, 10) : 0;
+            const tilt = elTiltTarget ? parseInt(elTiltTarget.value, 10) : 0;
+            somfy.sendShadeMyPosition(shadeId, pos, tilt);
+            animateClose();
+        };
+
+        setTimeout(() => {
+            document.body.addEventListener('click', animateClose, { once: true });
+        }, 100);
+
+        fnUpdateUI();
     }
     sendShadeMyPosition(shadeId, pos, tilt) {
         console.log(`Sending My Position for shade id ${shadeId} to ${pos} and ${tilt}`);
@@ -2772,27 +3660,40 @@ class Somfy {
     }
     setLinkedRemotesList(shade) {
         let divCfg = '';
+        const btnContainer = document.getElementById('divshowSomfyButtons');
+
         for (let i = 0; i < shade.linkedRemotes.length; i++) {
             let remote = shade.linkedRemotes[i];
             divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}" style="text-align:center;">`;
             divCfg += `<span class="linkedremote-address" style="display:inline-block;width:127px;text-align:left;">${remote.remoteAddress}</span>`;
             divCfg += `<span class="linkedremote-code" style="display:inline-block;width:77px;text-align:left;">${remote.lastRollingCode}</span>`;
-            divCfg += `<div class="button-outline" onclick="somfy.unlinkRemote(${shade.shadeId}, ${remote.remoteAddress});"><i class="icss-trash"></i></div>`;
+            divCfg += `<div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, ${remote.remoteAddress});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>`;
             divCfg += '</div>';
         }
         document.getElementById('divLinkedRemoteList').innerHTML = divCfg;
     }
+
     setLinkedShadesList(group) {
         let divCfg = '';
+        const btnContainer = document.getElementById('divSomfyGroupButtons');
+
         for (let i = 0; i < group.linkedShades.length; i++) {
             let shade = group.linkedShades[i];
             divCfg += `<div class="linked-shade" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}">`;
             divCfg += `<span class="linkedshade-name">${shade.name}</span>`;
             divCfg += `<span class="linkedshade-address">${shade.remoteAddress}</span>`;
-            divCfg += `<div class="button-outline" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><i class="icss-trash"></i></div>`;
+            divCfg += `<div class="button-outline-svg" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>`;
             divCfg += '</div>';
         }
         document.getElementById('divLinkedShadeList').innerHTML = divCfg;
+
+        if (btnContainer) {
+            if (group.linkedShades.length > 0) {
+                btnContainer.classList.remove('disabled');
+            } else {
+                btnContainer.classList.add('disabled');
+            }
+        }
     }
     pinMaps = [
         { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },
@@ -2824,22 +3725,25 @@ class Somfy {
         console.log(state);
         let icons = document.querySelectorAll(`.somfy-shade-icon[data-shadeid="${state.shadeId}"]`);
         for (let i = 0; i < icons.length; i++) {
-            icons[i].style.setProperty('--shade-position', `${state.flipPosition ? 100 - state.position : state.position}%`);
+            icons[i].style.setProperty('--shade-position', `${state.flipPosition ? 100 - state.position : state.position}`);
             icons[i].style.setProperty('--fpos', `${state.position}%`);
-            //icons[i].style.setProperty('--shade-position', `${state.position}%`);
         }
+        const labelTiltContainer = document.getElementById('labelTiltContainer');
+        const spanValTilt = document.getElementById('valTilt');
+
         if (state.tiltType !== 0) {
-            let tilts = document.querySelectorAll(`.icss-window-tilt[data-shadeid="${state.shadeId}"]`);
-            for (let i = 0; i < tilts.length; i++) {
-                tilts[i].setAttribute('data-tiltposition', `${state.tiltPosition}`);
-            }
+            if (labelTiltContainer) labelTiltContainer.style.display = 'block';
+            if (spanValTilt) spanValTilt.innerText = state.tiltPosition;
+        } else {
+            if (labelTiltContainer) labelTiltContainer.style.display = 'none';
         }
+
         let flags = document.querySelectorAll(`.button-sunflag[data-shadeid="${state.shadeId}"]`);
         for (let i = 0; i < flags.length; i++) {
             flags[i].style.display = state.sunSensor ? '' : 'none';
-            flags[i].setAttribute('data-on', state.flags & 0x01 === 0x01 ? 'true' : 'false');
-
+            flags[i].setAttribute('data-on', (state.flags & 0x01) === 0x01 ? 'true' : 'false');
         }
+
         let divs = document.querySelectorAll(`.somfyShadeCtl[data-shadeid="${state.shadeId}"]`);
         for (let i = 0; i < divs.length; i++) {
             divs[i].setAttribute('data-direction', state.direction);
@@ -2850,15 +3754,31 @@ class Somfy {
             divs[i].setAttribute('data-sunny', (state.flags & 0x20) === 0x20 ? 'true' : 'false');
             if (typeof state.myTiltPos !== 'undefined') divs[i].setAttribute('data-mytiltpos', state.myTiltPos);
             else divs[i].setAttribute('data-mytiltpos', -1);
+
             if (state.tiltType !== 0) {
                 divs[i].setAttribute('data-tiltdirection', state.tiltDirection);
                 divs[i].setAttribute('data-tiltposition', state.tiltPosition);
                 divs[i].setAttribute('data-tilttarget', state.tiltTarget);
             }
-            let span = divs[i].querySelector('span.my-pos');
-            if (span) span.innerHTML = typeof state.myPos !== 'undefined' && state.myPos >= 0 ? `${state.myPos}%` : '---';
-            span = divs[i].querySelector('span.my-pos-tilt');
-            if (span) span.innerHTML = typeof state.myTiltPos !== 'undefined' && state.myTiltPos >= 0 ? `${state.myTiltPos}%` : '---';
+
+            let spanPos = divs[i].querySelector('.val-pos');
+            if (spanPos) {
+                spanPos.innerHTML = `Pos: ${state.position}%`;
+            }
+            if (state.tiltType !== 0) {
+                let spans = divs[i].querySelectorAll('.val-pos');
+                if (spans.length > 1) {
+                    spans[1].innerHTML = `Tilt: ${state.tiltPosition}%`;
+                }
+            }
+            let spanMy = divs[i].querySelector('.val-my');
+            if (spanMy) {
+                spanMy.innerHTML = (state.myPos !== undefined && state.myPos >= 0) ? `My: ${state.myPos}%` : 'My: ---';
+            }
+            let spanMyTilt = divs[i].querySelector('.val-tilt');
+            if (spanMyTilt) {
+                spanMyTilt.innerHTML = (state.myTiltPos !== undefined && state.myTiltPos >= 0) ? `My Tilt: ${state.myTiltPos}%` : 'My Tilt: ---';
+            }
         }
     }
     procRemoteFrame(frame) {
@@ -2937,13 +3857,13 @@ class Somfy {
                 if (Array.isArray(v)) return JSON.stringify(v);
                 return v;
             }, indent).replace(/\\/g, '')
-                .replace(/\"\[/g, '[')
-                .replace(/\]\"/g, ']')
-                .replace(/\"\{/g, '{')
-                .replace(/\}\"/g, '}')
-                .replace(/\{\n\s+/g, '{');
-            return output;
-        }
+            .replace(/\"\[/g, '[')
+            .replace(/\]\"/g, ']')
+            .replace(/\"\{/g, '{')
+            .replace(/\}\"/g, '}')
+            .replace(/\{\n\s+/g, '{');
+                return output;
+            }
     }
     framesToClipboard() {
         if (typeof navigator.clipboard !== 'undefined')
@@ -2963,17 +3883,22 @@ class Somfy {
         let tilt = parseInt(document.getElementById('selTiltType').value, 10);
         let ico = document.getElementById('icoShade');
         let type = parseInt(sel.value, 10);
+
         document.getElementById('somfyShade').setAttribute('data-shadetype', type);
         document.getElementById('divSomfyButtons').setAttribute('data-shadetype', type);
-        
+
         let st = this.shadeTypes.find(x => x.type === type) || { type: type };
         for (let i = 0; i < this.shadeTypes.length; i++) {
             let t = this.shadeTypes[i];
             if (t.type !== type) {
                 if (ico.classList.contains(t.ico) && t.ico !== st.ico) ico.classList.remove(t.ico);
-            }
-            else {
-                if (!ico.classList.contains(st.ico)) ico.classList.add(st.ico);
+            } else {
+                const useTag = ico.querySelector('use');
+                if (useTag && st.ico) {
+                    const newHref = '#' + st.ico;
+                    useTag.setAttribute('href', newHref);
+                    useTag.setAttribute('xlink:href', newHref);
+                }
                 document.getElementById('divTiltSettings').style.display = st.tilt !== false ? '' : 'none';
                 let lift = st.lift || false;
                 if (lift && tilt == 3) lift = false;
@@ -2981,7 +3906,10 @@ class Somfy {
                 document.getElementById('fldTiltTime').parentElement.style.display = tilt ? 'inline-block' : 'none';
                 document.getElementById('divLiftSettings').style.display = lift ? '' : 'none';
                 document.getElementById('divTiltSettings').style.display = st.tilt ? '' : 'none';
-                document.querySelector('#divSomfyButtons i.icss-window-tilt').style.display = tilt ? '' : 'none';
+
+                const tiltContainer = document.getElementById('labelTiltContainer');
+                if (tiltContainer) tiltContainer.style.display = tilt ? 'block' : 'none';
+
                 document.getElementById('divSunSensor').style.display = st.sun ? '' : 'none';
                 document.getElementById('divLightSwitch').style.display = st.light ? '' : 'none';
                 document.getElementById('divFlipPosition').style.display = st.fpos ? '' : 'none';
@@ -2993,15 +3921,13 @@ class Somfy {
     }
     onShadeBitLengthChanged(el) {
         document.getElementById('somfyShade').setAttribute('data-bitlength', el.value);
-        //document.getElementById('divStepSettings').style.display = parseInt(el.value, 10) === 80 ? '' : 'none';
     }
     onShadeProtoChanged(el) {
         document.getElementById('somfyShade').setAttribute('data-proto', el.value);
     }
     openEditRoom(roomId) {
-        
         if (typeof roomId === 'undefined') {
-            document.getElementById('btnSaveRoom').innerText = 'Add Room';
+            document.getElementById('btnSaveRoom').innerText = tr('BT_ADD_ROOM');
             getJSONSync('/getNextRoom', (err, room) => {
                 document.getElementById('spanRoomId').innerText = '*';
                 if (err) ui.serviceError(err);
@@ -3015,7 +3941,7 @@ class Somfy {
             });
         }
         else {
-            document.getElementById('btnSaveRoom').innerText = 'Save Room';
+            document.getElementById('btnSaveRoom').innerText = tr('BT_SAVE_ROOM');
             getJSONSync(`/room?roomId=${roomId}`, (err, room) => {
                 if (err) ui.serviceError(err);
                 else {
@@ -3030,75 +3956,87 @@ class Somfy {
         }
     }
     openEditShade(shadeId) {
+        const elShade = document.getElementById('somfyShade');
+        const btnContainer = document.getElementById('divshowSomfyButtons');
+        const ico = document.getElementById('icoShade');
+        const tiltContainer = document.getElementById('labelTiltContainer');
+        const spanValTilt = document.getElementById('valTilt');
+        const btnSave = document.getElementById('btnSaveShade');
+
+        btnContainer.style.display = 'flex';
+        btnContainer.classList.remove('disabled');
         if (typeof shadeId === 'undefined') {
+            btnContainer.classList.add('disabled');
             getJSONSync('/getNextShade', (err, shade) => {
                 document.getElementById('btnPairShade').style.display = 'none';
                 document.getElementById('btnUnpairShade').style.display = 'none';
                 document.getElementById('btnLinkRemote').style.display = 'none';
-                document.getElementById('btnSaveShade').innerText = 'Add Shade';
+                document.getElementById('btnSetRollingCode').style.display = 'none';
+                btnSave.innerText = tr('BT_ADD_SHADE');
+                btnSave.style.display = 'inline-block';
                 document.getElementById('spanShadeId').innerText = '*';
                 document.getElementById('divLinkedRemoteList').innerHTML = '';
-                document.getElementById('btnSetRollingCode').style.display = 'none';
-                //document.getElementById('selShadeBitLength').value = 56;
-                //document.getElementById('cbFlipCommands').value = false;
-                //document.getElementById('cbFlipPosition').value = false;
                 if (err) {
                     ui.serviceError(err);
-                }
-                else {
-                    console.log(shade);
-                    let elShade = document.getElementById('somfyShade');
+                } else {
                     shade.name = '';
                     shade.downTime = shade.upTime = 10000;
                     shade.tiltTime = 7000;
                     shade.bitLength = 56;
                     shade.flipCommands = shade.flipPosition = false;
                     ui.toElement(elShade, shade);
+                    if (ico) {
+                        ico.setAttribute('data-shadeid', '*');
+                        ico.style.setProperty('--shade-position', '0');
+                        ico.style.setProperty('--fpos', '0%');
+                        ico.style.setProperty('--tilt-position', '0%');
+                    }
+                    if (tiltContainer) tiltContainer.style.display = 'none';
+                    if (spanValTilt) spanValTilt.innerText = '0';
+
                     this.showEditShade(true);
                     elShade.setAttribute('data-bitlength', shade.bitLength);
                 }
             });
-        }
-        else {
-            // Load up an exist shade.
-            document.getElementById('btnSaveShade').style.display = 'none';
+        } else {
+            btnSave.style.display = 'none';
             document.getElementById('btnPairShade').style.display = 'none';
             document.getElementById('btnUnpairShade').style.display = 'none';
             document.getElementById('btnLinkRemote').style.display = 'none';
 
-            document.getElementById('btnSaveShade').innerText = 'Save Shade';
+            btnSave.innerText = tr('BT_SAVE_SHADE');
             document.getElementById('spanShadeId').innerText = shadeId;
+            if (ico) ico.setAttribute('data-shadeid', shadeId);
+
             getJSONSync(`/shade?shadeId=${shadeId}`, (err, shade) => {
                 if (err) {
                     ui.serviceError(err);
-                }
-                else {
-                    console.log(shade);
-                    ui.toElement(document.getElementById('somfyShade'), shade);
+                } else {
+                    btnContainer.classList.remove('disabled');
+                    ui.toElement(elShade, shade);
                     this.showEditShade(true);
-                    document.getElementById('btnSaveShade').style.display = 'inline-block';
+                    btnSave.style.display = 'inline-block';
                     document.getElementById('btnLinkRemote').style.display = '';
                     this.onShadeTypeChanged(document.getElementById('selShadeType'));
-                    let ico = document.getElementById('icoShade');
-                    let tilt = ico.parentElement.querySelector('i.icss-window-tilt');
-                    tilt.style.display = shade.tiltType !== 0 ? '' : 'none';
-                    tilt.setAttribute('data-tiltposition', shade.tiltPosition);
-                    tilt.setAttribute('data-shadeid', shade.shadeId);
-                    ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}%`);
-                    ico.style.setProperty('--fpos', `${shade.position}%`);
-                    
-                    ico.style.setProperty('--tilt-position', `${shade.flipPosition ? 100 - shade.tiltPosition : shade.tiltPosition}%`);
-                    //ico.style.setProperty('--shade-position', `${shade.position}%`);
-                    //ico.style.setProperty('--tilt-position', `${shade.tiltPosition}%`);
 
-                    ico.setAttribute('data-shadeid', shade.shadeId);
+                    if (tiltContainer) {
+                        tiltContainer.style.display = shade.tiltType !== 0 ? 'block' : 'none';
+                    }
+                    if (spanValTilt) spanValTilt.innerText = shade.tiltPosition;
+
+                    if (ico) {
+                        const pos = shade.flipPosition ? 100 - shade.position : shade.position;
+                        const tPos = shade.flipPosition ? 100 - shade.tiltPosition : shade.tiltPosition;
+                        ico.style.setProperty('--shade-position', pos);
+                        ico.style.setProperty('--fpos', `${shade.position}%`);
+                        ico.style.setProperty('--tilt-position', `${tPos}%`);
+                    }
                     somfy.onShadeBitLengthChanged(document.getElementById('selShadeBitLength'));
                     somfy.onShadeProtoChanged(document.getElementById('selShadeProto'));
                     document.getElementById('btnSetRollingCode').style.display = 'inline-block';
                     if (shade.paired) {
                         document.getElementById('btnUnpairShade').style.display = 'inline-block';
-                    }
-                    else {
+                    } else {
                         document.getElementById('btnPairShade').style.display = 'inline-block';
                     }
                     this.setLinkedRemotesList(shade);
@@ -3107,13 +4045,22 @@ class Somfy {
         }
     }
     openEditGroup(groupId) {
-        document.getElementById('btnLinkShade').style.display = 'none';
+        const btnContainer = document.getElementById('divSomfyGroupButtons');
+        const btnLink = document.getElementById('btnLinkShade');
+        const btnSave = document.getElementById('btnSaveGroup');
+        const elGroup = document.getElementById('somfyGroup');
+
+        btnLink.style.display = 'none';
+        btnContainer.style.display = 'flex';
+        btnContainer.classList.add('disabled');
+
         if (typeof groupId === 'undefined') {
             getJSONSync('/getNextGroup', (err, group) => {
-                document.getElementById('btnSaveGroup').innerText = 'Add Group';
+                btnSave.innerText = tr('BT_ADD_GROUP');
+                btnSave.style.display = 'inline-block';
                 document.getElementById('spanGroupId').innerText = '*';
                 document.getElementById('divLinkedShadeList').innerHTML = '';
-                //document.getElementById('btnSetRollingCode').style.display = 'none';
+
                 if (err) {
                     ui.serviceError(err);
                 }
@@ -3121,27 +4068,33 @@ class Somfy {
                     console.log(group);
                     group.name = '';
                     group.flipCommands = false;
-                    ui.toElement(document.getElementById('somfyGroup'), group);
+                    ui.toElement(elGroup, group);
                     this.showEditGroup(true);
                 }
             });
         }
         else {
-            // Load up an existing group.
-            document.getElementById('btnSaveGroup').style.display = 'none';
-            document.getElementById('btnSaveGroup').innerText = 'Save Group';
+            btnSave.style.display = 'none';
+            btnSave.innerText = tr('BT_SAVE_GROUP');
             document.getElementById('spanGroupId').innerText = groupId;
+
             getJSONSync(`/group?groupId=${groupId}`, (err, group) => {
                 if (err) {
                     ui.serviceError(err);
                 }
                 else {
                     console.log(group);
-                    ui.toElement(document.getElementById('somfyGroup'), group);
+
+                    if (group.shades && group.shades.length > 0) {
+                        btnContainer.classList.remove('disabled');
+                    } else {
+                        btnContainer.classList.add('disabled');
+                    }
+                    ui.toElement(elGroup, group);
                     this.showEditGroup(true);
-                    document.getElementById('btnSaveGroup').style.display = 'inline-block';
-                    document.getElementById('btnLinkShade').style.display = '';
-                    document.getElementById('btnSetRollingCode').style.display = 'inline-block';
+
+                    btnSave.style.display = 'inline-block';
+                    btnLink.style.display = '';
                     this.setLinkedShadesList(group);
                 }
             });
@@ -3200,14 +4153,13 @@ class Somfy {
             this.showEditRoom(false);
             this.showEditShade(false);
         }
-
     }
     saveRoom() {
         let roomId = parseInt(document.getElementById('spanRoomId').innerText, 10);
         let obj = ui.fromElement(document.getElementById('somfyRoom'));
         let valid = true;
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'You must provide a name for the room between 1 and 20 characters.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_ROOM_NAME_INVALID'));
             valid = false;
         }
         if (valid) {
@@ -3221,7 +4173,7 @@ class Somfy {
                     else {
                         console.log(room);
                         document.getElementById('spanRoomId').innerText = room.roomId;
-                        document.getElementById('btnSaveRoom').innerText = 'Save Room';
+                        document.getElementById('btnSaveRoom').innerText = tr('BT_SAVE_ROOM');
                         document.getElementById('btnSaveRoom').style.display = 'inline-block';
                         this.updateRoomsList();
                     }
@@ -3242,42 +4194,36 @@ class Somfy {
         let obj = ui.fromElement(document.getElementById('somfyShade'));
         let valid = true;
         if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'The remote address must be a number between 1 and 16777215.  This number must be unique for all shades.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_REMOTE_ADDRESS_INVALID'));
             valid = false;
         }
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'You must provide a name for the shade between 1 and 20 characters.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_SHADE_NAME_INVALID'));
             valid = false;
         }
         if (valid && (isNaN(obj.upTime) || obj.upTime < 1 || obj.upTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'Up Time must be a value between 0 and 4,294,967,295 milliseconds.  This is the travel time to go from full closed to full open.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_UP_TIME_INVALID'));
             valid = false;
         }
         if (valid && (isNaN(obj.downTime) || obj.downTime < 1 || obj.downTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), 'Down Time must be a value between 0 and 4,294,967,295 milliseconds.  This is the travel time to go from full open to full closed.');
+            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_DOWN_TIME_INVALID'));
             valid = false;
         }
         if (obj.proto === 8 || obj.proto === 9) {
             switch (obj.shadeType) {
-                case 5: // Garage 1-button
-                case 14: // Gate left 1-button
-                case 15: // Gate center 1-button
-                case 16: // Gate right 1-button
-                case 10: // Two button dry contact
+                case 5: case 14: case 15: case 16: case 10:
                     if (obj.proto !== 9 && obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down GPIO selections must be unique.');
+                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_NOT_UNIQUE'));
                         valid = false;
                     }
                     break;
-                case 9: // Dry contact.
-                    break;
+                case 9: break;
                 default:
                     if (obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down GPIO selections must be unique.');
+                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_NOT_UNIQUE'));
                         valid = false;
-                    }
-                    else if (obj.proto === 9 && (obj.gpioMy === obj.gpioUp || obj.gpioMy === obj.gpioDown)) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), 'For GPIO controlled motors the up and down and my GPIO selections must be unique.');
+                    } else if (obj.proto === 9 && (obj.gpioMy === obj.gpioUp || obj.gpioMy === obj.gpioDown)) {
+                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_MY_NOT_UNIQUE'));
                         valid = false;
                     }
                     break;
@@ -3285,7 +4231,6 @@ class Somfy {
         }
         if (valid) {
             if (isNaN(shadeId) || shadeId >= 255) {
-                // We are adding.
                 putJSONSync('/addShade', obj, (err, shade) => {
                     if (err) {
                         ui.serviceError(err);
@@ -3294,7 +4239,12 @@ class Somfy {
                     else {
                         console.log(shade);
                         document.getElementById('spanShadeId').innerText = shade.shadeId;
-                        document.getElementById('btnSaveShade').innerText = 'Save Shade';
+                        document.getElementById('icoShade').setAttribute('data-shadeid', shade.shadeId);
+                        const btnContainer = document.getElementById('divshowSomfyButtons');
+                        btnContainer.style.display = 'flex';
+                        btnContainer.classList.remove('disabled');
+
+                        document.getElementById('btnSaveShade').innerText = tr('BT_SAVE_SHADE');
                         document.getElementById('btnSaveShade').style.display = 'inline-block';
                         document.getElementById('btnLinkRemote').style.display = '';
                         document.getElementById(shade.paired ? 'btnUnpairShade' : 'btnPairShade').style.display = 'inline-block';
@@ -3307,18 +4257,23 @@ class Somfy {
                 obj.shadeId = shadeId;
                 putJSONSync('/saveShade', obj, (err, shade) => {
                     if (err) ui.serviceError(err);
-                    else this.updateShadeList();
+                    else {
+                        document.getElementById('divshowSomfyButtons').classList.remove('disabled');
+                        this.updateShadeList();
+                    }
                     console.log(shade);
                     let ico = document.getElementById('icoShade');
-                    let tilt = ico.parentElement.querySelector('i.icss-window-tilt');
-                    tilt.style.display = shade.tiltType !== 0 ? '' : 'none';
-                    tilt.setAttribute('data-tiltposition', shade.tiltPosition);
-                    tilt.setAttribute('data-shadeid', shade.shadeId);
-                    ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}%`);
+
+                    // --- REMPLACEMENT ICI ---
+                    const tiltContainer = document.getElementById('labelTiltContainer');
+                    const spanValTilt = document.getElementById('valTilt');
+
+                    if (tiltContainer) tiltContainer.style.display = shade.tiltType !== 0 ? 'block' : 'none';
+                    if (spanValTilt) spanValTilt.innerText = shade.tiltPosition;
+
+                    ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}`);
                     ico.style.setProperty('--fpos', `${shade.position}%`);
-
                     ico.style.setProperty('--tilt-position', `${shade.flipPosition ? 100 - shade.tiltPosition : shade.tiltPosition}%`);
-
                 });
             }
         }
@@ -3327,36 +4282,50 @@ class Somfy {
         let groupId = parseInt(document.getElementById('spanGroupId').innerText, 10);
         let obj = ui.fromElement(document.getElementById('somfyGroup'));
         let valid = true;
+        const btnContainer = document.getElementById('divSomfyGroupButtons');
+
         if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage('The remote address must be a number between 1 and 16777215.  This number must be unique for all shades.');
+            ui.errorMessage(tr('ERR_REMOTE_ADDRESS_INVALID'));
             valid = false;
         }
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage('You must provide a name for the shade between 1 and 20 characters.');
+            ui.errorMessage(tr('ERR_SHADE_NAME_INVALID'));
             valid = false;
         }
+
         if (valid) {
             if (isNaN(groupId) || groupId >= 255) {
-                // We are adding.
                 putJSONSync('/addGroup', obj, (err, group) => {
-                    if (err) ui.serviceError(err);
+                    if (err) {
+                        ui.serviceError(err);
+                    }
                     else {
                         console.log(group);
                         document.getElementById('spanGroupId').innerText = group.groupId;
-                        document.getElementById('btnSaveGroup').innerText = 'Save Group';
+                        btnContainer.classList.add('disabled');
+                        document.getElementById('btnSaveGroup').innerText = tr('BT_SAVE_GROUP');
                         document.getElementById('btnSaveGroup').style.display = 'inline-block';
                         document.getElementById('btnLinkShade').style.display = '';
-                        //document.getElementById('btnSetRollingCode').style.display = 'inline-block';
                         this.updateGroupList();
                     }
                 });
             }
             else {
                 obj.groupId = groupId;
-                putJSONSync('/saveGroup', obj, (err, shade) => {
-                    if (err) ui.serviceError(err);
-                    else this.updateGroupList();
-                    console.log(shade);
+                putJSONSync('/saveGroup', obj, (err, group) => {
+                    if (err) {
+                        ui.serviceError(err);
+                    }
+                    else {
+                        console.log(group);
+                        if (group.shades && group.shades.length > 0) {
+                            btnContainer.classList.remove('disabled');
+                        } else {
+                            btnContainer.classList.add('disabled');
+                        }
+
+                        this.updateGroupList();
+                    }
                 });
             }
         }
@@ -3369,7 +4338,6 @@ class Somfy {
             }
             else {
                 this.setRoomsList(shades);
-                
             }
         });
     }
@@ -3411,14 +4379,14 @@ class Somfy {
     deleteRoom(roomId) {
         let valid = true;
         if (isNaN(roomId) || roomId >= 255 || roomId <= 0) {
-            ui.errorMessage('A valid room id was not supplied.');
+            ui.errorMessage(tr('ERR_ROOM_ID_REQUIRED'));
             valid = false;
         }
         if (valid) {
             getJSONSync(`/room?roomId=${roomId}`, (err, room) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage(`Are you sure you want to delete this room?`, () => {
+                    let prompt = ui.promptMessage(tr('PROMPT_DELETE_ROOM'), () => {
                         ui.clearErrors();
                         putJSONSync('/deleteRoom', { roomId: roomId }, (err, room) => {
                             prompt.remove();
@@ -3427,7 +4395,7 @@ class Somfy {
                                 this.updateRoomsList();
                         });
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<p>If this room was previously selected for motors or groups, they will be automatically assigned to the Home room.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_DELETE_ROOM_WARNING")}</p>`;
                 }
             });
         }
@@ -3435,22 +4403,22 @@ class Somfy {
     deleteShade(shadeId) {
         let valid = true;
         if (isNaN(shadeId) || shadeId >= 255 || shadeId <= 0) {
-            ui.errorMessage('A valid shade id was not supplied.');
+            ui.errorMessage(tr('ERR_SHADE_ID_REQUIRED'));
             valid = false;
         }
         if (valid) {
             getJSONSync(`/shade?shadeId=${shadeId}`, (err, shade) => {
                 if (err) ui.serviceError(err);
-                else if (shade.inGroup) ui.errorMessage(`You may not delete this shade because it is a member of a group.`);
+                else if (shade.inGroup) ui.errorMessage(tr('ERR_SHADE_IN_GROUP'));
                 else {
-                    let prompt = ui.promptMessage(`Are you sure you want to delete this shade?`, () => {
+                    let prompt = ui.promptMessage(tr('PROMPT_DELETE_SHADE'), () => {
                         ui.clearErrors();
                         putJSONSync('/deleteShade', { shadeId: shadeId }, (err, shade) => {
                             this.updateShadeList();
                             prompt.remove;
                         });
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<p>If this shade was previously paired with a motor, you should first unpair it from the motor and remove it from any groups.  Otherwise its address will remain in the motor memory.</p><p>Press YES to delete ${shade.name} or NO to cancel this operation.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_DELETE_SHADE_WARNING")}</p><p>${tr("PROMPT_DELETE_SHADE_CONFIRM").replace("{SHADE_NAME}", shade.name)}</p>`;
                 }
             });
         }
@@ -3458,7 +4426,7 @@ class Somfy {
     deleteGroup(groupId) {
         let valid = true;
         if (isNaN(groupId) || groupId >= 255 || groupId <= 0) {
-            ui.errorMessage('A valid shade id was not supplied.');
+            ui.errorMessage(tr('ERR_INVALID_GROUP_ID'));
             valid = false;
         }
         if (valid) {
@@ -3466,19 +4434,17 @@ class Somfy {
                 if (err) ui.serviceError(err);
                 else {
                     if (group.linkedShades.length > 0) {
-                        ui.errorMessage('You may not delete this group until all shades have been removed from it.');
+                        ui.errorMessage(tr('ERR_GROUP_NOT_EMPTY'));
                     }
                     else {
-                        let prompt = ui.promptMessage(`Are you sure you want to delete this group?`, () => {
+                        let prompt = ui.promptMessage(tr('PROMPT_DELETE_GROUP'), () => {
                             putJSONSync('/deleteGroup', { groupId: groupId }, (err, g) => {
                                 if (err) ui.serviceError(err);
                                 this.updateGroupList();
                                 prompt.remove();
                             });
-
                         });
-                        prompt.querySelector('.sub-message').innerHTML = `<p>Press YES to delete the ${group.name} group or NO to cancel this operation.</p>`;
-                        
+                        prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_DELETE_GROUP_CONFIRM").replace("{GROUP_NAME}", group.name)}</p>`;
                     }
                 }
             });
@@ -3499,11 +4465,15 @@ class Somfy {
                 document.getElementsByName('shadeName')[0].value = shade.name;
                 document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
                 document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-                let ico = document.getElementById('icoShade');
-                ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}%`);
-                ico.style.setProperty('--fpos', `${shade.position}%`);
-                //ico.style.setProperty('--shade-position', `${shade.position}%`);
-                ico.setAttribute('data-shadeid', shade.shadeId);
+
+                let svg = document.getElementById('icoShade');
+                if (svg) {
+                    let pos = shade.flipPosition ? 100 - shade.position : shade.position;
+
+                    svg.style.setProperty('--shade-position', pos);
+                    svg.style.setProperty('--fpos', `${shade.position}%`);
+                    svg.setAttribute('data-shadeid', shade.shadeId);
+                }
                 if (shade.paired) {
                     document.getElementById('btnUnpairShade').style.display = 'inline-block';
                     document.getElementById('btnPairShade').style.display = 'none';
@@ -3512,10 +4482,12 @@ class Somfy {
                     document.getElementById('btnPairShade').style.display = 'inline-block';
                     document.getElementById('btnUnpairShade').style.display = 'none';
                 }
-                this.setLinkedRemotesList(shade);
-                document.getElementById('divPairing').remove();
-            }
 
+                this.setLinkedRemotesList(shade);
+
+                let divPairing = document.getElementById('divPairing');
+                if (divPairing) divPairing.remove();
+            }
         });
     }
     sendUnpairCommand(shadeId) {
@@ -3533,11 +4505,15 @@ class Somfy {
                 document.getElementsByName('shadeName')[0].value = shade.name;
                 document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
                 document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-                let ico = document.getElementById('icoShade');
-                ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}%`);
-                ico.style.setProperty('--fpos', `${shade.position}%`);
-                //ico.style.setProperty('--shade-position', `${shade.position}%`);
-                ico.setAttribute('data-shadeid', shade.shadeId);
+
+                let svg = document.getElementById('icoShade');
+                if (svg) {
+                    let pos = shade.flipPosition ? 100 - shade.position : shade.position;
+
+                    svg.style.setProperty('--shade-position', pos);
+                    svg.style.setProperty('--fpos', `${shade.position}%`);
+                    svg.setAttribute('data-shadeid', shade.shadeId);
+                }
                 if (shade.paired) {
                     document.getElementById('btnUnpairShade').style.display = 'inline-block';
                     document.getElementById('btnPairShade').style.display = 'none';
@@ -3546,8 +4522,11 @@ class Somfy {
                     document.getElementById('btnPairShade').style.display = 'inline-block';
                     document.getElementById('btnUnpairShade').style.display = 'none';
                 }
+
                 this.setLinkedRemotesList(shade);
-                document.getElementById('divPairing').remove();
+
+                let divPairing = document.getElementById('divPairing');
+                if (divPairing) divPairing.remove();
             }
         });
     }
@@ -3568,24 +4547,47 @@ class Somfy {
                 ui.serviceError(err);
             }
             else {
-                console.log(shade);
                 let div = document.createElement('div');
                 div.setAttribute('id', 'divRollingCode');
-                let html = `<div class="instructions" data-shadeid="${shadeId}">`;
-                html += '<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="background:yellow;padding:10px;display:inline-block;border-radius:5px;background:white;">BEWARE ... WARNING ... DANGER<span></div>';
-                html += '<hr style="width:100%;margin:0px;"></hr>';
-                html += '<p style="font-size:14px;">If this shade is already paired with a motor then changing the rolling code WILL cause it to stop working.  Rolling codes are tied to the remote address and the Somfy motor expects these to be sequential.</p>';
-                html += '<p style="font-size:14px;">If you hesitated just a little bit do not press the red button.  Green represents safety so press it, wipe the sweat from your brow, and go through the normal pairing process.';
-                html += '<div class="field-group" style="border-radius:5px;background:white;width:50%;margin-left:25%;text-align:center">';
-                html += `<input id="fldNewRollingCode" min="0" max="65535" name="newRollingCode" type="number" length="12" style="text-align:center;font-size:24px;" placeholder="New Code" value="${shade.lastRollingCode}"></input>`;
-                html += '<label for="fldNewRollingCode">Rolling Code</label>';
-                html += '</div>';
-                html += `<div class="button-container">`;
-                html += `<button id="btnChangeRollingCode" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:orangered;" onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">Set Rolling Code</button>`;
-                html += `<button id="btnCancel" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;background:lawngreen;color:gray" onclick="document.getElementById('divRollingCode').remove();">Cancel</button>`;
-                html += `</div>`;
-                div.innerHTML = html;
-                document.getElementById('somfyShade').appendChild(div);
+                div.setAttribute('class', 'inst-overlay');
+
+                div.innerHTML = `
+                <div class="instructions-content">
+                <div id="btnOverlayRollingClose" class="boutonOverlayClose" onclick="document.getElementById('divRollingCode').remove();">
+                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+                </div>
+                <div class="instructions-header">
+                <div style="position: relative;">
+                <h2>${tr("ROLLING_CODE_TITLE")}</h2>
+                <p>${tr("ROLLING_CODE_DESC")}</p>
+                </div>
+                <svg class="instructions-headerLogo"><use xlink:href="#icon-warning"></use></svg>
+                </div>
+                <div class="error">
+                <svg><use xlink:href="#icon-warning"></use></svg>
+                <div style="text-align: left; flex: 1;">
+                <b>${tr("MSG_DANGER")}</b>
+                <span>${tr("ROLLING_CODE_WARNING_DESC_1")}</span>
+                </div>
+                </div>
+                <div class="field-group unibloc" style="padding: 15px; margin-top:15px;">
+                <p style="font-size:14px; margin:0;">${tr("ROLLING_CODE_WARNING_DESC_2")}</p>
+                </div>
+                <div class="field-group unibloc" style="padding: 20px;">
+                <label class="label" for="fldNewRollingCode" style="color: var(--accent-color);">${tr("BT_ROLLING_CODE")}</label>
+                <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number"
+                style="text-align:center; font-size:35px; color: var(--accent-color);" value="${shade.lastRollingCode}">
+                </div>
+                <div class="button-container-row" style="gap:10px;">
+                <button id="btnCancel" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
+                <button id="btnChangeRollingCode" class="bouton" type="button" style="flex:1; background-color: var(--error-color, brown);"
+                onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
+                </div>
+                </div>`;
+
+                document.getElementById('divContainer').appendChild(div);
+                window.scrollTo(0, 0);
             }
         });
     }
@@ -3620,93 +4622,73 @@ class Somfy {
     pairShade(shadeId) {
         let shadeType = parseInt(document.getElementById('somfyShade').getAttribute('data-shadetype'), 10);
         let div = document.createElement('div');
-        let html = `<div id="divPairing" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
+        let specificContent = '';
+
         if (shadeType === 5 || shadeType === 6) {
-            html += '<div>Follow the instructions below to pair ESPSomfy RTS with an RTS Garage Door motor</div>';
-            html += '<hr style="width:100%;margin:0px;"></hr>';
-            html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-            html += '<li>Open the garage door motor memory per instructions for your motor.</li>';
-            html += '<li>Once the memory is opened, press the prog button below</li>';
-            html += '<li>For single button control ESPSomfy RTS will send a toggle command but for a 3 button control it will send a prog command.</li>';
-            html += '</ul>';
-            html += `<div class="button-container">`;
-            html += `<button id="btnSendPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Door Paired</button>`;
-            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Close</button>`;
-            html += `</div>`;
+            specificContent = `
+            <div class="instructions-header">
+            <div style="position: relative;"><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_GARAGE_DESC")}</p></div>
+            <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleGarage"></use></svg>
+            </div>
+            <div class="button-container-row">
+            <button id="btnSendPairing" class="bouton" type="button">${tr("BT_PROG")}</button>
+            <button id="btnMarkPaired" class="bouton" type="button" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_DOOR_PAIRED")}</button>
+            </div>
+            <div class="button-container-col">
+            <button id="btnStopPairing" class="boutonOutline" type="button">${tr("BT_CLOSE")}</button>
+            </div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_GARAGE_STEP_1")}</div></div></div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_GARAGE_STEP_2")}</div></div></div>
+            <div class="information"><svg><use xlink:href="#svg-info"></use></svg>
+            <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_GARAGE_STEP_3")}</span></div>
+            </div>`;
+        } else {
+            specificContent = `
+            <div class="instructions-header">
+            <div style="position: relative;"><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_SHADE_DESC")}</p></div>
+            <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+            </div>
+            <div class="button-container-row" style="margin-top: 20px;">
+            <button id="btnSendPairing" class="bouton" style="flex:1;">${tr("BT_PROG")}</button>
+            <button id="btnMarkPaired" class="bouton" style="flex:1;" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
+            </div>
+            <div class="button-container-col" style="margin-top: 10px;">
+            <button id="btnStopPairing" class="boutonOutline" style="width:100%;">${tr("BT_CLOSE")}</button>
+            </div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_SHADE_STEP_1")}</div></div></div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_SHADE_STEP_2")}</div></div></div>
+            <div class="information"><svg><use xlink:href="#svg-info"></use></svg>
+            <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_SHADE_STEP_3")}</span></div>
+            </div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("PAIR_SHADE_STEP_4")}</div></div></div>
+            <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("PAIR_SHADE_STEP_5")}</div></div></div>`;
         }
-        else {
-            html += '<div>Follow the instructions below to pair this shade with a Somfy motor</div>';
-            html += '<hr style="width:100%;margin:0px;"></hr>';
-            html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-            html += '<li>Open the shade memory using an existing remote by pressing the prog button on the back until the shade jogs.</li>';
-            html += '<li>After the shade jogs press the Prog button below</li>';
-            html += '<li>The shade should jog again indicating that the shade is paired. NOTE: On some motors you may need to press and hold the Prog button.</li>';
-            html += '<li>If the shade jogs, you can press the shade paired button.</li>';
-            html += '<li>If the shade does not jog, try pressing the prog button again.</li>';
-            html += '</ul>';
-            html += `<div class="button-container">`;
-            html += `<button id="btnSendPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-            html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, true);">Shade Paired</button>`;
-            html += `<button id="btnStopPairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" >Close</button>`;
-            html += `</div>`;
-        }
-        let fnRepeatProg = (err, shade) => {
-            if (this.btnTimer) {
-                clearTimeout(this.btnTimer);
-                this.btnTimer = null;
-            }
-            if (err) return;
-            if (mouseDown) {
-                somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
-            }
-        }
-        div.innerHTML = html;
-        document.getElementById('somfyShade').appendChild(div);
-        document.getElementById('btnStopPairing').addEventListener('click', (event) => {
-            console.log(this);
-            console.log(event);
-            console.log('close');
+
+        div.innerHTML = `
+        <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
+        <div class="instructions-content">
+        <div id="btnOverlayPairingClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        ${specificContent}
+        </div>
+        </div>`;
+
+        document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
+
+        const closePairing = () => {
             if (this.btnTimer) {
                 clearInterval(this.btnTimer);
                 this.btnTimer = null;
             }
             document.getElementById('divPairing').remove();
-        });
-        let btn = document.getElementById('btnSendPairing');
-        btn.addEventListener('mousedown', (event) => {
-            console.log(this);
-            console.log(event);
-            console.log('mousedown');
-            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        }, true);
-        btn.addEventListener('touchstart', (event) => {
-            console.log(this);
-            console.log(event);
-            console.log('touchstart');
-            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        }, true);
-        return div;
-    }
-    unpairShade(shadeId) {
-        let div = document.createElement('div');
-        let html = `<div id="divPairing" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
-        html += '<div>Follow the instructions below to unpair this shade from a Somfy motor</div>';
-        html += '<hr style="width:100%;margin:0px;"></hr>';
-        html += '<ul style="width:100%;margin:0px;padding-left:20px;font-size:14px;">';
-        html += '<li>Open the shade memory using an existing remote</li>';
-        html += '<li>Press the prog button on the back of the remote until the shade jogs</li>';
-        html += '<li>After the shade jogs press the Prog button below</li>';
-        html += '<li>The shade should jog again indicating that the shade is unpaired</li>';
-        html += '<li>If the shade jogs, you can press the shade unpaired button.</li>';
-        html += '<li>If the shade does not jog, press the prog button again until the shade jogs.</li>';
-        html += '</ul>';
-        html += `<div class="button-container">`;
-        html += `<button id="btnSendUnpairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;">Prog</button>`;
-        html += `<button id="btnMarkPaired" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;" onclick="somfy.setPaired(${shadeId}, false);">Shade Unpaired</button>`;
-        html += `<button id="btnStopUnpairing" type="button" style="padding-left:20px;padding-right:20px;display:inline-block" onclick="document.getElementById('divPairing').remove();">Close</button>`;
-        html += `</div>`;
-        div.innerHTML = html;
+        };
+
+        document.getElementById('btnStopPairing').addEventListener('click', closePairing);
+        document.getElementById('btnOverlayPairingClose').addEventListener('click', closePairing);
+
         let fnRepeatProg = (err, shade) => {
             if (this.btnTimer) {
                 clearTimeout(this.btnTimer);
@@ -3717,20 +4699,88 @@ class Somfy {
                 somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
             }
         }
-        document.getElementById('somfyShade').appendChild(div);
+
+        let btn = document.getElementById('btnSendPairing');
+        const onProgClick = (event) => {
+            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
+        };
+
+        btn.addEventListener('mousedown', onProgClick, true);
+        btn.addEventListener('touchstart', onProgClick, true);
+
+        return div;
+    }
+    unpairShade(shadeId) {
+        let div = document.createElement('div');
+
+        div.innerHTML = `
+        <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
+        <div class="instructions-content">
+        <div id="btnOverlayPairingClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr("UNPAIR_TITLE")}</h2>
+        <p>${tr("UNPAIR_SHADE_DESC_1")}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+        </div>
+        <div class="button-container-row" style="margin-top: 20px; gap:10px;">
+        <button id="btnSendUnpairing" class="bouton" style="flex:1;">${tr("BT_PROG")}</button>
+        <button id="btnMarkPaired" class="bouton" style="flex:1;" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
+        </div>
+        <div class="button-container-col" style="margin-top: 10px;">
+        <button id="btnStopUnpairing" class="boutonOutline" style="width:100%;">${tr("BT_CLOSE")}</button>
+        </div>
+        <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_1")}</div></div></div>
+        <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_2")}</div></div></div>
+        <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_3")}</div></div></div>
+        <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_4")}</div></div></div>
+        <div class="field-group unibloc"><div class="step-item"><div class="step-number">5</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_5")}</div></div></div>
+        <div class="information">
+        <svg><use xlink:href="#svg-info"></use></svg>
+        <div style="text-align: left; flex: 1;">
+        <b>${tr("MSG_NOTE")}</b>
+        <span>${tr("UNPAIR_SHADE_STEP_6") || "Le volet doit effectuer un mouvement pour confirmer qu'il a bien oublié ESPSomfy."}</span>
+        </div>
+        </div>
+        </div>
+        </div>`;
+
+        const closeUnpair = () => {
+            if (this.btnTimer) {
+                clearTimeout(this.btnTimer);
+                this.btnTimer = null;
+            }
+            div.remove();
+        };
+
+        document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
+
+        document.getElementById('btnStopUnpairing').onclick = closeUnpair;
+        document.getElementById('btnOverlayPairingClose').onclick = closeUnpair;
+
+        let fnRepeatProg = (err, shade) => {
+            if (this.btnTimer) {
+                clearTimeout(this.btnTimer);
+                this.btnTimer = null;
+            }
+            if (err) return;
+            if (mouseDown) {
+                somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
+            }
+        };
+
         let btn = document.getElementById('btnSendUnpairing');
-        btn.addEventListener('mousedown', (event) => {
-            console.log(this);
-            console.log(event);
-            console.log('mousedown');
+        const onProgClick = (event) => {
             somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        }, true);
-        btn.addEventListener('touchstart', (event) => {
-            console.log(this);
-            console.log(event);
-            console.log('touchstart');
-            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        }, true);
+        };
+
+        btn.addEventListener('mousedown', onProgClick, true);
+        btn.addEventListener('touchstart', onProgClick, true);
 
         return div;
     }
@@ -3770,12 +4820,6 @@ class Somfy {
         putJSON('/repeatCommand', obj, (err, shade) => {
             if (typeof cb === 'function') cb(err, shade);
         });
-
-        /*
-        putJSON(`/repeatCommand?shadeId=${shadeId}&command=${command}`, null, (err, shade) => {
-            if(typeof cb === 'function') cb(err, shade);
-        });
-        */
     }
     sendGroupRepeat(groupId, command, repeat, cb) {
         let obj = { groupId: groupId, command: command };
@@ -3848,114 +4892,184 @@ class Somfy {
             putJSON('/tiltCommand', { shadeId: shadeId, command: command }, (err, shade) => {
                 if (typeof cb === 'function') cb(err, shade);
             });
-        else
-            putJSON('/tiltCommand', { shadeId: shadeId, target: parseInt(command, 10) }, (err, shade) => {
-                if (typeof cb === 'function') cb(err, shade);
-            });
+                else
+                    putJSON('/tiltCommand', { shadeId: shadeId, target: parseInt(command, 10) }, (err, shade) => {
+                        if (typeof cb === 'function') cb(err, shade);
+                    });
     }
     linkRemote(shadeId) {
         let div = document.createElement('div');
-        let html = `<div id="divLinking" class="instructions" data-type="link-remote" data-shadeid="${shadeId}">`;
-        html += '<div>Press any button on the remote to link it to this shade.  This will not change the pairing for the remote and this screen will close when the remote is detected.</div>';
-        html += '<hr></hr>';
-        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinking').remove();">Cancel</button></div>`;
-        html += '</div>';
-        div.innerHTML = html;
-        document.getElementById('somfyShade').appendChild(div);
+
+        div.innerHTML = `
+        <div id="divLinking" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
+        <div class="instructions-content">
+        <div id="btnOverlayLinkingClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr("PAIR_TITLE")}</h2>
+        <p style="font-size:14px;">${tr("LINK_REMOTE_DESC")}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-remote"></use></svg>
+        </div>
+        <div class="field-group unibloc" style="font-size: 14px; padding: 20px;">
+        ${tr("LINK_REMOTE_DESC_1")}
+        </div>
+        <div class="information">
+        <svg><use xlink:href="#svg-info"></use></svg>
+        <div style="text-align: left; flex: 1;">
+        <b>${tr("MSG_NOTE")}</b>
+        <span>${tr("LINK_REMOTE_DESC_2")}</span>
+        </div>
+        </div>
+        <div class="button-container-col" style="margin-top: 10px;">
+        <button id="btnStopLinking" class="bouton" type="button">${tr("BT_CANCEL_1")}</button>
+        </div>
+        </div>
+        </div>`;
+
+        const closeLinking = () => { div.remove(); };
+
+        document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
+
+        document.getElementById('btnStopLinking').onclick = closeLinking;
+        document.getElementById('btnOverlayLinkingClose').onclick = closeLinking;
+
         return div;
     }
+
     linkRepeatRemote() {
         let div = document.createElement('div');
-        let html = `<div id="divLinkRepeater" class="instructions" data-type="link-repeatremote" style="border-radius:27px;">`;
-        html += '<div>Press any button on the remote to repeat its signals.</div>';
-        html += '<div class="sub-message">When assigned, ESPSomfy RTS will act as a repeater and repeat any frames for the identified remotes.</div>'
-        html += '<div class="sub-message" style="font-size:14px;">Only assign a repeater when ESPSomfy RTS reliably hears a physical remote but the motor does not.  Repeating unnecessary radio signals will degrade radio performance and never assign the same repeater to more than one ESPSomfy RTS device.  You will have created an insidious echo chamber.</div>'
 
-        html += '<div class="sub-message">Once a signal is detected from the remote this window will close and the remote signals will be repeated.</div>'
-        html += '<hr></hr>';
-        html += `<div><div class="button-container"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;" onclick="document.getElementById('divLinkRepeater').remove();">Cancel</button></div>`;
-        html += '</div>';
-        div.innerHTML = html;
-        document.getElementById('divConfigPnl').appendChild(div);
+        div.innerHTML = `
+        <div id="divLinkRepeater" class="inst-overlay" data-type="link-repeatremote">
+        <div class="instructions-content">
+        <div id="btnOverlayRepeaterClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr("REPEAT_REMOTE_TITLE")}</h2>
+        <p style="font-size:14px;">${tr("REPEAT_REMOTE_DESC")}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-repeater"></use></svg>
+        </div>
+        <div class="button-container-col">
+        <button id="btnStopLinking" class="bouton" type="button">${tr("BT_CANCEL_1")}</button>
+        </div>
+        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_1")}</div>
+        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_2")}</div>
+        <div class="field-group unibloc" style="padding: 15px; font-size:14px;">${tr("REPEAT_REMOTE_DESC_3")}</div>
+        <div class="warning">
+        <svg><use xlink:href="#icon-warning"></use></svg>
+        <div style="text-align: left; flex: 1;">
+        <b>${tr("MSG_ALERT")}</b>
+        <span>${tr("REPEAT_REMOTE_DESC_4")}</span>
+        </div>
+        </div>
+        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_5")}</div>
+        </div>
+        </div>`;
+
+        const closeRepeater = () => { div.remove(); };
+
+        document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
+
+        document.getElementById('btnStopLinking').onclick = closeRepeater;
+        document.getElementById('btnOverlayRepeaterClose').onclick = closeRepeater;
+
         return div;
     }
-
     linkGroupShade(groupId) {
         let div = document.createElement('div');
-        let html = `<div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">`;
-        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>ADD SHADE TO GROUP</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
 
-        html += '<div class="wizard-step" data-stepid="1">';
-        html += '<p style="font-size:14px;">This wizard will walk you through the steps required to add shades into a group.  Follow all instructions at each step until the shade is added to the group.</p>';
-        html += '<p style="font-size:14px;">During this process the shade should jog exactly two times.  The first time indicates that the motor memory has been enabled and the second time adds the group to the motor memory</p>';
-        html += '<p style="font-size:14px;">Each shade must be paired individually to the group.  When you are ready to begin pairing your shade to the group press the NEXT button.</p><hr></hr>';
-       
-        html += '</div>';
+        div.innerHTML = `
+        <div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
+        <div class="instructions-content">
+        <div id="btnOverlayGroupClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr("LINK_GROUP_TITLE")}</h2>
+        <p id="pGroupHeaderTitle" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px;">
+        ${tr("LINK_GROUP_DESC")}
+        <span id="spanGroupName" style="font-weight:bold; font-size: 17px; vertical-align: middle; line-height: 1;"></span>
+        </p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+        </div>
+        <div class="field-group unibloc wizard-step" data-stepid="2" style="text-align:center;">
+        <label class="label" for="selAvailShades">${tr("LINK_GROUP_SELECT_SHADE")}</label>
+        <select id="selAvailShades" class="inputAndSelect" style="font-size:25px;color: var(--accent-color);" data-bind="shadeId" data-datatype="int" onchange="document.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = this.options[this.selectedIndex].text);">
+        <options style="color:black;"></options>
+        </select>
+        </div>
+        <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center;font-size:25px;font-weight:bold;color:var(--accent-color);"></div>
+        <div class="button-container-col wizard-step" data-stepid="3" style="margin-bottom: 15px;">
+        <button class="bouton" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
+        </div>
+        <div class="divWizShadeName wizard-step" data-stepid="4" style="text-align:center;font-size:22px;font-weight:bold;color:var(--accent-color);"></div>
+        <div class="button-container-col wizard-step" data-stepid="4" style="margin-bottom: 15px;">
+        <button class="bouton" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button>
+        </div>
+        <div class="button-container-row" style="text-align:center; gap:10px;">
+        <button id="btnPrevStep" class="boutonOutline" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
+        </div>
+        <div class="button-container-col" style="text-align:center; margin-top:10px;">
+        <button id="btnStopLinking" class="boutonOutline" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
+        </div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP2_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
+        </div>
+        </div>`;
 
-        html += '<div class="wizard-step" data-stepid="2">';
-        html += '<p style="font-size:14px;">Choose a shade that you would like to include in this group.  Once you have chosen the shade to include in the link press the NEXT button.</p>';
-        html += '<p style="font-size:14px;">Only shades that have not already been included in this group are available the dropdown.  Each shade can be included in multiple groups.</p>';
-        html += '<hr></hr>';
-        html += `<div class="field-group" style="text-align:center;background-color:white;border-radius:5px;">`;
-        html += `<select id="selAvailShades" style="font-size:22px;min-width:277px;text-align:center;" data-bind="shadeId" data-datatype="int" onchange="document.getElementById('divWizShadeName').innerHTML = this.options[this.selectedIndex].text;"><options style="color:black;"></options></select><label for="selAvailShades">Select a Shade</label></div >`;
-        html += '</div>';
-
-        html += '<div class="wizard-step" data-stepid="3">';
-        html += '<p style="font-size:14px;">Now that you have chosen a shade to pair.  Open the memory for the shade by pressing the OPEN MEMORY button.  The shade should jog to indicate the memory has been opened.</p>';
-        html += '<p style="font-size:14px;">The motor should jog only once.  If it jogs more than once then you have again closed the memory on the motor. Once the command is sent to the motor you will be asked if the motor successfully jogged.</p><p style="font-size:14px;">If it did then press YES if not press no and click the OPEN MEMORY button again.</p>';
-        html += '<hr></hr>';
-        html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Open Memory</button></div>';
-        html += '<hr></hr>';
-        html += '</div>';
-
-        html += '<div class="wizard-step" data-stepid="4">';
-        html += '<p style="font-size:14px;">Now that the memory is opened on the motor you need to send the pairing command for the group.</p>';
-        html += '<p style="font-size:14px;">To do this press the PAIR TO GROUP button below and once the motor jogs the process will be complete.</p>';
-        html += '<hr></hr>';
-        html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnPairToGroup">Pair to Group</button></div>';
-        html += '<hr></hr>';
-        html += '</div>';
-
-
-
-        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">Go Back</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">Next</button></div>`;
-        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divLinkGroup').remove();">Cancel</button></div>`;
-        html += '</div>';
-        div.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
         ui.wizSetStep(div, 1);
+
+
+        const closeWiz = () => { div.remove(); };
+        div.querySelector('#btnStopLinking').onclick = closeWiz;
+        div.querySelector('#btnOverlayGroupClose').onclick = closeWiz;
+
         let btnOpenMemory = div.querySelector('#btnOpenMemory');
         btnOpenMemory.addEventListener('click', (evt) => {
             let obj = ui.fromElement(div);
-            console.log(obj);
             putJSONSync('/shadeCommand', { shadeId: obj.shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
                         ui.wizSetNextStep(document.getElementById('divLinkGroup'));
                         prompt.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>Once the shade has jogged the motor memory will be ready to add the shade to the group.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("LINK_GROUP_MEMORY_READY_FOR_GROUP")}</p>`;
                 }
             });
         });
         let btnPairToGroup = div.querySelector('#btnPairToGroup');
         let fnRepeatProgCommand = (err, o) => {
-            console.log(o);
-            if (this.btnTimer) {
-                clearTimeout(this.btnTimer);
-                this.btnTimer = null;
-            }
+            if (this.btnTimer) { clearTimeout(this.btnTimer); this.btnTimer = null; }
             if (err) return;
             if (mouseDown) {
-                if (o.cmd === 'Sensor')
-                    somfy.sendSetSensor(o);
-                else if (typeof o.groupId !== 'undefined')
-                    somfy.sendGroupRepeat(o.groupId, 'prog', null, fnRepeatProgCommand);
-                else
-                    somfy.sendCommandRepeat(o.shadeId, 'prog', null, fnRepeatProgCommand);
+                if (o.cmd === 'Sensor') somfy.sendSetSensor(o);
+                else if (typeof o.groupId !== 'undefined') somfy.sendGroupRepeat(o.groupId, 'prog', null, fnRepeatProgCommand);
+                else somfy.sendCommandRepeat(o.shadeId, 'prog', null, fnRepeatProgCommand);
             }
         }
         btnPairToGroup.addEventListener('mousedown', (evt) => {
@@ -3965,150 +5079,148 @@ class Somfy {
         btnPairToGroup.addEventListener('mouseup', (evt) => {
             mouseDown = false;
             let obj = ui.fromElement(div);
-            let prompt = ui.promptMessage('Confirm Motor Response', () => {
+            let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
                 putJSONSync('/linkToGroup', { groupId: groupId, shadeId: obj.shadeId }, (err, group) => {
-                    console.log(group);
                     somfy.setLinkedShadesList(group);
                     this.updateGroupList();
                 });
                 prompt.remove();
                 div.remove();
             });
-            prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog?  If the shade jogged press the YES button and your shade will be linked to the group.  If it did not press the NO button and try again.</p></p><p>Once the shade has jogged the shade will be added to the group and this process will be finished.</p>`;
-
+            prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_SHADE_GROUP_LINK_CONFIRM")}</p><p>${tr("LINK_GROUP_LINK_DONE")}</p>`;
         });
         getJSONSync(`/groupOptions?groupId=${groupId}`, (err, options) => {
-            if (err) {
-                div.remove();
-                ui.serviceError(err);
-            }
+            if (err) { div.remove(); ui.serviceError(err); }
             else {
-                console.log(options);
                 if (options.availShades.length > 0) {
-                    // Add in all the available shades.
+                    let spanName = div.querySelector('#spanGroupName');
+                    if (spanName) spanName.innerHTML = options.name;
+
                     let selAvail = div.querySelector('#selAvailShades');
-                    let grpName = div.querySelector('#divGroupName');
-                    if (grpName) grpName.innerHTML = options.name;
-                    for (let i = 0; i < options.availShades.length; i++) {
-                        let shade = options.availShades[i];
+                    options.availShades.forEach(shade => {
                         selAvail.options.add(new Option(shade.name, shade.shadeId));
-                    }
-                    let divWizShadeName = div.querySelector('#divWizShadeName');
-                    if (divWizShadeName) divWizShadeName.innerHTML = options.availShades[0].name;
-                }
-                else {
+                    });
+
+                    div.querySelectorAll('.divWizShadeName').forEach(el => {
+                        el.innerHTML = options.availShades[0].name;
+                    });
+                } else {
                     div.remove();
-                    ui.errorMessage('There are no available shades to pair to this group.');
+                    ui.errorMessage(tr('ERR_NO_SHADE_AVAILABLE_FOR_GROUP'));
                 }
             }
         });
+
         return div;
     }
     unlinkGroupShade(groupId, shadeId) {
         let div = document.createElement('div');
-        let html = `<div id="divUnlinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">`;
-        html += '<div style="width:100%;text-align:center;font-weight:bold;"><div style="padding:10px;display:inline-block;width:100%;color:#00bcd4;border-radius:5px;border-top-right-radius:17px;border-top-left-radius:17px;background:white;"><div>REMOVE SHADE FROM GROUP</div><div id="divGroupName" style="font-size:14px;"></div></div></div>';
 
-        html += '<div class="wizard-step" data-stepid="1">';
-        html += '<p style="font-size:14px;">This wizard will walk you through the steps required to remove a shade from a group.  Follow all instructions at each step until the shade is removed from the group.</p>';
-        html += '<p style="font-size:14px;">During this process the shade should jog exactly two times.  The first time indicates that the motor memory has been enabled and the second time removes the group from the motor memory</p>';
-        html += '<p style="font-size:14px;">Each shade must be removed from the group individually.  When you are ready to begin unpairing your shade from the group press the NEXT button to begin.</p><hr></hr>';
-        html += '</div>';
+        div.innerHTML = `
+        <div id="divUnlinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
+        <div class="instructions-content">
+        <div id="btnOverlayUnlinkClose" class="boutonOverlayClose">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr("UNLINK_GROUP_TITLE")}</h2>
+        <p id="pGroupHeaderTitle" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px;">
+        ${tr("UNLINK_GROUP_DESC")}
+        <span id="spanGroupName" style="font-weight:bold; font-size: 17px; vertical-align: middle; line-height: 1;"></span>
+        </p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+        </div>
+        <div class="divWizShadeName wizard-step" data-stepid="2" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
+        <div class="button-container-col wizard-step" data-stepid="2">
+        <button class="bouton" type="button" id="btnOpenMemory" style="margin-bottom: 15px;">${tr("BT_OPEN_MEMORY")}</button>
+        </div>
+        <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
+        <div class="button-container-col wizard-step" data-stepid="3">
+        <button class="bouton" type="button" id="btnUnpairFromGroup" style="margin-bottom: 15px;">${tr("BT_UNPAIR_GROUP")}</button>
+        </div>
+        <div class="button-container-row" style="text-align:center; gap:10px;">
+        <button id="btnPrevStep" class="boutonOutline" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
+        </div>
+        <div class="button-container-col" style="margin-top:10px;">
+        <button id="btnStopLinking" class="boutonOutline" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
+        </div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP2_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP2_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP3_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP3_DESC_2")}</p></div>
+        </div>
+        </div>`;
 
-        html += '<div class="wizard-step" data-stepid="2">';
-        html += '<p style="font-size:14px;">You must first open the memory for the shade by pressing the OPEN MEMORY button.  The shade should jog to indicate the memory has been opened.</p>';
-        html += '<p style="font-size:14px;">The motor should jog only once.  If it jogs more than once then you have again closed the memory on the motor. Once the motor has jogged press the NEXT button to proceed.</p>';
-        html += '<hr></hr>';
-        html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnOpenMemory">Open Memory</button></div>';
-        html += '<hr></hr>';
-        html += '</div>';
-
-        html += '<div class="wizard-step" data-stepid="3">';
-        html += '<p style="font-size:14px;">Now that the memory is opened on the motor you need to send the un-pairing command for the group.</p>';
-        html += '<p style="font-size:14px;">To do this press the UNPAIR FROM GROUP button below and once the motor jogs the process will be complete.</p>';
-        html += '<hr></hr>';
-        html += '<div id="divWizShadeName" style="text-align:center;font-size:22px;"></div>';
-        html += '<div class="button-container"><button type="button" id="btnUnpairFromGroup">Unpair from Group</button></div>';
-        html += '<hr></hr>';
-        html += '</div>';
-        html += `<div class="button-container" style="text-align:center;"><button id="btnPrevStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;margin-right:10px;display:inline-block;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">Go Back</button><button id="btnNextStep" type="button" style="padding-left:20px;padding-right:20px;width:37%;display:inline-block;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">Next</button></div>`;
-        html += `<div class="button-container" style="text-align:center;"><button id="btnStopLinking" type="button" style="padding-left:20px;padding-right:20px;display:inline-block;width:calc(100% - 100px);" onclick="document.getElementById('divUnlinkGroup').remove();">Cancel</button></div>`;
-        html += '</div>';
-        div.innerHTML = html;
         document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
         ui.wizSetStep(div, 1);
-        let btnOpenMemory = div.querySelector('#btnOpenMemory');
-        btnOpenMemory.addEventListener('click', (evt) => {
-            let obj = ui.fromElement(div);
-            console.log(obj);
+
+        const closeWiz = () => { div.remove(); };
+        div.querySelector('#btnStopLinking').onclick = closeWiz;
+        div.querySelector('#btnOverlayUnlinkClose').onclick = closeWiz;
+        div.querySelector('#btnOpenMemory').addEventListener('click', (evt) => {
             putJSONSync('/shadeCommand', { shadeId: shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
                         ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));
                         prompt.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>If you are having trouble getting the motor to jog on this step you may try to open the memory using a remote.  Most often this is done by selecting the channel, then a long press on the prog button.</p><p>If you opened the memory using the alternate method press the NO button to close this message, then press NEXT button to skip the step.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("UNLINK_GROUP_METHOD_1")}</p><p>${tr("UNLINK_GROUP_METHOD_2")}</p>`;
                 }
             });
         });
-        let btnUnpairFromGroup = div.querySelector('#btnUnpairFromGroup');
-        btnUnpairFromGroup.addEventListener('click', (evt) => {
-            let obj = ui.fromElement(div);
+        div.querySelector('#btnUnpairFromGroup').addEventListener('click', (evt) => {
             putJSONSync('/groupCommand', { groupId: groupId, command: 'prog', repeat: 1 }, (err, shade) => {
                 if (err) ui.serviceError(err);
                 else {
-                    let prompt = ui.promptMessage('Confirm Motor Response', () => {
+                    let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
                         putJSONSync('/unlinkFromGroup', { groupId: groupId, shadeId: shadeId }, (err, group) => {
-                            console.log(group);
                             somfy.setLinkedShadesList(group);
                             this.updateGroupList();
                         });
                         prompt.remove();
                         div.remove();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr></hr><p>Did the shade jog? If the shade jogged press the YES button if not then press the NO button and try again.</p><p>Once the shade has jogged the shade will be removed from the group and this process will be finished.</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("PROMPT_SHADE_MOVE_DONE")}</p>`;
                 }
             });
         });
         getJSONSync(`/group?groupId=${groupId}`, (err, group) => {
-            if (err) {
-                div.remove();
-                ui.serviceError(err);
-            }
+            if (err) { div.remove(); ui.serviceError(err); }
             else {
-                console.log(group);
-                console.log(shadeId);
-                let shade = group.linkedShades.find((x) => { return shadeId === x.shadeId; });
-                if (typeof shade !== 'undefined') {
-                    // Add in all the available shades.
-                    let grpName = div.querySelector('#divGroupName');
+                let shade = group.linkedShades.find((x) => x.shadeId === shadeId);
+                if (shade) {
+                    let grpName = div.querySelector('#spanGroupName');
                     if (grpName) grpName.innerHTML = group.name;
-                    let divWizShadeName = div.querySelector('#divWizShadeName');
-                    if (divWizShadeName) divWizShadeName.innerHTML = shade.name;
-                }
-                else {
+                    div.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = shade.name);
+                } else {
                     div.remove();
-                    ui.errorMessage('The specified shade could not be found in this group.');
+                    ui.errorMessage(tr('ERR_SHADE_NOT_FOUND_IN_GROUP'));
                 }
             }
         });
+
         return div;
     }
     unlinkRepeater(address) {
-        let prompt = ui.promptMessage('Are you sure you want to stop repeating frames from this address?', () => {
+        let prompt = ui.promptMessage(tr('PROMPT_UNLINK_REPEATER'), () => {
             putJSONSync('/unlinkRepeater', { address: address }, (err, repeaters) => {
                 if (err) ui.serviceError(err);
                 else this.setRepeaterList(repeaters);
                 prompt.remove();
             });
-
         });
     }
-
     unlinkRemote(shadeId, remoteAddress) {
-        let prompt = ui.promptMessage('Are you sure you want to unlink this remote from the shade?', () => {
+        let prompt = ui.promptMessage(tr('PROMPT_UNLINK_REMOTE'), () => {
             let obj = {
                 shadeId: shadeId,
                 remoteAddress: remoteAddress
@@ -4119,7 +5231,6 @@ class Somfy {
                 prompt.remove();
                 this.setLinkedRemotesList(shade);
             });
-
         });
     }
     deviationChanged(el) {
@@ -4166,57 +5277,79 @@ class Somfy {
     }
     openSetPosition(shadeId) {
         console.log('Opening Shade Positioner');
-        if (typeof shadeId === 'undefined') {
+        if (typeof shadeId === 'undefined') return;
+
+        let shade = document.querySelector(`div.somfyShadeCtl[data-shadeid="${shadeId}"]`);
+        if (!shade) return;
+
+        let arrowUse = shade.querySelector('.handle-icon use');
+        let existing = shade.querySelector('.shade-positioner');
+
+        if (existing) {
+            existing.classList.add('popup-slide-out');
+            if (arrowUse) arrowUse.setAttribute('href', '#svg-arrowRight');
+            setTimeout(() => { existing.remove(); }, 300);
             return;
         }
-        else {
-            let shade = document.querySelector(`div.somfyShadeCtl[data-shadeid="${shadeId}"]`);
-            if (shade) {
-                let ctls = document.querySelectorAll('.shade-positioner');
-                for (let i = 0; i < ctls.length; i++) {
-                    console.log('Closing shade positioner');
-                    ctls[i].remove();
-                }
-                switch (parseInt(shade.getAttribute('data-shadetype'), 10)) {
-                    case 5:
-                    case 9:
-                    case 10:
-                    case 14:
-                    case 15:
-                    case 16:
-                        return;
-                }
-                let tiltType = parseInt(shade.getAttribute('data-tilt'), 10) || 0;
-                let currPos = parseInt(shade.getAttribute('data-target'), 0);
-                let elname = shade.querySelector(`.shadectl-name`);
-                let shadeName = elname.innerHTML;
-                let html = `<div class="shade-name">${shadeName}</div>`;
-                let lbl = makeBool(shade.getAttribute('data-flipposition')) ? '% Open' : '% Closed';
-                if (tiltType !== 3) {
-                    html += `<input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" onchange="somfy.processShadeTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />`;
-                    html += `<label for="slidShadeTarget"><span>Target Position </span><span><span id="spanShadeTarget" class="shade-target">${currPos}</span><span>${lbl}</span></span></label>`;
-                }
-                if (tiltType > 0) {
-                    let currTiltPos = parseInt(shade.getAttribute('data-tilttarget'), 10);
-                    html += `<input id="slidShadeTiltTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" onchange="somfy.processShadeTiltTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />`;
-                    html += `<label for="slidShadeTiltTarget"><span>Target Tilt Position </span><span><span id="spanShadeTiltTarget" class="shade-tilt-target">${currTiltPos}</span><span>${lbl}</span></span></label>`;
-                }
-                html += `</div>`;
-                let div = document.createElement('div');
-                div.setAttribute('class', 'shade-positioner');
-                div.setAttribute('data-shadeid', shadeId);
-                div.addEventListener('onclick', (event) => { event.stopPropagation(); });
-                div.innerHTML = html;
-                shade.appendChild(div);
-                document.body.addEventListener('click', () => {
-                    let ctls = document.querySelectorAll('.shade-positioner');
-                    for (let i = 0; i < ctls.length; i++) {
-                        console.log('Closing shade positioner');
-                        ctls[i].remove();
-                    }
-                }, { once: true });
-            }
+
+        document.querySelectorAll('.shade-positioner').forEach(el => {
+            el.remove();
+            document.querySelectorAll('.handle-icon use').forEach(u => u.setAttribute('href', '#svg-arrowRight'));
+        });
+
+        switch (parseInt(shade.getAttribute('data-shadetype'), 10)) {
+            case 5: case 9: case 10: case 14: case 15: case 16: return;
         }
+
+        let tiltType = parseInt(shade.getAttribute('data-tilt'), 10) || 0;
+        let currPos = parseInt(shade.getAttribute('data-target'), 10) || 0;
+        let currTiltPos = parseInt(shade.getAttribute('data-tilttarget'), 10) || 0;
+        let lbl = makeBool(shade.getAttribute('data-flipposition')) ? `% ${tr('POPUP_OPEN')}` : `% ${tr('POPUP_CLOSED')}`;
+
+        const positionSlider = (tiltType !== 3) ? `
+        <div class="slider-group">
+        <div class="slider-header">
+        <span class="title">${tr('POPUP_TARGET_POSITION')}</span>
+        <span class="val"><span id="spanShadeTarget" class="shade-target">${currPos}</span> ${lbl}</span>
+        </div>
+        <input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" onchange="somfy.processShadeTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />
+        </div>` : '';
+
+        const tiltSlider = (tiltType > 0) ? `
+        <div class="slider-group" ${(tiltType !== 3) ? 'style="margin-top:10px;"' : ''}>
+        <div class="slider-header">
+        <span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span>
+        <span class="val"><span id="spanShadeTiltTarget" class="shade-tilt-target">${currTiltPos}</span> ${lbl}</span>
+        </div>
+        <input id="slidShadeTiltTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" onchange="somfy.processShadeTiltTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />
+        </div>` : '';
+
+        let div = document.createElement('div');
+        div.setAttribute('class', 'shade-positioner shade-positioner-popup');
+        div.setAttribute('data-shadeid', shadeId);
+        div.onclick = (event) => { event.stopPropagation(); };
+
+        div.innerHTML = `
+        <div class="shade-positioner-inner">
+        ${positionSlider}
+        ${tiltSlider}
+        </div>`;
+
+        shade.appendChild(div);
+        if (arrowUse) arrowUse.setAttribute('href', '#svg-arrowLeft');
+
+        document.body.addEventListener('click', () => {
+            let ctls = document.querySelectorAll('.shade-positioner');
+            ctls.forEach(ctl => {
+                ctl.classList.add('popup-slide-out');
+                let parentShade = ctl.closest('.somfyShadeCtl');
+                if (parentShade) {
+                    let u = parentShade.querySelector('.handle-icon use');
+                    if (u) u.setAttribute('href', '#svg-arrowRight');
+                }
+                setTimeout(() => { ctl.remove(); }, 300);
+            });
+        }, { once: true });
     }
 }
 var somfy = new Somfy();
@@ -4225,12 +5358,13 @@ class MQTT {
     init() { this.initialized = true; }
     async loadMQTT() {
         getJSONSync('/mqttsettings', (err, settings) => {
-            if (err) 
+            if (err)
                 console.log(err);
             else {
                 console.log(settings);
                 ui.toElement(document.getElementById('divMQTT'), { mqtt: settings });
                 document.getElementById('divDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
+                document.getElementById('hrIdDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
             }
         });
     }
@@ -4239,27 +5373,27 @@ class MQTT {
         console.log(obj);
         if (obj.mqtt.enabled) {
             if (typeof obj.mqtt.hostname !== 'string' || obj.mqtt.hostname.length === 0) {
-                ui.errorMessage('Invalid host name').querySelector('.sub-message').innerHTML = 'You must supply a host name to connect to MQTT.';
+                ui.errorMessage (tr('ERR_HOSTNAME')).querySelector('.sub-message').innerHTML = tr('ERR_MQTT_HOSTNAME_REQUIRED');
                 return;
             }
             if (obj.mqtt.hostname.length > 64) {
-                ui.errorMessage('Invalid host name').querySelector('.sub-message').innerHTML = 'The maximum length of the host name is 64 characters.';
+                ui.errorMessage (tr('ERR_HOSTNAME')).querySelector('.sub-message').innerHTML = tr('ERR_HOSTNAME_MAX_LENGTH_64');
                 return;
             }
             if (isNaN(obj.mqtt.port) || obj.mqtt.port < 0) {
-                ui.errorMessage('Invalid port number').querySelector('.sub-message').innerHTML = 'Likely ports are 1183, 8883 for MQTT/S or 80,443 for HTTP/S';
+                ui.errorMessage (tr('ERR_PORT_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_MQTT_PORT_HINT');
                 return;
             }
             if (typeof obj.mqtt.username === 'string' && obj.mqtt.username.length > 32) {
-                ui.errorMessage('Invalid Username').querySelector('.sub-message').innerHTML = 'The maximum length of the username is 32 characters.';
+                ui.errorMessage (tr('ERR_USERNAME_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_USERNAME_MAX_LENGTH_32');
                 return;
             }
             if (typeof obj.mqtt.password === 'string' && obj.mqtt.password.length > 32) {
-                ui.errorMessage('Invalid Password').querySelector('.sub-message').innerHTML = 'The maximum length of the password is 32 characters.';
+                ui.errorMessage (tr('ERR_PASSWORD_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_MAX_LENGTH_32');
                 return;
             }
             if (typeof obj.mqtt.rootTopic === 'string' && obj.mqtt.rootTopic.length > 64) {
-                ui.errorMessage('Invalid Root Topic').querySelector('.sub-message').innerHTML = 'The maximum length of the root topic is 64 characters.';
+                ui.errorMessage (tr('ERR_ROOT_TOPIC_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_ROOT_TOPIC_MAX_LENGTH_64');
                 return;
             }
         }
@@ -4342,39 +5476,83 @@ class Firmware {
     restore() {
         let div = this.createFileUploader('/restore');
         let inst = div.querySelector('div[id=divInstText]');
-        let html = '<div style="font-size:14px;">Select a backup file that you would like to restore and the options you would like to restore then press the Upload File button.</div><hr />';
-        html += `<div style="font-size:14px;">Restoring network settings from a different board than the original will ignore Ethernet chip settings. Security, MQTT and WiFi connection information will also not be restored since backup files do not contain passwords.</div><hr/>`;
-        html += '<div style="font-size:14px;margin-bottom:27px;text-align:left;margin-left:70px;">';
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreShades" type="checkbox" data-bind="shades" style="display:inline-block;" checked="true" /><label for="cbRestoreShades" style="display:inline-block;cursor:pointer;color:white;">Restore Shades and Groups</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreRepeaters" type="checkbox" data-bind="repeaters" style="display:inline-block;" /><label for="cbRestoreRepeaters" style="display:inline-block;cursor:pointer;color:white;">Restore Repeaters</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreSystem" type="checkbox" data-bind="settings" style="display:inline-block;" /><label for="cbRestoreSystem" style="display:inline-block;cursor:pointer;color:white;">Restore System Settings</label></div>`;
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreNetwork" type="checkbox" data-bind="network" style="display:inline-block;" /><label for="cbRestoreNetwork" style="display:inline-block;cursor:pointer;color:white;">Restore Network Settings</label></div>`
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreMQTT" type="checkbox" data-bind="mqtt" style="display:inline-block;" /><label for="cbRestoreMQTT" style="display:inline-block;cursor:pointer;color:white;">Restore MQTT Settings</label></div>`
-        html += `<div class="field-group" style="vertical-align:middle;width:auto;"><input id="cbRestoreTransceiver" type="checkbox" data-bind="transceiver" style="display:inline-block;" /><label for="cbRestoreTransceiver" style="display:inline-block;cursor:pointer;color:white;">Restore Radio Settings</label></div>`;
-        html += '</div>';
-        inst.innerHTML = html;
+
+        const options = [
+            { id: 'cbRestoreShades', bind: 'shades', txt: 'RESTORE_SHADES_GROUPS', checked: true },
+            { id: 'cbRestoreRepeaters', bind: 'repeaters', txt: 'RESTORE_REPEATERS', checked: false },
+            { id: 'cbRestoreSystem', bind: 'settings', txt: 'RESTORE_SYSTEM_SETTINGS', checked: false },
+            { id: 'cbRestoreNetwork', bind: 'network', txt: 'RESTORE_NETWORK_SETTINGS', checked: false },
+            { id: 'cbRestoreMQTT', bind: 'mqtt', txt: 'RESTORE_MQTT_SETTINGS', checked: false },
+            { id: 'cbRestoreTransceiver', bind: 'transceiver', txt: 'RESTORE_RADIO_SETTINGS', checked: false }
+        ];
+
+        let optionsHtml = '';
+        options.forEach(opt => {
+            optionsHtml += `
+            <div class="uniRow" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0;">
+            <div class="uniLabel" style="font-size:14px;">${tr(opt.txt)}</div>
+            <label class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></label>
+            </div>`;
+        });
+
+        inst.innerHTML = `
+        <div id="jsHeadRestore" class="instructions-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+        <div style="text-align:left;">
+        <h2 style="margin:0;">${tr('RESTORE_TITLE')}</h2>
+        <p style="font-size:14px; margin:5px 0;">${tr('RESTORE_DESC')}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-restore"></use></svg>
+        </div>
+        <div class="field-group unibloc" style="margin-bottom:15px; padding: 15px; text-align: left;">
+        <div style="font-size:14px;">${tr('RESTORE_SELECT_FILE')}</div>
+        </div>
+        <div class="warning">
+        <svg><use xlink:href="#icon-warning"></use></svg>
+        <div style="text-align:left; flex:1;">
+        <b>${tr('MSG_ALERT')}</b>
+        <span>${tr('RESTORE_NETWORK_WARNING')}</span>
+        </div>
+        </div>
+        <div id="jsUniRestore" class="field-group unibloc" style="margin-bottom:20px; padding: 5px 15px;">
+        ${optionsHtml}
+        </div>`;
+
         document.getElementById('divContainer').appendChild(div);
     }
+
     createFileUploader(service) {
         let div = document.createElement('div');
         div.setAttribute('id', 'divUploadFile');
         div.setAttribute('class', 'inst-overlay');
-        div.style.width = '100%';
-        div.style.alignContent = 'center';
-        let html = `<div style="width:100%;text-align:center;"><form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp" style="">`;
-        html += `<div id="divInstText"></div>`;
-        html += `<input id="fileName" type="file" name="updateFS" style="display:none;" onchange="document.getElementById('span-selected-file').innerText = this.files[0].name;"/>`;
-        html += `<label for="fileName">`;
-        html += `<span id="span-selected-file" style="display:inline-block;width:calc(100% - 47px);border-bottom:solid 2px white;font-size:14px;white-space:nowrap;overflow:hidden;max-width:320px;text-overflow:ellipsis;"></span>`;
-        html += `<div id="btn-select-file" class="button-outline" style="font-size:.8em;padding:10px;"><i class="icss-upload" style="margin:0px;"></i></div>`;
-        html += `</label>`;
-        html += `<div class="progress-bar" id="progFileUpload" style="--progress:0%;margin-top:10px;display:none;"></div>`;
-        html += `<div class="button-container">`;
-        html += `<button id="btnBackupCfg" type="button" style="display:none;width:auto;padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">Backup</button>`;
-        html += `<button id="btnUploadFile" type="button" style="width:auto;padding-left:20px;padding-right:20px;margin-right:4px;display:inline-block;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">Upload File</button>`;
-        html += `<button id="btnClose" type="button" style="width:auto;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divUploadFile').remove();">Cancel</button></div>`;
-        html += `</form><div>`;
-        div.innerHTML = html;
+
+        div.innerHTML = `
+        <div class="overlay-content">
+        <div id="btnOverlayUploadClose" class="boutonOverlayClose" onclick="this.closest('#divUploadFile').remove();">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp" style="width:100%;">
+        <div id="divInstText"></div>
+        <input id="fileName" type="file" name="updateFS" style="display:none;" onchange="document.getElementById('span-selected-file').innerText = this.files[0].name;"/>
+        <div class="field-group unibloc" style="padding:10px 15px; margin-bottom:20px; border-radius:30px;">
+        <label for="fileName" style="display: flex; align-items: center; cursor: pointer; width: 100%;">
+        <span id="span-selected-file" style="flex: 1; border-bottom: solid 2px var(--accent-color); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; color: var(--soustxt-color); min-height: 20px;">${tr('CHOOSE_FILE')}</span>
+        <div id="btn-select-file" style="width: 40px; height: 40px; background-color: var(--accent-color); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+        <svg style="width: 24px; height: 24px; color: white;"><use xlink:href="#svg-upload"></use></svg>
+        </div>
+        </label>
+        </div>
+        <div class="progress-bar" id="progFileUpload" style="--progress:0%; margin-top:10px; display:none;"></div>
+        <div class="button-container-col">
+        <button id="btnBackupCfg" class="boutonOutline" type="button" onclick="firmware.backup();" style="margin-bottom:10px;">${tr('BT_SAVE')}</button>
+        <div class="button-container-row" style="gap:10px;">
+        <button id="btnUploadFile" class="bouton" type="button" style="flex:1;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
+        <button id="btnClose" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
+        </div>
+        </div>
+        </form>
+        </div>`;
+
         return div;
     }
     procMemoryStatus(mem) {
@@ -4385,58 +5563,60 @@ class Firmware {
         if (sp) sp.innerHTML = mem.max.fmt('#,##0');
         sp = document.getElementById('spanMinMemory');
         if (sp) sp.innerHTML = mem.min.fmt('#,##0');
-
-
     }
-
     procFwStatus(rel) {
-        console.log(rel);
+        console.log("Status Firmware reçu:", rel);
         let div = document.getElementById('divFirmwareUpdate');
+        if (!div) return;
+        div.style.display = 'none';
+        div.onclick = null;
+        div.style.cursor = 'default';
+        div.style.color = '';
+
         if (rel.available && rel.status === 0 && rel.checkForUpdate !== false) {
-            div.style.color = 'black';
-            div.innerHTML = `<span>Firmware ${rel.fwVersion.name} Installed<span><span style="color:red"> ${rel.latest.name} Available</span>`;
+            div.style.display = 'flex';
+            div.style.cursor = 'pointer';
+            div.onclick = () => { firmware.updateGithub(); };
+            div.innerHTML = `
+            <svg class="btnSvg" style="width:16px; height:16px; margin:0; fill:var(--txtwarning-color); flex-shrink:0;">
+            <use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)}
+            <span style="color:var(--txtwarning-color); font-weight:bold;">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
         }
         else {
             switch (rel.status) {
-                case 2: // Awaiting update.
-                    div.style.color = 'red';
-                    div.innerHTML = `Preparing firmware update`;
+                case 2:
+                    div.style.display = 'flex';
+                    div.style.color = 'var(--txtwarning-color)';
+                    div.innerHTML = tr('FW_PREPARING_UPDATE');
                     break;
-                case 3: // Updating -- this will be set by the update progress.
-                    break;
-                case 4: // Complete
+                case 4:
+                    div.style.display = 'flex';
                     if (rel.error !== 0) {
-                        div.style.color = 'red';
-                        let e = errors.find(x => x.code === rel.error) || { code: rel.error, desc: 'Unspecified error' };
+                        div.style.color = 'var(--txtwarning-color)';
+                        let e = errors.find(x => x.code === rel.error) || { code: rel.error, desc: tr('ERR_UNSPECIFIED') };
                         let inst = document.getElementById('divGitInstall');
-                        if (inst) {
-                            inst.remove();
-                            ui.errorMessage(e.desc);
-                        }
+                        if (inst) inst.remove();
+                        ui.errorMessage(e.desc);
                         div.innerHTML = e.desc;
-                    }
-                    else {
-                        div.innerHTML = `Firmware update complete`;
-                        // Throw up a wait message this will be cleared on the reload.
+                    } else {
+                        div.innerHTML = tr('FW_UPDATE_DONE');
                         ui.waitMessage(document.getElementById('divContainer'));
                     }
                     break;
                 case 5:
-                    div.style.color = 'red';
-                    div.innerHTML = `Cancelling firmware update`;
+                    div.style.display = 'flex';
+                    div.style.color = 'var(--txtwarning-color)';
+                    div.innerHTML = tr('FW_UPDATE_CANCELING');
                     break;
                 case 6:
-                    div.style.color = 'red';
-                    div.innerHTML = `Firmware update cancelled`;
+                    div.style.display = 'flex';
+                    div.style.color = 'var(--txtwarning-color)';
+                    div.innerHTML = tr('FW_UPDATE_CANCELED');
                     break;
-
                 default:
-                    div.style.color = 'black';
-                    div.innerHTML = `Firmware ${rel.fwVersion.name} Installed`;
                     break;
             }
         }
-        div.style.display = '';
     }
     procUpdateProgress(prog) {
         let pct = Math.round((prog.loaded / prog.total) * 100);
@@ -4462,7 +5642,6 @@ class Firmware {
                 }
             }
         }
-
     }
     async installGitRelease(div) {
         if (!this.isMobile()) {
@@ -4472,27 +5651,49 @@ class Firmware {
                 console.log('Backup Complete');
             }
             catch (err) {
-                ui.serviceError(el, err);
+                ui.serviceError(div, err);
                 return;
             }
         }
-
         let obj = ui.fromElement(div);
-        console.log(obj);
         putJSONSync(`/downloadFirmware?ver=${obj.version}`, {}, (err, ver) => {
-            if (err) ui.serviceError(err);
-            else {
+            if (err) {
+                ui.serviceError(err);
+            } else {
                 general.reloadApp = true;
-                // Change the display and allow the percentage to be shown when the socket emits the progress.
-                let html = `<div>Installing ${ver.name}</div><div style="font-size:.7em;margin-top:4px;">Please wait as the files are downloaded and installed.  Once the application update process starts you may no longer cancel the update as this will corrupt the downloaded files.</div>`;
-                html += `<div class="progress-bar" id="progFirmwareDownload" style="--progress:0%;margin-top:10px;text-align:center;"></div>`;
-                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Firmware Install Progress</label>`;
-                html += `<div class="progress-bar" id="progApplicationDownload" style="--progress:0%;margin-top:10px;text-align:center;"></div>`;
-                html += `<label for="progFirmwareDownload" style="font-size:10pt;">Application Install Progress</label>`;
-                html += `<hr></hr><div class="button-container" style="text-align:center;">`;
-                html += `<button id="btnCancelUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">Cancel</button>`;
-                html += `</div>`;
-                div.innerHTML = html;
+
+                div.innerHTML = `
+                <div class="overlay-content">
+                <div class="boutonOverlayClose" onclick="document.getElementById('divGitInstall').remove();">
+                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+                </div>
+                <div class="instructions-header">
+                <div style="position: relative;">
+                <h2>${tr('GIT_RELEASE_TITLE')}</h2>
+                <p>${tr('GIT_RELEASE_DESC').replace('%1', ver.name)}</p>
+                </div>
+                <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
+                </div>
+                <div class="warning" style="margin-bottom:20px;">
+                <svg><use xlink:href="#icon-warning"></use></svg>
+                <div style="text-align: left; flex: 1;">
+                <b>${tr('GIT_RELEASE_WAIT_WARNING')}</b>
+                <span>${tr('GIT_RELEASE_WAIT_WARNING_1')}</span>
+                </div></div>
+                <div class="progress-bar" id="progFirmwareDownload" style="--progress:0%; margin-top:10px; text-align:center;"></div>
+                <label for="progFirmwareDownload" style="font-size:10pt; display:block; margin-bottom:15px;">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
+                <div class="progress-bar" id="progApplicationDownload" style="--progress:0%; margin-top:10px; text-align:center;"></div>
+                <label for="progApplicationDownload" style="font-size:10pt; display:block; margin-bottom:20px;">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
+                <div class="button-container-col sticky-bottom-buttons" style="text-align:center;">
+                <button id="btnCancelUpdate" class="bouton" type="button" style="padding-left:30px; padding-right:30px;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">
+                ${tr('BT_CANCEL_1')}
+                </button>
+                </div></div>`;
+
+                div.querySelectorAll('[data-txt]').forEach(el => {
+                    el.innerHTML = tr(el.getAttribute('data-txt'));
+                });
             }
         });
     }
@@ -4507,48 +5708,77 @@ class Firmware {
         getJSONSync('/getReleases', (err, rel) => {
             if (err) ui.serviceError(err);
             else {
-                console.log(rel);
                 let div = document.createElement('div');
                 let chip = document.getElementById('divContainer').getAttribute('data-chipmodel');
-                div.setAttribute('id', 'divGitInstall')
-                div.setAttribute('class', 'inst-overlay');
-                div.style.width = '100%';
-                div.style.alignContent = 'center';
-                // Sort the releases so that the pre-releases are at the bottom.
+
+                div.setAttribute('id', 'divGitInstall');
+                div.setAttribute('class', 'inst-overlay message-overlay');
+
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
-                let html = `<div>Select a version from the repository to install using the dropdown below.  Then press the update button to install that version.</div><div style="font-size:.7em;margin-top:4px;">Select Main to install the most recent alpha version from the repository.</div>`;
-                html += `<div id="divPrereleaseWarning" style="display:none;width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span><hr style="margin:0px" /><div style="font-size:.7em;padding-left:1em;padding-right:1em;color:black;font-weight:normal;">You have selected a pre-released beta version that has not been fully tested or published for general use.</div></div>`;
-                html += `<div class="field-group" style="text-align:center;">`;
-                html += `<select id="selVersion" data-bind="version" style="width:70%;font-size:2em;color:white;text-align-last:center;" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));">`
+                const isMob = this.isMobile();
+                const infoClass = isMob ? "warning" : "information";
+                const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+                const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
+                const infoText = isMob ? tr('UPDATE_GIT_NO_AUTO_BACKUP') : tr('UPDATE_GIT_BACKUP_DOWNLOAD_UP');
+
+                let optionsHtml = '';
                 for (let i = 0; i < rel.releases.length; i++) {
-                    if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0)
-                        html += `<option style="text-align:left;font-size:.5em;color:black;" data-prerelease="${rel.releases[i].preRelease}" value="${rel.releases[i].version.name}">${rel.releases[i].name}${rel.releases[i].preRelease ? ' - Pre' : ''}</option>`
-                }
-                html += `</select><label for="selVersion">Select a version</label></div>`;
-                html += `<div class="button-container" id="divReleaseNotes" style="text-align:center;margin-top:-20px;display:none;"><button type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);" style="display:inline-block;width:auto;padding-left:20px;padding-right:20px;">Release Notes</button></div>`;
-                if (this.isMobile()) {
-                    html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
-                }
-                else {
-                    html += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the firmware update process fails please restore this file using the restore button after going through the onboarding process.</div>'
-                }
-                html += `<hr></hr><div class="button-container" style="text-align:center;">`;
-                if (this.isMobile()) {
-                    html += `<button id="btnBackupCfg" type="button" style="display:inline-block;width:calc(80% + 7px);padding-left:20px;padding-right:20px;margin-right:4px;" onclick="firmware.backup();">Backup</button>`;
-                }
-                html += `<button id="btnUpdate" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;margin-right:7px;" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));">Update</button>`;
-                html += `<button id="btnClose" type="button" style="width:40%;padding-left:20px;padding-right:20px;display:inline-block;" onclick="document.getElementById('divGitInstall').remove();">Cancel</button>`;
+                    if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0) {
+                        let displayName = rel.releases[i].name;
+                        if (displayName.toLowerCase() === 'main') displayName += ` - (${tr('UPDATE_GIT_RECOMMENDED')})`;
+                        if (rel.releases[i].preRelease) displayName += ' - Pre';
 
-                html += `</div></div>`;
+                        optionsHtml += `<option style="text-align:left;color:black;" data-prerelease="${rel.releases[i].preRelease}" value="${rel.releases[i].version.name}">${displayName}</option>`;
+                    }
+                }
+                div.innerHTML = `
+                <div class="overlay-content">
+                <div class="boutonOverlayClose" onclick="document.getElementById('divGitInstall').remove();">
+                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+                </div>
+                <div class="instructions-header">
+                <div style="position: relative;">
+                <h2>${tr('UPDATE_GIT_TITLE')}</h2><p>${tr('UPDATE_GIT_DESC')}</p>
+                </div>
+                <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
+                </div>
+                <div id="divPrereleaseWarning" class="error" style="display:none; margin-bottom:15px;">
+                <svg><use xlink:href="#icon-error"></use></svg>
+                <div style="text-align:left; flex:1;">
+                <b>${tr('MSG_ALERT')}</b>
+                <span>${tr('UPDATE_GIT_RELEASE_DESC')}</span>
+                </div>
+                </div>
+                <div class="field-group unibloc">
+                <div class="field-group">
+                <label class="label" for="selVersion" style="text-align:left; display:block;">${tr('UPDATE_GIT_SELECT_VERSION')}</label>
+                <select id="selVersion" class="inputAndSelect" data-bind="version" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));" style="width:100%;">
+                ${optionsHtml}
+                </select>
+                <hr>
+                <button class="boutonOutline" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
+                </div>
+                </div>
+                <div class="${infoClass}" style="margin-bottom:15px; width:100%;">
+                <svg><use xlink:href="${infoIcon}"></use></svg>
+                <div style="text-align:left; flex:1;">
+                <b>${infoTitle}</b>
+                <span>${infoText}</span>
+                </div>
+                </div>
+                ${isMob ? `<button id="btnBackupCfg" class="bouton" type="button" style="width:100%; margin-bottom:15px;" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button>` : ''}
+                <div class="button-container-row sticky-bottom-buttons">
+                <button id="btnUpdate" type="button" class="bouton" style="flex:1" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));" >${tr('BT_UPDATE')}</button>
+                <button id="btnClose" type="button" class="boutonOutline" style="flex:1" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
+                </div>
+                </div>`;
 
-                div.innerHTML = html;
                 document.getElementById('divContainer').appendChild(div);
                 this.gitReleaseSelected(div);
             }
         });
-        
     }
     gitReleaseSelected(div) {
         let obj = ui.fromElement(div);
@@ -4562,10 +5792,10 @@ class Firmware {
         else
             if (divPre) divPre.style.display = 'none';
 
-        if (divNotes) {
-            if (!obj.version || obj.version === 'main' || obj.version === '') divNotes.style.display = 'none';
-            else divNotes.style.display = '';
-        }
+            if (divNotes) {
+                if (!obj.version || obj.version === 'main' || obj.version === '') divNotes.style.display = 'none';
+                else divNotes.style.display = '';
+            }
     }
     async getReleaseInfo(tag) {
         let overlay = ui.waitMessage(document.getElementById('divContainer'));
@@ -4655,30 +5885,84 @@ class Firmware {
     updateFirmware() {
         let div = this.createFileUploader('/updateFirmware');
         let inst = div.querySelector('div[id=divInstText]');
-        let html = '<div style="font-size:14px;margin-bottom:20px;">Select a binary file [SomfyController.ino.esp32.bin] containing the device firmware then press the Upload File button.</div>';
-        if (this.isMobile()) {
-            html += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
-        }
-        else
-            html += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the firmware update process fails please restore this file using the restore button after going through the onboarding process.</div>'
-        inst.innerHTML = html;
+
+        const isMob = this.isMobile();
+        const infoClass = isMob ? "warning" : "information";
+        const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+        const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
+        const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_FIRMWARE_BACKUP_DOWNLOAD_FIRMWARE');
+
+        inst.innerHTML = `
+        <div class="boutonOverlayClose" onclick="document.getElementById('divUploadFile').remove();">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div id="jsHeadFirmware" class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
+        <p>${tr('UPDATE_FIRMWARE_DESC')}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg>
+        </div>
+        <div class="field-group unibloc" style="padding: 15px; display: block; margin-bottom: 15px;">
+        <div>${tr('UPDATE_FIRMWARE_UPLOAD_FIRMWARE_DESC').replace('%1', '<span class="txt-badge">SomfyController.ino.esp32.bin</span>')}</div>
+        </div>
+        <div class="${infoClass}" style="margin-bottom: 15px; width: 100%;">
+        <svg><use xlink:href="${infoIcon}"></use></svg>
+        <div style="text-align: left; flex: 1;">
+        <b>${infoTitle}</b>
+        <span>${infoText}</span>
+        </div>
+        </div>`;
+
+        div.classList.add('inst-overlay');
         document.getElementById('divContainer').appendChild(div);
-        if (this.isMobile()) document.getElementById('btnBackupCfg').style.display = 'inline-block';
+
+        if (isMob) {
+            let btnBackup = document.getElementById('btnBackupCfg');
+            if (btnBackup) btnBackup.style.display = 'inline-block';
+        }
     }
     updateApplication() {
         let div = this.createFileUploader('/updateApplication');
         general.reloadApp = true;
         let inst = div.querySelector('div[id=divInstText]');
-        inst.innerHTML = '<div style="font-size:14px;">Select a binary file [SomfyController.littlefs.bin] containing the littlefs data for the application then press the Upload File button.</div>';
-        if (this.isMobile()) {
-            inst.innerHTML += `<div style="width:100%;color:red;text-align:center;font-weight:bold;"><span style="margin-top:7px;width:100%;background:yellow;padding:3px;display:inline-block;border-radius:5px;background:white;">WARNING<span></div>`;
-            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">This browser does not support automatic backups.  It is highly recommended that you back up your configuration using the backup button before proceeding.</div>';
-        }
-        else
-            inst.innerHTML += '<hr/><div style="font-size:14px;margin-bottom:10px;">A backup file for your configuration will be downloaded to your browser.  If the application update process fails please restore this file using the restore button</div>';
+
+        const isMob = this.isMobile();
+        const infoClass = isMob ? "warning" : "information";
+        const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+        const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
+        const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_LITTLEFS_BACKUP_DOWNLOAD');
+
+        inst.innerHTML = `
+        <div class="boutonOverlayClose" onclick="document.getElementById('divUploadFile').remove();">
+        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
+        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        </div>
+        <div id="jsHeadLittlefs" class="instructions-header">
+        <div style="position: relative;">
+        <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
+        <p>${tr('UPDATE_LITTLEFS_DESC')}</p>
+        </div>
+        <svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg>
+        </div>
+        <div class="field-group unibloc" style="padding: 15px; display: block; margin-bottom: 15px;">
+        <div>${tr('UPDATE_LITTLEFS_select').replace('%1', '<span class="instructionsTxt-badge">SomfyController.littlefs.bin</span>')}</div>
+        </div>
+        <div class="${infoClass}" style="margin-bottom: 15px; width: 100%;">
+        <svg><use xlink:href="${infoIcon}"></use></svg>
+        <div style="text-align: left; flex: 1;">
+        <b>${infoTitle}</b>
+        <span>${infoText}</span>
+        </div>
+        </div>`;
+
         document.getElementById('divContainer').appendChild(div);
-        if(this.isMobile()) document.getElementById('btnBackupCfg').style.display = 'inline-block';
+
+        if (isMob) {
+            let btnBackup = document.getElementById('btnBackupCfg');
+            if (btnBackup) btnBackup.style.display = 'inline-block';
+        }
     }
     async uploadFile(service, el, data) {
         let field = el.querySelector('input[type="file"]');
@@ -4686,14 +5970,15 @@ class Firmware {
         console.log(filename);
         let formData = new FormData();
         formData.append('file', field.files[0]);
+        const title = tr('MSG_ALERT');
         switch (service) {
             case '/updateApplication':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a littleFS binary file to proceed.');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_LITTLEFS_SELECTED');
                     return;
                 }
                 else if (filename.indexOf('.littlefs') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage('This file is not a valid littleFS binary file.');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_LITTLEFS');
                     return;
                 }
                 if (!this.isMobile()) {
@@ -4710,11 +5995,11 @@ class Firmware {
                 break;
             case '/updateFirmware':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a valid firmware binary file to proceed.');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_FIRMWARE_SELECTED');
                     return;
                 }
                 else if (filename.indexOf('.ino.') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage(el, 'This file is not a valid firmware binary file.');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_FIRMWARE');
                     return;
                 }
                 if (!this.isMobile()) {
@@ -4731,19 +6016,19 @@ class Firmware {
                 break;
             case '/restore':
                 if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage('You must select a valid backup file to proceed.');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_BACKUP_SELECTED');
                     return;
                 }
                 else if (field.files[0].size > 20480) {
-                    ui.errorMessage(el, `This file is ${field.files[0].size.fmt("#,##0")} bytes in length.  This file is too large to be a valid backup file.`);
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_BACKUP_TOO_LARGE').replace('%s', field.files[0].size.fmt("#,##0"));
                     return;
                 }
                 else if (!filename.endsWith('.backup')) {
-                    ui.errorMessage(el, 'This file is not a valid backup file');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_BACKUP');
                     return;
                 }
                 if (!data.shades && !data.settings && !data.network && !data.transceiver && !data.repeaters && !data.mqtt) {
-                    ui.errorMessage(el, 'No restore options have been selected');
+                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_RESTORE_OPTION');
                     return;
                 }
                 console.log(data);
@@ -4770,7 +6055,6 @@ class Firmware {
             prog.style.setProperty('--progress', `${pct}%`);
             prog.setAttribute('data-progress', `${pct}%`);
             console.log(evt);
-            
         };
         xhr.onerror = function (err) {
             console.log(err);
@@ -4778,14 +6062,14 @@ class Firmware {
         };
         xhr.onload = function () {
             console.log('File upload load called');
-            btnCancel.innerText = 'Close';
+            btnCancel.innerText = tr('BT_CLOSE');
             switch (service) {
                 case '/restore':
                     (async () => {
                         await somfy.init();
                         if (document.getElementById('divUploadFile')) document.getElementById('divUploadFile').remove();
                     })();
-                    break;
+                        break;
                 case '/updateApplication':
 
                     break;
@@ -4796,8 +6080,8 @@ class Firmware {
             console.log('Cancel clicked');
             xhr.abort();
         });
-
     }
 }
 var firmware = new Firmware();
+
 

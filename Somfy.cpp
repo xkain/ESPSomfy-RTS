@@ -3348,7 +3348,7 @@ void SomfyShade::toJSON(JsonResponse &json) {
   json.addElem("myTiltPos", this->transformPosition(this->myTiltPos));
   json.addElem("direction", this->direction);
   json.addElem("shadeType", static_cast<uint8_t>(this->shadeType));
-  json.addElem("bitLength", this->bitLength);
+  json.addElem("bitLength", this->bitLength);;
   json.addElem("proto", static_cast<uint8_t>(this->proto));
   json.addElem("flags", this->flags);
   json.addElem("flipCommands", this->flipCommands);
@@ -4584,7 +4584,7 @@ void Transceiver::emitFrequencyScan(uint8_t num) {
   sockEmit.endEmit(num);
   /*
   char buf[420];
-  snprintf(buf, sizeof(buf), "{\"scanning\":%s,\"testFreq\":%f,\"testRSSI\":%d,\"frequency\":%f,\"RSSI\":%d}", rxmode == 3 ? "true" : "false", currFreq, currRSSI, markFreq, markRSSI); 
+  snprintf(buf, sizeof(buf), "{\"scanning\":%s,\"testFreq\":%f,\"testRSSI\":%d,\"frequency\":%f,\"RSSI\":%d}", rxmode == 3 ? "true" : "false", currFreq, currRSSI, markFreq, markRSSI);
   if(num >= 255) sockEmit.sendToClients("frequencyScan", buf);
   else sockEmit.sendToClient(num, "frequencyScan", buf);
   */
@@ -4645,7 +4645,7 @@ void Transceiver::emitFrame(somfy_frame_t *frame, somfy_rx_t *rx) {
     evt.appendMessage(buf);
     snprintf(buf, sizeof(buf), "\"sync\":%d,\"pulses\":[", frame->hwsync);
     evt.appendMessage(buf);
-    
+
     if(rx) {
       for(uint16_t i = 0; i < rx->pulseCount; i++) {
         snprintf(buf, sizeof(buf), "%s%d", i != 0 ? "," : "", rx->pulses[i]);
@@ -4739,6 +4739,8 @@ void transceiver_config_t::fromJSON(JsonObject& obj) {
     if(obj.containsKey("enabled")) this->enabled = obj["enabled"];
     if(obj.containsKey("txPower")) this->txPower = obj["txPower"];
     if(obj.containsKey("proto")) this->proto = static_cast<radio_proto>(obj["proto"].as<uint8_t>());
+
+
     /*
     if (obj.containsKey("internalCCMode")) this->internalCCMode = obj["internalCCMode"];
     if (obj.containsKey("modulationMode")) this->modulationMode = obj["modulationMode"];
@@ -4842,7 +4844,7 @@ void transceiver_config_t::save() {
     pref.putBool("radioInit", true);
     pref.putChar("txPower", this->txPower);
     pref.putChar("proto", static_cast<uint8_t>(this->proto));
-    
+
     /*
     pref.putBool("internalCCMode", this->internalCCMode);
     pref.putUChar("modulationMode", this->modulationMode);

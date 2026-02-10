@@ -1,0 +1,6 @@
+<svg id="svg2" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+ <style id="style1">path { fill: #000; }
+              @media (prefers-color-scheme: dark) { path { fill: #fff; } }</style>
+ <path id="path1" d="m12 2-10 5v3l10-4.5 10 4.5v-3l-10-5z"/>
+ <path id="path2" d="m2 12v10h20v-4h-16v-6zm10-5h10v4h-10zm0 6h10v4h-10z" fill-rule="evenodd"/>
+</svg>

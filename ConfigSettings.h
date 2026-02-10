@@ -58,7 +58,7 @@ class BaseSettings {
 class NTPSettings: BaseSettings {
   public:
     char ntpServer[65] = "pool.ntp.org";
-    char posixZone[64] = "";
+    char posixZone[64] = "UTC0";
     bool fromJSON(JsonObject &obj);
     bool toJSON(JsonObject &obj);
     void toJSON(JsonResponse &json);
@@ -166,18 +166,24 @@ class MQTTSettings: BaseSettings {
     void toJSON(JsonResponse &json);
     bool fromJSON(JsonObject &obj);
 };
+
+
+
 class ConfigSettings: BaseSettings {
   public:
     static void printAvailHeap();
     char serverId[10] = "";
     char hostname[32] = "ESPSomfyRTS";
     char chipModel[10] = "ESP32";
+    char accentColor[8] = "#F8A525";
     conn_types_t connType = conn_types_t::unset;
     appver_t fwVersion;
     appver_t appVersion;
     bool ssdpBroadcast = true;
     bool checkForUpdate = true;
+    bool swShowGpio = false;
     uint8_t status;
+    uint8_t language = 1;
     IPSettings IP;
     WifiSettings WIFI;
     EthernetSettings Ethernet;
