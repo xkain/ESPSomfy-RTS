@@ -43,7 +43,6 @@ This version is in **active development**.
 
 ## 📸 Screenshots
 
-<<<<<<< HEAD
 <p align="center">
    <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png?raw=true" width="16%" />
    <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png?raw=true" width="16%" />
@@ -90,6 +89,7 @@ Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **uni
 > **Note sur le Firmware :** Tant que mon interface (Fork) est en phase de construction, les boîtiers sont livrés avec la version officielle de **rstrouse** afin de garantir une stabilité maximale. Vous pourrez installer ma version manuellement dès qu'elle sera finalisée !
 
 <p align="center">
-  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin00.jpg?raw=true" width="45%" />
-  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin01.jpg?raw=true" width="45%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin02.jpg?raw=true" width="33%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin00.jpg?raw=true" width="33%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin01.jpg?raw=true" width="33%" />
 </p>
