@@ -43,6 +43,7 @@ This version is in **active development**.
 
 ## 📸 Screenshots
 
+<<<<<<< HEAD
 <p align="center">
    <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png?raw=true" width="16%" />
    <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png?raw=true" width="16%" />
