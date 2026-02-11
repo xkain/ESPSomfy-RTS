@@ -224,6 +224,7 @@ void Network::setConnected(conn_types_t connType) {
   esp_task_wdt_reset();
   this->connType = connType;
   this->connectTime = millis();
+  this->connectedAt = millis();
   connectRetries = 0;
   Serial.println("Setting connected...");
   if(this->connType == conn_types_t::wifi) {

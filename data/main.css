@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 :root {
     color-scheme: light dark;
     --shade-color: #F8A525;
@@ -105,39 +112,80 @@ html, body {
     align-items: center;
     gap: 10px;
 }
-
 .top-bar-left svg {
     display: block;
     flex-shrink: 0;
     width: 64px;
     height: 64px
 }
-.top-bar-right{
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
     filter: blur(8px);
     transition: filter 0.5s ease;
 }
-.clock-item {
-    font-family: monospace;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--accent-color);
-    margin-right: 15px;
-    padding-right: 15px;
-    border-right: 1px solid #444;
+.status-item {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+    border-right: 1px solid var(--soustxt-color);
+    height: 40px;
 }
-.status-badge {
-    display: inline-block;
-    background-color: var(--accent-color);
-    padding: 2px 8px;
-    border-radius: 4px;
+.status-options {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+.opt-badge {
     font-size: 0.8rem;
-    margin-left: 5px;
-    opacity: 0;
-    transition: opacity 0.5s ease-in;
+    color: var(--soustxt-color);
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
 }
-    .status-badge[data-type] {
-        opacity: 1;
-    }
+.opt-badge.active {
+    border-color: var(--accent-color);
+    font-weight: bold;
+    opacity: 1;
+    background-color: var(--accent-color);
+    color: var(--color);
+}
+.uptime-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.uptime-label {
+    font-weight: normal;
+    white-space: nowrap;
+}
+.uptime-values {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.3;
+    font-size: 0.9rem;
+}
+.uptime-values > div {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    align-items: baseline;
+    color: var(--soustxt-color);
+}
+.uptime-values span {
+    color: var(--color);
+    text-align: right;
+    font-family: monospace;
+    min-width: 68px;
+}
+
+
+
+
+
 .sidebar {
     display: flex;
     flex-direction: column;

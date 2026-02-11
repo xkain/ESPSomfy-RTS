@@ -1,4 +1,7 @@
 {
+"PAGE": "TOPBAR",
+    "TOPBAR_Uptime": "Betriebszeit:",
+    "TOPBAR_DEVICE": "Gerät",
 "PAGE": "WELCOME",
     "WELCOME": "Willkommen bei ESPSomfy-RTS!",
     "WELCOME_DESC": "Steuern und überwachen Sie ganz einfach Ihre Rollläden, Tore, Garagentore oder jedes andere Gerät mit dem RTS-Protokoll.",

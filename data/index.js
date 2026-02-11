@@ -15,8 +15,8 @@ window.tr = function(id) {
 
 const translator = {
     translate(el) {
-        if (!el || !el.dataset.txt) return;
-        const key = el.dataset.txt;
+        if (!el || !el.dataset.lang) return;
+        const key = el.dataset.lang;
         const text = tr(key);
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
             el.placeholder = text;
@@ -29,18 +29,35 @@ const translator = {
         }
     },
     init() {
-        document.querySelectorAll('[data-txt]').forEach(el => this.translate(el));
+        document.querySelectorAll('[data-lang]').forEach(el => this.translate(el));
         const observer = new MutationObserver((mutations) => {
             mutations.forEach(m => m.addedNodes.forEach(node => {
                 if (node.nodeType === 1) {
-                    if (node.dataset.txt) this.translate(node);
-                    node.querySelectorAll('[data-txt]').forEach(el => this.translate(el));
+                    if (node.dataset.lang) this.translate(node);
+                    node.querySelectorAll('[data-lang]').forEach(el => this.translate(el));
                 }
             }));
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
 };
+function displayUptime(totalSeconds, elementId) {
+    const uptimeEl = document.getElementById(elementId);
+    // On vérifie si l'élément existe ET si on a bien un nombre
+    if (!uptimeEl || isNaN(totalSeconds)) return;
+
+    let seconds = parseInt(totalSeconds, 10);
+    let days = Math.floor(seconds / (24 * 3600));
+    seconds %= (24 * 3600);
+    let hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    let minutes = Math.floor(seconds / 60);
+
+    const fH = hours.toString().padStart(2, '0');
+    const fM = minutes.toString().padStart(2, '0');
+
+    uptimeEl.textContent = `${days}j ${fH}h ${fM}m`;
+}
 
 function loadLang(callback) {
     fetch(baseUrl + '/lang')
@@ -1399,6 +1416,15 @@ class Security {
                     }
 
                     console.log("Contexte reçu:", ctx);
+
+                    if (ctx.hasOwnProperty('uptime')) {
+                        displayUptime(ctx.uptime, 'uptime-display'); // Pour le système
+                    }
+
+                    if (ctx.hasOwnProperty('netUptime')) {
+                        displayUptime(ctx.netUptime, 'net-display'); // Pour le réseau
+                    }
+
                     this.type = ctx.type;
                     this.permissions = ctx.permissions;
 
@@ -2055,21 +2081,29 @@ class Wifi {
         });
     }
     updateStatusBadge(settings) {
-        const badge = document.querySelector('.status-badge');
-        if (!badge) return;
+        // On récupère toutes les options
+        const options = document.querySelectorAll('.opt-badge');
+        if (!options.length) return;
 
+        // 1. On détermine le type de connexion active
         const connType = parseInt(settings.connType);
-        let statusText = "WiFi";
+        let activeType = "wifi"; // Par défaut
 
         if (connType >= 2) {
             const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined)
             ? parseInt(settings.ethernet.PWRPin)
             : -1;
-
-            statusText = (pwrPin !== -1) ? "PoE" : "LAN";
+            activeType = (pwrPin !== -1) ? "poe" : "lan";
         }
-        badge.innerHTML = statusText;
-        badge.setAttribute('data-type', statusText.toLowerCase());
+
+        // 2. On met à jour l'affichage
+        options.forEach(opt => {
+            if (opt.getAttribute('data-conn') === activeType) {
+                opt.classList.add('active');
+            } else {
+                opt.classList.remove('active');
+            }
+        });
     }
     useEthernetClicked() {
         let useEthernet = document.getElementById('cbHardwired').checked;
@@ -5704,8 +5738,8 @@ class Firmware {
                 </button>
                 </div></div>`;
 
-                div.querySelectorAll('[data-txt]').forEach(el => {
-                    el.innerHTML = tr(el.getAttribute('data-txt'));
+                div.querySelectorAll('[data-lang]').forEach(el => {
+                    el.innerHTML = tr(el.getAttribute('data-lang'));
                 });
             }
         });

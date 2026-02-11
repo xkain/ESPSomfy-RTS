@@ -1,4 +1,7 @@
 {
+"PAGE": "TOPBAR",
+    "TOPBAR_Uptime": "Uptime:",
+    "TOPBAR_DEVICE": "Device",
 "PAGE": "WELCOME",
     "WELCOME": "Welcome to ESPSomfy-RTS!",
     "WELCOME_DESC": "Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS protocol.",
@@ -16,7 +19,7 @@
     "GENERAL_LANGUAGE": "Language",
     "GENERAL_OPT_EN": "English",
     "GENERAL_OPT_FR": "French",
-    "GENERAL_OPT_DE": "Deutsch",
+    "GENERAL_OPT_DE": "German",
     "GENERAL_NTP_SERVER": "NTP Server",
     "GENERAL_PH_NTP_SERVER": "Enter your NTP server",
     "GENERAL_UPNP": "uPnP Broadcast (SSDP)",

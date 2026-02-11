@@ -329,6 +329,12 @@ void Web::handleLoginContext(WebServer &server) {
     resp.addElem("version", settings.fwVersion.name);
     resp.addElem("model", "ESPSomfyRTS");
     resp.addElem("hostname", settings.hostname);
+    resp.addElem("uptime", (uint32_t)(millis() / 1000));
+    uint32_t netUptime = 0;
+    if(net.connectedAt > 0) {
+      netUptime = (millis() - net.connectedAt) / 1000;
+    }
+    resp.addElem("netUptime", netUptime);
     resp.endObject();
     resp.endResponse();
 }

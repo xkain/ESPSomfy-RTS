@@ -1,4 +1,7 @@
 {
+"PAGE": "TOPBAR",
+    "TOPBAR_Uptime": "Durée de fonctionnement:",
+    "TOPBAR_DEVICE": "Appareil",
 "PAGE": "WELCOME",
     "WELCOME": "Bienvenue sur ESPSomfy-RTS !",
     "WELCOME_DESC": "Contrôlez et surveillez facilement vos volets roulants, portail, porte de garage ou tout autre appareil disposant du protocole RTS.",

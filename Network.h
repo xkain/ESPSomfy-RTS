@@ -37,6 +37,7 @@ class Network {
     uint32_t disconnectTime = 0;
     uint32_t connectStart = 0;
     uint32_t connectTime = 0;
+    uint32_t connectedAt = 0;
     bool openSoftAP();
     bool connect(conn_types_t ctype);
     bool connectWiFi(const uint8_t *bssid = nullptr, const int32_t channel = -1);
