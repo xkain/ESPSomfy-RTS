@@ -1,5 +1,5 @@
-//var hst = '192.168.1.45';
-var hst = '192.168.4.1';
+var hst = '192.168.1.45';
+//var hst = '192.168.4.1';
 var _rooms = [];
 let LANG = {};
 var baseUrl = window.location.protocol === 'file:' ? `http://${hst}` : '';
