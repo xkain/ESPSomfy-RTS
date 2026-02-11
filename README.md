@@ -9,14 +9,15 @@ This fork of the original [ESPSomfy-RTS](https://github.com/rstrouse/ESPSomfy-RT
 In the last few months, this version has been significantly updated with a focus on **User Experience**, **Modern Design**, and **Accessibility**.
 
 ### 🌍 Localization & UI/UX
-* **Multi-language Support:** Currently available languages ​​are : **English**, **French**, and **German**.
+* **Multi-language Support:** Currently available languages are: **English**, **French**, and **German**.
 * **Complete Redesign:** New logo and a fully **responsive** interface (mobile, tablet, and desktop).
 * **Theme Engine:** Integrated **Dark/Light mode** with customizable **accent colors**.
 * **Modern Components:** * All legacy checkboxes replaced with modern **switches**.
     * High-quality **SVG icons** for crisp rendering on all screens.
 * **Virtual Remote:** Completely redesigned for a more intuitive and realistic experience.
 
-### 🔐 Security & Safety
+### 🔐 Security & Connectivity
+* **HTTPS Support:** Integrated the WebSocket refactor by [y-streibel-uiris](https://github.com/y-streibel-uiris) to support **secure HTTPS connections** (from PR #624).
 * **Password Privacy:** Passwords hidden by default with a "toggle eye" button.
 * **Ethernet Safeguard:** Safety confirmation step to prevent accidental network lockouts.
 * **Smart Interlocks:** Control buttons are disabled until the device configuration is finalized.
@@ -42,40 +43,39 @@ This version is in **active development**.
 
 ## 📸 Screenshots
 
-
 <p align="center">
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile03.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile01.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile02.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile03.png" width="16%" />  
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile03.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile01.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile02.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile03.png?raw=true" width="16%" /> 
 </p>
 
 <p align="center">
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair00.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair02.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair03.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark00.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark02.png" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark03.png" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair00.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair02.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair03.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark00.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark02.png?raw=true" width="16%" />
+   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark03.png?raw=true" width="16%" />
 </p>
-   
+    
 ---
 
 ## 📚 Documentation & Resources
 
 Since this is a fork, you can rely on the extensive original documentation for technical hardware details and integrations:
 
-* 📖 ** [Configuring the Software](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software)**
-* ⚙️ ** [Installing the Firmware](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Installing-the-Firmware)
-* 🔄 ** [How to Update ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)
-* 🔌 ** [Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations)
+* 📖 **[Configuring the Software](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software)**
+* ⚙️ **[Installing the Firmware](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Installing-the-Firmware)**
+* 🔄 **[How to Update ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)**
+* 🔌 **[Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations)**
 
 ---
 
 ## 🙏 Credits
-Special thanks to [rstrouse](https://github.com/rstrouse) for the incredible work on the original ESPSomfy-RTS project. This fork aims to build upon that solid foundation with a modernized user experience.
+Special thanks to [rstrouse](https://github.com/rstrouse) for the incredible work on the original ESPSomfy-RTS project, and to [y-streibel-uiris](https://github.com/y-streibel-uiris) for the HTTPS WebSocket implementation.
 
 ---
 
@@ -89,6 +89,6 @@ Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **uni
 > **Note sur le Firmware :** Tant que mon interface (Fork) est en phase de construction, les boîtiers sont livrés avec la version officielle de **rstrouse** afin de garantir une stabilité maximale. Vous pourrez installer ma version manuellement dès qu'elle sera finalisée !
 
 <p align="center">
-  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin00.jpg" width="45%" />
-  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin01.jpg" width="45%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin00.jpg?raw=true" width="45%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin01.jpg?raw=true" width="45%" />
 </p>
