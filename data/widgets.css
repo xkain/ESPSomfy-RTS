@@ -1,21 +1,7 @@
-
-
-
-
-
-
-
-
-/* sidebar devient nette quand la langue est là */
-body.lang-loaded .sidebar {
+.lang-loaded .sidebar,
+.lang-loaded .top-bar-right {
     filter: blur(0px);
 }
-
-
-
-
-
-
 .room-pill {
     flex: 0 0 auto !important;
     padding: 8px 18px;
@@ -600,27 +586,9 @@ span.ssid {
     margin: 2px 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Par défaut (Desktop), on cache la flèche retour */
 .closeShow-mobile {
     display: none !important;
 }
-
-
 @media (max-width: 780px) {
 
     .overlay-content {
