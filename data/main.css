@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 :root {
     color-scheme: light dark;
     --shade-color: #F8A525;
@@ -134,7 +127,6 @@ html, body {
 }
 .status-options {
     display: inline-flex;
-    gap: 8px;
     margin-left: 10px;
 }
 .opt-badge {
@@ -533,6 +525,13 @@ form {
     align-items: center;
     gap: 8px; /* Espace entre les boutons */
 }
+.uniColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+}
+
 .numberfield {
     display: flex;
     color: var(--color);
@@ -2068,19 +2067,25 @@ div.frame-pulses {
     border: none;
     box-sizing: border-box;
 }
-div#divFirmware div.uniStatus span{
-    color: var(--color);
+#spanFreeMemory { color: var(--soustxt-color) !important;; }
+
+.minMaxFull{
+    display: inline-block;
 }
-#spanFreeMemory {
-color: var(--soustxt-color) !important;;
+.minMax550{
+    display: none;
 }
-#divFirmware .uniRight {
-gap: 0;
+
+
+#divFirmware .uniRight { gap: 0; }
+#divFirmware .uniText { max-width: 52%; }
+.show780 {
+    display: none;
 }
-#spanMaxMemory,
-#spanMinMemory {
-font-size: 11px;
-color: var(--soustxt-color);
+.status-detail {
+    font-size: 12px;
+    color: var(--soustxt-color);
+    margin-left: 2px;
 }
 /*
 #divUnauthenticated {
@@ -2190,6 +2195,11 @@ margin: auto;
 @media screen and (max-width: 1024px) {
     .somfyShadeCtl {
         width: 100%;
+    }
+}
+@media screen and (max-width: 850px) {
+    .status-item {
+        display: none;
     }
 }
 @media screen and (max-width: 780px) {
@@ -2351,7 +2361,9 @@ margin: auto;
     .welcomeTop {
     display: block;
     }
-
+    .show780 {
+        display: flex;
+    }
     #divUnauthenticated {
     min-height: 800px;
     }
@@ -2365,6 +2377,19 @@ margin: auto;
         gap: 12px;
     }
 }
+
+
+@media screen and (max-width: 550px) {
+    .hide550 {
+        display: none !important;
+    }
+    .minMaxFull{
+        display: none !important;
+    }
+    .minMax550{
+        display: inline-block !important;
+    }
+}
 @media screen and (max-width: 480px) {
     body {
         height: 100%;
@@ -2374,11 +2399,8 @@ margin: auto;
     }
     .container {
         min-height: 100vh;
+        padding: 10px;
     }
-
-
-
-
 
     .subtab-content {
         padding-left:14px;

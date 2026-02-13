@@ -46,11 +46,11 @@
                 <div class="uptime-values">
                     <div>
                         <div data-lang="TOPBAR_DEVICE">Appareil</div>
-                        <span id="uptime-display">--j --h --m</span>
+                        <span class="uptime-display">--j --h --m</span>
                     </div>
                     <div>
-                        <div data-lang="TAB_NETWORK">Réseau</div>
-                        <span id="net-display">--j --h --m</span>
+                        <div data-lang="CONNECTION_WIFI_NETWORK">Réseau</div>
+                        <span class="net-display">--j --h --m</span>
                     </div>
                 </div>
             </div>
@@ -308,25 +308,85 @@
                             </button>
                         </div>
                     </div>
+
                     <div id="divFirmware" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
+
+                            <div class="uniRow" style="display:flex;">
+                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CHIP">Puce</div></div>
+                                <span id="info-chip" class="status-detail">---</span>
+                            </div>
+                            <div class="uniRow" style="display:flex;">
+                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CPU">Processeur</div></div>
+                                <span id="info-cpu">---</span>
+                            </div>
+                            <hr>
+
                             <div class="uniRow">
                                 <div class="uniText">
-                                    <div class="uniLabel" data-lang="FIRMWARE_MEMORY">Mémoire (bytes)</div>
+                                    <div class="uniLabel" data-lang="FIRMWARE_RAM">Mémoire Vive (RAM)</div>
                                     <div class="uniStatus">
-                                        <span data-lang="FIRMWARE_FREE">Free: </span><span id="spanFreeMemory"></span>
+                                        <span id="spanFreeMemory" class="status-detail">--</span><span data-lang="FIRMWARE_AVAILABLE"> Ko disponibles</span>
                                     </div>
                                 </div>
-                                <label class="uniRight" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center;">
+                                <label class="uniColumn">
                                     <div class="mem-row">
-                                        <span data-lang="FIRMWARE_MAX">Max: </span><span id="spanMaxMemory"></span>
+                                        <span class="minMax550" data-lang="FIRMWARE_MIN">Min: </span><span class="minMaxFull" data-lang="FIRMWARE_MIN_FULL">Niveau Min</span>
+                                        <span class="status-detail" id="spanMinMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO">Ko</span>
+                                    </div>
+                                    <div class="mem-row" title="Plus gros bloc contigu disponible">
+                                        <span class="minMax550" data-lang="FIRMWARE_MAX">Max: </span><span class="minMaxFull" data-lang="FIRMWARE_MAX_FULL">Bloc Max</span>
+                                        <span class="status-detail" id="spanMaxMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO">Ko</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" data-lang="FIRMWARE_STORAGE">Stockage Fichiers</div>
+                                    <div class="uniStatus">
+                                        <span id="info-flash">--</span>
+                                    </div>
+                                </div>
+                                <label class="uniColumn">
+                                    <div class="mem-row">
+                                        <span id="info-fs-status" class="status-detail" style="font-weight: bold;">--</span>
                                     </div>
                                     <div class="mem-row">
-                                        <span data-lang="FIRMWARE_MIN">Min: </span><span id="spanMinMemory"></span>
+                                        <span id="info-fs-pct" class="status-detail">--</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <hr class="show780">
+                            <div class="uniRow show780">
+                                <div class="uniText">
+                                    <div class="uniLabel" data-lang="TOPBAR_Uptime">Temps de fonctionnement</div>
+                                </div>
+                                <label class="uniColumn">
+                                    <div class="mem-row">
+                                        <span data-lang="TOPBAR_DEVICE">Appareil: </span>
+                                        <span class="uptime-display status-detail">--j --h --m</span>
+                                    </div>
+                                    <div class="mem-row">
+                                        <span data-lang="CONNECTION_WIFI_NETWORK">Réseau: </span>
+                                        <span class="net-display status-detail">--j --h --m</span>
                                     </div>
                                 </label>
                             </div>
                         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
                         <div class="firmwarblocupdate">
                             <button id="btnUpdateGithub" onclick="firmware.updateGithub();" class="button-update" type="button">
                                 <svg><use xlink:href="#svg-github"></use></svg><span data-lang="BT_UPDATE_GITHUB">Github mise à jour</span>
@@ -348,7 +408,7 @@
                             </button>
                         </div>
                         <div class="info-block">
-                            <div class="uniRow">
+                            <div class="uniRow" style="display:none;">
                                 <span class="uniLabel" data-lang="FIRMWARE_HARDWARE">Hardware</span>
                                 <span class="uniValue">ESP32<span id="spanHwVersion"></span></span>
                             </div>
@@ -407,6 +467,13 @@
                                     </div>
                                 </div>
                             </div>
+                            <hr>
+                            <div class="uniRow" style="display:flex;">
+                                <div class="uniText">
+                                    <div class="uniLabel" >Adresse MAC</div>
+                                </div>
+                                <span class="spanMacAddress">--:--:--:--:--:--</span>
+                            </div>
                         </div>
                         <div id="divEthernetStatus" class="field-group unibloc" style="display:none;">
                             <div class="uniRow">
@@ -415,7 +482,15 @@
                                     <div class="uniLabel"><span data-lang="CONNECTION_ETH_SPEED">Speed:</span></span><span id="spanEthernetSpeed" style="padding-left:4px;display:inline-block;text-align:left;width:120px;">--</span></div>
                                 </div>
                             </div>
+                            <hr>
+                            <div class="uniRow" style="display:flex;">
+                                <div class="uniText">
+                                    <div class="uniLabel" >Adresse MAC</div>
+                                </div>
+                                <span class="spanMacAddress">--:--:--:--:--:--</span>
+                            </div>
                         </div>
+
                         <div class="field-group unibloc">
                             <div id="divHiddenSSID">
                                 <div class="uniRow" style="display:flex;">
@@ -560,6 +635,15 @@
                                 <span id="spanCurrentIP"></span>
                             </div>
                             <hr>
+
+
+
+
+
+
+
+
+
                             <div class="uniRow" style="display:flex;">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="ADRESSIP_DHCP">DHCP</div>

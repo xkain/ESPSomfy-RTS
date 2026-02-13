@@ -329,12 +329,26 @@ void Web::handleLoginContext(WebServer &server) {
     resp.addElem("version", settings.fwVersion.name);
     resp.addElem("model", "ESPSomfyRTS");
     resp.addElem("hostname", settings.hostname);
+    if (net.connType == conn_types_t::ethernet) {
+      resp.addElem("mac", ETH.macAddress().c_str());
+    } else {
+      resp.addElem("mac", WiFi.macAddress().c_str());
+    }
     resp.addElem("uptime", (uint32_t)(millis() / 1000));
     uint32_t netUptime = 0;
     if(net.connectedAt > 0) {
       netUptime = (millis() - net.connectedAt) / 1000;
     }
     resp.addElem("netUptime", netUptime);
+    resp.addElem("chipModel", ESP.getChipModel());
+    resp.addElem("cpuFreq", ESP.getCpuFreqMHz());
+    resp.addElem("cores", ESP.getChipCores());
+    resp.addElem("flashSize", (uint32_t)(ESP.getFlashChipSize() / 1024 / 1024));
+    size_t total = LittleFS.totalBytes();
+    size_t used = LittleFS.usedBytes();
+    resp.addElem("fsTotal", (uint32_t)(total / 1024)); // En Ko
+    resp.addElem("fsUsed", (uint32_t)(used / 1024));   // En Ko
+    resp.addElem("flashSpeed", (uint32_t)(ESP.getFlashChipSpeed() / 1000000)); // En MHz
     resp.endObject();
     resp.endResponse();
 }

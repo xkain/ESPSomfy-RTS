@@ -41,10 +41,13 @@ const translator = {
         observer.observe(document.body, { childList: true, subtree: true });
     }
 };
-function displayUptime(totalSeconds, elementId) {
-    const uptimeEl = document.getElementById(elementId);
-    // On vérifie si l'élément existe ET si on a bien un nombre
-    if (!uptimeEl || isNaN(totalSeconds)) return;
+
+
+
+
+function displayUptime(totalSeconds, className) {
+    const elements = document.querySelectorAll('.' + className);
+    if (elements.length === 0 || isNaN(totalSeconds)) return;
 
     let seconds = parseInt(totalSeconds, 10);
     let days = Math.floor(seconds / (24 * 3600));
@@ -55,8 +58,11 @@ function displayUptime(totalSeconds, elementId) {
 
     const fH = hours.toString().padStart(2, '0');
     const fM = minutes.toString().padStart(2, '0');
+    const timeString = `${days}${tr('DAY')} ${fH}${tr('HOUR')} ${fM}${tr('MIN')}`;
 
-    uptimeEl.textContent = `${days}j ${fH}h ${fM}m`;
+    elements.forEach(el => {
+        el.textContent = timeString;
+    });
 }
 
 function loadLang(callback) {
@@ -1414,17 +1420,44 @@ class Security {
                         resolve();
                         return;
                     }
-
-                    console.log("Contexte reçu:", ctx);
-
                     if (ctx.hasOwnProperty('uptime')) {
-                        displayUptime(ctx.uptime, 'uptime-display'); // Pour le système
+                        displayUptime(ctx.uptime, 'uptime-display');
                     }
-
                     if (ctx.hasOwnProperty('netUptime')) {
-                        displayUptime(ctx.netUptime, 'net-display'); // Pour le réseau
+                        displayUptime(ctx.netUptime, 'net-display');
                     }
-
+                    if(ctx.chipModel) document.getElementById('info-chip').textContent = ctx.chipModel;
+                    if(ctx.cpuFreq) {
+                        const cores = ctx.cores > 1 ? 'Dual-Core' : 'Single-Core';
+                        document.getElementById('info-cpu').textContent = `${cores} @ ${ctx.cpuFreq} ${tr('MHZ')}`;
+                    }
+                    if(ctx.flashSize) {
+                        document.getElementById('info-flash').innerHTML =
+                        `<span>${tr('FIRMWARE_TOTAL')}: </span>` +
+                        `<span class="status-detail">${ctx.flashSize}</span> Mo ` +
+                        `(<span class="hide550">${tr('FIRMWARE_SPEED')} : </span>` +
+                        `<span class="status-detail">${ctx.flashSpeed}</span> ${tr('MHZ')})`;
+                    }
+                    if(ctx.fsTotal) {
+                        const free = ctx.fsTotal - ctx.fsUsed;
+                        const percent = Math.round((ctx.fsUsed / ctx.fsTotal) * 100);
+                        const elStatus = document.getElementById('info-fs-status');
+                        if (elStatus) {
+                            elStatus.innerHTML =
+                            `<span class="status-detail">${free}</span> ${tr('FIRMWARE_UNIT_KO')} ${tr('FIRMWARE_FREE_SUFFIX')}` +
+                            `<span class="hide550"> ${tr('FIRMWARE_ON')} <span class="status-detail">${ctx.fsTotal}</span> ${tr('FIRMWARE_UNIT_KO')}</span>`;
+                        }
+                        const elPct = document.getElementById('info-fs-pct');
+                        if (elPct) {
+                            elPct.innerHTML = `${tr('FIRMWARE_USED_AT')} <span class="status-detail">${percent}</span>%`;
+                        }
+                    }
+                    if(ctx.mac) {
+                        const macElements = document.querySelectorAll('.spanMacAddress');
+                        macElements.forEach(el => {
+                            el.textContent = ctx.mac;
+                        });
+                    }
                     this.type = ctx.type;
                     this.permissions = ctx.permissions;
 
@@ -2721,7 +2754,7 @@ class Somfy {
             <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_SCAN")}</div>
-            <div style="font-size: 18px;"><span id="spanTestFreq" style="font-family: monospace; font-weight: bold;">433.00</span> <span style="font-size: 14px;">${tr("SCANFREQ_MHZ")}</span></div>
+            <div style="font-size: 18px;"><span id="spanTestFreq" style="font-family: monospace; font-weight: bold;">433.00</span> <span style="font-size: 14px;">${tr("MHZ")}</span></div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end;">
             <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
@@ -2732,7 +2765,7 @@ class Somfy {
             <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_FREQUENCY")}</div>
-            <div style="font-size: 18px;"><span id="spanBestFreq" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">---.--</span> <span style="font-size: 14px;">${tr("SCANFREQ_MHZ")}</span></div>
+            <div style="font-size: 18px;"><span id="spanBestFreq" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">---.--</span> <span style="font-size: 14px;">${tr("MHZ")}</span></div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end;">
             <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
@@ -5602,15 +5635,55 @@ class Firmware {
 
         return div;
     }
+
+
     procMemoryStatus(mem) {
-        console.log(mem);
-        let sp = document.getElementById('spanFreeMemory');
-        if (sp) sp.innerHTML = mem.free.fmt("#,##0");
-        sp = document.getElementById('spanMaxMemory');
-        if (sp) sp.innerHTML = mem.max.fmt('#,##0');
-        sp = document.getElementById('spanMinMemory');
-        if (sp) sp.innerHTML = mem.min.fmt('#,##0');
+        // console.log("Bytes reçus:", mem.free); // ex: 162556
+
+        // Conversion en Ko avec 2 décimales
+        const freeKo = (mem.free / 1024).toFixed(2);
+        const minKo  = (mem.min / 1024).toFixed(2);
+        const maxKo  = (mem.max / 1024).toFixed(2);
+
+        const elFree = document.getElementById('spanFreeMemory');
+        if (elFree) elFree.textContent = freeKo;
+
+        const elMin = document.getElementById('spanMinMemory');
+        if (elMin) elMin.textContent = minKo;
+
+        const elMax = document.getElementById('spanMaxMemory');
+        if (elMax) elMax.textContent = maxKo;
     }
+
+
+    /*
+
+    procMemoryStatus(mem) {
+        console.log("Données mémoire reçues:", mem); // Vérifie ici les noms des clés
+
+        // On récupère les valeurs en bytes et on convertit en Ko
+        // Si mem.max n'existe pas, on essaie mem.maxBlock ou une autre clé visible dans la console
+        const free = Math.round((mem.free || 0) / 1024);
+        const min = Math.round((mem.min || 0) / 1024);
+        const max = Math.round((mem.max || 0) / 1024); // Vérifie si c'est bien .max
+
+        const elFree = document.getElementById('spanFreeMemory');
+        if (elFree) elFree.textContent = free.toLocaleString();
+
+        const elMin = document.getElementById('spanMinMemory');
+        if (elMin) elMin.textContent = min.toLocaleString();
+
+        const elMax = document.getElementById('spanMaxMemory');
+        if (elMax) {
+            if (max > 0) {
+                elMax.textContent = max.toLocaleString();
+            } else {
+                // Si max est à 0 ou indéfini, on affiche N/A ou on cache la ligne
+                elMax.textContent = "N/A";
+            }
+        }
+    }
+    */
     procFwStatus(rel) {
         console.log("Status Firmware reçu:", rel);
         let div = document.getElementById('divFirmwareUpdate');
