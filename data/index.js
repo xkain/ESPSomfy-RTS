@@ -41,10 +41,6 @@ const translator = {
         observer.observe(document.body, { childList: true, subtree: true });
     }
 };
-
-
-
-
 function displayUptime(totalSeconds, className) {
     const elements = document.querySelectorAll('.' + className);
     if (elements.length === 0 || isNaN(totalSeconds)) return;
@@ -64,7 +60,6 @@ function displayUptime(totalSeconds, className) {
         el.textContent = timeString;
     });
 }
-
 function loadLang(callback) {
     fetch(baseUrl + '/lang')
     .then(r => r.json())
@@ -2776,7 +2771,7 @@ class Somfy {
             <div class="field-group unibloc" style="padding: 10px; height: 200px; background:#333;">
             <canvas id="rssiCanvas" style="width: 100%; height: 100%;"></canvas>
             </div>
-            <div class="button-container-row">
+            <div class="button-container-col">
             <button id="btnStopScanning" class="bouton" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
             <div style="display:flex; gap:10px; width:100%;">
             <button id="btnRestartScanning" class="bouton" type="button" style="display:none; flex:1;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>

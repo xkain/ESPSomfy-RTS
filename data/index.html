@@ -308,7 +308,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div id="divFirmware" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
 
@@ -321,7 +320,6 @@
                                 <span id="info-cpu">---</span>
                             </div>
                             <hr>
-
                             <div class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="FIRMWARE_RAM">Mémoire Vive (RAM)</div>
@@ -374,19 +372,6 @@
                                 </label>
                             </div>
                         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
                         <div class="firmwarblocupdate">
                             <button id="btnUpdateGithub" onclick="firmware.updateGithub();" class="button-update" type="button">
                                 <svg><use xlink:href="#svg-github"></use></svg><span data-lang="BT_UPDATE_GITHUB">Github mise à jour</span>
@@ -1577,8 +1562,17 @@
                         </div>
                     </div>
                     <div id="divFrameLog" class="subtab-content frame-log" style="display:none;">
-                        <div class="frame-header"><span data-lang="RADIO_KEY">Key</span><span data-lang="RADIO_ADRESS">Adresse</span><span data-lang="RADIO_COMMAND">Command</span><span data-lang="RADIO_CODE">Code</span><span data-lang="SCANFREQ_RSSI">RSSI</span><span data-lang="RADIO_BITS">Bits</span><span data-lang="RADIO_TIME">Temps</span></div>
-                        <div id="divFrames" class="frame-list"></div>
+
+                        <div class="log-global-container">
+                            <div class="frame-header"><span data-lang="RADIO_KEY">Key</span><span data-lang="RADIO_ADRESS">Adresse</span><span data-lang="RADIO_COMMAND">Command</span><span data-lang="RADIO_CODE">Code</span><span data-lang="SCANFREQ_RSSI">RSSI</span><span data-lang="RADIO_BITS">Bits</span><span data-lang="RADIO_TIME">Temps</span></div>
+
+
+
+
+
+                                <div id="divFrames" class="frame-list">
+                            </div>
+                        </div>
                         <div class="button-container-row">
                             <button id="btnCopyFrame" type="button" class="bouton" onclick="somfy.framesToClipboard();" data-lang="BT_COPY">Copié</button>
                             <button id="btnClearFrames" type="button" class="boutonOutline" onclick="document.getElementById('divFrames').innerHTML = ''; somfy.frames = [];" data-lang="BT_CLEAR">Effacer</button>
