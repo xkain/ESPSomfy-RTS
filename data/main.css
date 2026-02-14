@@ -3,6 +3,10 @@
     --shade-color: #F8A525;
     --accent-color: #F8A525;
 }
+
+
+
+
 :root[data-theme="light"] {
     --body-color: #fff;
     --color: #000000;
@@ -29,7 +33,12 @@
     --svg-shade5: #515255;
     --barreRoomBg: #d9d9d9;
     --room-pill : #fffdfd;
-    --side-handle:#d9d9d9;
+    --side-handle:#5e5d5d;
+
+    --borderShadeCtl: #999;
+    --shadowShadeCtl: rgba(125, 125, 125, 0.6);
+
+
     --wait-overlay : rgba(236, 236, 236, 0.3);
     --border: #bbc5d1;
 }
@@ -60,7 +69,11 @@
     --barreRoomBg: #0f0f0f;
     --room-pill : #4a4a4a;
     --side-handle:#4a4a4a;
-    --wait-overlay : rgba(2, 2, 2, 0.3);
+
+    --borderShadeCtl: #333;
+    --shadowShadeCtl: rgba(0, 0, 0, 0.6);
+
+    --wait-overlay : rgba(2, 2, 2, 0.0);
     --border: #333;
 }
 html, body {
@@ -131,7 +144,7 @@ html, body {
 }
 .opt-badge {
     font-size: 0.8rem;
-    color: var(--soustxt-color);
+    color: #ababab;
     padding: 2px 8px;
     border-radius: 8px;
     border: 1px solid transparent;
@@ -142,7 +155,7 @@ html, body {
     font-weight: bold;
     opacity: 1;
     background-color: var(--accent-color);
-    color: var(--color);
+    color: #fff;
 }
 .uptime-container {
     display: flex;
@@ -165,19 +178,14 @@ html, body {
     grid-template-columns: auto 1fr;
     gap: 8px;
     align-items: baseline;
-    color: var(--soustxt-color);
+    color: #ababab;
 }
 .uptime-values span {
-    color: var(--color);
+    color: #fff;
     text-align: right;
     font-family: monospace;
     min-width: 68px;
 }
-
-
-
-
-
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -239,15 +247,12 @@ html, body {
     .submenu {
         display: none;
         flex-direction: column;
-        padding-left: 45px; /* Aligne le texte sous le texte du parent */
+        padding-left: 45px;
         margin-bottom: 10px;
     }
-
-    /* État ouvert */
     .nav-group.open .submenu {
         display: flex;
     }
-
     .nav-group.open .arrow-icon {
         transform: rotate(180deg);
     }
@@ -289,6 +294,10 @@ html, body {
     margin-bottom: 20px;
     opacity: 0.3; /* Pour un look sobre */
     fill: currentColor;
+}
+.empty-icon { --shade-position: 100 !important; /* À ÉVITER */
+    --accent-color: #a1a1a1;
+    --unibloc-color:var(--background-color)
 }
 .empty-subtext {
     font-size: 0.9em;
@@ -1430,6 +1439,8 @@ div.wait-overlay > .lds-roller {
     border-radius: 25px;
     overflow: hidden;
     width: 40%;
+    border: 1px solid var(--borderShadeCtl);
+    box-shadow: 0 1px 8px 0px var(--shadowShadeCtl);
 }
 #divShadeControls {
     display: flex;
@@ -1517,9 +1528,10 @@ div.wait-overlay > .lds-roller {
     color: var(--soustxt-color);
     margin-top: 2px;
     line-height: 1.2;
+    font-weight: bold;
 }
 .myShade-badge {
-    color: #bbb;
+    color: var(--soustxt-color);
     padding: 2px 8px;
     border-radius: 12px;
     font-size: 10px;
@@ -1621,7 +1633,8 @@ div.wait-overlay > .lds-roller {
         background-color: var(--unibloc-color);
         padding: 20px;
         border-radius: 25px;
-        border: 1px solid #d2d2d2;
+        border: 1px solid var(--borderShadeCtl);
+        box-shadow: 0 0 6px 0 var(--shadowShadeCtl);
     }
     .vr-content .unibloc {background-color: var(--background-color);}
 .vr-bloctoogle {
@@ -1937,7 +1950,6 @@ display: none;
         animation: slideToLeft 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
     }
 
-
 div.eth-setting-line {
     font-size:12px;
     padding-top:0px;
@@ -1954,11 +1966,6 @@ div.eth-setting-line label {
     text-align:right;
     color: var(--color);
 }
-
-
-
-
-/* --- 1. Le parent qui gère le scroll horizontal --- */
 .log-global-container {
     width: 100%;
     overflow-x: auto;
@@ -1967,85 +1974,61 @@ div.eth-setting-line label {
     border-radius: 15px;
     margin-top: 15px;
 }
-
-/* --- 2. Le wrapper interne --- */
 .log-global-container > div.frame-header,
 .log-global-container > div.frame-list {
     display: block;
-    /* On utilise min-width au lieu de width pour permettre l'extension */
     min-width: 675px;
+    max-height: 500px;
 }
-
-/* --- 3. Les lignes (Flex) --- */
 .frame-header,
 .frame-row {
     display: flex !important;
     width: 100%;
     box-sizing: border-box;
 }
-
 .frame-header {
     background-color: var(--accent-color);
-    color: #1e1e1e;
+    color: #fff;;
     padding: 10px 0;
     border-radius: 15px 15px 0 0;
 }
-
 .frame-list {
     min-height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-/* --- 4. Alignement et Extension des colonnes --- */
 .frame-row > span,
 .frame-header > span {
     padding: 0 14px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    /* flex-shrink: 0 empêche l'écrasement en mobile */
     flex-shrink: 0;
 }
-
-/* On utilise min-width pour le mobile et flex pour le PC */
-
-/* Clé : Fixe */
 .frame-row > span:nth-child(1), .frame-header > span:nth-child(1) { flex: 0 0 60px; text-align: center; }
-
-/* Adresse : S'étend sur PC */
 .frame-row > span:nth-child(2), .frame-header > span:nth-child(2) { flex: 1 0 95px; text-align: center; }
-
-/* Command : S'étend sur PC */
 .frame-row > span:nth-child(3), .frame-header > span:nth-child(3) { flex: 1 0 110px; text-align: center; }
-
-/* Code : Fixe */
 .frame-row > span:nth-child(4), .frame-header > span:nth-child(4) { flex: 0 0 70px; text-align: center; }
-
-/* RSSI : Fixe */
 .frame-row > span:nth-child(5), .frame-header > span:nth-child(5) { flex: 0 0 110px; text-align: center; }
-
-/* Bits : Fixe */
 .frame-row > span:nth-child(6), .frame-header > span:nth-child(6) { flex: 0 0 120px; text-align: center; }
+.frame-row > span:nth-child(7), .frame-header > span:nth-child(7) { flex: 0 0 110px; text-align: center; }
 
-/* Temps : Fixe ou légèrement extensible */
-.frame-row > span:nth-child(7), .frame-header > span:nth-child(7) { flex: 0 0 110px; text-align: right; }
-
-/* --- 5. Esthétique --- */
 .frame-row {
-    background-color: color-mix(in srgb, var(--unibloc-color), #000 10%);
+    background-color: color-mix(in srgb, var(--unibloc-color), #000 20%);
     border-bottom: 1px solid rgba(255,255,255,0.05);
     padding: 8px 0;
 }
 .frame-list > .frame-row:nth-child(2n) { background-color: var(--unibloc-color); }
 
-.frame-pulses { display: none; }
-
-
-
-
-
-
+div.frame-pulses {
+    width:100%;
+    padding-left:7px;
+    padding-right:7px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    display:none;
+}
 
 
 
