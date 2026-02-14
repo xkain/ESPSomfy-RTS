@@ -3,7 +3,7 @@
 #ifndef configsettings_h
 #define configsettings_h
 #include "WResp.h"
-#define FW_VERSION "v2.4.7"
+#define FW_VERSION "v2.4.8"
 enum class conn_types_t : byte {
     unset = 0x00,
     wifi = 0x01,
@@ -39,8 +39,6 @@ struct appver_t {
   int8_t compare(appver_t &ver);
   void copy(appver_t &ver);
 };
-
-
 class BaseSettings {
   public:
     bool loadFile(const char* filename);
