@@ -1554,7 +1554,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.4.8';
+    appVersion = 'v2.4.9';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -4904,15 +4904,21 @@ class Somfy {
         });
     }
     sendVRCommand(el) {
+        if (typeof mouseDown === 'undefined') window.mouseDown = false;
+
         let pnl = document.getElementById('divVirtualRemote');
         let dd = pnl.querySelector('#selVRMotor');
+
+        if (!dd || dd.selectedIndex === -1) return;
+
         let opt = dd.selectedOptions[0];
         let o = {
             type: opt.getAttribute('data-type'),
             address: opt.getAttribute('data-address'),
             cmd: el.getAttribute('data-cmd')
         };
-        ui.fromElement(el.parentElement.parentElement, o);
+        ui.fromElement(pnl, o);
+
         switch (o.type) {
             case 'shade':
                 o.shadeId = parseInt(opt.getAttribute('data-shadeId'), 10);
@@ -4922,14 +4928,16 @@ class Somfy {
                 o.groupId = parseInt(opt.getAttribute('data-groupId'), 10);
                 break;
         }
-        console.log(o);
+
+        console.log("Commande envoyée :", o);
+
         let fnRepeatCommand = (err, shade) => {
             if (this.btnTimer) {
                 clearTimeout(this.btnTimer);
                 this.btnTimer = null;
             }
             if (err) return;
-            if (mouseDown) {
+            if (window.mouseDown || (typeof mouseDown !== 'undefined' && mouseDown)) {
                 if (o.cmd === 'Sensor')
                     somfy.sendSetSensor(o);
                 else if (o.type === 'group')
@@ -5916,7 +5924,7 @@ class Firmware {
         let overlay = ui.waitMessage(document.getElementById('divContainer'));
         try {
             let ret = {};
-            ret.resp = await fetch(`https://api.github.com/repos/rstrouse/espsomfy-rts/releases/tags/${tag}`);
+            ret.resp = await fetch(`https://api.github.com/repos/xkain/espsomfy-rts/releases/tags/${tag}`);
             if (ret.resp.ok)
                 ret.info = await ret.resp.json();
             return ret;

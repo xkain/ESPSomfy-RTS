@@ -18,12 +18,12 @@
     })();
     </script>
 
-    <link rel="stylesheet" href="main.css?v=2.4.8c" type="text/css" />
-    <link rel="stylesheet" href="widgets.css?v=2.4.8c" type="text/css" />
-    <link rel="stylesheet" href="icons.css?v=2.4.8c" type="text/css" />
+    <link rel="stylesheet" href="main.css?v=2.4.9c" type="text/css" />
+    <link rel="stylesheet" href="widgets.css?v=2.4.9c" type="text/css" />
+    <link rel="stylesheet" href="icons.css?v=2.4.9c" type="text/css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <script type="text/javascript" src="index.js?v=2.4.8c"></script>
+    <script type="text/javascript" src="index.js?v=2.4.9c"></script>
 </head>
 <body>
     <header class="top-bar">
@@ -1244,18 +1244,15 @@
                     </div>
                    <div id="divRepeater" style="display:none;padding-top:10px;" class="subtab-content">
                         <div id="divRepeaterListContainer">
-
                             <div id="divRepeaterEmptyState" class="empty-state" style="display:none;">
                                 <svg class="empty-icon"><use href="#svg-emptyRepeater"></use></svg>
                                 <p data-lang="EMPTY_REPEATER_TITLE">Aucune télécommande n'est actuellement répétée.</p>
                                 <p class="empty-subtext" data-lang="EMPTY_REPEATER_DESC">Utilisez le bouton ci-dessous pour capturer et dupliquer un signal.</p>
                             </div>
-
                             <div id="divRepeaterListContent">
                                 <div class="dragtxt" data-lang="ALL_DUPLICATE_REMOTES">Toutes les adresses de télécommande dupliquées sont listées ci-dessous.</div>
                                 <div id="divRepeatList" class="edit-repeaterlist"></div>
                             </div>
-
                             <div class="button-container-col">
                                 <button id="btnLinkRepeater" class="bouton" type="button" onclick="somfy.linkRepeatRemote();" data-lang="BT_SCAN_REMOTE">
                                     Chercher Télécommande
@@ -1263,10 +1260,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
                     <div id="divVirtualRemote" style="display:none;padding:0px;margin-top: 25px;" class="subtab-content" data-bitlength="56">
                         <div class="vr-content">
 
@@ -1275,8 +1268,6 @@
                                 <select id="selVRMotor" class="inputAndSelect" onchange="document.getElementById('divVirtualRemote').setAttribute('data-bitlength', this.options[this.selectedIndex].getAttribute('data-bitlength'));">
                                 </select>
                             </div>
-
-
                             <div class="vr-button vr-bloctoogle">
                                 <div class="button-outline vr-toogle vr-stop vr-80bit" data-cmd="stop" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                     <svg class="icon-svg" style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggleHand"></use></svg>
@@ -1285,7 +1276,6 @@
                                     <svg class="icon-svg" style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggle"></use></svg>
                                 </div>
                             </div>
-    <!-- toogle fin -->
                             <div class="vr-updownmy vr-wheel-container">
                                 <div class="vr-wheel-outer">
                                     <div class="vr-wheel-arrow vr-arrow-up" data-cmd="up" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-up"></use></svg></div>
@@ -1301,10 +1291,7 @@
                                     <div class="button-outline2 btn-top btn-fav" data-lang="VR_FAVORITE" title="" data-cmd="favorite" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-favori"></use></svg></div>
                                 </div>
                             </div>
-
-    <!-- bouton prog et favori fin -->
                             <div class="vr-block-boutons">
-                                <!-- bouton vertical gauche-->
                                 <div class="vr-blockLeft">
                                     <div class="vr-upMy" data-cmd="MyUp" data-lang="VR_MY_UP" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <div class="segment" ><svg><use xlink:href="#vr-up"></use></svg></div>
@@ -1315,7 +1302,6 @@
                                         <div class="segment"><svg><use xlink:href="#vr-down"></use></svg></div>
                                     </div>
                                 </div>
-    <!-- bloc central-->
                                 <div class="vr-block-center" style="padding: 10px">
                                     <div class="vr-block-centerFlag">
                                         <div class="vr-button-sunflagL btn-sunflag" style="flex:1;" data-cmd="SunFlag" data-lang="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-sunflag-o"></use></svg></div>
@@ -1345,7 +1331,7 @@
                                         <div class="segment">all</div>
                                     </div>
                                 </div>
-    <!-- slider80 -->       </div>
+                            </div>
                             <div class="vr-button vr-80bit vr-step80">
                                 <div style="flex: 1; display: flex; flex-direction: column;">
                                     <input id="vrslidStepSize" style="width: 100%; margin: 0; cursor: pointer; z-index: 2;" name="stepSize" type="range" min="1" max="127" step="1" data-bind="stepSize" value="1" oninput="document.getElementById('vrspanStepSize').innerText = this.value;" />
@@ -1364,12 +1350,9 @@
                                     </div>
                                 </div>
                             </div>
-    <!-- slider80 fin -->
                         </div>
                     </div>
                 </div>
-
-
                 <div id="divRadioSettings" style="display:none;">
                     <div class="subtab-container">
                         <span class="selected" data-grpid="divTransceiverSettings" data-lang="TAB_RADIO">Radio</span>
@@ -1704,7 +1687,6 @@
             <path id="path2" d="m14 40v-22l-6 4v24h38v-6z" fill="currentColor"/>
             <path id="path3" d="m24 24v2h22v-2zm0 4v2h22v-2zm0 4v2h22v-2zm0-12v2h21.32v-2zm0 16v2h22v-2z" fill="currentColor"/>
         </symbol>
-
   <!--Connexion -->
         <symbol id="icon-user" viewBox="0 0 20 20">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
@@ -1712,12 +1694,9 @@
         <symbol id="icon-cadenas" viewBox="0 0 20 20">
             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"/>
         </symbol>
-
-
         <symbol id="icon-eyeOn" viewBox="0 0 24 24">
             <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>';
         </symbol>
-
         <symbol id="icon-eyeOff" viewBox="0 0 24 24">
             <path fill="currentColor" d="M11.83 9L15 12.16V12a3 3 0 0 0-3-3zm-4.3.8l1.55 1.55c-.05.21-.08.42-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2M2 4.27l2.28 2.28l.45.45C3.08 8.3 1.78 10 1 12c1.73 4.39 6 7.5 11 7.5c1.55 0 3.03-.3 4.38-.84l.43.42L19.73 22L21 20.73L3.27 3M12 7a5 5 0 0 1 5 5c0 .64-.13 1.26-.36 1.82l2.93 2.93c1.5-1.25 2.7-2.89 3.43-4.75c-1.73-4.39-6-7.5-11-7.5c-1.4 0-2.74.25-4 .7l2.17 2.15C10.74 7.13 11.35 7 12 7" />
         </symbol>
@@ -1762,12 +1741,10 @@
             <rect x="2" y="2" width="92" height="44" ry="22" fill="currentColor" />
             <path d="m45.38 17.37a1.326 1.326 0 0 1 1.326-1.326 1.326 1.326 0 0 1 1.326 1.326v5.927l1.604 0.1724 6.55 2.904c0.7028 0.3182 1.127 1.021 1.127 1.79v5.781c-0.03977 1.087-0.9017 1.949-1.989 1.989h-8.619c-0.5039 0-0.9812-0.1989-1.326-0.5702l-6.497-5.569 0.9812-1.021c0.2519-0.2785 0.6099-0.4243 0.9812-0.4243h0.2917l4.243 2.281zm1.326-5.304a5.304 5.304 0 0 1 5.304 5.304c0 1.989-1.061 3.673-2.652 4.588v-1.618c0.8088-0.7293 1.326-1.79 1.326-2.97a3.978 3.978 0 0 0-3.978-3.978 3.978 3.978 0 0 0-3.978 3.978c0 1.18 0.5171 2.241 1.326 2.97v1.618c-1.591-0.9149-2.652-2.599-2.652-4.588a5.304 5.304 0 0 1 5.304-5.304" fill="#fff"/>
         </symbol>
-
         <symbol id="icon-toggleHand" viewBox="0 0 96 48">
             <rect id="rect1" x="2" y="2" width="92" height="44" ry="22" fill="currentColor"/>
             <path id="path2" d="m56 28c0 4.42-3.58 8-8 8-3.26 0-6.19-1.99-7.4-5.02l-3.03-7.61c-0.313-0.788 0.434-1.58 1.24-1.32l0.79 0.26c0.56 0.18 1.02 0.61 1.24 1.16l1.28 3.21c0.08 0.2 0.26 0.32 0.46 0.32h0.42v-11.8c0-1.67 2.5-1.67 2.5 0v8.25c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-10.2c0-1.67 2.5-1.67 2.5 0v10.2c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-8.75c0-1.67 2.5-1.67 2.5 0v8.75c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-5.75c0-1.67 2.5-1.67 2.5 0z" fill="#fff"/>
         </symbol>
-
 <!-- VR REMOTE -->
         <symbol id="svg-arrowDown" viewBox="0 0 24 24">
             <path id="path1" d="m5 9 7 6 7-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
@@ -1815,7 +1792,6 @@
             <path d="m12 4.5c-2.732 0.00331-4.947 2.218-4.95 4.95 0 0.75 0.164 1.467 0.487 2.136 0.564 1.168 1.184 2.493 1.683 3.914h5.56c0.5-1.421 1.12-2.746 1.684-3.914 0.3211-0.6662 0.4873-1.396 0.486-2.136 0-2.73-2.22-4.95-4.95-4.95m-2.5 12.5v2h5v-2z"
                 fill="var(--icon-color, --bg-switch-ch-color)"/>
         </symbol>
-
         <symbol id="svg-favori" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" fill="var(--bg-switch-ch-color)" />
             <path fill="var(--icon-color, --bg-switch-ch-color)" d="M16.23 18L12 15.45L7.77 18l1.12-4.81l-3.73-3.23l4.92-.42L12 5l1.92 4.53l4.92.42l-3.73 3.23z" />
@@ -1856,7 +1832,6 @@
         <symbol id="icon-error" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2zm0-4h-2V7h2z" />
         </symbol>
-
         <symbol id="svg-upload" viewBox="0 0 24 24">
             <path fill="currentColor" d="M6 20q-.825 0-1.412-.587T4 18v-2q0-.425.288-.712T5 15t.713.288T6 16v2h12v-2q0-.425.288-.712T19 15t.713.288T20 16v2q0 .825-.587 1.413T18 20zm5-12.15L9.125 9.725q-.3.3-.712.288T7.7 9.7q-.275-.3-.288-.7t.288-.7l3.6-3.6q.15-.15.325-.212T12 4.425t.375.063t.325.212l3.6 3.6q.3.3.288.7t-.288.7q-.3.3-.712.313t-.713-.288L13 7.85V15q0 .425-.288.713T12 16t-.712-.288T11 15z" />
         </symbol>
@@ -1921,7 +1896,6 @@
             <rect x="4" y="39" width="40" height="5" rx=".959" ry=".97" fill="var(--svg-shade1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="0" stroke-width="1.4"/>
             <path d="m4 5h40s0-1-1-1h-38c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/><path d="m4 40h40s0-1-1-1h-38c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
         </symbol>
-
         <symbol id="svg-awning" viewBox="0 0 48 48">
             <g class="lattes-group" style="transform:translateY(calc(-31px + (31px * var(--shade-position, 0) / 100)))">
                 <path d="m7 12v29h34v-29z" fill="var(--accent-color)"/>
@@ -1932,12 +1906,6 @@
             <rect x="4" y="5" width="40" height="6" rx=".959" ry="1" fill="var(--svg-shade1)" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="0" stroke-width="1.4"/>
             <path d="m4 6h40s0-1-1-1h-38c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
         </symbol>
-
-
-
-
-
-
         <symbol id="svg-shutter" viewBox="0 0 48 48">
             <path d="m6 9v30h36v-30zm34 2v26h-32v-26z" fill="var(--svg-shade3)"/>
             <g class="lattes-group" style="transform:translateY(calc(-26px + (26px * var(--shade-position, 0) / 100)))">
@@ -1950,11 +1918,6 @@
             <rect x="4" y="39" width="40" height="5" rx=".959" ry=".97" fill="var(--svg-shade1" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="0" stroke-width="1.4"/>
             <path d="m4 5h40s0-1-1-1h-38c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/><path d="m4 40h40s0-1-1-1h-38c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
         </symbol>
-
-
-
-
-
         <symbol id="svg-garage" viewBox="0 0 48 48">
             <g class="lattes-group" style="transform: translateY(calc(-20px + (20px * var(--shade-position, 0) / 100)));">
                 <path d="m10 19v21h28v-21z" fill="color-mix(in srgb, var(--accent-color), #060606 20%)"/>
@@ -2051,6 +2014,3 @@
     </svg>
 </body>
 </html>
-
-
-

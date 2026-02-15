@@ -327,7 +327,7 @@ void Network::setConnected(conn_types_t connType) {
   SSDP.setHTTPPort(80);
   SSDP.setSchemaURL(0, "upnp.xml");
   SSDP.setChipId(0, this->getChipId());
-  SSDP.setDeviceType(0, "urn:schemas-rstrouse-org:device:ESPSomfyRTS:1");
+  SSDP.setDeviceType(0, "urn:schemas-xkain-org:device:ESPSomfyRTS:1");
   SSDP.setName(0, settings.hostname);
   
   //SSDP.setSerialNumber(0, "C2496952-5610-47E6-A968-2FC19737A0DB");
@@ -339,9 +339,9 @@ void Network::setConnected(conn_types_t connType) {
     snprintf(sModel, sizeof(sModel), "ESP32-%s", settings.chipModel);
     SSDP.setModelNumber(0, sModel);
   }
-  SSDP.setModelURL(0, "https://github.com/rstrouse/ESPSomfy-RTS");
-  SSDP.setManufacturer(0, "rstrouse");
-  SSDP.setManufacturerURL(0, "https://github.com/rstrouse");
+  SSDP.setModelURL(0, "https://github.com/xkain/ESPSomfy-RTS");
+  SSDP.setManufacturer(0, "xkain");
+  SSDP.setManufacturerURL(0, "https://github.com/xkain");
   SSDP.setURL(0, "/");
   SSDP.setActive(0, true);
   esp_task_wdt_reset();
