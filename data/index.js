@@ -1554,7 +1554,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.4.9';
+    appVersion = 'v2.4.8';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -5881,7 +5881,7 @@ class Firmware {
                 ${optionsHtml}
                 </select>
                 <hr>
-                <button class="boutonOutline" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
+                <button class="boutonOutline" id="divReleaseNotes" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
                 </div>
                 </div>
                 <div class="${infoClass}" style="margin-bottom:15px; width:100%;">
