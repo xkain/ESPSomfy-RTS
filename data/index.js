@@ -4714,7 +4714,7 @@ class Somfy {
             </div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_GARAGE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_GARAGE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#svg-info"></use></svg>
+            <div class="information"><svg><use xlink:href="#icon-info"></use></svg>
             <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_GARAGE_STEP_3")}</span></div>
             </div>`;
         } else {
@@ -4732,7 +4732,7 @@ class Somfy {
             </div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_SHADE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_SHADE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#svg-info"></use></svg>
+            <div class="information"><svg><use xlink:href="#icon-info"></use></svg>
             <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_SHADE_STEP_3")}</span></div>
             </div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("PAIR_SHADE_STEP_4")}</div></div></div>
@@ -4815,7 +4815,7 @@ class Somfy {
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_4")}</div></div></div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">5</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_5")}</div></div></div>
         <div class="information">
-        <svg><use xlink:href="#svg-info"></use></svg>
+        <svg><use xlink:href="#icon-info"></use></svg>
         <div style="text-align: left; flex: 1;">
         <b>${tr("MSG_NOTE")}</b>
         <span>${tr("UNPAIR_SHADE_STEP_6") || "Le volet doit effectuer un mouvement pour confirmer qu'il a bien oublié ESPSomfy."}</span>
@@ -5001,7 +5001,7 @@ class Somfy {
         ${tr("LINK_REMOTE_DESC_1")}
         </div>
         <div class="information">
-        <svg><use xlink:href="#svg-info"></use></svg>
+        <svg><use xlink:href="#icon-info"></use></svg>
         <div style="text-align: left; flex: 1;">
         <b>${tr("MSG_NOTE")}</b>
         <span>${tr("LINK_REMOTE_DESC_2")}</span>
@@ -5638,103 +5638,78 @@ class Firmware {
 
         return div;
     }
-
-
     procMemoryStatus(mem) {
-        // console.log("Bytes reçus:", mem.free); // ex: 162556
-
-        // Conversion en Ko avec 2 décimales
-        const freeKo = (mem.free / 1024).toFixed(2);
-        const minKo  = (mem.min / 1024).toFixed(2);
-        const maxKo  = (mem.max / 1024).toFixed(2);
-
-        const elFree = document.getElementById('spanFreeMemory');
-        if (elFree) elFree.textContent = freeKo;
-
-        const elMin = document.getElementById('spanMinMemory');
-        if (elMin) elMin.textContent = minKo;
-
-        const elMax = document.getElementById('spanMaxMemory');
-        if (elMax) elMax.textContent = maxKo;
+        let sp;
+        if (sp = document.getElementById('spanFreeMemory'))
+            sp.textContent = (mem.free / 1024).toFixed(2);
+        if (sp = document.getElementById('spanMinMemory'))
+            sp.textContent = (mem.min / 1024).toFixed(2);
+        if (sp = document.getElementById('spanMaxMemory'))
+            sp.textContent = (mem.max / 1024).toFixed(2);
     }
-
-
-    /*
-
-    procMemoryStatus(mem) {
-        console.log("Données mémoire reçues:", mem); // Vérifie ici les noms des clés
-
-        // On récupère les valeurs en bytes et on convertit en Ko
-        // Si mem.max n'existe pas, on essaie mem.maxBlock ou une autre clé visible dans la console
-        const free = Math.round((mem.free || 0) / 1024);
-        const min = Math.round((mem.min || 0) / 1024);
-        const max = Math.round((mem.max || 0) / 1024); // Vérifie si c'est bien .max
-
-        const elFree = document.getElementById('spanFreeMemory');
-        if (elFree) elFree.textContent = free.toLocaleString();
-
-        const elMin = document.getElementById('spanMinMemory');
-        if (elMin) elMin.textContent = min.toLocaleString();
-
-        const elMax = document.getElementById('spanMaxMemory');
-        if (elMax) {
-            if (max > 0) {
-                elMax.textContent = max.toLocaleString();
-            } else {
-                // Si max est à 0 ou indéfini, on affiche N/A ou on cache la ligne
-                elMax.textContent = "N/A";
-            }
-        }
-    }
-    */
     procFwStatus(rel) {
         console.log("Status Firmware reçu:", rel);
-        let div = document.getElementById('divFirmwareUpdate');
-        if (!div) return;
-        div.style.display = 'none';
-        div.onclick = null;
-        div.style.cursor = 'default';
-        div.style.color = '';
+
+        let divGlobal = document.getElementById('divFirmwareUpdate');
+        let divLocal = document.getElementById('divSystemStatus');
+
+        if (!divGlobal || !divLocal) return;
+
+        let statusTitle = document.getElementById('statusTitle');
+        let statusDesc = document.getElementById('statusDesc');
+        let statusIcon = document.getElementById('useStatusIcon');
+
+        divGlobal.style.display = 'none';
+        divGlobal.onclick = null;
+        divGlobal.style.cursor = 'default';
+        divGlobal.style.color = '';
 
         if (rel.available && rel.status === 0 && rel.checkForUpdate !== false) {
-            div.style.display = 'flex';
-            div.style.cursor = 'pointer';
-            div.onclick = () => { firmware.updateGithub(); };
-            div.innerHTML = `
-            <svg class="btnSvg" style="width:16px; height:16px; margin:0; fill:var(--txtwarning-color); flex-shrink:0;">
-            <use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)}
-            <span style="color:var(--txtwarning-color); font-weight:bold;">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
+            divGlobal.style.display = 'flex';
+            divGlobal.style.cursor = 'pointer';
+            divGlobal.onclick = () => { firmware.updateGithub(); };
+            divGlobal.innerHTML = `<svg class="btnSvg" style="width:16px; height:16px; margin:0; fill:var(--txtwarning-color); flex-shrink:0;"><use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)} <span style="color:var(--txtwarning-color); font-weight:bold;">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
+
+            divLocal.className = "error";
+            statusIcon.setAttribute('xlink:href', '#icon-error');
+            statusTitle.innerHTML = "Mise à jour disponible !";
+            statusDesc.innerHTML = `La version ${rel.latest.name} est prête à être installée.`;
         }
         else {
+            divLocal.className = "success";
+            statusIcon.setAttribute('xlink:href', '#icon-info');
+            statusTitle.innerHTML = "Votre système est à jour";
+            statusDesc.innerHTML = "Aucune action n'est requise.";
+
             switch (rel.status) {
                 case 2:
-                    div.style.display = 'flex';
-                    div.style.color = 'var(--txtwarning-color)';
-                    div.innerHTML = tr('FW_PREPARING_UPDATE');
+                    divGlobal.style.display = 'flex';
+                    divGlobal.style.color = 'var(--txtwarning-color)';
+                    divGlobal.innerHTML = tr('FW_PREPARING_UPDATE');
                     break;
                 case 4:
-                    div.style.display = 'flex';
+                    divGlobal.style.display = 'flex';
                     if (rel.error !== 0) {
-                        div.style.color = 'var(--txtwarning-color)';
+                        divGlobal.style.color = 'var(--txtwarning-color)';
                         let e = errors.find(x => x.code === rel.error) || { code: rel.error, desc: tr('ERR_UNSPECIFIED') };
                         let inst = document.getElementById('divGitInstall');
                         if (inst) inst.remove();
                         ui.errorMessage(e.desc);
-                        div.innerHTML = e.desc;
+                        divGlobal.innerHTML = e.desc;
                     } else {
-                        div.innerHTML = tr('FW_UPDATE_DONE');
+                        divGlobal.innerHTML = tr('FW_UPDATE_DONE');
                         ui.waitMessage(document.getElementById('divContainer'));
                     }
                     break;
                 case 5:
-                    div.style.display = 'flex';
-                    div.style.color = 'var(--txtwarning-color)';
-                    div.innerHTML = tr('FW_UPDATE_CANCELING');
+                    divGlobal.style.display = 'flex';
+                    divGlobal.style.color = 'var(--txtwarning-color)';
+                    divGlobal.innerHTML = tr('FW_UPDATE_CANCELING');
                     break;
                 case 6:
-                    div.style.display = 'flex';
-                    div.style.color = 'var(--txtwarning-color)';
-                    div.innerHTML = tr('FW_UPDATE_CANCELED');
+                    divGlobal.style.display = 'flex';
+                    divGlobal.style.color = 'var(--txtwarning-color)';
+                    divGlobal.innerHTML = tr('FW_UPDATE_CANCELED');
                     break;
                 default:
                     break;
@@ -5841,7 +5816,7 @@ class Firmware {
 
                 const isMob = this.isMobile();
                 const infoClass = isMob ? "warning" : "information";
-                const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+                const infoIcon = isMob ? "#icon-warning" : "#icon-info";
                 const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
                 const infoText = isMob ? tr('UPDATE_GIT_NO_AUTO_BACKUP') : tr('UPDATE_GIT_BACKUP_DOWNLOAD_UP');
 
@@ -6011,7 +5986,7 @@ class Firmware {
 
         const isMob = this.isMobile();
         const infoClass = isMob ? "warning" : "information";
-        const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+        const infoIcon = isMob ? "#icon-warning" : "#icon-info";
         const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_FIRMWARE_BACKUP_DOWNLOAD_FIRMWARE');
 
@@ -6053,7 +6028,7 @@ class Firmware {
 
         const isMob = this.isMobile();
         const infoClass = isMob ? "warning" : "information";
-        const infoIcon = isMob ? "#icon-warning" : "#svg-info";
+        const infoIcon = isMob ? "#icon-warning" : "#icon-info";
         const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_LITTLEFS_BACKUP_DOWNLOAD');
 

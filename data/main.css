@@ -2077,7 +2077,6 @@ div.frame-pulses {
 .status-detail {
     font-size: 12px;
     color: var(--soustxt-color);
-    margin-left: 2px;
 }
 /*
 #divUnauthenticated {

@@ -371,19 +371,36 @@
                                 </label>
                             </div>
                         </div>
+                        <div id="divSystemStatus" class="success">
+                            <svg><use id="useStatusIcon" xlink:href="#icon-info"></use></svg>
+                            <div style="text-align:left; flex:1;">
+                                <b id="statusTitle">Votre système est à jour</b>
+                                <span id="statusDesc">Aucune action n'est requise.</span>
+                            </div>
+                        </div>
                         <div class="firmwarblocupdate">
                             <button id="btnUpdateGithub" onclick="firmware.updateGithub();" class="button-update" type="button">
-                                <svg><use xlink:href="#svg-github"></use></svg><span data-lang="BT_UPDATE_GITHUB">Github mise à jour</span>
+                                <svg><use xlink:href="#svg-github"></use></svg>
+                                <div style="display:flex; flex-direction:column; text-align:left;">
+                                    <div  data-lang="BT_UPDATE_GITHUB">Github mise à jour</div>
+                                    <div class="uniStatus">Mise à jour recommandée (Firmware + Application)</div>
+                                </div>
                             </button>
                             <hr>
                             <button id="btnUpdateFirmware" onclick="firmware.updateFirmware();" class="button-update" type="button">
                                 <svg><use xlink:href="#svg-update"></use></svg>
-                                <span data-lang="BT_UPDATE_FIRMWARE">Mise à jour Firmware</span>
+                                <div style="display:flex; flex-direction:column; text-align:left;">
+                                    <div data-lang="BT_UPDATE_FIRMWARE">Mise à jour Firmware</div>
+                                    <div class="uniStatus">Mise à jour locale du cœur du système (.bin)</div>
+                                </div>
                             </button>
                             <hr>
                             <button id="btnUpdateApplication" type="button" onclick="firmware.updateApplication();" class="button-update">
                                 <svg><use xlink:href="#svg-update"></use></svg>
-                                <span data-lang="BT_UPDATE_APP">Mise à jour Application</span>
+                                <div style="display:flex; flex-direction:column; text-align:left;">
+                                    <div data-lang="BT_UPDATE_APP">Mise à jour Application</div>
+                                    <div class="uniStatus">Mise à jour locale de l'interface web uniquement (.bin)</div>
+                                </div>
                             </button>
                             <hr>
                             <button id="btnReloadApplication" type="button" onclick="general.reload();" class="button-update">
@@ -670,7 +687,7 @@
                             </div>
                         </div>
                         <div class="field-group unibloc" style="display: block;">
-                            <svg class="btnSvg" style="color: cornflowerblue; width: 15px; height: 15px; float: left; margin-right: 4px; margin-top: 1px;"><use xlink:href="#svg-info"></use></svg>
+                            <svg class="btnSvg" style="color: cornflowerblue; width: 15px; height: 15px; float: left; margin-right: 4px; margin-top: 1px;"><use xlink:href="#icon-info"></use></svg>
                             <div style="font-size: 0.9em;">
                                 <div data-lang="ADRESSIP_IP_REBOOT_INFO"></div>
                             </div>
@@ -1823,7 +1840,7 @@
         <symbol id="icon-succes" viewBox="0 0 20 20">
             <path fill="currentColor" d="M1 8.25a1.25 1.25 0 1 1 2.5 0v7.5a1.25 1.25 0 1 1-2.5 0zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0 1 14 3c0 .995-.182 1.948-.514 2.826c-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a24 24 0 0 1-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 0 1-1.341-.317l-2.734-1.366A3 3 0 0 0 6.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4 4 0 0 1 2.166-1.73c.432-.143.853-.386 1.011-.814c.16-.432.248-.9.248-1.388" />
         </symbol>
-        <symbol id="svg-info" viewBox="0 0 24 24">
+        <symbol id="icon-info" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
         </symbol>
         <symbol id="icon-warning" viewBox="0 0 24 24">
