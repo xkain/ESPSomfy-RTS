@@ -1554,7 +1554,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.4.8';
+    appVersion = 'v2.4.9';
     reloadApp = false;
     init() {
         if (this.initialized) return;
