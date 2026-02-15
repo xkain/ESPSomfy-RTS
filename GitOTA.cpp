@@ -421,7 +421,7 @@ void GitUpdater::setFirmwareFile() {
 
 bool GitUpdater::beginUpdate(const char *version) {
   Serial.println("Begin update called...");
-  if(strcmp(version, "Main") == 0)  strcpy(this->baseUrl, "https://raw.githubusercontent.com/xkain/ESPSomfy-RTS/master/");
+  if(strcmp(version, "Main") == 0)  strcpy(this->baseUrl, "https://raw.githubusercontent.com/xkain/ESPSomfy-RTS/main/");
   else sprintf(this->baseUrl, "https://github.com/xkain/ESPSomfy-RTS/releases/download/%s/", version);
   
   strcpy(this->targetRelease, version);
