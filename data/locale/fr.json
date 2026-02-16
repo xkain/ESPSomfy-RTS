@@ -63,17 +63,21 @@
     "FIRMWARE_FREE_SUFFIX": "libres",
     "FIRMWARE_ON": "sur",
     "FIRMWARE_USED_AT": "Utilisé à",
-
-
+    "FIRMWARE_UPDATE_AVAILABLE": "Mise à jour disponible !",
+    "FIRMWARE_UPDATE_UPTODATE": "Votre système est à jour",
+    "FIRMWARE_UPDATE_ACTION_DESC": "Aucune action n'est requise",
+    "FIRMWARE_UPDATE_ACTION_DESC2": "La version %1 est prête à être installée",
+    "FIRMWARE_UPDATE_GITHUB": "Github mise à jour",
+    "FIRMWARE_UPDATE_GITHUB_DESC": "Mise à jour recommandée (Firmware + Application)",
+    "FIRMWARE_UPDATE_FIRMWARE": "Mise à jour Firmware",
+    "FIRMWARE_UPDATE_FIRMWARE_DESC": "Mise à jour locale du cœur du système (.bin)",
+    "FIRMWARE_UPDATE_APP": "Mise à jour Application",
+    "FIRMWARE_UPDATE_APP_DESC": "Mise à jour locale de l'interface web uniquement (.bin)",
+    "FIRMWARE_REFRESH_CACHE": "Vider le cache",
     "FIRMWARE_HARDWARE": "Hardware",
     "FIRMWARE_APPLICATION": "Application",
     "FIRMWARE_CREATOR": "Createur",
     "FIRMWARE_UIUX_CONTRIBUTOR": "Contributeur UI/UX",
-
-
-
-
-
 "PAGE": "CONNECTION",
     "CONNECTION_WIFI_NETWORK": "Réseau:",
     "CONNECTION_WIFI_CHANNEL": "Canal:",
@@ -462,10 +466,7 @@
     "BT_SAVE_MQTT": "Sauvegarder paramètres MQTT",
     "BT_SAVE_ETHERNET": "Sauvegarder paramètres Ethernet",
     "BT_SAVE_SECURITY": "Sauvegarder Securité",
-    "BT_UPDATE_GITHUB": "Github mise à jour",
-    "BT_UPDATE_FIRMWARE": "Mise à jour Firmware",
-    "BT_UPDATE_APP": "Mise à jour Application",
-    "BT_REFRESH_CACHE": "Vider le cache",
+
     "BT_RESTORE": "Restorer",
     "BT_SCANFREQUENCY": "Balayer les fréquences",
     "BT_SCAN_WIFI": "Chercher réseau WI-FI",

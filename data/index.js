@@ -806,11 +806,10 @@ async function init() {
     somfy.setStep('deviation', 1);
 
     bindNavigation();
-
     // État initial (Home actif par défaut)
     if (typeof ui !== 'undefined' && !ui.isConfigOpen()) {
         const hBtn = document.querySelector('.nav-item[data-grpid="divHomePnl"]');
-        if (hBtn) syncNavigationState('divHomePnl'); // Utilise la nouvelle fonction de synchro
+        if (hBtn) syncNavigationState('divHomePnl');
     }
 }
 class UIBinder {
@@ -1220,13 +1219,6 @@ class UIBinder {
         const targetSection = document.getElementById(groupId);
         if (targetSection) targetSection.style.display = '';
     }
-
-
-
-
-
-
-
     wizSetPrevStep(el) { this.wizSetStep(el, Math.max(this.wizCurrentStep(el) - 1, 1)); }
     wizSetNextStep(el) { this.wizSetStep(el, this.wizCurrentStep(el) + 1); }
     wizSetStep(el, step) {
@@ -1271,23 +1263,15 @@ class UIBinder {
             case 'Control':
                 return;
         }
-
-        // Si ce n'est pas un chiffre, on bloque
         if (!/^\d$/.test(evt.key)) {
             evt.preventDefault();
             return;
         }
-
-        // Si on tape un chiffre
-        el.value = ''; // On vide pour accepter la nouvelle valeur
-
-        // On attend un micro-instant que le caractère soit écrit pour passer au suivant
+        el.value = '';
         setTimeout(() => {
             if (index < digits.length - 1) {
                 digits[index + 1].focus();
             }
-
-            // --- VERIFICATION FINALE ---
             const pin = digits.map(d => d.value).join('');
             if (pin.length === 4) {
                 console.log("PIN complet détecté, connexion...");
@@ -1295,9 +1279,7 @@ class UIBinder {
             }
         }, 10);
     }
-
     pinDigitFocus(evt) {
-        // Sélectionne le contenu pour permettre d'écraser le chiffre si on clique dessus
         evt.srcElement.select();
     }
     isConfigOpen() { return window.getComputedStyle(document.getElementById('divConfigPnl')).display !== 'none'; }
@@ -1539,7 +1521,7 @@ class Security {
     }
     toggleFieldPassword(fieldId, el) {
         const fld = document.getElementById(fieldId);
-        const ico = el.querySelector('use'); // On trouve l'icône à l'intérieur du div cliqué
+        const ico = el.querySelector('use');
 
         if (fld.type === 'password') {
             fld.type = 'text';
@@ -1740,20 +1722,10 @@ class General {
 
             if (typeof somfy !== 'undefined') somfy.loadSomfy();
 
-
-
             const langSelect = document.getElementById('langSelect');
                 if (langSelect) {
-                    // On crée un tableau ou un objet pour faire le lien entre l'index (0,1,2...) et le code langue
                     const languages =
-                    [
-                        'en',
-                        'fr',
-                        'de',
-                        //'es',
-                        //'it'
-                    ];
-
+                    [ 'en', 'fr', 'de', /*'es', 'it' */ ];
                     langSelect.value = languages[settings.language] || 'en';
                     langSelect.onchange = (e) => {
                         this.onLanguageChanged(e.target.value);
@@ -1776,7 +1748,6 @@ class General {
         });
     }
     loadLogin() {
-
         const savedColor = localStorage.getItem('accentColor');
         if (savedColor) {
             document.documentElement.style.setProperty('--accent-color', savedColor);
@@ -2189,7 +2160,6 @@ class Wifi {
                 }
             }
         }
-
         nets.sort((a, b) => b.strength - a.strength);
 
         let div = "";
@@ -2457,9 +2427,6 @@ class Wifi {
         document.getElementById('spanEthernetSpeed').innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed}Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
     }
 }
-
-
-
 var wifi = new Wifi();
 class Somfy {
     initialized = false;
@@ -3162,7 +3129,6 @@ class Somfy {
             });
         }
     }
-
     checkArrows() {
         const container = document.getElementById('divRoomSelector');
         const btnLeft = document.getElementById('btnScrollLeft');
@@ -3537,7 +3503,6 @@ class Somfy {
 
                 divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}">`;
                 divCfg += `<div class="button-outline-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>`;
-                //divCfg += `<i class="Group-icon" data-position="${Group.position || 0}%"></i>`;
                 divCfg += '<div class="group-name">';
                 divCfg += `<div class="cfg-room">${room.name}</div>`;
                 divCfg += `<div class="">${group.name}</div>`;
@@ -4760,10 +4725,8 @@ class Somfy {
             }
             document.getElementById('divPairing').remove();
         };
-
         document.getElementById('btnStopPairing').addEventListener('click', closePairing);
         document.getElementById('btnOverlayPairingClose').addEventListener('click', closePairing);
-
         let fnRepeatProg = (err, shade) => {
             if (this.btnTimer) {
                 clearTimeout(this.btnTimer);
@@ -4774,12 +4737,10 @@ class Somfy {
                 somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
             }
         }
-
         let btn = document.getElementById('btnSendPairing');
         const onProgClick = (event) => {
             somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
         };
-
         btn.addEventListener('mousedown', onProgClick, true);
         btn.addEventListener('touchstart', onProgClick, true);
 
@@ -5125,7 +5086,6 @@ class Somfy {
         document.getElementById('divContainer').appendChild(div);
         window.scrollTo(0, 0);
         ui.wizSetStep(div, 1);
-
 
         const closeWiz = () => { div.remove(); };
         div.querySelector('#btnStopLinking').onclick = closeWiz;
@@ -5577,7 +5537,6 @@ class Firmware {
             <label class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></label>
             </div>`;
         });
-
         inst.innerHTML = `
         <div id="jsHeadRestore" class="instructions-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
         <div style="text-align:left;">
@@ -5602,7 +5561,6 @@ class Firmware {
 
         document.getElementById('divContainer').appendChild(div);
     }
-
     createFileUploader(service) {
         let div = document.createElement('div');
         div.setAttribute('id', 'divUploadFile');
@@ -5627,7 +5585,7 @@ class Firmware {
         </div>
         <div class="progress-bar" id="progFileUpload" style="--progress:0%; margin-top:10px; display:none;"></div>
         <div class="button-container-col">
-        <button id="btnBackupCfg" class="boutonOutline" type="button" onclick="firmware.backup();" style="margin-bottom:10px;">${tr('BT_SAVE')}</button>
+        <button id="btnBackupCfg" class="boutonOutline" type="button" onclick="firmware.backup();" style="display:none;margin-bottom:10px;">${tr('BT_BACK_UP')}</button>
         <div class="button-container-row" style="gap:10px;">
         <button id="btnUploadFile" class="bouton" type="button" style="flex:1;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
         <button id="btnClose" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
@@ -5672,14 +5630,14 @@ class Firmware {
 
             divLocal.className = "error";
             statusIcon.setAttribute('xlink:href', '#icon-error');
-            statusTitle.innerHTML = "Mise à jour disponible !";
-            statusDesc.innerHTML = `La version ${rel.latest.name} est prête à être installée.`;
+            statusTitle.innerHTML = tr('FIRMWARE_UPDATE_AVAILABLE');
+            statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
         }
         else {
             divLocal.className = "success";
             statusIcon.setAttribute('xlink:href', '#icon-info');
-            statusTitle.innerHTML = "Votre système est à jour";
-            statusDesc.innerHTML = "Aucune action n'est requise.";
+            statusTitle.innerHTML = tr('FIRMWARE_UPDATE_UPTODATE');
+            statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC');
 
             switch (rel.status) {
                 case 2:
