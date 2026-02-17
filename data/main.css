@@ -857,10 +857,10 @@ animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 
         .welcomeCard svg {
             position: absolute;
-            right: -10px;
-            bottom: -10px;
-            width: 70px;
-            height: 70px;
+            right: -15px;
+            bottom: -15px;
+            width: 80px;
+            height: 80px;
             color: var(--accent-color);
             opacity: 0.12;
             transform: rotate(-10deg);
@@ -1435,6 +1435,16 @@ div.wait-overlay > .lds-roller {
     margin: 23px 0;
     padding: 5px;
 }
+#divShadeControls {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8%;
+    width: 100%;
+    justify-content: space-between;
+    max-width: 1006px;
+    margin: 0 auto;
+}
 .somfyShadeCtl {
     height: 170px;
     max-width: 450px;
@@ -1447,16 +1457,12 @@ div.wait-overlay > .lds-roller {
     margin: 25px 0;
     border-radius: 25px;
     overflow: hidden;
-    width: 40%;
+    width: 46%;
     border: 1px solid var(--borderShadeCtl);
     box-shadow: 0 1px 8px 0px var(--shadowShadeCtl);
+    flex-grow: 0;
 }
-#divShadeControls {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8%;
-    width: 100%;
+#divShadeControls:has(> .somfyShadeCtl:last-child:first-child) {
     justify-content: center;
 }
 .shadectl-side-handle {
@@ -1483,7 +1489,6 @@ div.wait-overlay > .lds-roller {
     height: 16px;
     color: var(--soustxt-color);;
 }
-
 .shadectl-right-content {
     flex: 1;
     display: flex;
@@ -1542,17 +1547,19 @@ div.wait-overlay > .lds-roller {
     height: 16px;
 }
 .somfyGroupCtl {
-    height:80px;
-    position:relative;
     display:flex;
+    flex-direction:row;
     vertical-align:middle;
     align-items:center;
-    flex-direction:row;
-    background-color: var(--unibloc-color);
-    margin-top: 25px;
-    border-radius: 25px;
+    position:relative;
+    height:80px;
+    max-width: 964px;
     padding: 8px;
-
+    margin-top: 25px;
+    margin: auto;
+    border-radius: 25px;
+    border: 1px solid var(--borderShadeCtl);
+    background-color: var(--unibloc-color);
 }
     .somfyShadeCtl .shade-icon {
         display: flex;
@@ -1612,6 +1619,7 @@ div.wait-overlay > .lds-roller {
     margin-top:0;
     display: flex;
     align-items: center;
+    gap: 4px;
 }
 
     .somfyGroupCtl .groupctl-buttons .button-outline,
@@ -1828,7 +1836,6 @@ div.wait-overlay > .lds-roller {
     align-items: center;
     gap: 10px;
     width: 100%;
-
 }
 .vr-step80-arrow {
     width: 46px;
@@ -2028,11 +2035,6 @@ div.frame-pulses {
     text-overflow:ellipsis;
     display:none;
 }
-
-
-
-
-
 .chooseAccentColor {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2077,19 +2079,6 @@ div.frame-pulses {
     font-size: 12px;
     color: var(--soustxt-color);
 }
-/*
-#divUnauthenticated {
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-flex-grow: 1;
-width: 70%;
-background: var(--background-color);
-margin: auto;
-}
-*/
-
 #divPinSecurity { justify-content: center; }
 #divPinSecurity label { margin: 20px; }
 #fldPinEntry { margin-top: 20px; }
@@ -2183,6 +2172,9 @@ margin: auto;
     }
 }
 @media screen and (max-width: 1024px) {
+    #divShadeControls {
+        justify-content: center;
+    }
     .somfyShadeCtl {
         width: 100%;
     }
@@ -2327,6 +2319,7 @@ margin: auto;
         display: flex;
         height: 135px;
         width: 100%;
+        max-width: none;
     }
 
     .somfyShadeCtl .shadectl-buttons {
