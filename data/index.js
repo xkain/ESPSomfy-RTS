@@ -5532,10 +5532,10 @@ class Firmware {
         let optionsHtml = '';
         options.forEach(opt => {
             optionsHtml += `
-            <div class="uniRow" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0;">
+            <label class="uniRow" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0;">
             <div class="uniLabel" style="font-size:14px;">${tr(opt.txt)}</div>
-            <label class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></label>
-            </div>`;
+            <div class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></div>
+            </label>`;
         });
         inst.innerHTML = `
         <div id="jsHeadRestore" class="instructions-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
@@ -5597,13 +5597,13 @@ class Firmware {
         return div;
     }
     procMemoryStatus(mem) {
-        let sp;
-        if (sp = document.getElementById('spanFreeMemory'))
-            sp.textContent = (mem.free / 1024).toFixed(2);
-        if (sp = document.getElementById('spanMinMemory'))
-            sp.textContent = (mem.min / 1024).toFixed(2);
-        if (sp = document.getElementById('spanMaxMemory'))
-            sp.textContent = (mem.max / 1024).toFixed(2);
+        console.log(mem);
+        let sp = document.getElementById('spanFreeMemory');
+        if (sp) sp.innerHTML = mem.free.fmt("#,### ");
+        sp = document.getElementById('spanMaxMemory');
+        if (sp) sp.innerHTML = mem.max.fmt('#,### ');
+        sp = document.getElementById('spanMinMemory');
+        if (sp) sp.innerHTML = mem.min.fmt('#,### ');
     }
     procFwStatus(rel) {
         console.log("Status Firmware reçu:", rel);

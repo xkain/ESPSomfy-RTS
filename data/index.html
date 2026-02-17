@@ -27,6 +27,7 @@
 </head>
 <body>
     <header class="top-bar">
+        <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
         <div class="top-bar-left">
             <svg width="100" height="100"><use xlink:href="#icon-logo"></use></svg>
             <span class="site-title">ESPSomfy-RTS</span>
@@ -117,7 +118,7 @@
     </aside>
     <div id="divContainer" class="container" data-auth="false">
         <div id="divAuthenticated" style="display:none;">
-            <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
+
             <div class="header">
                 <div class="header-left">
                     <div id="showLogoHeader" class="headerIdentity" >
@@ -159,12 +160,12 @@
                             <hr>
                             <div class="field-group">
                                 <label class="label" for="selTimeZone" data-lang="GENERAL_TIMEZONE">Fuseau horaire</label>
-                                <select id="selTimeZone" class="inputAndSelect" name="timeZone" data-bind="general.posixZone" style="width:100%;"></select>
+                                <select id="selTimeZone" class="inputAndSelect" name="timeZone" data-bind="general.posixZone"></select>
                             </div>
                             <hr>
                             <div class="field-group">
-                                <label class="label" data-lang="GENERAL_LANGUAGE">Langue</label>
-                                <select id="langSelect" class="inputAndSelect" onchange="general.onLanguageChanged(this.value)" style="width:100%;">
+                                <label class="label" for="langSelect" data-lang="GENERAL_LANGUAGE">Langue</label>
+                                <select id="langSelect" class="inputAndSelect" onchange="general.onLanguageChanged(this.value)">
                                     <option value="en" data-lang="GENERAL_OPT_EN">English</option>
                                     <option value="fr" data-lang="GENERAL_OPT_FR">Français</option>
                                     <option value="de" data-lang="GENERAL_OPT_DE">Deutsch</option>
@@ -177,37 +178,36 @@
                             </div>
                         </div>
                         <div class="field-group unibloc">
-                            <div class="uniRow">
+                            <label class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="GENERAL_UPNP">Diffusion uPnP (SSDP)</div>
                                     <div class="uniStatus" data-lang="GENERAL_UPNP_DESC">Diffuse les annonces de service sur le réseau pour permettre la détection automatique de l'appareil par vos autres équipements</div>
                                 </div>
-                                <label class="uniRight">
+                                <div class="uniRight">
                                     <span class="switch">
                                         <input id="cbSsdpBroadcast" name="ssdpBroadcast" type="checkbox" data-bind="general.ssdpBroadcast">
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                             <hr>
-                            <div class="uniRow">
+                            <label class="uniRow" for="cbCheckForUpdate">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="GENERAL_UPDATES">Mises à jour</div>
-                                    <div class="uniStatus" data-lang="GENERAL_UPDATES_DESC">La vérification sera automatique
+                                    <div class="uniStatus" data-lang="GENERAL_UPDATES_DESC">La vérification sera automatique</div>
                                 </div>
-                                </div>
-                                <label class="uniRight">
+                                <div class="uniRight">
                                     <span class="switch">
                                         <input id="cbCheckForUpdate" type="checkbox" data-bind="general.checkForUpdate">
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                         </div>
                         <div class="field-group unibloc">
                             <div class="field-group">
                                 <label class="label" data-lang="GENERAL_DISPLAY_MODE">Mode d'affichage</label>
-                                <select id="selThemeMode" class="inputAndSelect" data-bind="general.type" onchange="general.onModeThemeChanged();" data-datatype="int" style="width:100%;">
+                                <select id="selThemeMode" class="inputAndSelect" data-bind="general.type" onchange="general.onModeThemeChanged();" data-datatype="int">
                                     <option value="0" selected data-lang="GENERAL_OPT_THEME_AUTO">Dépend du navigateur</option>
                                     <option value="1" data-lang="GENERAL_OPT_THEME_DARK">Mode sombre</option>
                                     <option value="2" data-lang="GENERAL_OPT_THEME_LIGHT">Mode clair</option>
@@ -237,7 +237,7 @@
                         <div class="field-group unibloc">
                             <div class="field-group" style="display:inline-block;vertical-align:middle;">
                                 <label class="label" for="fldPinEntry" data-lang="SECURITY_TYPE">Type de Sécurité</label>
-                                <select class="inputAndSelect" data-bind="security.type" onchange="general.onSecurityTypeChanged();" data-datatype="int" style="width:100%;">
+                                <select class="inputAndSelect" data-bind="security.type" onchange="general.onSecurityTypeChanged();" data-datatype="int">
                                     <option value="0" selected data-lang="NONE">Aucun</option>
                                     <option value="1" data-lang="SECURITY_PIN_CODE">Code Pin</option>
                                     <option value="2" data-lang="SECURITY_PASSWORD">Mot de passe</option>
@@ -245,18 +245,18 @@
                             </div>
                             <div id="divPermissions" class="field-group" style="display:none;vertical-align:middle;width:auto;">
                                 <hr>
-                                <div class="uniRow">
+                                <label class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="SECURITY_SECURE_CONFIG_ONLY">Configuration sécurisée uniquement</div>
                                         <div class="uniStatus" data-lang="SECURITY_SECURE_CONFIG_DESC">Limite les modifications de paramètres aux connexions sécurisées uniquement afin d'empêcher les changements non autorisés</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbSecureConfigOnly" name="hardwired" type="checkbox" data-bind="security.permissions.configOnly" style="display:inline-block;" />
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                            </div>
                         </div>
                         <div id="divPinSecurity" style="display:none;">
@@ -494,69 +494,69 @@
 
                         <div class="field-group unibloc">
                             <div id="divHiddenSSID">
-                                <div class="uniRow" style="display:flex;">
+                                <label class="uniRow" style="display:flex;">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_HIDDEN_SSID">Réseau Wi-Fi caché</div>
                                         <div class="uniStatus" data-lang="CONNECTION_HIDDEN_SSID_DESC">Permet de se connecter à un réseau qui ne diffuse pas son nom</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbHiddenSSID" type="checkbox" data-bind="wifi.hidden" style="display:inline-block;" onclick="wifi.hiddenSSIDClicked();">
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                                 <hr>
                             </div>
                             <div id="divRoaming">
-                                <div class="uniRow" style="display:flex;">
+                                <label class="uniRow" style="display:flex;">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_ROAMING">Activer Itinérance</div>
                                         <div class="uniStatus" data-lang="CONNECTION_ROAMING_DESC">Cible toujours la borne Wi-Fi la plus proche</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbRoaming" type="checkbox" name="roaming" data-bind="wifi.roaming" style="display:inline-block;" onclick="wifi.hiddenSSIDClicked();">
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                                 <hr>
                             </div>
                             <div id="divHardwired">
-                                <div class="uniRow">
+                                <label class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_ETHERNET">Connexion Ethernet</div>
                                         <div class="uniStatus" data-lang="CONNECTION_ETHERNET_DESC">Utilise le câble Ethernet à la place du Wi-Fi</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbHardwired" name="hardwired" type="checkbox" data-bind="ethernet.hardwired" onclick="wifi.useEthernetClicked();">
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                                 <hr id="hrIdName">
                             </div>
                             <div id="divFallbackWireless">
-                                <div class="uniRow" style="display:flex;">
+                                <label class="uniRow" style="display:flex;">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_WIFI_FALLBACK">Secours Wi-Fi</div>
                                         <div class="uniStatus" data-lang="CONNECTION_WIFI_FALLBACK_DESC">Bascule sur le Wi-Fi en cas de panne Ethernet</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbFallbackWireless" name="fallbackwireless" type="checkbox" data-bind="ethernet.wirelessFallback" style="display:inline-block;">
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                                 <hr>
                             </div>
                             <div id="divTypeCardMode" class="field-group">
                                 <div class="field-group">
                                     <label class="label" for="selETHBoardType" data-lang="CONNECTION_ETH_BOARD_TYPE">Type de carte</label>
-                                    <select id="selETHBoardType" class="inputAndSelect" name="ethBoardType" placeholder="Type de carte" data-datatype="int" data-bind="ethernet.boardType" style="width:100%;" onchange="wifi.onETHBoardTypeChanged(this);"></select>
+                                    <select id="selETHBoardType" class="inputAndSelect" name="ethBoardType" placeholder="Type de carte" data-datatype="int" data-bind="ethernet.boardType" onchange="wifi.onETHBoardTypeChanged(this);"></select>
                                 </div>
                             </div>
                         </div>
@@ -591,32 +591,32 @@
                                 <div class="field-group unibloc">
                                     <div class="field-group">
                                         <label class="label" for="selETHPhyType" data-lang="CONNECTION_ETH_PHY_TYPE">Type de puce PHY</label>
-                                        <select id="selETHPhyType" class="inputAndSelect" name="ethphytype" placeholder="PHY Type" data-datatype="int" data-bind="ethernet.phyType" style="width:100%;"></select>
+                                        <select id="selETHPhyType" class="inputAndSelect" name="ethphytype" placeholder="PHY Type" data-datatype="int" data-bind="ethernet.phyType"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selETHAddress" data-lang="ETH_SETTINGS_PHY_ADDRESS">Adresse</label>
-                                        <select id="selETHAddress" class="inputAndSelect" name="address"  placeholder="Adresse" data-datatype="int" data-bind="ethernet.phyAddress" style="width:100%;"></select>
+                                        <select id="selETHAddress" class="inputAndSelect" name="address"  placeholder="Adresse" data-datatype="int" data-bind="ethernet.phyAddress"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selETHClkMode" data-lang="CONNECTION_ETH_CLK_MODE">Mode Clock </label>
-                                        <select id="selETHClkMode" class="inputAndSelect" name="clkmode"  placeholder="Mode Clock" data-datatype="int" data-bind="ethernet.CLKMode" style="width:100%;"></select>
+                                        <select id="selETHClkMode" class="inputAndSelect" name="clkmode"  placeholder="Mode Clock" data-datatype="int" data-bind="ethernet.CLKMode"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selETHPWRPin" data-lang="CONNECTION_ETH_PWR_PIN">Pin Alimentation</label>
-                                        <select id="selETHPWRPin" class="inputAndSelect" name="pwr"  placeholder="Pin Alimentation" data-datatype="int" data-bind="ethernet.PWRPin" style="width:100%;"></select>
+                                        <select id="selETHPWRPin" class="inputAndSelect" name="pwr"  placeholder="Pin Alimentation" data-datatype="int" data-bind="ethernet.PWRPin"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selETHPMDCPin" data-lang="CONNECTION_ETH_MDC_PIN">Pin MDC</label>
-                                        <select id="selETHMDCPin" class="inputAndSelect" name="mdc"  placeholder="Pin MDC" data-datatype="int" data-bind="ethernet.MDCPin" style="width:100%;"></select>
+                                        <select id="selETHMDCPin" class="inputAndSelect" name="mdc"  placeholder="Pin MDC" data-datatype="int" data-bind="ethernet.MDCPin"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selETHMDIOPin" data-lang="CONNECTION_ETH_MDIO_PIN">Pin MDIO</label>
-                                        <select id="selETHMDIOPin" class="inputAndSelect" name="mdio"  placeholder="Pin MDIO" data-datatype="int" data-bind="ethernet.MDIOPin" style="width:100%;"></select>
+                                        <select id="selETHMDIOPin" class="inputAndSelect" name="mdio"  placeholder="Pin MDIO" data-datatype="int" data-bind="ethernet.MDIOPin"></select>
                                     </div>
                                 </div>
                             </div>
@@ -645,18 +645,18 @@
 
 
 
-                            <div class="uniRow" style="display:flex;">
+                            <label class="uniRow" style="display:flex;">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="ADRESSIP_DHCP">DHCP</div>
                                     <div class="uniStatus" data-lang="ADRESSIP_DHCP_DESC">Obtenir automatiquement une adresse IP (DHCP)</div>
                                 </div>
-                                <label class="uniRight">
+                                <div class="uniRight">
                                     <span class="switch">
                                         <input id="cbRoaming" type="checkbox" name="dhcp" data-bind="ip.dhcp" style="display:inline-block;" onclick="wifi.onDHCPClicked(this);"/>
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                         </div>
                         <div id="divStaticIP" style="display:none;margin-top: 15px;">
                             <div class="field-group unibloc">
@@ -704,41 +704,41 @@
                     </div>
                     <div id="divMQTT" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
-                            <div class="uniRow">
+                            <label class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="MQTT_ENABLE">Activer le client MQTT</div>
                                     <div class="uniStatus" data-lang="MQTT_ENABLE_DESC">Active la communication avec votre serveur (broker) MQTT</div>
                                 </div>
-                                <label class="MqttEnabled-switch">
+                                <div class="MqttEnabled-switch">
                                     <span class="switch">
                                         <input id="cbMqttEnabled" type="checkbox" name="mqtt-enabled" data-bind="mqtt.enabled" style="display:inline-block;"/>
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                             <hr>
-                            <div class="uniRow" style="display:flex;">
+                            <label class="uniRow" style="display:flex;">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="MQTT_PUB_DISCOVERY">Publier découverte</div>
                                     <div class="uniStatus" data-lang="MQTT_PUB_DISCOVERY_DESC">Envoie les paramètres pour une configuration automatique dans votre système</div>
                                 </div>
-                                <label class="uniRight">
+                                <div class="uniRight">
                                     <span class="switch">
                                         <input id="cbPubDisco" type="checkbox" name="pub-disco" data-bind="mqtt.pubDisco" style="display:inline-block;" onclick="document.getElementById('divDiscoveryTopic').style.display = this.checked ? '' : 'none'; document.getElementById('hrIdDiscoveryTopic').style.display = this.checked ? '' : 'none';"/>
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                         </div>
                         <div class="input-mqtt" style="white-space:nowrap;">
-                            <select class="select" name="mqtt-protocol" data-bind="mqtt.protocol" style="width:72px;">
+                            <select class="mqttSelect" name="mqtt-protocol" data-bind="mqtt.protocol" style="width:72px;">
                                 <option data-lang="MQTT">MQTT</option>
                                 <option data-lang="MQTT_OPT_MQTTS">MQTTS</option>
                             </select>
                             <span>://</span>
-                            <input class="select" name="mqtt-host" type="text" length=64 placeholder="Host" data-bind="mqtt.hostname" style="width:calc(100% - 164px);">
+                            <input class="mqttSelect" name="mqtt-host" type="text" length=64 placeholder="Host" data-bind="mqtt.hostname" style="width:calc(100% - 164px);">
                             <span>:</span>
-                            <input class="select" name="mqtt-port" type="text" length=5 placeholder="Port" data-bind="mqtt.port" data-datatype="int" style="width:55px;">
+                            <input class="mqttSelect" name="mqtt-port" type="text" length=5 placeholder="Port" data-bind="mqtt.port" data-datatype="int" style="width:55px;">
                         </div>
                         <div class="field-group unibloc">
                             <div class="field-group">
@@ -844,12 +844,12 @@
                                     <hr>
                                     <div class="field-group" style="padding:0px;">
                                         <label class="label" for="selShadeRoom" data-lang="ROOM">Pièce</label>
-                                        <select id="selShadeRoom" class="inputAndSelect"  data-bind="roomId" data-datatype="int" style="width:100%;"></select>
+                                        <select id="selShadeRoom" class="inputAndSelect"  data-bind="roomId" data-datatype="int"></select>
                                     </div>
                                     <hr>
                                     <div class="field-group">
                                         <label class="label" for="selShadeType" data-lang="SHADE_TYPE">Type</label>
-                                        <select id="selShadeType" class="inputAndSelect" name="shadeType" data-bind="shadeType" data-datatype="int" style="width:100%;" onchange="somfy.onShadeTypeChanged(this);">
+                                        <select id="selShadeType" class="inputAndSelect" name="shadeType" data-bind="shadeType" data-datatype="int" onchange="somfy.onShadeTypeChanged(this);">
                                             <option value="0" data-lang="SHADE_ROLLER">Store enrouleur</option>
                                             <option value="4" data-lang="SHADE_SHUTTER">Volet</option>
                                             <option value="1" data-lang="SHADE_BLIND">Store</option>
@@ -873,7 +873,7 @@
                                 <div class="field-group unibloc">
                                     <div class="field-group">
                                         <label class="label" for="selShadeProto" data-lang="PROTOCOL">Protocole</label>
-                                        <select class="inputAndSelect" id="selShadeProto" name="proto" data-bind="proto" data-datatype="int" style="width:100%;" onchange="somfy.onShadeProtoChanged(this);">
+                                        <select class="inputAndSelect" id="selShadeProto" name="proto" data-bind="proto" data-datatype="int" onchange="somfy.onShadeProtoChanged(this);">
                                             <option value="0" data-lang="RTS">RTS</option>
                                             <option value="1" data-lang="RTW">RTW</option>
                                             <option value="2" data-lang="RTV">RTV</option>
@@ -945,7 +945,7 @@
                                     <div class="field-group">
                                         <div id="divShadeAddress" class="field-group">
                                             <label class="label" for="fldShadeAddress" data-lang="REMOTE_ID">ID Télécommande</label>
-                                            <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 data-lang="ADRESS" placeholder="Address" style="width:100%;">
+                                            <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 data-lang="ADRESS" placeholder="Address">
                                         </div>
                                     </div>
                                 </div>
@@ -953,19 +953,19 @@
                                 <div id="divLiftSettings">
                                     <div class="field-group" style="display:inline-block;">
                                         <label class="label" for="fldShadeUpTime" data-lang="SHADE_UP_TIME">Temps montée (ms)</label>
-                                        <input id="fldShadeUpTime" class="inputAndSelect" name="shadeUpTime" data-bind="upTime" data-datatype="int" type="number" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds" style="width:100%;" />
+                                        <input id="fldShadeUpTime" class="inputAndSelect" name="shadeUpTime" data-bind="upTime" data-datatype="int" type="number" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds"/>
                                     </div>
                                     <hr>
                                     <div class="field-group" style="display:inline-block;">
                                         <label class="label" for="fldShadeDownTime" data-lang="SHADE_DOWN_TIME">Temps descente (ms)</label>
-                                        <input id="fldShadeDownTime" class="inputAndSelect" name="shadeDownTime" type="number" data-bind="downTime" data-datatype="int" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds" style="width:100%;" />
+                                        <input id="fldShadeDownTime" class="inputAndSelect" name="shadeDownTime" type="number" data-bind="downTime" data-datatype="int" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds"/>
                                     </div>
                                 </div>
                                 <div id="divTiltSettings" style="display:none;">
                                 <hr id="hrTiltSettings">
                                     <div class="field-group" style="display:inline-block;vertical-align:middle;">
                                         <label class="label" for="selTiltType" style="cursor:pointer;" data-lang="SHADE_TILT_TYPE">Type d’inclinaison</label>
-                                        <select id="selTiltType" class="inputAndSelect" name="tiltType" data-bind="tiltType" data-datatype="int" style="width:100%;" onchange="somfy.onShadeTypeChanged(this);">
+                                        <select id="selTiltType" class="inputAndSelect" name="tiltType" data-bind="tiltType" data-datatype="int" onchange="somfy.onShadeTypeChanged(this);">
                                             <option value="0" data-lang="NONE">Aucun</option>
                                             <option value="1" data-lang="SHADE_OPT_TILT_MOTOR">Moteur inclinaison</option>
                                             <option value="2" data-lang="SHADE_OPT_INTEGRATED">Intégré</option>
@@ -976,7 +976,7 @@
                                     <hr>
                                     <div class="field-group" style="display:inline-block;vertical-align:middle;">
                                         <label class="label" for="fldTiltTime" data-lang="SHADE_TILT_TIME">Temps inclinaison (ms)</label>
-                                        <input id="fldTiltTime" class="inputAndSelect" name="shadeTiltTime" type="number" data-bind="tiltTime" data-datatype="int" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds" style="width:100%;" />
+                                        <input id="fldTiltTime" class="inputAndSelect" name="shadeTiltTime" type="number" data-bind="tiltTime" data-datatype="int" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds" />
                                     </div>
                                 </div>
                                 <div id="divStepSettings">
@@ -994,97 +994,97 @@
                             </div>
                             <div class="field-group unibloc">
                                 <div id="divLLTrigger">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="SHADE_LL_TRIGGER">Déclenchement niveau bas</div>
                                             <div class="uniStatus" data-lang="SHADE_LL_TRIGGER_DESC">Pour utilisation des protocoles GP_*</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbLLTrigger" name="hasLLTrigger" type="checkbox" data-bind="gpioLLTrigger" style="display:inline-block;"/>
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                     <hr>
                                 </div>
                                 <div id="divSunSensor">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="SHADE_SUN_SENSOR">Capteur solaire</div>
                                             <div class="uniStatus" data-lang="SHADE_SUN_SENSOR_DESC">Active le capteur solaire du moteur</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbHasSunsensor" name="hasSunSensor" type="checkbox" data-bind="sunSensor" style="display:inline-block;" onclick="wifi.useEthernetClicked();" />
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                     <hr>
                                 </div>
                                 <div id="divLightSwitch">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="SHADE_LIGHT_SENSOR">Capteur lumière</div>
                                             <div class="uniStatus" data-lang="SHADE_LIGHT_SENSOR_DESC">Active le capteur lumière du moteur</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbHasLight" name="hasLight" type="checkbox" data-bind="light" style="display:inline-block;"/>
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                     <hr>
                                 </div>
                                 <div id="divFlipCommands">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="RADIO_COMMAND">Commandes</div>
                                             <div class="uniStatus" data-lang="FLIP_COMMAND_DESC">Inverse la direction des commandes</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbFlipCommands" name="flipCommands" type="checkbox" data-bind="flipCommands" style="display:inline-block;"/>
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                     <hr>
                                 </div>
 
 
                                 <div id="divFlipPosition">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="SHADE_POSITION">Position</div>
                                             <div class="uniStatus" data-lang="SHADE_POSITION_DESC">Inverser la position (en % d’ouverture)</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbFlipPosition" name="flipPos" type="checkbox" data-bind="flipPosition" style="display:inline-block;"/>
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                     <hr>
                                 </div>
 
 
                                 <div id="divSimMy">
-                                    <div class="uniRow">
+                                    <label class="uniRow">
                                         <div class="uniText">
                                             <div class="uniLabel" data-lang="SHADE_FAVORITE_POSITION">Favoris</div>
                                             <div class="uniStatus" data-lang="SHADE_FAVORITE_POSITION_DESC">Simule la position favorite</div>
                                         </div>
-                                        <label class="uniRight">
+                                        <div class="uniRight">
                                             <span class="switch">
                                                 <input id="cbSimMy" name="simMy" type="checkbox" data-bind="simMy" style="display:inline-block;" onclick="wifi.useEthernetClicked();" />
                                                 <div></div>
                                             </span>
-                                        </label>
-                                    </div>
+                                        </div>
+                                    </label>
                                 </div>
                                 <hr>
                                 <div classs="field-group">
@@ -1219,18 +1219,18 @@
                                 </div>
                             </div>
                             <div class="field-group unibloc">
-                                <div id="divFlipGrpCommands" class="uniRow">
+                                <label id="divFlipGrpCommands" class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="RADIO_COMMAND">Inverser Commandes</div>
                                         <div class="uniStatus" data-lang="FLIP_COMMAND_DESC">Inverse la direction des commandes</div>
                                     </div>
-                                    <label class="uniRight">
+                                    <div class="uniRight">
                                         <span class="switch">
                                             <input id="cbFlipGrpCommands" name="flipCommands" type="checkbox" data-bind="flipCommands" style="display:inline-block;"/>
                                             <div></div>
                                         </span>
-                                    </label>
-                                </div>
+                                    </div>
+                                </label>
                                 <hr>
                                 <div class="field-group">
                                     <label class="label" for="selRepeatCommnds" style="cursor:pointer;" data-lang="REPEAT_COMMANDS">Répéter Commandes</label>
@@ -1381,23 +1381,23 @@
                     </div>
                     <div id="divTransceiverSettings" class="subtab-content">
                         <div id="divRadioEnableColor" class="field-group unibloc">
-                            <div class="uniRow">
+                            <label class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="TAB_RADIO">Radio</div>
                                     <div id="divRadioEnableStatus" class="uniStatus">La radio est désactivée</div>
                                 </div>
-                                <label class="uniRight">
+                                <div class="uniRight">
                                     <span class="switch">
                                         <input id="cbEnableRadio" name="enableRadio" type="checkbox" data-bind="transceiver.config.enabled">
                                         <div></div>
                                     </span>
-                                </label>
-                            </div>
+                                </div>
+                            </label>
                         </div>
                         <div class="field-group unibloc">
                             <div class="field-group" style="display:inline-block;">
                                 <label class="label" for="selRadioProto" data-lang="PROTOCOL">Protocole</label>
-                                <select id="selRadioProto" class="inputAndSelect" name="radioType" data-bind="transceiver.config.proto" data-datatype="int" style="width:100%;">
+                                <select id="selRadioProto" class="inputAndSelect" name="radioType" data-bind="transceiver.config.proto" data-datatype="int">
                                     <option value="0" data-lang="RTS">RTS</option>
                                     <option value="1" data-lang="RTW">RTW</option>
                                     <option value="2" data-lang="RTV">RTV</option>
@@ -1406,7 +1406,7 @@
                             <hr>
                             <div class="field-group" style="display:inline-block;">
                                 <label class="label" for="selRadioType" data-lang="BIT">Bits</label>
-                                <select id="selRadioType" class="inputAndSelect" name="radioType" data-bind="transceiver.config.type" data-datatype="int" style="width:100%;">
+                                <select id="selRadioType" class="inputAndSelect" name="radioType" data-bind="transceiver.config.type" data-datatype="int">
                                     <option value="56" data-lang="56BIT">56-BIT</option>
                                     <option value="80" data-lang="80BIT">80-BIT</option>
                                 </select>
