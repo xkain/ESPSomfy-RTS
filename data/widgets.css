@@ -125,7 +125,7 @@
     opacity: 0.9;
     font-size: 12px;
     line-height: 1.5;
-    display: block;
+    display: inline-block;
     margin-top: 4px;
 }
 .warning b,

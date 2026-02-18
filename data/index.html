@@ -571,13 +571,10 @@
                                         <input id="fldSsid" class="inputAndSelect" name="ssid" type="text" data-bind="wifi.ssid" length=32 data-lang="CONNECTION_WIFI_ENTER_SSID" placeholder="Entrer votre SSID">
                                     </div>
                                     <hr>
-
-
                                     <div class="field-group">
                                         <label class="label" for="fldPassphrase" data-lang="SECURITY_PASSWORD">Mot de passe</label>
                                         <div class="LoginPassword-input password-container">
                                             <input id="fldPassphrase" class="inputAndSelect" name="passphrase" type="password" data-bind="wifi.passphrase" length=32 DATA-lang="SECURITY_PASSWORD_PLH" placeholder="Entrer votre Mot de passe">
-
                                             <div class="password-eye" onclick="security.toggleFieldPassword('fldPassphrase', this)">
                                                 <svg class="pwd-icon pwd-iconeye"><use id="wifiEyeIcon" href="#icon-eyeOff"></use></svg>
                                             </div>
@@ -585,6 +582,18 @@
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                        <div class="information">
+                            <svg><use id="useStatusIcon" xlink:href="#icon-info"></use></svg>
+                            <div style="text-align:left; flex:1;">
+                                <b data-lang="MSG_INFO"></b>
+                                <span style="display:block;">
+                                    <span data-lang="CONNECTION_AFTER_HOTSPOT_1"></span><span class="instructionsTxt-badge">http://192.168.4.1</span><span data-lang="CONNECTION_AFTER_HOTSPOT_2"></span>
+                                </span>
+                                <span style="margin-top:0;">
+                                    <span data-lang="CONNECTION_ACCESS_METHODS_1" ></span><span class="instructionsTxt-badge">http://espsomfyrts.local</span><span data-lang="CONNECTION_ACCESS_METHODS_2"></span><span class="instructionsTxt-badge">http://192.168.1.XX</span>
+                                </span>
+                            </div>
                         </div>
                         <div id="divEthernetMode" style="display:none;">
                             <div id="divETHSettings">
@@ -1641,7 +1650,7 @@
                     </div>
                 </div>
                 <div id="divGroupControls" style="padding: 0 10px;"></div>
-                <div id="divShadeControls" style="min-height:130px;padding: 20px;"></div>
+                <div id="divShadeControls" style="padding: 20px;"></div>
                 <div id="divNoDevice" class="empty-state-container" style="display:none;">
                     <svg class="icon-svg"><use xlink:href="#svg-placeholder"></use></svg>
                     <p data-lang="NO_DEVICE">Aucun appareil dans cette pièce</p>

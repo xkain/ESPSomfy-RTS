@@ -6,7 +6,6 @@
 
 
 
-
 :root[data-theme="light"] {
     --body-color: #fff;
     --color: #000000;
@@ -303,7 +302,10 @@ html, body {
     font-size: 0.9em;
     opacity: 0.7;
 }
-* {box-sizing: border-box;}
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
 svg, svg * {pointer-events: none;}
 
@@ -2315,11 +2317,10 @@ div.frame-pulses {
     }
 
     .somfyShadeCtl {
-        min-height: 130px;
-        display: flex;
-        height: 135px;
-        width: 100%;
+        width: 76%;
+        height: 140px;
         max-width: none;
+        margin: 6px auto;
     }
 
     .somfyShadeCtl .shadectl-buttons {
@@ -2366,6 +2367,9 @@ div.frame-pulses {
     }
     .minMax550{
         display: inline-block !important;
+    }
+    .somfyShadeCtl {
+        width: 100%;
     }
 }
 @media screen and (max-width: 480px) {

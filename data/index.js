@@ -5599,11 +5599,11 @@ class Firmware {
     procMemoryStatus(mem) {
         console.log(mem);
         let sp = document.getElementById('spanFreeMemory');
-        if (sp) sp.innerHTML = mem.free.fmt("#,### ");
+        if (sp) sp.innerHTML = mem.free.fmt("#,##0 ");
         sp = document.getElementById('spanMaxMemory');
-        if (sp) sp.innerHTML = mem.max.fmt('#,### ');
+        if (sp) sp.innerHTML = mem.max.fmt('#,##0 ');
         sp = document.getElementById('spanMinMemory');
-        if (sp) sp.innerHTML = mem.min.fmt('#,### ');
+        if (sp) sp.innerHTML = mem.min.fmt('#,##0 ');
     }
     procFwStatus(rel) {
         console.log("Status Firmware reçu:", rel);
