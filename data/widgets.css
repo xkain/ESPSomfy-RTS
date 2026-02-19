@@ -559,7 +559,7 @@ span.ssid {
 #stepButtons > .step-btn.active,
 #stepButtonsRx > .step-btn.active,
 #stepButtonsDeviation > .step-btn.active {
-    background-color: var(--background-color);
+    background-color: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
 }
 .sticky-bottom-buttons {
     margin-top: auto;

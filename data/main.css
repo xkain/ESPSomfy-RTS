@@ -3,9 +3,6 @@
     --shade-color: #F8A525;
     --accent-color: #F8A525;
 }
-
-
-
 :root[data-theme="light"] {
     --body-color: #fff;
     --color: #000000;
@@ -37,7 +34,7 @@
     --borderShadeCtl: #999;
     --shadowShadeCtl: rgba(125, 125, 125, 0.6);
 
-
+    --help: #c3c3c3;
     --wait-overlay : rgba(236, 236, 236, 0.3);
     --border: #bbc5d1;
 }
@@ -72,6 +69,7 @@
     --borderShadeCtl: #333;
     --shadowShadeCtl: rgba(0, 0, 0, 0.6);
 
+    --help: #474747;
     --wait-overlay : rgba(2, 2, 2, 0.0);
     --border: #333;
 }
@@ -263,7 +261,6 @@ html, body {
         transition: color 0.2s;
         cursor: pointer;
     }
-
     .sub-nav-item:hover, .sub-nav-item.active {
         color: var(--accent-color, #f8a525);
     }
@@ -273,11 +270,9 @@ html, body {
         display: flex;
         justify-content: center;
     }
-
 .tab-container {
     display: none;
 }
-
 #divConfigPnl {
     max-width: 900px;
     margin: auto;
@@ -560,13 +555,9 @@ label.uniRow {
     display: flex;
     color: var(--color);
 }
-
-
-
 *::placeholder {
     opacity: .5;
 }
-
 input[type=password],
 input[type=number],
 input[type=text] {
@@ -734,7 +725,7 @@ button:active {
     justify-content: left;
     gap: 5px;
     width: 100%;
-    padding: 10px;
+    padding: 5px 10px;
     cursor: pointer;
     border: none;
     background: none;
@@ -762,6 +753,48 @@ button:active {
         width: 20px;
         height: 20px;
         fill: currentColor;
+    }
+.help-container {
+    position: relative;
+    display: inline-block;
+}
+    .help-container svg {
+        width:24px;
+        height:24px;
+        cursor:help;
+        vertical-align:middle;
+        color: var(--help);
+        transition: color 0.5s ease;
+    }
+    .help-container:hover svg {
+        color: var(--accent-color) !important;
+    }
+.tooltip-text {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-10%);
+    width: 290px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 0.8em;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+    border: 1px solid var(--borderShadeCtl);
+}
+    .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 10%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
     }
 /***welcome */
 #divGetStarted {
@@ -1102,6 +1135,7 @@ div.socket-error {
         font-weight: bold;
         color: var(--color);
         font-style: italic;
+        margin-right: 5px;
     }
 
 

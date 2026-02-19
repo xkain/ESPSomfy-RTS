@@ -2520,16 +2520,25 @@ class Somfy {
         else if (val === 1) {
             targetPins = { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 };
         }
-        if (targetPins) {
-            const map = { SCKPin: 'SCLK:', CSNPin: 'CSN:', MOSIPin: 'MOSI:', MISOPin: 'MISO:', TXPin: 'TX:', RXPin: 'RX:' };
-            let infoArray = [];
 
-            for (const [key, label] of Object.entries(map)) {
-                const pinVal = targetPins[key];
-                document.getElementById(`selTrans${key}`).value = pinVal;
-                infoArray.push(`<span style="color: #888;">${label}</span> <span style="color: var(--accent-color); font-weight: bold;">${pinVal}</span>`);
-            }
-            divSummary.innerHTML = `<div style="font-size: 0.8em; text-align: left; padding: 5px 0;">${infoArray.join(' | ')}</div>`;
+        if (targetPins) {
+            const group1 = { SCKPin: 'SCLK:', CSNPin: 'CSN:', MOSIPin: 'MOSI:' };
+            const group2 = { MISOPin: 'MISO:', TXPin: 'TX:', RXPin: 'RX:' };
+            const createGroupHtml = (obj) => {
+                let parts = [];
+                for (const [key, label] of Object.entries(obj)) {
+                    const pinVal = targetPins[key];
+                    document.getElementById(`selTrans${key}`).value = pinVal;
+                    parts.push(`<span style="white-space: nowrap;"><span style="color:var(--soustxt-color);">${label}</span> <span style="color:var(--accent-color);font-weight:bold;">GPIO${pinVal}</span></span>`);
+                }
+                return parts.join(' | ');
+            };
+            divSummary.innerHTML = `
+            <div style="display:flex;flex-wrap:wrap;gap:7px;font-size:0.8em;text-align:left;">
+            <div>${createGroupHtml(group1)}</div>
+            <div>${createGroupHtml(group2)}</div>
+            </div>`;
+
             divSummary.style.display = 'block';
             divShowGpio.style.display = 'none';
         }
@@ -2906,6 +2915,20 @@ class Somfy {
             container.querySelectorAll(".step-btn").forEach(btn => btn.classList.remove("active"));
             const activeBtn = container.querySelector(`.step-btn[onclick*="${stepValue}"]`);
             if (activeBtn) activeBtn.classList.add("active");
+        }
+    }
+    toggleTooltip(el) {
+        const tooltip = el.querySelector('.tooltip-text');
+        const isVisible = tooltip.style.display === 'block';
+        document.querySelectorAll('.tooltip-text').forEach(t => t.style.display = 'none');
+        tooltip.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+            setTimeout(() => {
+                window.addEventListener('click', function closeMenu() {
+                    tooltip.style.display = 'none';
+                    window.removeEventListener('click', closeMenu);
+                }, { once: true });
+            }, 10);
         }
     }
     checkEmptyState() {

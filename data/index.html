@@ -588,10 +588,10 @@
                             <div style="text-align:left; flex:1;">
                                 <b data-lang="MSG_INFO"></b>
                                 <span style="display:block;">
-                                    <span data-lang="CONNECTION_AFTER_HOTSPOT_1"></span><span class="instructionsTxt-badge">http://192.168.4.1</span><span data-lang="CONNECTION_AFTER_HOTSPOT_2"></span>
+                                    <span data-lang="CONNECTION_AFTER_HOTSPOT_1"></span><span class="instructionsTxt-badge">http://192.168.4.1 </span><span data-lang="CONNECTION_AFTER_HOTSPOT_2"></span>
                                 </span>
                                 <span style="margin-top:0;">
-                                    <span data-lang="CONNECTION_ACCESS_METHODS_1" ></span><span class="instructionsTxt-badge">http://espsomfyrts.local</span><span data-lang="CONNECTION_ACCESS_METHODS_2"></span><span class="instructionsTxt-badge">http://192.168.1.XX</span>
+                                    <span data-lang="CONNECTION_ACCESS_METHODS_1" ></span><span class="instructionsTxt-badge">http://espsomfyrts.local </span><span data-lang="CONNECTION_ACCESS_METHODS_2"></span><span class="instructionsTxt-badge">http://192.168.1.XX</span>
                                 </span>
                             </div>
                         </div>
@@ -1475,12 +1475,23 @@
                             </div>
                         </div>
 
+
+
+
                         <div class="field-group uniblocRadio">
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <label for="slidFrequency" style="font-size:1em;" data-lang="RADIO_BASE_FREQUENCY">
-                                        Fréquence de base
-                                    </label>
+                                    <div style="display:flex; align-items:center; gap:3px;">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use xlink:href="#icon-question"></use>
+                                            </svg>
+                                            <div class="tooltip-text" data-lang="RADIO_BASE_FREQUENCY_HELP"></div>
+                                        </div>
+                                        <label for="slidFrequency" style="font-size:1em; margin:0;" data-lang="RADIO_BASE_FREQUENCY">
+                                            Fréquence de base
+                                        </label>
+                                    </div>
                                     <div id="stepButtons" style="display:flex; gap:5px;">
                                         <button type="button" class="step-btn" onclick="somfy.setStep('freq', 1)">1</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('freq', 10)">10</button>
@@ -1505,9 +1516,17 @@
 
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <label for="slidRxBandwidth" style="font-size:1em;" data-lang="RADIO_RX_BANDWIDTH">
-                                        Largeur bande RX
-                                    </label>
+                                    <div style="display:flex; align-items:center; gap:3px;">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use xlink:href="#icon-question"></use>
+                                            </svg>
+                                            <div class="tooltip-text" data-lang="RADIO_RX_BANDWIDTH_HELP"></div>
+                                        </div>
+                                        <label for="slidRxBandwidth" style="font-size:1em; margin:0;" data-lang="RADIO_RX_BANDWIDTH">
+                                            Largeur bande RX
+                                        </label>
+                                    </div>
                                     <div id="stepButtonsRx" style="display:flex; gap:5px;">
                                         <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 1)">1</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 10)">10</button>
@@ -1527,9 +1546,17 @@
                             <hr>
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <label for="slidDeviation" style="font-size:1em;" data-lang="RADIO_FREQ_DEVIATION">
-                                        Déviation de fréquence
-                                    </label>
+                                    <div style="display:flex; align-items:center; gap:3px;">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use xlink:href="#icon-question"></use>
+                                            </svg>
+                                            <div class="tooltip-text" data-lang="RADIO_FREQ_DEVIATION_HELP"></div>
+                                        </div>
+                                        <label for="slidDeviation" style="font-size:1em; margin:0;" data-lang="RADIO_FREQ_DEVIATION">
+                                            Déviation de fréquence
+                                        </label>
+                                    </div>
                                     <div id="stepButtonsDeviation" style="display:flex; gap:5px;">
                                         <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 1)">1</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 10)">10</button>
@@ -1547,11 +1574,21 @@
                                 </div>
                             </div>
                             <hr>
+
+
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <label for="slidTxPower" style="font-size:1em;" data-lang="RADIO_TX_POWER">
-                                        TX Puissance
-                                    </label>
+                                    <div style="display:flex; align-items:center; gap:3px;">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use xlink:href="#icon-question"></use>
+                                            </svg>
+                                            <div class="tooltip-text" data-lang="RADIO_TX_POWER_HELP"></div>
+                                        </div>
+                                        <label for="slidTxPower" style="font-size:1em; margin:0;" data-lang="RADIO_TX_POWER">
+                                            TX Puissance
+                                        </label>
+                                    </div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
                                     <input id="slidTxPower" class="md3-slider" name="txPower" type="range" min="0" max="10" step="1" style="flex:1;" data-bind="transceiver.config.txPower" data-datatype="index" data-setonly="true" data-values="[-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12]" oninput="somfy.txPowerChanged(this);" />
@@ -1706,6 +1743,16 @@
         })();
     </script>
    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+
+
+
+        <symbol id="icon-question" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11.25c-.69 0-1.25.56-1.25 1.25v.107a.75.75 0 1 1-1.5 0V10A2.75 2.75 0 0 1 12 7.25h.116a2.634 2.634 0 0 1 1.714 4.633l-.77.66a.9.9 0 0 0-.31.674v.533a.75.75 0 0 1-1.5 0v-.533c0-.697.304-1.359.833-1.812l.771-.66a1.134 1.134 0 0 0-.738-1.995zM13 16a1 1 0 1 1-2 0a1 1 0 0 1 2 0" />
+        </symbol>
+
+
+
+
         <symbol id="icon-logo" viewBox="0 0 48 48">
             <path d="m24 2-22 14v8l22-14 22 14v-8z" fill="currentColor"/>
             <path d="m14 40v-22l-6 4v24h38v-6z" fill="currentColor"/>
