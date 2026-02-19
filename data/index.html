@@ -18,16 +18,17 @@
     })();
     </script>
 
-    <link rel="stylesheet" href="main.css?v=2.4.8c" type="text/css" />
-    <link rel="stylesheet" href="widgets.css?v=2.4.8c" type="text/css" />
-    <link rel="stylesheet" href="icons.css?v=2.4.8c" type="text/css" />
+    <link rel="stylesheet" href="main.css?v=2.4.9c" type="text/css" />
+    <link rel="stylesheet" href="widgets.css?v=2.4.9c" type="text/css" />
+    <link rel="stylesheet" href="icons.css?v=2.4.9c" type="text/css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <script type="text/javascript" src="index.js?v=2.4.8c"></script>
+    <script type="text/javascript" src="index.js?v=2.4.9c"></script>
 </head>
 <body>
+    <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
     <header class="top-bar">
-        <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
+
         <div class="top-bar-left">
             <svg width="100" height="100"><use xlink:href="#icon-logo"></use></svg>
             <span class="site-title">ESPSomfy-RTS</span>
@@ -309,38 +310,37 @@
                     </div>
                     <div id="divFirmware" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
-
                             <div class="uniRow" style="display:flex;">
-                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CHIP">Puce</div></div>
-                                <span id="info-chip" class="status-detail">---</span>
+                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CHIP"></div></div>
+                                <span class="uniValue">ESP32<span id="spanHwVersion"></span></span>
                             </div>
                             <div class="uniRow" style="display:flex;">
-                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CPU">Processeur</div></div>
+                                <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CPU"></div></div>
                                 <span id="info-cpu">---</span>
                             </div>
                             <hr>
                             <div class="uniRow">
                                 <div class="uniText">
-                                    <div class="uniLabel" data-lang="FIRMWARE_RAM">Mémoire Vive (RAM)</div>
+                                    <div class="uniLabel" data-lang="FIRMWARE_RAM"></div>
                                     <div class="uniStatus">
-                                        <span id="spanFreeMemory" class="status-detail">--</span><span data-lang="FIRMWARE_AVAILABLE"> Ko disponibles</span>
+                                        <span id="spanFreeMemory" class="status-detail">--</span><span data-lang="FIRMWARE_AVAILABLE"></span>
                                     </div>
                                 </div>
                                 <label class="uniColumn">
                                     <div class="mem-row">
-                                        <span class="minMax550" data-lang="FIRMWARE_MIN">Min: </span><span class="minMaxFull" data-lang="FIRMWARE_MIN_FULL">Niveau Min</span>
-                                        <span class="status-detail" id="spanMinMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO">Ko</span>
+                                        <span class="minMax550" data-lang="FIRMWARE_MIN"></span><span class="minMaxFull" data-lang="FIRMWARE_MIN_FULL"></span>
+                                        <span class="status-detail" id="spanMinMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO"></span>
                                     </div>
                                     <div class="mem-row" title="Plus gros bloc contigu disponible">
-                                        <span class="minMax550" data-lang="FIRMWARE_MAX">Max: </span><span class="minMaxFull" data-lang="FIRMWARE_MAX_FULL">Bloc Max</span>
-                                        <span class="status-detail" id="spanMaxMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO">Ko</span>
+                                        <span class="minMax550" data-lang="FIRMWARE_MAX"></span><span class="minMaxFull" data-lang="FIRMWARE_MAX_FULL"></span>
+                                        <span class="status-detail" id="spanMaxMemory">--</span><span class="status-detail" data-lang="FIRMWARE_UNIT_KO"></span>
                                     </div>
                                 </label>
                             </div>
                             <hr>
                             <div class="uniRow">
                                 <div class="uniText">
-                                    <div class="uniLabel" data-lang="FIRMWARE_STORAGE">Stockage Fichiers</div>
+                                    <div class="uniLabel" data-lang="FIRMWARE_STORAGE"></div>
                                     <div class="uniStatus">
                                         <span id="info-flash">--</span>
                                     </div>
@@ -357,15 +357,15 @@
                             <hr class="show780">
                             <div class="uniRow show780">
                                 <div class="uniText">
-                                    <div class="uniLabel" data-lang="TOPBAR_Uptime">Temps de fonctionnement</div>
+                                    <div class="uniLabel" data-lang="TOPBAR_Uptime"></div>
                                 </div>
                                 <label class="uniColumn">
                                     <div class="mem-row">
-                                        <span data-lang="TOPBAR_DEVICE">Appareil: </span>
+                                        <span data-lang="TOPBAR_DEVICE"></span>
                                         <span class="uptime-display status-detail">--j --h --m</span>
                                     </div>
                                     <div class="mem-row">
-                                        <span data-lang="CONNECTION_WIFI_NETWORK">Réseau: </span>
+                                        <span data-lang="CONNECTION_WIFI_NETWORK"></span>
                                         <span class="net-display status-detail">--j --h --m</span>
                                     </div>
                                 </label>
@@ -374,66 +374,68 @@
                         <div id="divSystemStatus" class="success">
                             <svg><use id="useStatusIcon" xlink:href="#icon-info"></use></svg>
                             <div style="text-align:left; flex:1;">
-                                <b id="statusTitle" data-lang="FIRMWARE_UPDATE_UPTODATE">Votre système est à jour</b>
-                                <span id="statusDesc" data-lang="FIRMWARE_UPDATE_ACTION_DESC">Aucune action n'est requise.</span>
+                                <b id="statusTitle" data-lang="FIRMWARE_UPDATE_UPTODATE"></b>
+                                <span id="statusDesc" data-lang="FIRMWARE_UPDATE_ACTION_DESC"></span>
                             </div>
                         </div>
                         <div class="firmwarblocupdate">
                             <button id="btnUpdateGithub" onclick="firmware.updateGithub();" class="button-update" type="button">
-                                <svg><use xlink:href="#svg-github"></use></svg>
-                                <div style="display:flex; flex-direction:column; text-align:left;">
-                                    <div  data-lang="FIRMWARE_UPDATE_GITHUB">Github mise à jour</div>
-                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_GITHUB_DESC">Mise à jour recommandée (Firmware + Application)</div>
+                                <svg style="width:24px; height:24px;"><use xlink:href="#svg-github"></use></svg>
+                                <div style="display:flex; flex-direction:column; text-align:left; flex-grow: 1;">
+                                    <div data-lang="FIRMWARE_UPDATE_GITHUB"></div>
+                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_GITHUB_DESC"></div>
                                 </div>
+                                <svg style="width:20px;height:20px;opacity:0.6;"><use xlink:href="#svg-arrowRight"></use></svg>
                             </button>
                             <hr>
                             <button id="btnUpdateFirmware" onclick="firmware.updateFirmware();" class="button-update" type="button">
-                                <svg><use xlink:href="#svg-update"></use></svg>
-                                <div style="display:flex; flex-direction:column; text-align:left;">
-                                    <div data-lang="FIRMWARE_UPDATE_FIRMWARE">Mise à jour Firmware</div>
-                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_FIRMWARE_DESC">Mise à jour locale du cœur du système (.bin)</div>
+                                <svg style="width:24px; height:24px;"><use xlink:href="#svg-update"></use></svg>
+                                <div style="display:flex; flex-direction:column; text-align:left; flex-grow: 1;">
+                                    <div data-lang="FIRMWARE_UPDATE_FIRMWARE"></div>
+                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_FIRMWARE_DESC"></div>
                                 </div>
+                                <span class="version-badge" id="spanFwVersion">v-.--</span>
                             </button>
                             <hr>
                             <button id="btnUpdateApplication" type="button" onclick="firmware.updateApplication();" class="button-update">
-                                <svg><use xlink:href="#svg-update"></use></svg>
-                                <div style="display:flex; flex-direction:column; text-align:left;">
-                                    <div data-lang="FIRMWARE_UPDATE_APP">Mise à jour Application</div>
-                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_APP_DESC">Mise à jour locale de l'interface web uniquement (.bin)</div>
+                                <svg style="width:24px; height:24px;"><use xlink:href="#svg-update"></use></svg>
+                                <div style="display:flex; flex-direction:column; text-align:left; flex-grow: 1;">
+                                    <div data-lang="FIRMWARE_UPDATE_APP"></div>
+                                    <div class="uniStatus" data-lang="FIRMWARE_UPDATE_APP_DESC"></div>
                                 </div>
+                                <span class="version-badge" id="spanAppVersion">v-.--</span>
                             </button>
                             <hr>
                             <button id="btnReloadApplication" type="button" onclick="general.reload();" class="button-update">
-                                <svg><use xlink:href="#svg-clear"></use></svg>
-                                <span data-lang="FIRMWARE_REFRESH_CACHE">Vider le Cache</span>
+                                <svg style="width:24px; height:24px;"><use xlink:href="#svg-clear"></use></svg>
+                                <span style="flex-grow: 1; text-align: left;" data-lang="FIRMWARE_REFRESH_CACHE"></span>
                             </button>
                         </div>
-                        <div class="info-block">
-                            <div class="uniRow" style="display:none;">
-                                <span class="uniLabel" data-lang="FIRMWARE_HARDWARE">Hardware</span>
-                                <span class="uniValue">ESP32<span id="spanHwVersion"></span></span>
-                            </div>
-                            <div class="uniRow">
-                                <span class="uniLabel" data-lang="FIRMWARE">Firmware</span>
-                                <span class="uniValue" id="spanFwVersion">v-.--</span>
-                            </div>
-                            <div class="uniRow">
-                                <span class="uniLabel" data-lang="FIRMWARE_APPLICATION">Application</span>
-                                <span class="uniValue" id="spanAppVersion">v-.--</span>
-                            </div>
-                            <div class="uniRow">
-                                <span class="uniLabel" data-lang="FIRMWARE_CREATOR">Créateur</span>
-                                <span class="uniValue" id="spanAppauteur"></span>
-                                <span class="uniValue" id="spanAppVersionFR">
-                                    <a href="https://github.com/rstrouse/ESPSomfy-RTS" target="_blank">Rstrouse</a>
-                                </span>
-                            </div>
-                            <div class="uniRow">
-                                <span class="uniLabel" data-lang="FIRMWARE_UIUX_CONTRIBUTOR">Contributeur UI/UX</span>
-                                <span class="uniValue" id="spanAppVersionFR">
-                                    <a href="https://github.com/xkain/ESPSomfy-RTS" target="_blank">Xkain</a>
-                                </span>
-                            </div>
+                        <div class="field-group unibloc">
+                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" data-lang="FIRMWARE_CREDITS_MAINTAINER"></div>
+                                    <div class="uniStatus" style="text-transform: uppercase;" data-lang="FIRMWARE_CREDITS_MAINTAINER_DESC"></div>
+                                </div>
+                                <span style="font-weight: bold;">xkain</span>
+                            </label>
+                            <hr>
+                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" data-lang="FIRMWARE_CREDITS_DOCUMENTATION"></div>
+                                    <div class="uniStatus" style="text-transform: uppercase;" data-lang="FIRMWARE_CREDITS_DOCUMENTATION_DESC"></div>
+                                </div>
+                                <svg style="width:20px;height:20px;opacity:0.6;"><use xlink:href="#svg-arrowRight"></use></svg>
+                            </label>
+                            <hr>
+
+                            <label class="uniRow" style="display:flex; cursor:pointer; opacity: 0.8;" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" data-lang="FIRMWARE_CREDITS_SPECIAL"></div>
+                                    <div class="uniStatus" data-lang="FIRMWARE_CREDITS_SPECIAL_DESC"></div>
+                                </div>
+                                <span style="font-weight: bold;">rstrouse</span>
+                            </label>
                         </div>
                         <div class="button-container-row">
                             <button id="btnBackup" class="bouton" type="button" onclick="firmware.backup();" data-lang="BT_SAVE">
@@ -471,7 +473,7 @@
                             <hr>
                             <div class="uniRow" style="display:flex;">
                                 <div class="uniText">
-                                    <div class="uniLabel" >Adresse MAC</div>
+                                    <div class="uniLabel" ></div>
                                 </div>
                                 <span class="spanMacAddress">--:--:--:--:--:--</span>
                             </div>

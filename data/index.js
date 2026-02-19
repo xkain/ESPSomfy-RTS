@@ -1403,7 +1403,6 @@ class Security {
                     if (ctx.hasOwnProperty('netUptime')) {
                         displayUptime(ctx.netUptime, 'net-display');
                     }
-                    if(ctx.chipModel) document.getElementById('info-chip').textContent = ctx.chipModel;
                     if(ctx.cpuFreq) {
                         const cores = ctx.cores > 1 ? 'Dual-Core' : 'Single-Core';
                         document.getElementById('info-cpu').textContent = `${cores} @ ${ctx.cpuFreq} ${tr('MHZ')}`;
@@ -1536,7 +1535,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.4.8';
+    appVersion = 'v2.4.9';
     reloadApp = false;
     init() {
         if (this.initialized) return;

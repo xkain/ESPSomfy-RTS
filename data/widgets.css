@@ -53,18 +53,21 @@
     top: 0;
     font-weight: bold;
     font-size: 8pt;
-    background-color: var(--unibloc-color);
-    color: var(--color);
+    background-color: #fcfcfc;
+    color: #000;
     padding: 4px 15px;
     border-radius: 0 0 15px 15px;
     border: 1px solid var(--unibloc-border-color);
     border-top: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 1000;
+    z-index: 10000;
     cursor: pointer;
     width: fit-content;
     white-space: nowrap;
 }
+    .firmware-message svg{
+        --update-icon-color: #000;
+    }
     .firmwarMem {
         display: inline-block;
         padding: 8px 17px;
@@ -591,6 +594,14 @@ span.ssid {
 }
 @media (max-width: 780px) {
 
+    .firmware-message {
+        background-color: var(--unibloc-color);
+        color: var(--color);
+        border: 1px solid var(--unibloc-border-color);
+    }
+    .firmware-message svg{
+        --update-icon-color: var(--color) !important;
+    }
     .overlay-content {
         max-width: max-content;
     }

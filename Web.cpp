@@ -340,7 +340,6 @@ void Web::handleLoginContext(WebServer &server) {
       netUptime = (millis() - net.connectedAt) / 1000;
     }
     resp.addElem("netUptime", netUptime);
-    resp.addElem("chipModel", ESP.getChipModel());
     resp.addElem("cpuFreq", ESP.getCpuFreqMHz());
     resp.addElem("cores", ESP.getChipCores());
     resp.addElem("flashSize", (uint32_t)(ESP.getFlashChipSize() / 1024 / 1024));

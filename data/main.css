@@ -3,6 +3,73 @@
     --shade-color: #F8A525;
     --accent-color: #F8A525;
 }
+
+.credits-section {
+    background: var(--block-bg); /* Utilise la couleur de tes blocs existants */
+    border-radius: 8px;
+    padding: 5px 0;
+}
+
+.credit-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 15px;
+    transition: background 0.2s;
+}
+
+.doc-row {
+    cursor: pointer;
+}
+
+.doc-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.credit-icon {
+    width: 24px;
+    height: 24px;
+    fill: #888;
+}
+
+.credit-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.credit-label {
+    font-size: 11px;
+    color: var(--soustxt-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.credit-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color);
+}
+
+.credit-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+.credit-link:hover {
+    opacity: 1;
+}
+
+
+
+
+
+
+
+
 :root[data-theme="light"] {
     --body-color: #fff;
     --color: #000000;
@@ -722,15 +789,34 @@ button:active {
 .button-update {
     display: flex;
     align-items: center;
-    justify-content: left;
-    gap: 5px;
+    justify-content: space-between; /* Change de left à space-between */
+    gap: 10px; /* Un peu plus d'espace */
     width: 100%;
-    padding: 5px 10px;
+    padding: 8px 12px;
     cursor: pointer;
     border: none;
     background: none;
     color: var(--color);
 }
+
+/* Nouveau style pour la version à droite */
+.version-badge {
+    font-size: 0.9em;
+    font-family: monospace; /* Souvent plus joli pour les versions */
+    opacity: 0.7;
+    margin-left: auto; /* Force la poussée vers la droite */
+    padding-left: 10px;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
 
 .boutonOverlayClose {
     position: absolute;
