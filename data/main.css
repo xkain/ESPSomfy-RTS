@@ -1,74 +1,7 @@
 :root {
     color-scheme: light dark;
-    --shade-color: #F8A525;
-    --accent-color: #F8A525;
+    --accent-color: #1a5fb4;
 }
-
-.credits-section {
-    background: var(--block-bg); /* Utilise la couleur de tes blocs existants */
-    border-radius: 8px;
-    padding: 5px 0;
-}
-
-.credit-row {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    gap: 15px;
-    transition: background 0.2s;
-}
-
-.doc-row {
-    cursor: pointer;
-}
-
-.doc-row:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.credit-icon {
-    width: 24px;
-    height: 24px;
-    fill: #888;
-}
-
-.credit-info {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.credit-label {
-    font-size: 11px;
-    color: var(--soustxt-color);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.credit-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color);
-}
-
-.credit-link {
-    color: var(--accent-color);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    opacity: 0.7;
-}
-
-.credit-link:hover {
-    opacity: 1;
-}
-
-
-
-
-
-
-
 
 :root[data-theme="light"] {
     --body-color: #fff;
@@ -83,7 +16,6 @@
     --button-color: #5e5e5e;
     --button2-color: #4a4a4a;
     --background-color: #ecebeb;
-    --test-color: #F8A525;
     --unibloc-color: #fcfcfc;
     --fond-color: #f0f0f0;
     --cfg-SvgRightBg: #808080;
@@ -118,7 +50,6 @@
     --button-color: #2d2d2f;
     --button2-color: #4a4a4a;
     --background-color: #010101;
-    --test-color: #f80707;
     --unibloc-color: #1b1b1b;
     --fond-color: #010101;
     --cfg-SvgRightBg: #4a4a4a;
@@ -280,9 +211,10 @@ html, body {
         border-radius: 25px;
         transition: background 0.2s;
         cursor: pointer;
+        justify-content: flex-start; /* Aligne tout à gauche par défaut */
     }
         .nav-item span {
-            margin-right: auto;
+            margin-right: 0;
             text-align: left;
         }
         .nav-item:hover {
@@ -296,7 +228,7 @@ html, body {
         .nav-icon {
             width: 25px;
             height: 25px;
-            margin-right: 8px;
+            margin-right: 12px;
             fill: currentColor;
             flex-shrink: 0;
         }
@@ -306,7 +238,7 @@ html, body {
             transition: transform 0.3s;
             fill: currentColor;
             flex-shrink: 0;
-            margin-left: 10px;
+            margin-left: auto;
         }
     .submenu {
         display: none;
@@ -336,6 +268,17 @@ html, body {
         padding-top: 20px;
         display: flex;
         justify-content: center;
+    }
+    #barsideRadioDisable {
+        background-color: #e74c3c;
+        color: white !important;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 8px;
+        font-weight: bold;
+        margin-left: 10px;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 .tab-container {
     display: none;
@@ -1221,7 +1164,7 @@ div.socket-error {
         font-weight: bold;
         color: var(--color);
         font-style: italic;
-        margin-right: 5px;
+        margin: 0 5px 0 5px;
     }
 
 
@@ -2430,6 +2373,11 @@ div.frame-pulses {
         font-weight: bold;
         color: var(--accent-color);
     }
+
+
+
+
+
 
     #divShadeControls {
     display: flex;

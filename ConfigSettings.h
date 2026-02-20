@@ -173,7 +173,7 @@ class ConfigSettings: BaseSettings {
     char serverId[10] = "";
     char hostname[32] = "ESPSomfyRTS";
     char chipModel[10] = "ESP32";
-    char accentColor[8] = "#F8A525";
+    char accentColor[8] = "#1a5fb4";
     conn_types_t connType = conn_types_t::unset;
     appver_t fwVersion;
     appver_t appVersion;
@@ -181,7 +181,7 @@ class ConfigSettings: BaseSettings {
     bool checkForUpdate = true;
     bool swShowGpio = false;
     uint8_t status;
-    uint8_t language = 1;
+    uint8_t language = 0;
     IPSettings IP;
     WifiSettings WIFI;
     EthernetSettings Ethernet;

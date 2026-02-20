@@ -2574,8 +2574,10 @@ class Somfy {
                     }
                 };
                 const isRadioInit = somfy.transceiver.config.radioInit;
+                const sideNote = document.getElementById('barsideRadioDisable'); // On récupère ton span
                 if (radioTab) {
                     radioTab.classList.toggle('radio-error', !isRadioInit);
+                    if (sideNote) sideNote.style.display = isRadioInit ? 'none' : 'inline';
                     row.style.backgroundColor = isRadioInit
                     ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
                     : "var(--unibloc-color)";
@@ -2650,13 +2652,20 @@ class Somfy {
                         const row = document.getElementById('divRadioEnableColor');
                         const txtStatus = document.getElementById('divRadioEnableStatus');
                         const cbRadio = document.getElementById('cbEnableRadio');
+                        const sideNote = document.getElementById('barsideRadioDisable'); // Ton span
 
                         if (radioTab) {
-                            radioTab.classList.toggle('radio-error', !trans.config.radioInit);
-                            row.style.backgroundColor = trans.config.radioInit
+                            const isInit = trans.config.radioInit;
+                            radioTab.classList.toggle('radio-error', !isInit);
+
+                            // Mise à jour immédiate après sauvegarde
+                            if (sideNote) sideNote.style.display = isInit ? 'none' : 'inline';
+
+                            row.style.backgroundColor = isInit
                             ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
                             : "var(--unibloc-color)";
                         }
+
                         const isActuallyEnabled = radioTab && !radioTab.classList.contains('radio-error');
                         if (cbRadio.checked === isActuallyEnabled) {
                             txtStatus.textContent = cbRadio.checked ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');

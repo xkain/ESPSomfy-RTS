@@ -210,7 +210,7 @@ bool ConfigSettings::load() {
   this->ssdpBroadcast = pref.getBool("ssdpBroadcast", true);
   this->checkForUpdate = pref.getBool("checkForUpdate", true);
   pref.getString("accentColor", this->accentColor, sizeof(this->accentColor));
-  this->language = pref.getUChar("language", 1);
+  this->language = pref.getUChar("language", 0);
   this->swShowGpio = pref.getBool("swShowGpio", false);
   this->connType = static_cast<conn_types_t>(pref.getChar("connType", 0x00));
   //Serial.printf("Preference GFG Free Entries: %d\n", pref.freeEntries());

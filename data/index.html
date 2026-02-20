@@ -57,6 +57,8 @@
             </div>
         </div>
     </header>
+
+
     <aside class="sidebar">
         <nav class="sidebar-nav">
             <a class="nav-item" data-grpid="divHomePnl">
@@ -105,6 +107,7 @@
                 <a class="nav-item has-submenu" data-grpid="divRadioSettings">
                     <svg class="nav-icon"><use href="#icon-tabRadio"></use></svg>
                     <span data-lang="TAB_RADIO">Radio</span>
+                    <span id="barsideRadioDisable" style="display: none;" data-lang="TAB_RADIO_DISABLED">désactivé</span>
                     <svg class="arrow-icon"><use href="#svg-arrowDown"></use></svg>
                 </a>
                 <div class="submenu" style="display:none;">
@@ -117,6 +120,11 @@
             <button id="btnReboot" type="button" class="boutonOutline" onclick="general.rebootDevice();" data-lang="BT_REBOOT">Redémarrer</button>
         </div>
     </aside>
+
+
+
+
+
     <div id="divContainer" class="container" data-auth="false">
         <div id="divAuthenticated" style="display:none;">
 
@@ -473,7 +481,7 @@
                             <hr>
                             <div class="uniRow" style="display:flex;">
                                 <div class="uniText">
-                                    <div class="uniLabel" ></div>
+                                    <div class="uniLabel" data-lang="CONNECTION_MAC_ADRESSE"></div>
                                 </div>
                                 <span class="spanMacAddress">--:--:--:--:--:--</span>
                             </div>
@@ -488,7 +496,7 @@
                             <hr>
                             <div class="uniRow" style="display:flex;">
                                 <div class="uniText">
-                                    <div class="uniLabel" >Adresse MAC</div>
+                                    <div class="uniLabel" data-lang="CONNECTION_MAC_ADRESSE"></div>
                                 </div>
                                 <span class="spanMacAddress">--:--:--:--:--:--</span>
                             </div>

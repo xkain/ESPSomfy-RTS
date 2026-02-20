@@ -85,6 +85,7 @@
     "CONNECTION_WIFI_CHANNEL": "Canal:",
     "CONNECTION_ETH_STATUS": "Statut",
     "CONNECTION_ETH_SPEED": "Vitesse",
+    "CONNECTION_MAC_ADRESSE": "Adresse MAC",
     "CONNECTION_HIDDEN_SSID": "Réseau Wi-Fi caché",
     "CONNECTION_HIDDEN_SSID_DESC": "Permet de se connecter à un réseau qui ne diffuse pas son nom",
     "CONNECTION_ROAMING": "Activer l’itinérance",
@@ -139,6 +140,7 @@
     "TAB_NETWORK": "Réseau",
     "TAB_SOMFY": "Somfy",
     "TAB_RADIO": "Radio",
+    "TAB_RADIO_DISABLED": "désactivé",
 "MENU": "SUBTAB",
     "SUB_OPTION": "Options",
     "SUB_SECURITY": "Sécurité",
@@ -237,6 +239,7 @@
     "HOME": "Accueil",
     "NAME": "Nom",
     "NONE": "Aucun",
+
 "PAGE": "VIRTUAL REMOTE",
     "VR_SELECT_MOTOR_GROUP": "Sélectionner un moteur ou un groupe",
     "VR_MY": "my",
