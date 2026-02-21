@@ -524,7 +524,6 @@
     "BT_REBOOT": "NEUSTART",
     "BT_DONE": "FERTIG",
 "PAGE": "ERRORS",
-    "ERR_SOCKET_CONNECT": "Verbindung zum Server nicht möglich",
     "ERR_HOSTNAME": "Ungültiger Hostname",
     "ERR_INVALID_HOSTNAME": "Sie müssen einen gültigen Hostnamen angeben.",
     "ERR_HOSTNAME_CHARS": "Der Hostname darf nur Zahlen, Buchstaben oder Bindestriche enthalten.",

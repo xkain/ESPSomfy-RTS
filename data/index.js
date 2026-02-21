@@ -1130,13 +1130,15 @@ class UIBinder {
         sub.innerHTML = `<div><label>Service:</label>${err.service}</div><div style="font-size:22px;">${msg}</div>`;
         return div;
     }
+
+
     socketError(el, msg) {
         if (arguments.length === 1) {
             msg = el;
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = `<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>${tr("SOCKET_ATTEMPTS")}</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>${tr("ERR_SOCKET_CONNECT")}</div><hr><div style="font-size:.7em">${msg}</div></div>`;
+        div.innerHTML = `<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Attempts:</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Unable to connect to the server</div><hr><div style="font-size:.7em">${msg}</div></div>`;
         div.classList.add('error-message');
         div.classList.add('socket-error');
         div.classList.add('message-overlay');
@@ -2032,7 +2034,11 @@ class Wifi {
                 break;
         }
         for (let i = 0; i < 36; i++) {
-            arr.push({ val: i, label: `GPIO ${i}` });
+            // ON BANNI LE GPIO 2 : réservé pour la LED de statut et le Hard Reset
+            if (i === 2) continue;
+
+            // Petit bonus pour l'esthétique : on ajoute un '0' devant les chiffres < 10
+            arr.push({ val: i, label: `GPIO ${i > 9 ? i : '0' + i}` });
         }
         this.loadETHDropdown(sel, arr, selected);
     }
@@ -2711,7 +2717,7 @@ class Somfy {
         if (!div) {
             div = document.createElement('div');
             div.setAttribute('id', 'divScanFrequency');
-            div.classList.add('inst-overlay', 'message-overlay');
+            div.className = 'inst-overlay message-overlay';
 
             div.innerHTML = `
             <div class="overlay-content">
@@ -2720,11 +2726,9 @@ class Somfy {
             <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
             </div>
             <div id="jsHeadScanRadio" class="instructions-header">
-            <div style="position: relative;">
             <h2>${tr('SCANFREQ_TITLE')}</h2>
             <p>${tr('SCANFREQ_DESC')}</p>
-            </div>
-            <svg class="instructions-headerLogo"><use xlink:href="#svg-radio"></use></svg>
+            <svg class="instructions-headerLogo"><use xlink:href="#icon-tabRadio"></use></svg>
             </div>
             <div class="field-group unibloc" style="padding: 15px; display: block; text-align: left;">
             <div style="font-size:12px;">${tr("SCANFREQ_SCAN_DESC")}</div>
@@ -3767,10 +3771,10 @@ class Somfy {
         }
     }
     pinMaps = [
-        { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },
-        { name: 's2', maxPins: 46, inputs: [0, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 45], outputs: [0, 19, 20, 26, 27, 28, 29, 30, 31, 32, 45, 46]},
-        { name: 's3', maxPins: 48, inputs: [19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32], outputs: [19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32] },
-        { name: 'c3', maxPins: 21, inputs: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20], outputs: [11, 12, 13, 14, 15, 16, 17, 21] }
+        { name: '', maxPins: 39, inputs: [0, 1, 2, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [2, 3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },
+        { name: 's2', maxPins: 46, inputs: [0, 2, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 45], outputs: [0, 2, 19, 20, 26, 27, 28, 29, 30, 31, 32, 45, 46]},
+        { name: 's3', maxPins: 48, inputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32], outputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32] },
+        { name: 'c3', maxPins: 21, inputs: [2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], outputs: [2, 11, 12, 13, 14, 15, 16, 17, 21] }
     ];
 
     loadPins(type, sel, opt) {

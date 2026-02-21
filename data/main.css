@@ -827,13 +827,14 @@ button:active {
     }
 /***welcome */
 #divGetStarted {
-display: none;
-flex-direction: column;
-flex: 1;
-align-items: center;
-justify-content: center;
-text-align: center;
-animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    margin-top: 9%;
 }
 @keyframes slideUpFade {
     from {
@@ -879,7 +880,7 @@ animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         font-size: 1.2em;
         line-height: 1.6;
         text-align: center;
-        max-width: 331px;
+        max-width: 440px;
         margin: 15px auto 0 auto;
     }
 
@@ -943,11 +944,11 @@ animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             display: block;
             text-align: inherit;
             font-weight: bold;
-            font-size: 1rem;
+            font-size:17px;
             color: var(--color);
         }
         .welcomeCard-content p {
-            font-size: 0.8rem;
+            font-size: 13px;
             color: var(--soustxt-color);
         }
 
@@ -1067,6 +1068,7 @@ div.error-message {
 }
 .message-content,
 .overlay-content,
+.inner-error
 .instructions-content {
     position: relative;
      width: 90%;
@@ -1137,6 +1139,7 @@ div.socket-error {
     position: relative;
     justify-content: center;
     overflow: hidden;
+    min-height: 100px;
 }
     .instructions-header h2 {
         margin: 0;
@@ -1148,6 +1151,11 @@ div.socket-error {
         opacity: 0.8;
         font-size: 14px;
         max-width: 80%;
+    }
+    .instructions-header h2,
+    .instructions-header p {
+        position: relative; /* On les passe en relatif par rapport au header */
+        z-index: 2;        /* Pour être au-dessus du logo */
     }
 
     .instructions-headerLogo {
@@ -1205,13 +1213,14 @@ div.socket-error {
 }
 
 .room-nav-container {
-    position: relative;
     display: none;
+    position: relative;
     align-items: center;
     width: 100%;
     background-color: var(--barreRoomBg);
     overflow: hidden;
     border-radius: 25px;
+    margin-bottom: 30px;
 }
     .room-nav-container .icon-svg {
         color: var(--soustxt-color);
@@ -1552,7 +1561,7 @@ div.wait-overlay > .lds-roller {
 .handle-icon {
     width: 16px;
     height: 16px;
-    color: var(--soustxt-color);;
+    color: var(--cfg-SvgRight-inner);;
 }
 .shadectl-right-content {
     flex: 1;
@@ -2237,6 +2246,9 @@ div.frame-pulses {
     }
 }
 @media screen and (max-width: 1024px) {
+    #divGetStarted {
+        margin-top: 25%;
+    }
     #divShadeControls {
         justify-content: center;
     }
@@ -2273,7 +2285,7 @@ div.frame-pulses {
     .header {
         display: flex;
         justify-content: space-between;
-        padding: 20px 12px 20px 12px;
+        padding: 5px 5px 20px 5px;
     }
         .headerIdentity {
             display: flex;
@@ -2312,7 +2324,19 @@ div.frame-pulses {
             color: var(--color);
         }
 
+        #divGetStarted {
+        margin-top: 0;
+        }
+        .welcomeMiddle p {
+            max-width: 331px;
+        }
 
+        .welcomeCard-content H1 {
+            font-size: 1rem;
+        }
+        .welcomeCard-content p {
+            font-size: 0.8rem;
+        }
 
 
     .tab-container {
