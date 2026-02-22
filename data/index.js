@@ -5065,6 +5065,7 @@ class Somfy {
         return div;
     }
     linkGroupShade(groupId) {
+        let mouseDown = false;
         let div = document.createElement('div');
 
         div.innerHTML = `

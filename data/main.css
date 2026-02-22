@@ -1068,7 +1068,7 @@ div.error-message {
 }
 .message-content,
 .overlay-content,
-.inner-error
+.inner-error,
 .instructions-content {
     position: relative;
      width: 90%;
