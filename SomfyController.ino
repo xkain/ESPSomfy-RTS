@@ -9,6 +9,7 @@
 #include "Somfy.h"
 #include "MQTT.h"
 #include "GitOTA.h"
+#include "HardReset.h"
 
 ConfigSettings settings;
 Web webServer;
