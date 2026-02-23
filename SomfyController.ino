@@ -21,6 +21,8 @@ GitUpdater git;
 
 uint32_t oldheap = 0;
 void setup() {
+  pinMode(2, OUTPUT);
+  digitalWrite(2, LOW);
   Serial.begin(115200);
   Serial.println();
   Serial.println("Startup/Boot....");

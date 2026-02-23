@@ -1270,7 +1270,7 @@ var security = new Security();
 
 class General {
     initialized = false; 
-    appVersion = 'v2.4.7';
+    appVersion = 'v2.4.8';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -1954,7 +1954,7 @@ class Somfy {
         this.loadPins('input', document.getElementById('selTransRXPin'));
         //this.loadSomfy();
         ui.toElement(document.getElementById('divTransceiverSettings'), {
-            transceiver: { config: { proto: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 12, RXPin: 13, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
+            transceiver: { config: { proto: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
         });
         this.loadPins('out', document.getElementById('selShadeGPIOUp'));
         this.loadPins('out', document.getElementById('selShadeGPIODown'));
