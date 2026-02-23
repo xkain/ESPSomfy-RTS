@@ -1476,7 +1476,7 @@ void SomfyShade::publishDisco() {
   JsonObject dobj = obj.createNestedObject("device");
   dobj["hw_version"] = settings.fwVersion.name;
   dobj["name"] = settings.hostname;
-  dobj["mf"] = "rstrouse";
+  dobj["mf"] = "xkain";
   JsonArray arrids = dobj.createNestedArray("identifiers");
   //snprintf(topic, sizeof(topic), "mqtt_espsomfyrts_%s_shade%d", settings.serverId, this->shadeId);
   snprintf(topic, sizeof(topic), "mqtt_espsomfyrts_%s", settings.serverId);
