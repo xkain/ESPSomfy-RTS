@@ -1,4 +1,4 @@
-var hst = '192.168.1.45';
+var hst = '192.168.1.13';
 //var hst = '192.168.4.1';
 var _rooms = [];
 let LANG = {};
@@ -806,7 +806,6 @@ async function init() {
     somfy.setStep('deviation', 1);
 
     bindNavigation();
-    // État initial (Home actif par défaut)
     if (typeof ui !== 'undefined' && !ui.isConfigOpen()) {
         const hBtn = document.querySelector('.nav-item[data-grpid="divHomePnl"]');
         if (hBtn) syncNavigationState('divHomePnl');
@@ -1240,16 +1239,13 @@ class UIBinder {
     }
     wizCurrentStep(el) { return parseInt(el.getAttribute('data-stepid') || 1, 10); }
     pinKeyPressed(evt) {
-        let el = evt.srcElement;
+        let el = evt.target || evt.srcElement;
         let parent = el.parentElement;
         let digits = Array.from(parent.querySelectorAll('.pin-digit'));
         let index = digits.indexOf(el);
-
         switch (evt.key) {
             case 'Backspace':
-                if (el.value === '' && index > 0) {
-                    digits[index - 1].focus();
-                }
+                if (el.value === '' && index > 0) digits[index - 1].focus();
                 return;
             case 'ArrowLeft':
                 if (index > 0) digits[index - 1].focus();
@@ -1260,26 +1256,22 @@ class UIBinder {
             case 'Enter':
                 if (typeof security !== 'undefined') security.login();
                 return;
-            case 'Tab':
-            case 'Shift':
-            case 'Control':
-                return;
         }
-        if (!/^\d$/.test(evt.key)) {
-            evt.preventDefault();
-            return;
-        }
-        el.value = '';
         setTimeout(() => {
-            if (index < digits.length - 1) {
+            if (el.value.length > 1) el.value = el.value.slice(-1);
+            if (el.value !== "" && index < digits.length - 1) {
                 digits[index + 1].focus();
             }
             const pin = digits.map(d => d.value).join('');
             if (pin.length === 4) {
-                console.log("PIN complet détecté, connexion...");
-                if (typeof security !== 'undefined') security.login();
+                console.log("PIN complet détecté :", pin);
+                if (typeof security !== 'undefined') {
+                    security.login();
+                } else if (typeof general !== 'undefined' && typeof general.login === 'function') {
+                    general.login();
+                }
             }
-        }, 10);
+        }, 20);
     }
     pinDigitFocus(evt) {
         evt.srcElement.select();
@@ -2034,10 +2026,7 @@ class Wifi {
                 break;
         }
         for (let i = 0; i < 36; i++) {
-            // ON BANNI LE GPIO 2 : réservé pour la LED de statut et le Hard Reset
             if (i === 2) continue;
-
-            // Petit bonus pour l'esthétique : on ajoute un '0' devant les chiffres < 10
             arr.push({ val: i, label: `GPIO ${i > 9 ? i : '0' + i}` });
         }
         this.loadETHDropdown(sel, arr, selected);
@@ -2052,7 +2041,6 @@ class Wifi {
     onETHBoardTypeChanged(sel) {
         let type = this.ethBoardTypes.find(elem => parseInt(sel.value, 10) === elem.val);
         if (typeof type !== 'undefined') {
-            // Change the values to represent what the board type says.
             if(typeof type.ct !== 'undefined') document.getElementById('selETHPhyType').value = type.ct;
             if (typeof type.clk !== 'undefined') document.getElementById('selETHClkMode').value = type.clk;
             if (typeof type.addr !== 'undefined') document.getElementById('selETHAddress').value = type.addr;
@@ -2085,22 +2073,16 @@ class Wifi {
         });
     }
     updateStatusBadge(settings) {
-        // On récupère toutes les options
         const options = document.querySelectorAll('.opt-badge');
         if (!options.length) return;
-
-        // 1. On détermine le type de connexion active
         const connType = parseInt(settings.connType);
-        let activeType = "wifi"; // Par défaut
-
+        let activeType = "wifi";
         if (connType >= 2) {
             const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined)
             ? parseInt(settings.ethernet.PWRPin)
             : -1;
             activeType = (pwrPin !== -1) ? "poe" : "lan";
         }
-
-        // 2. On met à jour l'affichage
         options.forEach(opt => {
             if (opt.getAttribute('data-conn') === activeType) {
                 opt.classList.add('active');
@@ -5903,13 +5885,20 @@ class Firmware {
         }
         finally { overlay.remove(); }
     }
+    formatInlineMarkdown(txt) {
+        return txt
+        .replace(/`([^`]+)`/g, '<code style="background-color: rgba(120, 120, 120, 0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>')
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;height:auto;display:block;margin:5px 0;">')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#00aaff;text-decoration:underline;font-weight:bold;">$1</a>')
+        .replace(/(?<!["=>])(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#00aaff;text-decoration:underline;">$1</a>');
+    }
     async showReleaseNotes(tagName) {
         console.log(tagName);
         let r = await this.getReleaseInfo(tagName);
         console.log(r);
-        let fnToItem = (txt, tag) => {  }
+        const self = this;
+
         if (r.resp.ok) {
-            // Convert this to html.
             let lines = r.info.body.split('\r\n');
             let ctx = { html: '', llvl: 0, lines: r.info.body.split('\r\n'), ndx: 0 };
             ctx.toHead = function (txt) {
@@ -5934,7 +5923,9 @@ class Firmware {
                 }
                 this.html += '</ul>';
             };
-            ctx.toLI = function (txt) { return `<li>${txt.trim()}</li>`; }
+            ctx.toLI = function(txt) {
+                return `<li>${self.formatInlineMarkdown(txt.trim())}</li>`;
+            }
             ctx.token = function (txt) {
                 let tok = { ch: '', indent: 0, txt:'' }
                 for (let i = 0; i < txt.length; i++) {
@@ -5950,27 +5941,30 @@ class Firmware {
             };
             ctx.next = function () {
                 if (this.ndx >= this.lines.length) return false;
+                let line = this.lines[this.ndx].trim();
                 let tok = this.token(this.lines[this.ndx]);
+
                 switch (tok.ch) {
                     case '#':
-                        this.html += this.toHead(this.lines[this.ndx]);
+                        this.html += self.formatInlineMarkdown(this.toHead(this.lines[this.ndx]));
                         this.ndx++;
                         break;
                     case '*':
                         this.toUL();
                         break;
                     case '':
+                        this.html += '<div style="height:8px"></div>';
                         this.ndx++;
-                        this.html += `<br/><div>${tok.txt}</div>`;
                         break;
                     default:
+                        let formattedTxt = self.formatInlineMarkdown(this.lines[this.ndx]);
+                        this.html += `<p style="margin: 2px 0; line-height: 1.2;">${formattedTxt}</p>`;
                         this.ndx++;
                         break;
                 }
                 return true;
             };
             while (ctx.next());
-            console.log(ctx);
             ui.infoMessage(ctx.html);
         }
     }
