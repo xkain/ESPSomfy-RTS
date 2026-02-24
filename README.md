@@ -6,7 +6,7 @@
   <h3 align="center">ESPSomfy-RTS </h3>
 
   <p align="center">
-    Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS protocol.
+    Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS 433 MHz protocol.
     <br />
     <a href="https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software"><strong>Explore original docs »</strong></a>
     <br />
@@ -18,12 +18,11 @@
 </div>
 <br />
 
-## About The Project
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 
-## Technical Capabilities
+## About The Project
 
 This project serves as a comprehensive controller for Somfy RTS blinds and shades, capable of managing up to **32 individual shades** and **16 groups**.
 
@@ -55,40 +54,38 @@ This project aims to make managing your Somfy RTS devices as beautiful as it is 
 <br />
 
 ## Roadmap
-
 - [x] Add Multi-language Support
     - [x] English
     - [x] French
     - [x] German
-- [x] Nouvelle identitée visuelle 
-- [x] fully responsive interface (mobile, tablet, and desktop)
+- [x] New visual identity
+- [x] Fully responsive interface (mobile, tablet, and desktop)
 - [x] Add integrated Dark/Light mode with customizable accent colors
 - [x] All checkboxes replaced with modern switches
-- [x] toutes les icons ont été remplacé par des SVG
-   - [ ] optimisation
+- [x] All icons replaced with high-quality SVGs
+    - [ ] Performance optimization
 - [x] Virtual Remote completely redesigned
-- [x] Add Integrated the WebSocket refactor by [y-streibel-uiris](https://github.com/y-streibel-uiris) to support secure HTTPS connections from [#624](https://github.com/rstrouse/ESPSomfy-RTS/pull/624)
+- [x] Integrated WebSocket refactor by [y-streibel-uiris](https://github.com/y-streibel-uiris) to support secure HTTPS connections from [#624](https://github.com/rstrouse/ESPSomfy-RTS/pull/624)
 - [x] Passwords hidden by default with a "toggle eye" button
 - [x] Add Safety confirmation step to prevent accidental network lockouts
-- [x] Add show MAC adress
+- [x] Display MAC address in system info
 - [x] Control buttons are disabled until the device shade configuration is finalized
-- [x] Add une page d'accueil pour guider le nouvel utilisateur
+- [x] Add a welcome/onboarding page to guide new users
 - [x] Add new GPIO Selector for easier radio assignment
 - [x] Add stepped sliders (1, 10, 100) for precise frequency tuning
-- [x] Add tooltips pour mieux comprendre réglages fréquance 
-- [x] Add graphique for frequency scanning feedback
-- [x] Meilleur integration des popup SetMyPosition and openSetMyPosition
-- [x] Add Hard reset if you lose access to the web interface
-- [x] Add visual indicator (bleu led internal esp32) for hard reset on boot
-   - [x] Standard ESP32
-   - [ ] ESP32s2
-   - [ ] ESP32s3
-   - [ ] ESP32c3
-- [x] Add indicator connetion (wifi/ethernet/poe)
-- [x] Add uptime device and connection
-- [x] Add more infos device
-- [ ] Add Automations (opening/closing shades by time/day).
-
+- [x] Add tooltips for better understanding of frequency settings
+- [x] Add visual graph for frequency scanning feedback
+- [x] Better integration of SetMyPosition and openSetMyPosition popups
+- [x] Add Hard Reset feature if web interface access is lost
+- [x] Add visual indicator (internal blue LED) for hard reset during boot
+    - [x] Standard ESP32
+    - [ ] ESP32-S2
+    - [ ] ESP32-S3
+    - [ ] ESP32-C3
+- [x] Add connection type indicators (Wi-Fi/Ethernet/PoE)
+- [x] Add device and connection uptime tracking
+- [x] Display detailed device information
+- [ ] Add Automations (scheduling shade opening/closing by time or day)
  
 <br />
 
@@ -115,9 +112,7 @@ If you lose access to the web interface (due to a network misconfiguration or fo
       <p><i>Note: After the reset, look for the Wi-Fi SSID: <code>ESPSomfyRTS</code> to reconfigure your device.</i></p>
     </td>
     <td width="40%" align="center" valign="middle">
-      <a href="https://example.com">
         <img src="images/hard-reset.GIF" alt="Hard Reset Process" width="100%">
-      </a>
       <br />
       <em>Reset sequence animation</em>
     </td>
@@ -161,6 +156,8 @@ Since this is a fork, you can rely on the extensive original documentation for t
 * 🔄 **[How to Update ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)**
 * 🔌 **[Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations)**
 
+
+
 ---
 
 ## 🙏 Credits
@@ -170,12 +167,12 @@ Special thanks to [rstrouse](https://github.com/rstrouse) for the incredible wor
 
 ## 📦 Boîtiers Prêts à l'Emploi (Plug & Play)
 
-Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **unités entièrement assemblées et testées**. Ces boîtiers sont prêts à être alimentés et configurés pour piloter vos équipements Somfy RTS.
+Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **unités entièrement assemblées et testées**. Ces boîtiers sont prêts à être alimentés et configurés pour piloter vos équipements RTS 433 MHz.
 
 🛒 **Disponible sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)**
 
 > [!IMPORTANT]
-> **Note sur le Firmware :** Tant que mon interface (Fork) est en phase de construction, les boîtiers sont livrés avec la version officielle de **rstrouse** afin de garantir une stabilité maximale. Vous pourrez installer ma version manuellement dès qu'elle sera finalisée !
+> **Note sur le Firmware :** Tant que mon interface est en phase de développement, les boîtiers seront livrés avec la version '2.4.8'.  Vous pourrez installer la nouvelle version depuis l'interface dès qu'elle sera finalisée !
 
 <p align="center">
   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin02.jpg?raw=true" width="33%" />
