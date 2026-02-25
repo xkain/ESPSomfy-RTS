@@ -676,10 +676,10 @@ async function initSockets() {
                 else {
                     if (connecting) {
                         connectFailed++;
-                        let timeout = Math.min(connectFailed * 50, 1000);
+                        let timeout = Math.min(connectFailed * 500, 10000);
                         console.log(`Initial socket did not connect try again (server was busy and timed out ${connectFailed} times)`);
                         tConnect = setTimeout(async () => { await reopenSocket(); }, timeout);
-                        if (connectFailed === 1) {
+                        if (connectFailed === 5) {
                             ui.socketError('Too many clients connected.  A maximum of 5 clients may be connected at any one time.  Close some connections to the ESP Somfy RTS device to proceed.');
                         }
                         let spanAttempts = document.getElementById('spanSocketAttempts');
