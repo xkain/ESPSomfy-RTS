@@ -1129,17 +1129,13 @@ class UIBinder {
         sub.innerHTML = `<div><label>Service:</label>${err.service}</div><div style="font-size:22px;">${msg}</div>`;
         return div;
     }
-
-
     socketError(el, msg) {
         if (arguments.length === 1) {
             msg = el;
             el = document.getElementById('divContainer');
         }
-        // Éviter de dupliquer le message d'erreur de socket
         let existing = document.querySelector('.socket-error');
         if (existing) {
-            // On met juste à jour le nombre de tentatives si nécessaire
             return existing;
         }
         let div = document.createElement('div');
@@ -1150,18 +1146,6 @@ class UIBinder {
         el.appendChild(div);
         return div;
     }
-
-
-
-
-
-
-
-
-
-
-
-
     errorMessage(el, msg) {
         this.clearErrors();
         if (arguments.length === 1) {
