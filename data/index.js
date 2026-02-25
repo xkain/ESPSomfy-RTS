@@ -676,10 +676,10 @@ async function initSockets() {
                 else {
                     if (connecting) {
                         connectFailed++;
-                        let timeout = Math.min(connectFailed * 500, 10000);
+                        let timeout = Math.min(connectFailed * 50, 1000);
                         console.log(`Initial socket did not connect try again (server was busy and timed out ${connectFailed} times)`);
                         tConnect = setTimeout(async () => { await reopenSocket(); }, timeout);
-                        if (connectFailed === 5) {
+                        if (connectFailed === 1) {
                             ui.socketError('Too many clients connected.  A maximum of 5 clients may be connected at any one time.  Close some connections to the ESP Somfy RTS device to proceed.');
                         }
                         let spanAttempts = document.getElementById('spanSocketAttempts');
@@ -1136,6 +1136,12 @@ class UIBinder {
             msg = el;
             el = document.getElementById('divContainer');
         }
+        // Éviter de dupliquer le message d'erreur de socket
+        let existing = document.querySelector('.socket-error');
+        if (existing) {
+            // On met juste à jour le nombre de tentatives si nécessaire
+            return existing;
+        }
         let div = document.createElement('div');
         div.innerHTML = `<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Attempts:</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Unable to connect to the server</div><hr><div style="font-size:.7em">${msg}</div></div>`;
         div.classList.add('error-message');
@@ -1144,14 +1150,27 @@ class UIBinder {
         el.appendChild(div);
         return div;
     }
+
+
+
+
+
+
+
+
+
+
+
+
     errorMessage(el, msg) {
+        this.clearErrors();
         if (arguments.length === 1) {
             msg = el;
             el = document.getElementById('divContainer');
         }
         let div = document.createElement('div');
         div.innerHTML = `
-        <div class="message-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton" type="button" onclick="ui.clearErrors();">${tr('BT_CLOSE')}</button></div>`;
+        <div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton" type="button" onclick="ui.clearErrors();">Close</button></div>`;
         div.classList.add('error-message', 'message-overlay');
         el.appendChild(div);
         return div;

@@ -23,12 +23,13 @@
     --svg-shade0: #101010;
     --svg-shade1: #5e5d5d;
     --svg-shade2: #343333;
-    --svg-shade3: #383838;
+    --svg-shade3: #434343;
     --svg-shade4: #332b28;
     --svg-shade5: #515255;
     --barreRoomBg: #d9d9d9;
     --room-pill : #fffdfd;
     --side-handle:#5e5d5d;
+    --side-handleHov:#8e8c8c;
 
     --borderShadeCtl: #999;
     --shadowShadeCtl: rgba(125, 125, 125, 0.6);
@@ -36,6 +37,8 @@
     --help: #c3c3c3;
     --wait-overlay : rgba(236, 236, 236, 0.3);
     --border: #bbc5d1;
+    --buttonMy: #c3c3c3;
+    --crlIndicator: #5e5d5d;
 }
 :root[data-theme="dark"] {
     --body-color: #1c1c1c;
@@ -63,6 +66,7 @@
     --barreRoomBg: #0f0f0f;
     --room-pill : #4a4a4a;
     --side-handle:#4a4a4a;
+    --side-handleHov:#313131;
 
     --borderShadeCtl: #333;
     --shadowShadeCtl: rgba(0, 0, 0, 0.6);
@@ -70,6 +74,8 @@
     --help: #474747;
     --wait-overlay : rgba(2, 2, 2, 0.0);
     --border: #333;
+    --buttonMy: #5e5e5e;
+    --crlIndicator: #4a4a4a ;
 }
 html, body {
     margin: 0;
@@ -1035,7 +1041,6 @@ button:active {
 
 
 
-
 .inst-overlay {
     display: flex;
     flex-direction: column;
@@ -1052,9 +1057,12 @@ button:active {
     font-size: 13px;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
+
+
 div.info-message,
 div.prompt-message,
-div.error-message {
+div.error-message,
+div.socket-error {
     position: absolute;
     left: 0;
     top: 0;
@@ -1064,11 +1072,12 @@ div.error-message {
     justify-content: center;
     align-items: center;
     background-color: var(--wait-overlay);
+    z-index: 30000;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
+.error-content,
 .message-content,
 .overlay-content,
-.inner-error,
 .instructions-content {
     position: relative;
      width: 90%;
@@ -1081,7 +1090,8 @@ div.error-message {
     border-radius: 25px;
     border: 1px solid var(--border);
 }
-.message-content {
+.message-content,
+.error-content {
     max-width: 550px;
     text-align: center;
     gap: 20px;
@@ -1089,8 +1099,25 @@ div.error-message {
 .overlay-content {
     max-width: 600px;
     gap: 20px;
-
 }
+.socket-error .inner-error {
+    background: var(--unibloc-color);
+    max-width: 560px;
+    color: var(--color);
+    font-size: 19px;
+    min-height: 206px;
+    border-radius: 25px;
+    align-content: center;
+    border: 1px solid var(--border);
+}
+div.error-message {
+    animation: fadeInOnly 0.4s ease-out forwards;
+}
+
+
+
+
+
 
 .instructions-content {
     max-width: 600px;
@@ -1109,15 +1136,7 @@ div.error-message > .sub-message {
     font-size:14px;
     margin-bottom: 5%;
 }
-div.error-message {
-    text-align: center;
-}
-div.socket-error {
-    opacity: 1;
-    font-size: 20px;
-    min-height: 277px;
-    z-index: 20001;
-}
+div.error-message,
 .prompt-message > .button-container {
     text-align:center;
 }
@@ -1298,6 +1317,15 @@ div.wait-overlay {
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
         background: var(--wait-overlay); /* On arrive à ta couleur définie */
+    }
+}
+/* On crée une animation qui ne floute PAS pour les messages */
+@keyframes fadeInOnly {
+    from {
+        background: rgba(0, 0, 0, 0);
+    }
+    to {
+        background: var(--wait-overlay);
     }
 }
 div.wait-overlay > .lds-roller {
@@ -1552,7 +1580,7 @@ div.wait-overlay > .lds-roller {
     cursor: pointer;
 }
 .shadectl-side-handle:hover {
-    background-color: var(--bg-switch-color);
+    background-color: var(--side-handleHov);
 }
 .shadectl-side-handle:hover .handle-icon {
     transform: translateX(1px) scale(1.1);
@@ -2327,8 +2355,12 @@ div.frame-pulses {
         #divGetStarted {
         margin-top: 0;
         }
+        .welcome-container {
+            gap: 25px;
+        }
         .welcomeMiddle p {
             max-width: 331px;
+            font-size: 1em;
         }
 
         .welcomeCard-content H1 {
@@ -2449,6 +2481,7 @@ div.frame-pulses {
     #divUnauthenticated .button-container-row {
         gap: 12px;
     }
+
 }
 @media screen and (max-width: 550px) {
     .hide550 {
