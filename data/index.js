@@ -4042,7 +4042,7 @@ class Somfy {
                     shade.name = '';
                     shade.downTime = shade.upTime = 10000;
                     shade.tiltTime = 7000;
-                    shade.bitLength = 56;
+                    //shade.bitLength = 56;
                     shade.flipCommands = shade.flipPosition = false;
                     ui.toElement(elShade, shade);
                     if (ico) {
