@@ -11,3 +11,4 @@ SomfyController.ino.esp32s2.bin
 
 build/
 AA-BinAutoPlaceName.sh
+.Creator.py
