@@ -1251,13 +1251,10 @@ void Web::begin() {
 
     });
 
-
-
-
   server.on("/index.js", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/index.js", "text/javascript"); });
+  server.on("/base.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/base.css", "text/css"); });
   server.on("/main.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css", "text/css"); });
-  server.on("/widgets.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/widgets.css", "text/css"); });
-  server.on("/icons.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/icons.css", "text/css"); });
+  server.on("/overlays.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/overlays.css", "text/css"); });
   server.on("/favicon.svg", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.svg", "image/svg+xml"); });
   server.onNotFound([]() { webServer.handleNotFound(server); });
   server.on("/controller", []() { webServer.handleController(server); });

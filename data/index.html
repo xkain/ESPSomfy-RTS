@@ -18,9 +18,9 @@
     })();
     </script>
 
+    <link rel="stylesheet" href="base.css?v=2.4.9c" type="text/css" />
     <link rel="stylesheet" href="main.css?v=2.4.9c" type="text/css" />
-    <link rel="stylesheet" href="widgets.css?v=2.4.9c" type="text/css" />
-    <link rel="stylesheet" href="icons.css?v=2.4.9c" type="text/css" />
+    <link rel="stylesheet" href="overlays.css?v=2.4.9c" type="text/css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <script type="text/javascript" src="index.js?v=2.4.9c"></script>
@@ -28,7 +28,6 @@
 <body>
     <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
     <header class="top-bar">
-
         <div class="top-bar-left">
             <svg width="100" height="100"><use xlink:href="#icon-logo"></use></svg>
             <span class="site-title">ESPSomfy-RTS</span>
@@ -57,8 +56,6 @@
             </div>
         </div>
     </header>
-
-
     <aside class="sidebar">
         <nav class="sidebar-nav">
             <a class="nav-item" data-grpid="divHomePnl">
@@ -120,11 +117,6 @@
             <button id="btnReboot" type="button" class="boutonOutline" onclick="general.rebootDevice();" data-lang="BT_REBOOT">Redémarrer</button>
         </div>
     </aside>
-
-
-
-
-
     <div id="divContainer" class="container" data-auth="false">
         <div id="divAuthenticated" style="display:none;">
 
@@ -280,8 +272,6 @@
                                 <label for="fldPinEntry" style="display:block" data-lang="SECURITY_ENTER_PIN" >Saisir Code Pin</label>
                             </div>
                         </div>
-
-
                         <div id="divPasswordSecurity" style="display:none;">
                             <div class="field-group unibloc">
                                 <div class="field-group">
@@ -428,7 +418,7 @@
                                 <span style="font-weight: bold;">xkain</span>
                             </label>
                             <hr>
-                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software', '_blank')">
+                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/wiki', '_blank')">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="FIRMWARE_CREDITS_DOCUMENTATION"></div>
                                     <div class="uniStatus" style="text-transform: uppercase;" data-lang="FIRMWARE_CREDITS_DOCUMENTATION_DESC"></div>
@@ -791,7 +781,7 @@
                     </div>
                 </div>
                 <div id="divSomfySettings" style="display:none;">
-                    <div class="subtab-container"><span class="selected" data-grpid="divSomfyRooms" data-lang="SUBTAB_ROOMS">Pièces</span><span class="" data-grpid="divSomfyMotors" data-lang="SUBTAB_SHADES">Volets</span><span data-grpid="divSomfyGroups" data-lang="SUBTAB_GROUPS"> Groupes</span><span data-grpid="divRepeater" data-lang="SUBTAB_REPEATER">Répéteur</span><span class="hide-tabname-virtual-remote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_L">Télécommande Virtuelle</span><span class="show-tabname-virtual-remote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_S">Télécommande</span></div>
+                    <div class="subtab-container"><span class="selected" data-grpid="divSomfyRooms" data-lang="SUBTAB_ROOMS">Pièces</span><span class="" data-grpid="divSomfyMotors" data-lang="SUBTAB_SHADES">Volets</span><span data-grpid="divSomfyGroups" data-lang="SUBTAB_GROUPS"> Groupes</span><span data-grpid="divRepeater" data-lang="SUBTAB_REPEATER">Répéteur</span><span class="subtab-NameHide-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_L">Télécommande Virtuelle</span><span class="subtab-NameShow-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_S">Télécommande</span></div>
 
 
                     <div id="divSomfyRooms" class="subtab-content" style="padding-top:10px;">
@@ -817,17 +807,17 @@
 
 
                         <div id="somfyRoom" style="width:100%;display:none;">
-                            <div style="display:inline-block;float:right;position:relative;"><span id="spanRoomId">*</span>/<span id="spanMaxRooms">16</span></div>
+                            <div style="float:rightk;;position:relative;"><span id="spanRoomId">*</span>/<span id="spanMaxRooms">16</span></div>
                             <div class="field-group unibloc">
                                 <label class="label" for="fldRoomName" data-lang="NAME">Nom</label>
                                 <input id="fldRoomName" class="inputAndSelect" name="roomName" data-bind="name" type="text" length=20  data-lang="ROOM_NAME_PHL" placeholder="Entrer un nom de pièce">
                             </div>
-                            <div class="button-container-col">
+                            <div class="button-container-row">
                                 <button id="btnSaveRoom" class="bouton" type="button" onclick="somfy.saveRoom();" data-lang="BT_SAVE_ROOM">
                                     Sauvegarder Pièce
                                 </button>
-                                <button id="btnRoomGoBack" class="boutonOutline marginT" type="button" onclick="somfy.showEditRoom(false);" data-lang="BT_DONE">
-                                    Terminé
+                                <button id="btnRoomGoBack" class="boutonOutline" type="button" onclick="somfy.showEditRoom(false);" data-lang="BT_CLOSE">
+                                    Fermer
                                 </button>
                             </div>
                         </div>
@@ -853,7 +843,7 @@
                             </div>
                         </div>
                         <div id="somfyShade" style="width:100%;display:none;" data-bitlength="56">
-                            <div style="display:inline-block;float:right;position:relative;"><span id="spanShadeId">*</span>/<span id="spanMaxShades">5</span></div>
+                            <div style="float:right;position:relative;"><span id="spanShadeId">*</span>/<span id="spanMaxShades">5</span></div>
                             <div class="field-group" style="padding:0px;">
                                 <div class="field-group unibloc">
                                     <div class="field-group" style="padding:0px;">
@@ -911,22 +901,31 @@
                                         </div>
                                     </div>
                                     <div id="divGPIOControl" class="field-group">
-                                        <div id="divGPIOUp" class="field-group" style="">
+                                        <div id="divGPIOUp" class="field-group">
                                          <hr>
                                             <div>
-                                                <label class="label" for="selShadeGPIOUp" data-lang="GPIO_UP">Monter</label>
+                                                <label class="label" for="selShadeGPIOUp" data-lang="SHADE_GPIO_UP">Monter</label>
                                                 <select id="selShadeGPIOUp" class="inputAndSelect" data-bind="gpioUp" data-datatype="int"></select>
                                             </div>
                                         </div>
                                         <hr>
-                                        <div id="divGPIODown" class="field-group" style="">
-                                            <label class="label" for="selShadeGPIODown" data-lang="GPIO_DOWN">Descendre</label>
+                                        <div id="divGPIODown" class="field-group">
+                                            <label class="label" for="selShadeGPIODown" data-lang="SHADE_GPIO_DOWN">Descendre</label>
                                             <select id="selShadeGPIODown" class="inputAndSelect" data-bind="gpioDown" data-datatype="int"></select>
                                         </div>
                                         <hr id="hrGPIOMy">
-                                        <div id="divGPIOMy" class="field-group" style="">
-                                            <label class="label" for="selShadeGPIOMy" data-lang="MY">My</label>
+                                        <div id="divGPIOMy" class="field-group">
+                                            <label class="label" for="selShadeGPIOMy" data-lang="SHADE_GPIO_MY">My</label>
                                             <select id="selShadeGPIOMy" class="inputAndSelect" data-bind="gpioMy" data-datatype="int"></select>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="field-group" style="display:inline-block;">
+                                        <div class="field-group">
+                                            <div id="divShadeAddress" class="field-group">
+                                                <label class="label" for="fldShadeAddress" data-lang="REMOTE_ID">ID Télécommande</label>
+                                                <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 data-lang="ADRESS" placeholder="Address">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -959,16 +958,7 @@
 
                                 </div>
                             </div>
-                            <div class="field-group unibloc">
-                                <div class="field-group" style="display:inline-block;">
-                                    <div class="field-group">
-                                        <div id="divShadeAddress" class="field-group">
-                                            <label class="label" for="fldShadeAddress" data-lang="REMOTE_ID">ID Télécommande</label>
-                                            <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 data-lang="ADRESS" placeholder="Address">
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr id="hrLiftSettings">
+                            <div id="divShadeTimings" class="field-group unibloc">
                                 <div id="divLiftSettings">
                                     <div class="field-group" style="display:inline-block;">
                                         <label class="label" for="fldShadeUpTime" data-lang="SHADE_UP_TIME">Temps montée (ms)</label>
@@ -992,21 +982,27 @@
                                             <option value="4" data-v="SHADE_OPT_TILT_EURO">Inclinaison Euro</option>
                                         </select>
                                     </div>
-                                    <hr>
+                                    <hr id="hrDldTiltTime">
                                     <div class="field-group" style="display:inline-block;vertical-align:middle;">
                                         <label class="label" for="fldTiltTime" data-lang="SHADE_TILT_TIME">Temps inclinaison (ms)</label>
                                         <input id="fldTiltTime" class="inputAndSelect" name="shadeTiltTime" type="number" data-bind="tiltTime" data-datatype="int" length=5 data-lang="SHADE_MS_PLH"  placeholder="milliseconds" />
                                     </div>
                                 </div>
+
                                 <div id="divStepSettings">
-                                <hr>
+                                <hr id="hrDivStepSettings">
                                     <div class="field-group">
                                         <input id="slidStepSize" name="stepSize" type="range" min="1" max="1000" step="1" data-bind="stepSize" data-datatype="int" style="width:100%;" oninput="somfy.stepSizeChanged(this);" />
-                                        <label for="slidStepSize" style="display:block;font-size:1em;margin-top:0px;margin-left:7px;">
+
+                                        <label for="slidStepSize" style="display:flex; justify-content:space-between; align-items:center; font-size:1em; margin-top:0px; padding:0 7px;">
+
                                             <span data-lang="SHADE_STEP_SIZE_MIN">Taille du pas (plus petit)</span>
-                                            <span style="float:right;display:inline-block;margin-right:7px;">
-                                                <span id="spanStepSize" data-bind="stepSize" data-datatype="int" data-fmttype="number" data-fmtmask="#,##0" style="color:black;"></span><span data-lang="SHADE_STEP_SIZE_MAX">(plus grand)</span>
+
+                                            <span style="display:inline-flex; gap:5px; align-items:center;">
+                                                <span id="spanStepSize" data-bind="stepSize" data-datatype="int" data-fmttype="number" data-fmtmask="#,##0"></span>
+                                                <span data-lang="SHADE_STEP_SIZE_MAX">(plus grand)</span>
                                             </span>
+
                                         </label>
                                     </div>
                                 </div>
@@ -1148,13 +1144,15 @@
                                     Définir Code
                                 </button>
                             </div>
-                            <div class="button-container-col">
+                            <div class="button-container-col marginB" >
                                 <button id="btnLinkRemote" class="boutonOutline" type="button" onclick="somfy.linkRemote(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_LINK_REMOTE">
                                     Appairer Télécommande
                                 </button>
                             </div>
-                            <hr>
-                            <div id="divLinkedRemoteList" style="overflow-y:auto;max-height:177px;padding-top:2px;padding-bottom:2px;"></div>
+
+
+
+                            <div id="divLinkedRemoteList" style="overflow-y:auto;margin-top:15px;"></div>
                             <div class="button-container-row">
                                 <button id="btnSaveShade" class="bouton" type="button" onclick="somfy.saveShade();" data-lang="BT_SAVE_SHADE">
                                     Sauvegarder Volet
@@ -1172,7 +1170,7 @@
                         <div id="divGroupListContainer">
 
                             <div id="divGroupEmptyState" class="empty-state" style="display:none;">
-                                <svg class="empty-icon"><use href="#icon-tabSomfy"></use></svg>
+                                <svg class="empty-icon"><use href="#svg-emptyGroup"></use></svg>
                                 <p data-lang="EMPTY_GROUP_TITLE">Il n'y a pas encore de groupe créé.</p>
                                 <p class="empty-subtext" data-lang="EMPTY_GROUP_DESC">Cliquez sur le bouton ci-dessous pour en ajouter un.</p>
                             </div>
@@ -1189,7 +1187,18 @@
                             </div>
                         </div>
                         <div id="somfyGroup" style="width:100%;display:none;">
-                            <div style="display:inline-block;float:right;position:relative;"><span id="spanGroupId">*</span>/<span id="spanMaxGroups">5</span></div>
+                            <div style="float:right;position:relative;"><span id="spanGroupId">*</span>/<span id="spanMaxGroups">5</span></div>
+                            <div class="field-group unibloc">
+                                <div class="field-group">
+                                    <label class="label" for="fldGroupName" data-lang="NAME">Nom</label>
+                                    <input id="fldGroupName" class="inputAndSelect" name="groupName" data-bind="name" type="text" length=20  data-lang="SECURITY_ENTER_NAME" placeholder="entrer un Nom">
+                                </div>
+                                 <hr>
+                                <div class="field-group">
+                                    <label class="label" for="selGroupRoom" data-lang="ROOM">Pièce</label>
+                                    <select id="selGroupRoom" class="inputAndSelect" data-bind="roomId" data-datatype="int"></select>
+                                </div>
+                            </div>
                             <div class="field-group unibloc">
                                 <div class="field-group">
                                     <label class="label" for="selGroupProto" data-lang="PROTOCOL">Protocole</label>
@@ -1211,17 +1220,6 @@
                                 <div class="field-group">
                                     <label class="label" for="fldShadeAddress" data-lang="REMOTE_ID">ID Télécommande</label>
                                     <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 placeholder="Adresse">
-                                </div>
-                            </div>
-                            <div class="field-group unibloc">
-                                <div class="field-group">
-                                    <label class="label" for="fldGroupName" data-lang="NAME">Nom</label>
-                                    <input id="fldGroupName" class="inputAndSelect" name="groupName" data-bind="name" type="text" length=20  data-lang="SECURITY_ENTER_NAME" placeholder="entrer un Nom">
-                                </div>
-                                 <hr>
-                                <div class="field-group">
-                                    <label class="label" for="selGroupRoom" data-lang="ROOM">Pièce</label>
-                                    <select id="selGroupRoom" class="inputAndSelect" data-bind="roomId" data-datatype="int"></select>
                                 </div>
                             </div>
                             <div class="field-group">
@@ -1265,13 +1263,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="button-container-col marginT">
+                            <div class="button-container-col marginB">
                                <button id="btnLinkShade" class="boutonOutline" type="button" onclick="somfy.linkGroupShade(parseInt(document.getElementById('spanGroupId').innerText, 10));" data-lang="BT_LINK_SHADE">
                                     Associer Volet
                                 </button>
                             </div>
-                            <hr>
-                            <div id="divLinkedShadeList" style="overflow-y:auto;"></div>
+
+                            <div id="divLinkedShadeList" style="overflow-y:auto;margin-top:15px;"></div>
                             <div class="button-container-row">
                                  <button id="btnSaveGroup" class="bouton" type="button" onclick="somfy.saveGroup();" data-lang="BT_SAVE_GROUP">
                                     Sauvegarder Groupe
@@ -1300,6 +1298,8 @@
                             </div>
                         </div>
                     </div>
+
+
                     <div id="divVirtualRemote" style="display:none;padding:0px;margin-top: 25px;" class="subtab-content" data-bitlength="56">
                         <div class="vr-content">
 
@@ -1310,10 +1310,10 @@
                             </div>
                             <div class="vr-button vr-bloctoogle">
                                 <div class="button-outline vr-toogle vr-stop vr-80bit" data-cmd="stop" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
-                                    <svg class="icon-svg" style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggleHand"></use></svg>
+                                    <svg style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggleHand"></use></svg>
                                 </div>
                                 <div class="button-outline vr-toogle vr-updownmy" data-cmd="toggle" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
-                                    <svg class="icon-svg" style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggle"></use></svg>
+                                    <svg  style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggle"></use></svg>
                                 </div>
                             </div>
                             <div class="vr-updownmy vr-wheel-container">
@@ -1344,8 +1344,14 @@
                                 </div>
                                 <div class="vr-block-center" style="padding: 10px">
                                     <div class="vr-block-centerFlag">
-                                        <div class="vr-button-sunflagL btn-sunflag" style="flex:1;" data-cmd="SunFlag" data-lang="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-sunflag-o"></use></svg></div>
-                                        <div class="vr-button-sunflagR btn-sunflag" style="flex:1;" data-cmd="Flag" data-lang="VR_SUN_FLAG" title="" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg class="button-outline2"><use xlink:href="#vr-sunflag-c"></use></svg></div>
+
+
+                                        <div class="vr-button-sunflagL btn-sunflag" style="flex:1;" data-cmd="SunFlag" data-lang="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg><use xlink:href="#vr-sunflag-o"></use></svg>
+                                        </div>
+                                        <div class="vr-button-sunflagR btn-sunflag" style="flex:1;" data-cmd="Flag" data-lang="VR_SUN_FLAG" title="" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="button-outline2"><use xlink:href="#vr-sunflag-c"></use></svg>
+                                        </div>
                                     </div>
                                     <div style="border-radius: 25px;">
                                         <div class="switch-group">
@@ -1373,17 +1379,19 @@
                                 </div>
                             </div>
                             <div class="vr-button vr-80bit vr-step80">
+
+                                <div style="flex-shrink: 0;">
+                                    <div class="vr-step80-arrow" data-cmd="StepUp" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="icon-svg"><use xlink:href="#vr-up"></use></svg>
+                                    </div>
+                                </div>
                                 <div style="flex: 1; display: flex; flex-direction: column;">
                                     <input id="vrslidStepSize" style="width: 100%; margin: 0; cursor: pointer; z-index: 2;" name="stepSize" type="range" min="1" max="127" step="1" data-bind="stepSize" value="1" oninput="document.getElementById('vrspanStepSize').innerText = this.value;" />
                                     <div class="vr-step80Label">
                                         <label data-lang="VR_STEP_SIZE">Taille des pas : </label><span id="vrspanStepSize">1</span>
                                     </div>
                                 </div>
-                                <div style="flex-shrink: 0;">
-                                    <div class="vr-step80-arrow" data-cmd="StepUp" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
-                                        <svg class="icon-svg"><use xlink:href="#vr-up"></use></svg>
-                                    </div>
-                                </div>
+
                                 <div style="flex-shrink: 0;">
                                     <div class="vr-step80-arrow" data-cmd="StepDown" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <svg class="icon-svg"><use xlink:href="#vr-down"></use></svg>
@@ -1484,10 +1492,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
-
                         <div class="field-group uniblocRadio">
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1502,28 +1506,33 @@
                                             Fréquence de base
                                         </label>
                                     </div>
+                                    <div class="numberfield">
+                                        <span style="margin-right:7px;">
+                                            <span id="spanFrequency" data-bind="transceiver.config.frequency"
+                                                data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
+                                            <span data-lang="MHZ">MHz</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidFrequency', -1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowLeft"></use></svg>
+                                    </button>
+                                    <input id="slidFrequency" class="RadioSlider" name="frequency" type="range"
+                                        min="433000" max="434399" step="1" style="flex:1;"
+                                        data-bind="transceiver.config.frequency" data-datatype="float" data-mult="1000"
+                                        oninput="somfy.frequencyChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidFrequency', 1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowRight"></use></svg>
+                                    </button>
                                     <div id="stepButtons" style="display:flex; gap:5px;">
                                         <button type="button" class="step-btn" onclick="somfy.setStep('freq', 1)">1</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('freq', 10)">10</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('freq', 100)">100</button>
                                     </div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
-                                    <input id="slidFrequency" class="md3-slider" name="frequency" type="range"
-                                        min="433000" max="434399" step="1" style="flex:1;"
-                                        data-bind="transceiver.config.frequency" data-datatype="float" data-mult="1000"
-                                        oninput="somfy.frequencyChanged(this);" />
-                                    <div class="numberfield">
-                                        <span style="margin-right:7px;">
-                                            <span id="spanFrequency" data-bind="transceiver.config.frequency"
-                                                data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
-                                            <span>MHz</span>
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                             <hr>
-
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <div style="display:flex; align-items:center; gap:3px;">
@@ -1537,19 +1546,25 @@
                                             Largeur bande RX
                                         </label>
                                     </div>
-                                    <div id="stepButtonsRx" style="display:flex; gap:5px;">
-                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 1)">1</button>
-                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 10)">10</button>
-                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 100)">100</button>
-                                    </div>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
-                                    <input id="slidRxBandwidth" class="md3-slider" name="rxBandwidth" type="range" min="5803" max="81250" step="1" style="flex:1;" data-bind="transceiver.config.rxBandwidth" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.rxBandwidthChanged(this);" />
                                     <div class="numberfield">
                                         <span style="margin-right:7px;">
                                             <span id="spanRxBandwidth" data-bind="transceiver.config.rxBandwidth" data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
-                                            <span>MHz</span>
+                                            <span data-lang="MHZ">MHz</span>
                                         </span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidRxBandwidth', -1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowLeft"></use></svg>
+                                    </button>
+                                    <input id="slidRxBandwidth" class="RadioSlider" name="rxBandwidth" type="range" min="5803" max="81250" step="1" style="flex:1;" data-bind="transceiver.config.rxBandwidth" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.rxBandwidthChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidRxBandwidth', 1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowRight"></use></svg>
+                                    </button>
+                                     <div id="stepButtonsRx" style="display:flex; gap:5px;">
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 1)">1</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 10)">10</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 100)">100</button>
                                     </div>
                                 </div>
                             </div>
@@ -1567,47 +1582,63 @@
                                             Déviation de fréquence
                                         </label>
                                     </div>
+                                    <div class="numberfield">
+                                        <span style="margin-right:7px;">
+                                            <span id="spanDeviation" data-bind="transceiver.config.deviation" data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000">
+                                            </span>
+                                            <span data-lang="MHZ">MHz</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidDeviation', -1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowLeft"></use></svg>
+                                    </button>
+                                    <input id="slidDeviation" class="RadioSlider" name="deviation" type="range" min="158" max="38085" step="1" style="flex:1;" data-bind="transceiver.config.deviation" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.deviationChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidDeviation', 1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowRight"></use></svg>
+                                    </button>
                                     <div id="stepButtonsDeviation" style="display:flex; gap:5px;">
                                         <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 1)">1</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 10)">10</button>
                                         <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 100)">100</button>
                                     </div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
-                                    <input id="slidDeviation" class="md3-slider" name="deviation" type="range" min="158" max="38085" step="1" style="flex:1;" data-bind="transceiver.config.deviation" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.deviationChanged(this);" />
-                                    <div class="numberfield">
-                                        <span style="margin-right:7px;">
-                                            <span id="spanDeviation" data-bind="transceiver.config.deviation" data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
-                                            <span>MHz</span>
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                             <hr>
-
-
                             <div class="field-group">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <div style="display:flex; align-items:center; gap:3px;">
                                         <div class="help-container" onclick="somfy.toggleTooltip(this)">
-                                            <svg class="help-svg">
-                                                <use xlink:href="#icon-question"></use>
-                                            </svg>
+                                            <svg class="help-svg"><use xlink:href="#icon-question"></use></svg>
                                             <div class="tooltip-text" data-lang="RADIO_TX_POWER_HELP"></div>
                                         </div>
                                         <label for="slidTxPower" style="font-size:1em; margin:0;" data-lang="RADIO_TX_POWER">
                                             TX Puissance
                                         </label>
                                     </div>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
-                                    <input id="slidTxPower" class="md3-slider" name="txPower" type="range" min="0" max="10" step="1" style="flex:1;" data-bind="transceiver.config.txPower" data-datatype="index" data-setonly="true" data-values="[-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12]" oninput="somfy.txPowerChanged(this);" />
-                                    <div class="md3-numbfield">
+                                    <div class="numberfield">
                                         <span style="margin-right:7px;">
-                                            <span id="spanTxPower" data-bind="transceiver.config.txPower" data-datatype="int" data-fmttype="number" data-fmtmask="#,###"></span>
-                                            <span data-lang="DBM">dBm</span>
+                                            <span id="spanTxPower" data-bind="transceiver.config.txPower"
+                                                data-datatype="int" data-fmttype="number" data-fmtmask="#,###"></span>
+                                            <span data-lang="DBM" style="margin-left:3px;">dBm</span>
                                         </span>
                                     </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap:5px; margin:5px 0;">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidTxPower', -1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowLeft"></use></svg>
+                                    </button>
+                                    <input id="slidTxPower" class="RadioSlider" name="txPower" type="range"
+                                        min="0" max="10" step="1" style="flex:1;"
+                                        data-bind="transceiver.config.txPower" data-datatype="index"
+                                        data-setonly="true" data-values="[-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12]"
+                                        oninput="somfy.txPowerChanged(this);" />
+
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidTxPower', 1)">
+                                        <svg class="radioArrowSvg"><use xlink:href="#svg-arrowRight"></use></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1697,7 +1728,7 @@
                     </div>
                 </div>
                 <div id="divGroupControls" style="padding: 0 10px;"></div>
-                <div id="divShadeControls" style="padding: 20px;"></div>
+                <div id="divShadeControls" style="padding:6px 20px;"></div>
                 <div id="divNoDevice" class="empty-state-container" style="display:none;">
                     <svg class="icon-svg"><use xlink:href="#svg-placeholder"></use></svg>
                     <p data-lang="NO_DEVICE">Aucun appareil dans cette pièce</p>
@@ -1746,27 +1777,17 @@
             </div>
         </div>
     </div>
-
     <script type="text/javascript">
         (async () => {
             await init();
         })();
     </script>
    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-
-
-
         <symbol id="icon-question" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11.25c-.69 0-1.25.56-1.25 1.25v.107a.75.75 0 1 1-1.5 0V10A2.75 2.75 0 0 1 12 7.25h.116a2.634 2.634 0 0 1 1.714 4.633l-.77.66a.9.9 0 0 0-.31.674v.533a.75.75 0 0 1-1.5 0v-.533c0-.697.304-1.359.833-1.812l.771-.66a1.134 1.134 0 0 0-.738-1.995zM13 16a1 1 0 1 1-2 0a1 1 0 0 1 2 0" />
         </symbol>
-
-
-
-
         <symbol id="icon-logo" viewBox="0 0 48 48">
-            <path d="m24 2-22 14v8l22-14 22 14v-8z" fill="currentColor"/>
-            <path d="m14 40v-22l-6 4v24h38v-6z" fill="currentColor"/>
-            <path d="m24 24v2h22v-2zm0 4v2h22v-2zm0 4v2h22v-2zm0-12v2h21.32v-2zm0 16v2h22v-2z" fill="currentColor"/>
+            <path d="m24 2-22 14v8l22-14 22 14v-8z" fill="currentColor"/><path d="m14 40v-22l-6 4v24h38v-6z" fill="currentColor"/><path d="m24 24v2h22v-2zm0 4v2h22v-2zm0 4v2h22v-2zm0-12v2h21.32v-2zm0 16v2h22v-2z" fill="currentColor"/>
         </symbol>
   <!--Connexion -->
         <symbol id="icon-user" viewBox="0 0 20 20">
@@ -1793,28 +1814,20 @@
              <path d="m18 5c0-1.33-2-1.33-2 0v1h-12c-1.33 0-1.33 2 0 2h12v1c0 1.33 2 1.33 2 0v-1h2c1.33 0 1.33-2 0-2h-2zm-14 6c-1.33 0-1.33 2 0 2h2v1c0 1.33 2 1.33 2 0v-1h12c1.33 0 1.33-2 0-2h-12v-1c0-1.33-2-1.33-2 0v1zm-1 6c0-0.552 0.448-1 1-1h12v-1c0-1.33 2-1.33 2 0v1h2c1.33 0 1.33 2 0 2h-2v1c0 1.33-2 1.33-2 0v-1h-12c-0.552 0-1-0.448-1-1" fill="currentColor"/>
         </symbol>
         <symbol id="icon-tabNetwork" viewBox="0 0 24 24">
-             <g fill="none" stroke="currentColor" stroke-width="1.2">
-                <circle cx="12" cy="12" r="7.4"/>
-                <ellipse cx="12" cy="12" rx="3.18" ry="7.4"/>
-                <path d="m4.6 12h14.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
+             <g fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="7.4"/><ellipse cx="12" cy="12" rx="3.18" ry="7.4"/><path d="m4.6 12h14.8" stroke-linecap="round" stroke-linejoin="round"/></g>
         </symbol>
         <symbol id="icon-tabSomfy" viewBox="0 0 24 24">
             <path fill="currentColor" d="M3 4h18v4h-2v12h-2V8H7v12H5V8H3zm5 5h8v2H8zm0 3h8v2H8zm0 3h8v2H8zm0 3h8v2H8z" />
         </symbol>
         <symbol id="icon-tabRadio" viewBox="0 0 24 24">
-            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                <path d="m4.9 19.1c-3.9-3.9-3.9-10.3 0-14.2m2.9 2.8c-1.95 2.02-2.28 5.11-0.8 7.5"/><circle cx="12" cy="12" r="2"/><path d="m16.2 7.8c2 2 2.26 5.11 0.8 7.47m2.1-10.4c3.9 3.89 3.9 10.2 0 14.1"/>
-            </g>
+            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m4.9 19.1c-3.9-3.9-3.9-10.3 0-14.2m2.9 2.8c-1.95 2.02-2.28 5.11-0.8 7.5"/><circle cx="12" cy="12" r="2"/><path d="m16.2 7.8c2 2 2.26 5.11 0.8 7.47m2.1-10.4c3.9 3.89 3.9 10.2 0 14.1"/></g>
         </symbol>
 <!-- Bouton -->
         <symbol id="icon-up" viewBox="0 0 48 48">
-            <circle transform="rotate(-90)" cx="-24" cy="24" r="22" fill="currentColor"/>
-            <path d="m33 28.5-9-9-9 9" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+            <circle transform="rotate(-90)" cx="-24" cy="24" r="22" fill="currentColor"/><path d="m33 28.5-9-9-9 9" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
         </symbol>
         <symbol id="icon-my" viewBox="0 0 48 48">
-            <circle cx="24" cy="24" r="22" fill="currentColor" />
-            <text x="24" y="30" fill="#ffffff" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">my</text>
+            <circle cx="24" cy="24" r="22" fill="currentColor" /><text x="24" y="30" fill="#ffffff" font-family="sans-serif" font-size="18" font-weight="bold" text-anchor="middle">my</text>
         </symbol>
         <symbol id="icon-down" viewBox="0 0 48 48">
             <circle transform="rotate(-90)" cx="-24" cy="24" r="22" fill="currentColor"/>
@@ -1858,26 +1871,17 @@
             <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M.75 5.978c3.5-1.754 6.75-2 11.25 0s7.752 1.755 11.25 0l-3.108-1.215M.75 12c3.5-1.754 6.75-2 11.25 0s7.752 1.754 11.25 0l-3.108-1.215M.75 18.022c3.5-1.755 6.75-2 11.25 0s7.752 1.754 11.25 0l-3.108-1.216" />
         </symbol>
         <symbol id="indic-sun" viewBox="0 0 24 24">
-            <g fill="currentColor">
-                <circle cx="12" cy="12" r="5" opacity="0.3" />
-                <path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m12.73 0l-1.41-1.41M6.34 6.34l-1.41-1.41M12 7a5 5 0 100 10 5 5 0 000-10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            </g>
+            <g fill="currentColor"><circle cx="12" cy="12" r="5" opacity="0.3" /><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m12.73 0l-1.41-1.41M6.34 6.34l-1.41-1.41M12 7a5 5 0 100 10 5 5 0 000-10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></g>
         </symbol>
         <symbol id="icon-sun" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="var(--bg-switch-ch-color)" />
-            <g fill="none" stroke="var(--icon-color, --cfg-SvgRight-inner)" stroke-linecap="round" stroke-width="1.12">
-                <circle cx="12" cy="12" r="3.72" fill="var(--icon-color, --cfg-SvgRight-inner)" stroke="none"/>
-                <path d="m12 4.56v1.49m0 11.9v1.49m7.44-7.44h-1.49m-11.9 0h-1.49m12.44-5-1 1m-8 8-1 1m10 0-1-1m-8-8-1-1" />
-            </g>
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)" />
+            <g fill="none" stroke="var(--icon-color, --cfg-SvgRight-inner)" stroke-linecap="round" stroke-width="1.12"><circle cx="12" cy="12" r="3.72" fill="var(--icon-color, --cfg-SvgRight-inner)" stroke="none"/><path d="m12 4.56v1.49m0 11.9v1.49m7.44-7.44h-1.49m-11.9 0h-1.49m12.44-5-1 1m-8 8-1 1m10 0-1-1m-8-8-1-1" /></g>
         </symbol>
         <symbol id="svg-lightbulb" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="var(--bg-switch-ch-color)" />
-            <path d="m12 4.5c-2.732 0.00331-4.947 2.218-4.95 4.95 0 0.75 0.164 1.467 0.487 2.136 0.564 1.168 1.184 2.493 1.683 3.914h5.56c0.5-1.421 1.12-2.746 1.684-3.914 0.3211-0.6662 0.4873-1.396 0.486-2.136 0-2.73-2.22-4.95-4.95-4.95m-2.5 12.5v2h5v-2z"
-                fill="var(--icon-color, --bg-switch-ch-color)"/>
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)" /><path d="m12 4.5c-2.732 0.00331-4.947 2.218-4.95 4.95 0 0.75 0.164 1.467 0.487 2.136 0.564 1.168 1.184 2.493 1.683 3.914h5.56c0.5-1.421 1.12-2.746 1.684-3.914 0.3211-0.6662 0.4873-1.396 0.486-2.136 0-2.73-2.22-4.95-4.95-4.95m-2.5 12.5v2h5v-2z" fill="var(--icon-color, --bg-switch-ch-color)"/>
         </symbol>
         <symbol id="svg-favori" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" fill="var(--bg-switch-ch-color)" />
-            <path fill="var(--icon-color, --bg-switch-ch-color)" d="M16.23 18L12 15.45L7.77 18l1.12-4.81l-3.73-3.23l4.92-.42L12 5l1.92 4.53l4.92.42l-3.73 3.23z" />
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)" /><path fill="var(--icon-color, --bg-switch-ch-color)" d="M16.23 18L12 15.45L7.77 18l1.12-4.81l-3.73-3.23l4.92-.42L12 5l1.92 4.53l4.92.42l-3.73 3.23z" />
         </symbol>
 <!-- Edit-->
         <symbol id="icon-close" viewBox="0 0 24 24">
@@ -1934,19 +1938,25 @@
             <path fill="currentColor" fill-rule="evenodd" d="M23 12c0-6.075-4.925-11-11-11S1 5.925 1 12s4.925 11 11 11s11-4.925 11-11M10.707 6.707a1 1 0 0 0-1.414-1.414l-2 2a1 1 0 0 0 0 1.414l2 2a1 1 0 0 0 1.414-1.414L10.414 9H14a1 1 0 0 1 1 1v1a1 1 0 1 0 2 0v-1a3 3 0 0 0-3-3h-3.586zM9 13a1 1 0 1 0-2 0v1a3 3 0 0 0 3 3h3.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H10a1 1 0 0 1-1-1z" clip-rule="evenodd" />
         </symbol>
         <symbol id="svg-remote" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M9.75 15.5a2.25 2.25 0 1 1 4.5 0a2.25 2.25 0 0 1-4.5 0" />
-            <path fill="currentColor" fill-rule="evenodd" d="M5.674 3.778C5 4.787 5 6.19 5 9v6c0 2.809 0 4.213.674 5.222a4 4 0 0 0 1.104 1.104C7.787 22 9.19 22 12 22s4.213 0 5.222-.674a4 4 0 0 0 1.104-1.104C19 19.213 19 17.81 19 15V9c0-2.809 0-4.213-.674-5.222a4 4 0 0 0-1.104-1.104C16.213 2 14.81 2 12 2s-4.213 0-5.222.674a4 4 0 0 0-1.104 1.104M12 11.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5M8.25 5.5A.75.75 0 0 1 9 4.75h6a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 10a1 1 0 1 0 0-2a1 1 0 0 0 0 2m4-1a1 1 0 1 1-2 0a1 1 0 0 1 2 0m2 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" clip-rule="evenodd" />
+            <path fill="var(--crlIndicator)" d="M9.75 15.5a2.25 2.25 0 1 1 4.5 0a2.25 2.25 0 0 1-4.5 0" />
+            <path fill="var(--crlIndicator)" fill-rule="evenodd" d="M5.674 3.778C5 4.787 5 6.19 5 9v6c0 2.809 0 4.213.674 5.222a4 4 0 0 0 1.104 1.104C7.787 22 9.19 22 12 22s4.213 0 5.222-.674a4 4 0 0 0 1.104-1.104C19 19.213 19 17.81 19 15V9c0-2.809 0-4.213-.674-5.222a4 4 0 0 0-1.104-1.104C16.213 2 14.81 2 12 2s-4.213 0-5.222.674a4 4 0 0 0-1.104 1.104M12 11.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5M8.25 5.5A.75.75 0 0 1 9 4.75h6a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 10a1 1 0 1 0 0-2a1 1 0 0 0 0 2m4-1a1 1 0 1 1-2 0a1 1 0 0 1 2 0m2 1a1 1 0 1 0 0-2a1 1 0 0 0 0 2" clip-rule="evenodd" />
         </symbol>
         <symbol id="icon-return" viewBox="0 0 24 24">
             <path id="path1" d="m4 13c-1-1 0-2 0-2l6-6c1-1 1 0 1 0v3h8s1 0 1 1v6c0 1-1 1-1 1h-8v3s0 1-1 0z" fill="currentColor"/>
         </symbol>
-<!-- INSTRUCTION FIN -->
+<!-- Empty -->
         <symbol id="svg-placeholder" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="8" fill="currentColor" stroke-linecap="round" fill-opacity=".2" stroke-width="2" style="paint-order:markers stroke fill"/>
             <path d="m12 2a10 10 0 0 0-10 10 10 10 0 0 0 2.258 6.328l-1.965 1.965a1 1 0 0 0 0 1.414 1 1 0 0 0 1.414 0l1.965-1.965a10 10 0 0 0 6.328 2.258 10 10 0 0 0 10-10 10 10 0 0 0-2.258-6.328l1.965-1.965a1 1 0 0 0 0-1.414 1 1 0 0 0-1.414 0l-1.965 1.965a10 10 0 0 0-6.328-2.258zm0 2a8 8 0 0 1 4.906 1.68l-11.23 11.23a8 8 0 0 1-1.68-4.906 8 8 0 0 1 8-8zm6.32 3.094a8 8 0 0 1 1.68 4.906 8 8 0 0 1-8 8 8 8 0 0 1-4.906-1.68l11.23-11.23z" fill="currentColor" stroke-width=".275" style="paint-order:markers stroke fill"/>
         </symbol>
         <symbol id="svg-emptyRoom" viewBox="0 0 24 24">
             <path d="M12 13.8l8.9 3.6-8.9 3.6-9-3.6 9-3.6zm0 1.3L6.2 17.4l5.8 2.3 5.8-2.3-5.8-2.3zm-.3-12.1v10.1l-2.7 1.1v-4.8a1.3 1.3 0 0 0-1.8-1.2c-1 .4-1.7 1.4-1.8 2.6V15.3l-2.4 1v-10.2l8.7-3.5zm.6 0l8.7 3.5v10.2l-8.7-3.5V3zm2.4 4.7v3.6l3.6 1.5V7.7l-3.6-1.5zm-6.9 3.3c.3 0 .6.3.6.6s-.3.6-.6.6-.6-.3-.6-.6.3-.6.6-.6z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-emptyGroup" viewBox="0 0 24 24">
+            <path id="path1" d="m3 3v2h1v6h8v-6h1v-2h-10zm2 2h6v1h-6v-1zm0 2h6v1h-6v-1zm0 2h6v1h-6v-1z"/>
+            <path id="path4" d="m11 13v2h1v6h8v-6h1v-2h-10zm2 2h6v1h-6v-1zm0 2h6v1h-6v-1zm0 2h6v1h-6v-1z"/>
+            <path id="path2" d="m18.4 8.84c0.0325-0.854-0.189-1.73-0.705-2.46-0.905-1.27-2.41-1.69-3.71-1.16l0.268 0.816a2.51 2.8 0 0 1 2.83 0.887c0.38 0.534 0.549 1.18 0.535 1.81l-1.59-0.205 1.75 2.47 2.21-1.96z" fill="currentColor" stroke-width=".331"/>
+            <path id="path3" d="m5.63 15.1c-0.0833 0.826 0.096 1.69 0.589 2.43 0.865 1.3 2.4 1.8 3.78 1.37l-0.231-0.809a2.6 2.72 0 0 1-2.88-1.05c-0.363-0.543-0.501-1.18-0.45-1.79l1.64 0.306-1.67-2.51-2.4 1.75z" fill="currentColor" stroke-width=".332"/>
         </symbol>
         <symbol id="svg-emptyRepeater" viewBox="0 0 24 24">
             <g id="g2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -2094,7 +2104,6 @@
             <circle cx="12" cy="12" r="10" fill="var(--side-handle)" />
             <path class="contactBulbe-fill" d="m12 4.5c-2.732 0.00331-4.947 2.218-4.95 4.95 0 0.75 0.164 1.467 0.487 2.136 0.564 1.168 1.184 2.493 1.683 3.914h5.56c0.5-1.421 1.12-2.746 1.684-3.914 0.3211-0.6662 0.4873-1.396 0.486-2.136 0-2.73-2.22-4.95-4.95-4.95m-2.5 12.5v2h5v-2z" />
         </symbol>
-<!-- VR REMOTE FIN -->
     </svg>
 </body>
 </html>
