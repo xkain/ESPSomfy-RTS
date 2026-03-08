@@ -95,7 +95,7 @@ If you lose access to the web interface (due to a network misconfiguration or fo
 
 ### What happens during a Hard Reset?
 * **Restored:** All settings (Wi-Fi, MQTT, Rooms, Shades) are wiped and reset to default.
-* **Not Restored:** The firmware version remains the same. If you updated to v2.4.9, it will stay at v2.4.9 (it does not downgrade to the original factory version).
+* **Not Restored:** The firmware version remains the same. If you updated to v2.5.0, it will stay at v2.5.0 (it does not downgrade to the original factory version).
 * **Access:** After the reset, the device will restart in **Access Point mode** (SSID: `ESPSomfyRTS `) http://192.168.4.1.
 
 ### 🔌 How to perform the Hard Reset
