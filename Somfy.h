@@ -420,6 +420,7 @@ class SomfyGroup : public SomfyRemote {
 struct transceiver_config_t {
     bool printBuffer = false;
     bool enabled = false;
+    uint8_t boardType = 0;
     uint8_t type = 56;                // 56 or 80 bit protocol.
     radio_proto proto = radio_proto::RTS;
     uint8_t SCKPin = 18;

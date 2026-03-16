@@ -4726,6 +4726,7 @@ bool Transceiver::end() {
 }
 void transceiver_config_t::fromJSON(JsonObject& obj) {
     //Serial.print("Deserialize Radio JSON ");
+    if(obj.containsKey("boardType")) this->boardType = obj["boardType"];
     if(obj.containsKey("type")) this->type = obj["type"];
     if(obj.containsKey("CSNPin")) this->CSNPin = obj["CSNPin"];
     if(obj.containsKey("MISOPin")) this->MISOPin = obj["MISOPin"];
@@ -4769,6 +4770,7 @@ void transceiver_config_t::fromJSON(JsonObject& obj) {
     Serial.printf("SCK:%u MISO:%u MOSI:%u CSN:%u RX:%u TX:%u\n", this->SCKPin, this->MISOPin, this->MOSIPin, this->CSNPin, this->RXPin, this->TXPin);
 }
 void transceiver_config_t::toJSON(JsonResponse &json) {
+    json.addElem("boardType", this->boardType);
     json.addElem("type", this->type);
     json.addElem("TXPin", this->TXPin);
     json.addElem("RXPin", this->RXPin);
@@ -4830,6 +4832,7 @@ void transceiver_config_t::toJSON(JsonObject& obj) {
 void transceiver_config_t::save() {
     pref.begin("CC1101");
     pref.clear();
+    pref.putUChar("boardType", this->boardType);
     pref.putUChar("type", this->type);
     pref.putUChar("TXPin", this->TXPin);
     pref.putUChar("RXPin", this->RXPin);
@@ -4921,6 +4924,7 @@ void transceiver_config_t::load() {
         break;
     }
     pref.begin("CC1101");
+    this->boardType = pref.getUChar("boardType", 0);
     this->type = pref.getUChar("type", 56);
     this->TXPin = pref.getUChar("TXPin", this->TXPin);
     this->RXPin = pref.getUChar("RXPin", this->RXPin);
