@@ -171,7 +171,7 @@ class ConfigSettings: BaseSettings {
   public:
     static void printAvailHeap();
     char serverId[10] = "";
-    char hostname[32] = "ESPSomfyRTS";
+    char hostname[32] = "somfy";
     char chipModel[10] = "ESP32";
     char accentColor[8] = "#1a5fb4";
     conn_types_t connType = conn_types_t::unset;

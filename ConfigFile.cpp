@@ -7,11 +7,11 @@
 
 extern Preferences pref;
 
-#define SHADE_HDR_VER 24
+#define SHADE_HDR_VER 25
 #define SHADE_HDR_SIZE 76
 #define SHADE_REC_SIZE 276
 #define GROUP_REC_SIZE 200
-#define TRANS_REC_SIZE 74
+#define TRANS_REC_SIZE 78
 #define ROOM_REC_SIZE 29
 #define REPEATER_REC_SIZE 77
 
@@ -683,6 +683,7 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.enabled = this->readBool(false);
     cfg.proto = static_cast<radio_proto>(this->readUInt8(0));
     cfg.type = this->readUInt8(56);
+    cfg.boardType = this->readUInt8(0);
     cfg.SCKPin = this->readUInt8(cfg.SCKPin);
     cfg.CSNPin = this->readUInt8(cfg.CSNPin);
     cfg.MOSIPin = this->readUInt8(cfg.MOSIPin);
@@ -712,6 +713,11 @@ bool ShadeConfigFile::readSettingsRecord() {
     this->readVarString(settings.NTP.posixZone, sizeof(settings.NTP.posixZone));
     settings.ssdpBroadcast = this->readBool(false);
     if(this->header.version >= 20) settings.checkForUpdate = this->readBool(true);
+    if(this->header.version >= 25) {
+      settings.language = this->readUInt8(0);
+    } else {
+      settings.language = 0; // Anglais par défaut pour les versions antérieures
+    }
     if(this->file.position() != startPos + this->header.settingsRecordSize) {
       Serial.println("Reading to end of settings record");
       this->seekChar(CFG_REC_END);
@@ -1006,7 +1012,8 @@ bool ShadeConfigFile::writeSettingsRecord() {
   this->writeVarString(settings.NTP.ntpServer);
   this->writeVarString(settings.NTP.posixZone);
   this->writeBool(settings.ssdpBroadcast);
-  this->writeBool(settings.checkForUpdate, CFG_REC_END);
+  this->writeBool(settings.checkForUpdate);
+  this->writeUInt8(settings.language,CFG_REC_END);
   return true;
 }
 bool ShadeConfigFile::writeNetRecord() {
@@ -1036,6 +1043,7 @@ bool ShadeConfigFile::writeTransRecord(transceiver_config_t &cfg) {
   this->writeBool(cfg.enabled);
   this->writeUInt8(static_cast<uint8_t>(cfg.proto));
   this->writeUInt8(cfg.type);
+  this->writeUInt8(cfg.boardType);
   this->writeUInt8(cfg.SCKPin);
   this->writeUInt8(cfg.CSNPin);
   this->writeUInt8(cfg.MOSIPin);

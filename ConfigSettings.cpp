@@ -302,6 +302,7 @@ uint16_t ConfigSettings::calcSettingsRecSize() {
     + strlen(this->NTP.posixZone) + 3
     + 6  // ssdpbroadcast
     + 6; // updateCheck
+    + 3;  // language
 }
 uint16_t ConfigSettings::calcNetRecSize() {
   return 4 // connType
