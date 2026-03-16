@@ -1,4 +1,5 @@
 var hst = '192.168.1.13';
+//var hst = '192.168.2.232';
 //var hst = '192.168.4.1';
 var _rooms = [];
 let LANG = {};
@@ -1082,9 +1083,10 @@ class UIBinder {
         }
         return v;
     }
+
     waitMessage(el) {
         let div = document.createElement('div');
-        div.innerHTML = '<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>';
+        div.innerHTML = '<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>';
         div.classList.add('wait-overlay');
         if (typeof el === 'undefined') el = document.getElementById('divContainer');
         el.appendChild(div);
@@ -1154,7 +1156,7 @@ class UIBinder {
         }
         let div = document.createElement('div');
         div.innerHTML = `
-        <div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton" type="button" onclick="ui.clearErrors();">Close</button></div>`;
+        <div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton animScale" type="button" onclick="ui.clearErrors();">Close</button></div>`;
         div.classList.add('error-message', 'message-overlay');
         el.appendChild(div);
         return div;
@@ -1167,7 +1169,7 @@ class UIBinder {
         }
         let div = document.createElement('div');
         div.innerHTML = `
-        <div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" class="bouton" type="button">${tr('BT_YES')}</button><button class="boutonOutline" type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
+        <div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" class="bouton animScale" type="button">${tr('BT_YES')}</button><button class="boutonOutline animScale" type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
         div.classList.add('prompt-message');
         div.classList.add('message-overlay');
         el.appendChild(div);
@@ -1186,7 +1188,7 @@ class UIBinder {
         <div class="info-text">${msg}</div>
         <div class="sub-message"></div>
         <div class="button-container-row">
-        <button id="btnOk" class="bouton" type="button">${tr('BT_OK')}</button>
+        <button id="btnOk" class="bouton animScale" type="button">${tr('BT_OK')}</button>
         </div>
         </div>`;
         div.classList.add('info-message', 'message-overlay');
@@ -2078,20 +2080,27 @@ class Wifi {
     updateStatusBadge(settings) {
         const options = document.querySelectorAll('.opt-badge');
         if (!options.length) return;
+
         const connType = parseInt(settings.connType);
         let activeType = "wifi";
+
         if (connType >= 2) {
+            const boardType = (settings.ethernet && settings.ethernet.boardType !== undefined)
+            ? parseInt(settings.ethernet.boardType) : 0;
             const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined)
-            ? parseInt(settings.ethernet.PWRPin)
-            : -1;
-            activeType = (pwrPin !== -1) ? "poe" : "lan";
+            ? parseInt(settings.ethernet.PWRPin) : -1;
+            if (boardType === 1) {
+                activeType = "lan";
+            }
+            else if (pwrPin !== -1) {
+                activeType = "poe";
+            }
+            else {
+                activeType = "lan";
+            }
         }
         options.forEach(opt => {
-            if (opt.getAttribute('data-conn') === activeType) {
-                opt.classList.add('active');
-            } else {
-                opt.classList.remove('active');
-            }
+            opt.classList.toggle('active', opt.getAttribute('data-conn') === activeType);
         });
     }
     useEthernetClicked() {
@@ -2171,8 +2180,8 @@ class Wifi {
             ${tr("ERR_NO_WIFI_FOUND")}
             </div>
             <div class="button-container-row">
-            <button id="btnRetryWifi" class="bouton" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button>
-            <button id="btnCancelWifi" class="boutonOutline" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
+            <button id="btnRetryWifi" class="bouton animScale" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button>
+            <button id="btnCancelWifi" class="boutonOutline animScale" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
             </div>`;
         }
 
@@ -2281,14 +2290,12 @@ class Wifi {
             const boardType = this.ethBoardTypes.find(elem => obj.ethernet.boardType === elem.val);
             const phyType = this.ethPhyTypes.find(elem => obj.ethernet.phyType === elem.val);
             const clkMode = this.ethClockModes.find(elem => obj.ethernet.CLKMode === elem.val);
-
-            const div = document.createElement('div');
-            div.id = 'divLanSettings';
-            div.className = 'inst-overlay message-overlay';
+            let div = document.createElement('div');
 
             div.innerHTML = `
-            <div class="overlay-content">
-            <div class="boutonOverlayClose" onclick="document.getElementById('divLanSettings').remove();">
+            <div id="divLanSettings" class="inst-overlay">
+            <div class="instructions-content">
+            <div class="boutonOverlayClose animScale" onclick="document.getElementById('divLanSettings').remove();">
             <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
             <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
             </div>
@@ -2299,9 +2306,11 @@ class Wifi {
             </div>
             <svg class="instructions-headerLogo"><use xlink:href="#svg-ethernet"></use></svg>
             </div>
+
             <div class="field-group unibloc" style="margin-bottom:20px; padding: 5px 15px;">
             <p style="font-size:14px; text-align:left;">${tr("ETH_SETTINGS_WARNING_DESC_1")}</p>
             </div>
+
             <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
             <div style="text-align: left; display: inline-block;">
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_BOARD_TYPE")}</label><span>${boardType.label} [${boardType.val}]</span></div>
@@ -2313,8 +2322,9 @@ class Wifi {
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${obj.ethernet.MDIOPin}</span></div>
             </div>
             </div>
+
             <div class="field-group error" style="padding: 15px;">
-            <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; cursor:pointer; width:100%; margin:0; text-align:left;">
+            <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; width:100%; margin:0; text-align:left;">
             <div>
             <input type="checkbox" id="chkConfirmEth" style="display:none;">
             <span class="custom-checkbox"></span>
@@ -2325,13 +2335,16 @@ class Wifi {
             </div>
             </label>
             </div>
+
             <div class="button-container-row" style="margin-top:30px; width:100%;">
-            <button id="btnSaveEthernet" class="bouton" type="button" disabled style="background:#ccc; cursor:not-allowed; flex:1;">${tr("BT_SAVE_ETHERNET")}</button>
-            <button id="btnCancel" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
+            <button id="btnSaveEthernet" class="bouton animScale" type="button" disabled style="background:#ccc; cursor:not-allowed; flex:1;">${tr("BT_SAVE_ETHERNET")}</button>
+            <button id="btnCancel" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
+            </div>
             </div>
             </div>`;
 
             document.getElementById('divContainer').appendChild(div);
+            window.scrollTo(0, 0);
 
             const checkbox = div.querySelector('#chkConfirmEth');
             const saveBtn = div.querySelector('#btnSaveEthernet');
@@ -2386,7 +2399,6 @@ class Wifi {
 
         const ssid = strength.ssid || strength.name;
         const sVal = parseInt(strength.strength);
-
         const elSSID = document.getElementById('spanNetworkSSID');
         const elChan = document.getElementById('spanNetworkChannel');
         const elStrength = document.getElementById('spanNetworkStrength');
@@ -2411,10 +2423,16 @@ class Wifi {
     }
     procEthernet(ethernet) {
         console.log(ethernet);
-        document.getElementById('divEthernetStatus').style.display = ethernet.connected ? '' : 'none';
-        document.getElementById('divWiFiStrength').style.display = ethernet.connected ? 'none' : '';
-        document.getElementById('spanEthernetStatus').innerHTML = ethernet.connected ? 'Connected' : 'Disconnected';
-        document.getElementById('spanEthernetSpeed').innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed}Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
+        const spanStatus = document.getElementById('spanEthernetStatus');
+        const divStatus = document.getElementById('divEthernetStatus');
+        const divWifi = document.getElementById('divWiFiStrength');
+        const spanSpeed = document.getElementById('spanEthernetSpeed');
+
+        divStatus.style.display = ethernet.connected ? '' : 'none';
+        divWifi.style.display = ethernet.connected ? 'none' : '';
+        spanStatus.innerHTML = ethernet.connected ? 'Connected' : 'Disconnected';
+        spanStatus.style.color = ethernet.connected ? '#069800' : '';
+        spanSpeed.innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed} Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
     }
 }
 var wifi = new Wifi();
@@ -2442,17 +2460,21 @@ class Somfy {
         { type: 15, name: 'Gate (1-button center)', ico: 'svg-cgate', lift: true, fcmd: true, fpos: true },
         { type: 16, name: 'Gate (1-button right)', ico: 'svg-rgate', lift: true, fcmd: true, fpos: true },
     ];
-
     radioBoardTypes = [
         { val: 0, label: 'DEFAULT', showGPIO: false },
         { val: 1, label: 'CC1101 – ESP32-D1', showGPIO: false, pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 } },
-        { val: 2, label: 'MANUAL_SETTINGS', showGPIO: true }
+        { val: 2, label: 'CC1101 – WT32-ETH01', showGPIO: false, pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 4, TXPin: 33, RXPin: 35 } },
+        { val: 3, label: 'CC1101 – Olimex ESP32-PoE/EVB', showGPIO: false, pins: { SCKPin: 14, CSNPin: 13, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 36 } },
+        { val: 4, label: 'CC1101 – LilyGO T-Internet POE', showGPIO: false, pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 35 } },
+        { val: 5, label: 'CC1101 – wESP POE', showGPIO: false, pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 39 } },
+        { val: 5, label: 'CC1101 – ESP-PoE-32', showGPIO: false, pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
+        { val: 6, label: 'CC1101 – ESP32s3 Mini', showGPIO: false, pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
+        { val: 7, label: 'MANUAL_SETTINGS', showGPIO: true }
     ];
     init() {
         if (this.initialized) return;
         this.initialized = true;
     }
-
     initPins() {
         document
         .getElementById('selRadioBoardType')
@@ -2470,7 +2492,7 @@ class Somfy {
         this.loadPins('input', document.getElementById('selTransRXPin'));
 
         ui.toElement(document.getElementById('divTransceiverSettings'), {
-            transceiver: { config: { proto: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
+            transceiver: { config: { proto: 0, boardType: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
         });
 
         this.loadPins('out', document.getElementById('selShadeGPIOUp'));
@@ -2498,16 +2520,18 @@ class Somfy {
         const cm = (document.getElementById('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
         const divSummary = document.getElementById('divGPIOSummary');
         const divShowGpio = document.getElementById('divShowGpio');
-
         let targetPins = null;
+        const board = this.radioBoardTypes.find(t => t.val === val);
+
         if (val === 0) {
             if (cm === "s3") targetPins = { SCKPin: 12, CSNPin: 10, MOSIPin: 11, MISOPin: 13, TXPin: 15, RXPin: 14 };
             else if (cm === "s2") targetPins = { SCKPin: 36, CSNPin: 34, MOSIPin: 35, MISOPin: 37, TXPin: 15, RXPin: 14 };
             else if (cm === "c3") targetPins = { SCKPin: 15, CSNPin: 14, MOSIPin: 16, MISOPin: 17, TXPin: 13, RXPin: 12 };
             else targetPins = { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12 };
         }
-        else if (val === 1) targetPins = { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 };
-
+        else if (board && board.pins) {
+            targetPins = board.pins;
+        }
         if (targetPins) {
             const pins = [
                 { label: 'SCLK:', key: 'SCKPin' }, { label: 'CSN:', key: 'CSNPin' }, { label: 'MOSI:', key: 'MOSIPin' },
@@ -2515,8 +2539,7 @@ class Somfy {
             ];
 
             let html = `<div class="gpioRadio-container">`;
-            html += `<div class="help-container" onclick="somfy.toggleTooltip(this)"><svg class="help-svg"><use xlink:href="#icon-question"></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i></div>
-            </div>`;
+            html += `<div class="help-container" onclick="somfy.toggleTooltip(this)"><svg class="help-svg"><use xlink:href="#icon-question"></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i><br><br><span style="color: #ffcc00;">${tr('RADIO_TOOLTIP_GPIO_4')}</span></div></div>`;
 
             pins.forEach((p, i) => {
                 const pinVal = targetPins[p.key];
@@ -2544,12 +2567,17 @@ class Somfy {
                 console.log(err);
                 ui.serviceError(err);
             } else {
-                document.getElementById('spanMaxRooms').innerText = somfy.maxRooms || 0;
-                document.getElementById('spanMaxShades').innerText = somfy.maxShades;
-                document.getElementById('spanMaxGroups').innerText = somfy.maxGroups;
+                document.getElementById('spanMaxRooms').innerText = (somfy.maxRooms - 2);
+                document.getElementById('spanMaxShades').innerText = (somfy.maxShades - 2);
+                document.getElementById('spanMaxGroups').innerText = (somfy.maxGroups - 2);
 
                 ui.toElement(document.getElementById('divTransceiverSettings'), somfy);
 
+                const selBoard = document.getElementById('selRadioBoardType');
+                if(somfy.transceiver && somfy.transceiver.config) {
+                    selBoard.value = somfy.transceiver.config.boardType || 0;
+                    this.onRadioBoardTypeChanged(selBoard); // Force l'affichage du résumé GPIO
+                }
                 const cbRadio = document.getElementById('cbEnableRadio');
                 const txtStatus = document.getElementById('divRadioEnableStatus');
                 const row = document.getElementById('divRadioEnableColor');
@@ -2589,84 +2617,73 @@ class Somfy {
     }
     saveRadio() {
         let valid = true;
-        let getIntValue = (fld) => { return parseInt(document.getElementById(fld).value, 10); };
-        const form = ui.fromElement(document.getElementById('divTransceiverSettings'));
+        const divSettings = document.getElementById('divTransceiverSettings');
+        let trans = ui.fromElement(divSettings).transceiver;
+        const selBoard = document.getElementById('selRadioBoardType');
+        trans.config.boardType = parseInt(selBoard.value, 10);
 
-        let trans = ui.fromElement(document.getElementById('divTransceiverSettings')).transceiver;
         if (typeof trans.config.type === 'undefined' || trans.config.type === '' || trans.config.type === 'none') {
             ui.errorMessage(tr('ERR_RADIO_TYPE_REQUIRED'));
             valid = false;
         }
         if (valid) {
-            let fnValDup = (o, name) => {
-                let val = o[name];
+            const fnValDup = (o, name) => {
+                const val = o[name];
                 if (typeof val === 'undefined' || isNaN(val)) {
                     ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
                     return false;
                 }
                 for (let s in o) {
                     if (s.endsWith('Pin') && s !== name) {
-                        let sval = o[s];
-                        if (typeof sval === 'undefined' || isNaN(sval)) {
-                            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
-                            return false;
-                        }
+                        const sval = o[s];
                         if (sval === val) {
-                            if ((name === 'TXPin' && s === 'RXPin') ||
-                                (name === 'RXPin' && s === 'TXPin'))
-                                continue; // The RX and TX pins can share the same value.  In this instance the radio will only use GDO0.
-                                else {
-                                    ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_PIN_DUPLICATED').replace('%1', name.replace('Pin', '')).replace('%2', s.replace('Pin', ''))
-                                    );
-                                    valid = false;
-                                    return false;
-                                }
+                            if ((name === 'TXPin' && s === 'RXPin') || (name === 'RXPin' && s === 'TXPin')) continue;
+
+                            ui.errorMessage(
+                                document.getElementById('divSomfySettings'),
+                                            tr('ERR_GPIO_PIN_DUPLICATED').replace('%1', name.replace('Pin', '')).replace('%2', s.replace('Pin', ''))
+                            );
+                            return false;
                         }
                     }
                 }
                 return true;
             };
-            if (valid) valid = fnValDup(trans.config, 'SCKPin');
-            if (valid) valid = fnValDup(trans.config, 'CSNPin');
-            if (valid) valid = fnValDup(trans.config, 'MOSIPin');
-            if (valid) valid = fnValDup(trans.config, 'MISOPin');
-            if (valid) valid = fnValDup(trans.config, 'TXPin');
-            if (valid) valid = fnValDup(trans.config, 'RXPin');
-            if (valid) {
-                putJSONSync('/saveRadio', trans, (err, trans) => {
-                    if (err) {
-                        ui.serviceError(err);
-                    }
-                    else {
-                        document.getElementById('btnSaveRadio').classList.remove('disabled');
-
-                        const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
-                        const row = document.getElementById('divRadioEnableColor');
-                        const txtStatus = document.getElementById('divRadioEnableStatus');
-                        const cbRadio = document.getElementById('cbEnableRadio');
-                        const sideNote = document.getElementById('barsideRadioDisable'); // Ton span
-
-                        if (radioTab) {
-                            const isInit = trans.config.radioInit;
-                            radioTab.classList.toggle('radio-error', !isInit);
-
-                            // Mise à jour immédiate après sauvegarde
-                            if (sideNote) sideNote.style.display = isInit ? 'none' : 'inline';
-
-                            row.style.backgroundColor = isInit
-                            ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
-                            : "var(--unibloc-color)";
-                        }
-
-                        const isActuallyEnabled = radioTab && !radioTab.classList.contains('radio-error');
-                        if (cbRadio.checked === isActuallyEnabled) {
-                            txtStatus.textContent = cbRadio.checked ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');
-                        } else {
-                            txtStatus.textContent = tr('RADIO_SAVE_REQUIRED');
-                        }
-                    }
-                });
+            const pinKeys = ['SCKPin', 'CSNPin', 'MOSIPin', 'MISOPin', 'TXPin', 'RXPin'];
+            for (const key of pinKeys) {
+                if (!fnValDup(trans.config, key)) {
+                    valid = false;
+                    break;
+                }
             }
+        }
+        if (valid) {
+            putJSONSync('/saveRadio', trans, (err, response) => {
+                if (err) {
+                    ui.serviceError(err);
+                } else {
+                    document.getElementById('btnSaveRadio').classList.remove('disabled');
+                    const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
+                    const row = document.getElementById('divRadioEnableColor');
+                    const txtStatus = document.getElementById('divRadioEnableStatus');
+                    const cbRadio = document.getElementById('cbEnableRadio');
+                    const sideNote = document.getElementById('barsideRadioDisable');
+                    const isInit = response.config.radioInit;
+
+                    if (radioTab) {
+                        radioTab.classList.toggle('radio-error', !isInit);
+                        if (sideNote) sideNote.style.display = isInit ? 'none' : 'inline';
+                        row.style.backgroundColor = isInit
+                        ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
+                        : "var(--unibloc-color)";
+                    }
+                    if (cbRadio.checked === isInit) {
+                        txtStatus.textContent = cbRadio.checked ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');
+                    } else {
+                        txtStatus.textContent = tr('RADIO_SAVE_REQUIRED');
+                    }
+                }
+            });
         }
     }
     procFrequencyScan(scan) {
@@ -2707,7 +2724,7 @@ class Somfy {
 
             div.innerHTML = `
             <div class="overlay-content">
-            <div class="boutonOverlayClose" onclick="somfy.terminateScanUI(true);">
+            <div class="boutonOverlayClose animScale" onclick="somfy.terminateScanUI(true);">
             <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
             <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
             </div>
@@ -2746,12 +2763,12 @@ class Somfy {
             <canvas id="rssiCanvas" style="width: 100%; height: 100%;"></canvas>
             </div>
             <div class="button-container-col">
-            <button id="btnStopScanning" class="bouton" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
+            <button id="btnStopScanning" class="bouton animScale" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
             <div style="display:flex; gap:10px; width:100%;">
-            <button id="btnRestartScanning" class="bouton" type="button" style="display:none; flex:1;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
-            <button id="btnCopyFrequency" class="bouton" type="button" style="display:none; flex:1;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
+            <button id="btnRestartScanning" class="bouton animScale" type="button" style="display:none; flex:1;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
+            <button id="btnCopyFrequency" class="bouton animScale" type="button" style="display:none; flex:1;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
             </div>
-            <button id="btnCloseScanning" class="boutonOutline" type="button" style="width:100%; display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
+            <button id="btnCloseScanning" class="boutonOutline animScale" type="button" style="width:100%; display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
             </div>
             <div class="field-group unibloc" style="margin-top:15px; padding:15px; font-size:13px; line-height:1.4;">
             <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-color); display:flex; align-items:center;">
@@ -3069,90 +3086,86 @@ class Somfy {
     setRoomsList(rooms) {
         let divCfg = '';
         const homeName = tr('HOME');
-
+        const slider = document.getElementById('divRoomSelector');
         let divPills = `<div class="room-pill active" data-roomid="0" onclick="somfy.selectRoom(0)">${homeName}</div>`;
         let divOpts = `<option value="0">${homeName}</option>`;
-
         _rooms = [{ roomId: 0, name: homeName }];
+
         rooms.sort((a, b) => a.sortOrder - b.sortOrder);
-
-        for (let i = 0; i < rooms.length; i++) {
-            let room = rooms[i];
-            divPills += `<div class="room-pill" data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId})">${room.name}</div>`;
-            divCfg += `<div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">
-            <div class="button-outline-svg" onclick="somfy.openEditRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
-            <span class="room-name">${room.name}</span>
-            <div class="button-outline-svg" onclick="somfy.deleteRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
+        rooms.forEach(room => {
+            divPills += `<div class="room-pill animScale" data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId})">${room.name}</div>`;
+            divCfg += `
+            <div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">
+            <div class="divEditDelete-svg" onclick="somfy.openEditRoom(${room.roomId});">
+            <svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg>
+            </div>
+            <div class="room-name">
+            <span class="name-text">${room.name}</span>
+            </div>
+            <div class="divEditDelete-svg" onclick="somfy.deleteRoom(${room.roomId});">
+            <svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg>
+            </div>
             </div>`;
-
             divOpts += `<option value="${room.roomId}">${room.name}</option>`;
             _rooms.push(room);
-        }
-        const slider = document.getElementById('divRoomSelector');
+        });
+
         slider.innerHTML = divPills;
         slider.style.display = 'flex';
 
-        document.querySelector('.room-nav-container').style.display = rooms.length === 0 ? 'none' : 'flex';
+        const navContainer = document.querySelector('.room-nav-container');
+        if(navContainer) navContainer.style.display = rooms.length === 0 ? 'none' : 'flex';
+
         document.getElementById('divRoomList').innerHTML = divCfg;
         document.getElementById('selShadeRoom').innerHTML = divOpts;
         document.getElementById('selGroupRoom').innerHTML = divOpts;
 
         this.checkEmptyState();
         this.setListDraggable(document.getElementById('divRoomList'), '.room-draggable', (list) => {
-            let items = list.querySelectorAll('.room-draggable');
-            let order = [];
-            for (let i = 0; i < items.length; i++) {
-                order.push(parseInt(items[i].getAttribute('data-roomid'), 10));
-            }
+            let order = Array.from(list.querySelectorAll('.room-draggable')).map(item =>
+            parseInt(item.getAttribute('data-roomid'), 10)
+            );
             putJSONSync('/roomSortOrder', order, (err) => {
                 if (err) ui.serviceError(err);
                 else this.updateRoomsList();
             });
         });
-        const newSlider = slider.cloneNode(true);
-        slider.parentNode.replaceChild(newSlider, slider);
-        const scrollContainer = newSlider;
+        this.initRoomScroll(slider);
+    }
 
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-        const updateArrows = () => {
-            const btnLeft = document.getElementById('btnScrollLeft');
-            const btnRight = document.getElementById('btnScrollRight');
-            if (btnLeft && btnRight) {
-                btnLeft.style.display = scrollContainer.scrollLeft > 5 ? 'flex' : 'none';
-                const hasMoreRight = scrollContainer.scrollWidth > (scrollContainer.scrollLeft + scrollContainer.clientWidth + 5);
-                btnRight.style.display = hasMoreRight ? 'flex' : 'none';
-            }
-        };
+    initRoomScroll(container) {
+        const newContainer = container.cloneNode(true);
+        container.parentNode.replaceChild(newContainer, container);
+        const update = () => this.checkArrows();
+        let isDown = false, startX, scrollLeft;
 
-        scrollContainer.addEventListener('wheel', (e) => {
+        newContainer.addEventListener('wheel', (e) => {
             if (e.deltaY !== 0) {
                 e.preventDefault();
-                scrollContainer.scrollLeft += e.deltaY;
+                newContainer.scrollLeft += e.deltaY;
+                update();
             }
         }, { passive: false });
 
-        scrollContainer.addEventListener('mousedown', (e) => {
+        newContainer.addEventListener('mousedown', (e) => {
             isDown = true;
-            scrollContainer.style.cursor = 'grabbing';
-            startX = e.pageX - scrollContainer.offsetLeft;
-            scrollLeft = scrollContainer.scrollLeft;
+            newContainer.style.cursor = 'grabbing';
+            startX = e.pageX - newContainer.offsetLeft;
+            scrollLeft = newContainer.scrollLeft;
         });
-
-        scrollContainer.addEventListener('mouseleave', () => { isDown = false; scrollContainer.style.cursor = 'grab'; });
-        scrollContainer.addEventListener('mouseup', () => { isDown = false; scrollContainer.style.cursor = 'grab'; });
-        scrollContainer.addEventListener('mousemove', (e) => {
+        const stopScroll = () => { isDown = false; newContainer.style.cursor = 'grab'; };
+        newContainer.addEventListener('mouseleave', stopScroll);
+        newContainer.addEventListener('mouseup', stopScroll);
+        newContainer.addEventListener('mousemove', (e) => {
             if (!isDown) return;
             e.preventDefault();
-            const x = e.pageX - scrollContainer.offsetLeft;
-            const walk = (x - startX) * 2;
-            scrollContainer.scrollLeft = scrollLeft - walk;
+            const walk = (e.pageX - newContainer.offsetLeft - startX) * 2;
+            newContainer.scrollLeft = scrollLeft - walk;
+            update();
         });
-
-        scrollContainer.addEventListener('scroll', updateArrows);
-        window.addEventListener('resize', updateArrows);
-        setTimeout(updateArrows, 100);
+        newContainer.addEventListener('scroll', update);
+        setTimeout(update, 150);
+        window.addEventListener('resize', update);
     }
     scrollRooms(direction) {
         const container = document.getElementById('divRoomSelector');
@@ -3179,9 +3192,8 @@ class Somfy {
         let divCfg = '';
         if (typeof addresses !== 'undefined') {
             for (let i = 0; i < addresses.length; i++) {
-                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("ADDR")}</small><div class="repeater-name">${addresses[i]}</div>`;
-                divCfg += `<div class="button-outline-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>`;
-                divCfg += '</div>';
+
+                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="idRemoteAddress" style="flex-grow: 1;"><span class="AddrId-label">${tr("ADDR")}</span><span class="repeater-name">${addresses[i]}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
             }
         }
         document.getElementById('divRepeatList').innerHTML = divCfg;
@@ -3219,12 +3231,7 @@ class Somfy {
             let st = this.shadeTypes.find(x => x.type === shade.shadeType) || { type: shade.shadeType, ico: 'svg-window-shade' };
 
             // --- SECTION CONFIG ---
-            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}">
-            <div class="button-outline-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
-            <div class="shade-name"><div class="cfg-room">${room.name}</div><div class="">${shade.name}</div></div>
-            <small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("ID")}</small><span class="shade-address">${shade.remoteAddress}</span>
-            <div class="button-outline-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
-            </div>`;
+            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"><div class="divEditDelete-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="shade-name"><div class="cfg-room">${room.name}</div><div class="name-text">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="shade-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
             // --- SECTION CONTROLE ---
             divCtl += `<div class="somfyShadeCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-shadeid="${shade.shadeId}" data-roomid="${shade.roomId}" data-direction="${shade.direction}" data-remoteaddress="${shade.remoteAddress}" data-position="${shade.position}" data-target="${shade.target}" data-mypos="${shade.myPos}" data-mytiltpos="${shade.myTiltPos}" data-shadetype="${shade.shadeType}" data-tilt="${shade.tiltType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"
             data-windy="${(shade.flags & 0x10) === 0x10 ? 'true' : 'false'}" data-sunny="${(shade.flags & 0x20) === 0x20 ? 'true' : 'false'}">
@@ -3242,12 +3249,11 @@ class Somfy {
             divCtl += `<span class="shadectl-mypos"><span class="val-pos">Pos: ${shade.position}%</span>`;
             if (shade.tiltType !== 0) divCtl += `<span class="val-pos"> Tilt: ${shade.tiltPosition}%</span>`;
             divCtl += `</span></div>
-
             <div class="shadectl-buttons" data-shadeType="${shade.shadeType}">
-            <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="up" data-shadeid="${shade.shadeId}"><svg><use href="#icon-up"></use></svg></div>
-            <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="my" data-shadeid="${shade.shadeId}"><svg><use href="#icon-my"></use></svg></div>
-            <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="down" data-shadeid="${shade.shadeId}"><svg><use href="#icon-down"></use></svg></div>
-            <div class="button-outline2 cmd-button btn-somfy-svg-wide" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#icon-toggle"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-shadeid="${shade.shadeId}"><svg><use href="#icon-up"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-shadeid="${shade.shadeId}"><svg><use href="#icon-my"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-shadeid="${shade.shadeId}"><svg><use href="#icon-down"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg-wide animScale" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#icon-toggle"></use></svg></div>
             </div>
             <div class="shadectl-status-bar">
             <div style="display: flex; gap: 5px; color: #666; align-items: center;">
@@ -3267,12 +3273,7 @@ class Somfy {
             }
             divCtl += `<div class="button-my" onclick="event.stopPropagation(); somfy.openSetMyPosition(${shade.shadeId});">
             <svg><use href="#svg-favori"></use></svg>
-            </div>
-            </div>
-            </div>
-            </div>
-            </div>
-            </div></div>`;
+            </div></div></div></div></div></div></div>`;
 
             let opt = document.createElement('option');
             opt.innerHTML = shade.name;
@@ -3509,12 +3510,10 @@ class Somfy {
         [].forEach.call(items, (item) => {
             if (firmware.isMobile()) {
                 item.addEventListener('touchstart', fnDragStart);
-                //item.addEventListener('touchenter', fnDragEnter);
                 item.addEventListener('touchmove', fnDragOver);
                 item.addEventListener('touchleave', fnDragLeave);
                 item.addEventListener('drop', fnDrop);
                 item.addEventListener('touchend', fnDragEnd);
-
             }
             else {
                 item.addEventListener('dragstart', fnDragStart);
@@ -3527,6 +3526,7 @@ class Somfy {
         });
     }
     setGroupsList(groups) {
+        this.groups = groups;
         let divCfg = '';
         let divCtl = '';
         let vrList = document.getElementById('selVRMotor');
@@ -3544,7 +3544,6 @@ class Somfy {
                 optGroup.innerHTML = '';
             }
         }
-
         let roomId = document.querySelector('.room-pill.active') ? parseInt(document.querySelector('.room-pill.active').getAttribute('data-roomid'), 10) : 0;
 
         if (typeof groups !== 'undefined') {
@@ -3553,39 +3552,26 @@ class Somfy {
             for (let i = 0; i < groups.length; i++) {
                 let group = groups[i];
                 let room = _rooms.find(x => x.roomId === group.roomId) || { roomId: 0, name: '' };
-
                 // --- Section Configuration ---
-                divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}">
-                <div class="button-outline-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
-                <div class="group-name">
-                <div class="cfg-room">${room.name}</div>
-                <div>${group.name}</div>
-                </div>
-                <small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("ID")}</small><span class="group-address">${group.remoteAddress}</span>
-                <div class="button-outline-svg" onclick="somfy.deleteGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
-                </div>`;
-
+                divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}"><div class="divEditDelete-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="group-name"><div class="cfg-room">${room.name}</div><div class="name-text">${group.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${group.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteGroup(${group.groupId});"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
                 // --- Section Contrôle (divCtl) ---
                 divCtl += `<div class="somfyGroupCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-groupId="${group.groupId}" data-roomid="${group.roomId}" data-remoteaddress="${group.remoteAddress}">
                 <div class="group-name">
                 <span class="groupctl-room">${room.name}</span>
                 <span class="groupctl-name">${group.name}</span>
                 <div class="groupctl-shades">`;
-
                 if (typeof group.linkedShades !== 'undefined') {
                     divCtl += `<label>Members:</label><span>${group.linkedShades.length}</span>`;
                 }
-
                 divCtl += `</div></div>
                 <div class="groupctl-buttons">
                 <div class="button-sunflag cmd-button" data-cmd="sunflag" data-groupid="${group.groupId}" data-on="${(group.flags & 0x01) ? 'true' : 'false'}" style="${!group.sunSensor ? 'display:none' : ''}"><svg><use href="#icon-sun"></use></svg></div>
-                <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="up" data-groupid="${group.groupId}"><svg><use href="#icon-up"></use></svg></div>
-                <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="my" data-groupid="${group.groupId}"><svg><use href="#icon-my"></use></svg></div>
-                <div class="button-outline2 cmd-button btn-somfy-svg" data-cmd="down" data-groupid="${group.groupId}"><svg><use href="#icon-down"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-groupid="${group.groupId}"><svg><use href="#icon-up"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-groupid="${group.groupId}"><svg><use href="#icon-my"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-groupid="${group.groupId}"><svg><use href="#icon-down"></use></svg></div>
                 </div>
                 </div>`;
 
-                // --- Section Select (VR) ---
                 let opt = document.createElement('option');
                 opt.innerHTML = group.name;
                 opt.setAttribute('data-address', group.remoteAddress);
@@ -3669,7 +3655,7 @@ class Somfy {
         <span class="title">${tr('POPUP_TARGET_POSITION')}</span>
         <span class="val"><span id="spanShadeTarget" class="shade-target">${currPos}</span> ${lbl}</span>
         </div>
-        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />
+        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;"/>
         </div>` : '';
 
         const tiltSlider = (tiltType > 0) ? `
@@ -3691,8 +3677,8 @@ class Somfy {
         ${positionSlider}
         ${tiltSlider}
         <div class="popup-actions" style="display:flex; justify-content: flex-end; gap: 8px;">
-        <button id="btnSetMyPosition" class="bouton-pop" type="button">${tr("BT_SET_MY_POSITION")}</button>
-        <button id="btnCancelMy" class="boutonOutline-pop" type="button">${tr("BT_CANCEL_1")}</button>
+        <button id="btnSetMyPosition" class="bouton-pop animScale" type="button">${tr("BT_SET_MY_POSITION")}</button>
+        <button id="btnCancelMy" class="boutonOutline-pop animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
@@ -3759,36 +3745,28 @@ class Somfy {
     }
     setLinkedRemotesList(shade) {
         let divCfg = '';
-        const divList = document.getElementById('divLinkedRemoteList');
-        if (!shade.linkedRemotes || shade.linkedRemotes.length === 0) {
-            divList.innerHTML = '<div class="no-remote">Aucune télécommande liée</div>';
-            return;
-        }
+        const btnContainer = document.getElementById('divshowSomfyButtons');
 
         for (let i = 0; i < shade.linkedRemotes.length; i++) {
-            const remote = shade.linkedRemotes[i];
-
-            divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><span class="linkedremote-address">
-            <small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("ADDR")}</small>
-            ${remote.remoteAddress}</span><span class="linkedremote-code"><small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("CODE")}</small>${remote.lastRollingCode}</span><div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            let remote = shade.linkedRemotes[i];
+            divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><div class="idRemoteAddress addr-group"><span class="AddrId-label">${tr("ADDR")}</span><span class="linkedremote-address">${remote.remoteAddress}</span></div><div class="idRemoteAddress code-group"><span class="AddrId-label">${tr("CODE")}</span><span class="linkedremote-code">${remote.lastRollingCode}</span></div><div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
         }
-
-        divList.innerHTML = divCfg;
+        document.getElementById('divLinkedRemoteList').innerHTML = divCfg;
     }
     setLinkedShadesList(group) {
         let divCfg = '';
         const btnContainer = document.getElementById('divSomfyGroupButtons');
-        const listContainer = document.getElementById('divLinkedShadeList');
-        const shades = group && group.linkedShades ? group.linkedShades : [];
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
-            divCfg += `<div class="linked-shade" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}"><span class="linkedshade-name">${shade.name}</span><span class="linkedshade-address"><small style="opacity:0.5; font-size:0.7em; margin-right:5px;">${tr("ID")}</small>${shade.remoteAddress}</span><div class="button-outline-svg" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+
+        for (let i = 0; i < group.linkedShades.length; i++) {
+            let shade = group.linkedShades[i];
+
+            divCfg += `<div class="linked-shade" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}">
+            <div class="group-name"><div class="linkedshade-name">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" oonclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
         }
-        if (listContainer) {
-            listContainer.innerHTML = divCfg || `<div class="no-data">${tr("No shades linked")}</div>`;
-        }
+        document.getElementById('divLinkedShadeList').innerHTML = divCfg;
+
         if (btnContainer) {
-            if (shades.length > 0) {
+            if (group.linkedShades.length > 0) {
                 btnContainer.classList.remove('disabled');
             } else {
                 btnContainer.classList.add('disabled');
@@ -3801,15 +3779,17 @@ class Somfy {
         { name: 's3', maxPins: 48, inputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32], outputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32] },
         { name: 'c3', maxPins: 21, inputs: [2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], outputs: [2, 11, 12, 13, 14, 15, 16, 17, 21] }
     ];
-
     loadPins(type, sel, opt) {
         while (sel.firstChild) sel.removeChild(sel.firstChild);
         let cm = document.getElementById('divContainer').getAttribute('data-chipmodel');
         let pm = this.pinMaps.find(x => x.name === cm) || { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] };
-        //console.log({ cm: cm, pm: pm });
+
         for (let i = 0; i <= pm.maxPins; i++) {
+            // --- BANISSEMENT DU GPIO 02 pour éviter les conflits Hardware/Boot
+            if (i === 2) continue;
             if (type.includes('in') && pm.inputs.includes(i)) continue;
             if (type.includes('out') && pm.outputs.includes(i)) continue;
+
             sel.options[sel.options.length] = new Option(`GPIO-${i > 9 ? i.toString() : '0' + i.toString()}`, i, typeof opt !== 'undefined' && opt === i);
         }
     }
@@ -4022,7 +4002,6 @@ class Somfy {
             }
         }
     }
-
     onShadeBitLengthChanged(el) {
         document.getElementById('somfyShade').setAttribute('data-bitlength', el.value);
         this.onShadeTypeChanged(el);
@@ -4032,6 +4011,10 @@ class Somfy {
     }
     openEditRoom(roomId) {
         if (typeof roomId === 'undefined') {
+            if (_rooms.length >= 15) {
+                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_ROOM_LIMIT_REACHED'));
+                return;
+            }
             document.getElementById('btnSaveRoom').innerText = tr('BT_ADD_ROOM');
             getJSONSync('/getNextRoom', (err, room) => {
                 document.getElementById('spanRoomId').innerText = '*';
@@ -4057,7 +4040,6 @@ class Somfy {
                     document.getElementById('btnSaveRoom').style.display = 'inline-block';
                 }
             });
-
         }
     }
     openEditShade(shadeId) {
@@ -4067,7 +4049,13 @@ class Somfy {
         const tiltContainer = document.getElementById('labelTiltContainer');
         const spanValTilt = document.getElementById('valTilt');
         const btnSave = document.getElementById('btnSaveShade');
-
+        if (typeof shadeId === 'undefined') {
+            // On utilise "this.shades" qui est défini dans setShadesList
+            if (this.shades && this.shades.length >= 30) {
+                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_SHADE_LIMIT_REACHED'));
+                return;
+            }
+        }
         btnContainer.style.display = 'flex';
         btnContainer.classList.remove('disabled');
         if (typeof shadeId === 'undefined') {
@@ -4155,6 +4143,13 @@ class Somfy {
         const btnSave = document.getElementById('btnSaveGroup');
         const elGroup = document.getElementById('somfyGroup');
 
+        if (typeof groupId === 'undefined') {
+            // On vérifie this.groups qu'on vient de créer dans setGroupsList
+            if (this.groups && this.groups.length >= 14) {
+                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GROUP_LIMIT_REACHED'));
+                return;
+            }
+        }
         btnLink.style.display = 'none';
         btnContainer.style.display = 'flex';
         btnContainer.classList.add('disabled');
@@ -4658,7 +4653,7 @@ class Somfy {
 
                 div.innerHTML = `
                 <div class="instructions-content">
-                <div id="btnOverlayRollingClose" class="boutonOverlayClose" onclick="document.getElementById('divRollingCode').remove();">
+                <div id="btnOverlayRollingClose" class="boutonOverlayClose animScale" onclick="document.getElementById('divRollingCode').remove();">
                 <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
@@ -4685,8 +4680,8 @@ class Somfy {
                 style="text-align:center; font-size:35px; color: var(--accent-color);" value="${shade.lastRollingCode}">
                 </div>
                 <div class="button-container-row" style="gap:10px;">
-                <button id="btnCancel" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
-                <button id="btnChangeRollingCode" class="bouton" type="button" style="flex:1; background-color: var(--error-color, brown);"
+                <button id="btnCancel" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
+                <button id="btnChangeRollingCode" class="bouton animScale" type="button" style="flex:1; background-color: var(--error-color, brown);"
                 onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
                 </div>
                 </div>`;
@@ -4736,11 +4731,11 @@ class Somfy {
             <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleGarage"></use></svg>
             </div>
             <div class="button-container-row">
-            <button id="btnSendPairing" class="bouton" type="button">${tr("BT_PROG")}</button>
-            <button id="btnMarkPaired" class="bouton" type="button" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_DOOR_PAIRED")}</button>
+            <button id="btnSendPairing" class="bouton animScale" type="button">${tr("BT_PROG")}</button>
+            <button id="btnMarkPaired" class="bouton animScale" type="button" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_DOOR_PAIRED")}</button>
             </div>
             <div class="button-container-col">
-            <button id="btnStopPairing" class="boutonOutline" type="button">${tr("BT_CLOSE")}</button>
+            <button id="btnStopPairing" class="boutonOutline animScale" type="button">${tr("BT_CLOSE")}</button>
             </div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_GARAGE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_GARAGE_STEP_2")}</div></div></div>
@@ -4754,11 +4749,11 @@ class Somfy {
             <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
             </div>
             <div class="button-container-row" style="margin-top: 20px;">
-            <button id="btnSendPairing" class="bouton" style="flex:1;">${tr("BT_PROG")}</button>
-            <button id="btnMarkPaired" class="bouton" style="flex:1;" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
+            <button id="btnSendPairing" class="bouton animScale" style="flex:1;">${tr("BT_PROG")}</button>
+            <button id="btnMarkPaired" class="bouton animScale" style="flex:1;" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
             </div>
             <div class="button-container-col" style="margin-top: 10px;">
-            <button id="btnStopPairing" class="boutonOutline" style="width:100%;">${tr("BT_CLOSE")}</button>
+            <button id="btnStopPairing" class="boutonOutline animScale" style="width:100%;">${tr("BT_CLOSE")}</button>
             </div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_SHADE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_SHADE_STEP_2")}</div></div></div>
@@ -4772,7 +4767,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
         <div class="instructions-content">
-        <div id="btnOverlayPairingClose" class="boutonOverlayClose">
+        <div id="btnOverlayPairingClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -4817,7 +4812,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
         <div class="instructions-content">
-        <div id="btnOverlayPairingClose" class="boutonOverlayClose">
+        <div id="btnOverlayPairingClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -4829,11 +4824,11 @@ class Somfy {
         <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
         </div>
         <div class="button-container-row" style="margin-top: 20px; gap:10px;">
-        <button id="btnSendUnpairing" class="bouton" style="flex:1;">${tr("BT_PROG")}</button>
-        <button id="btnMarkPaired" class="bouton" style="flex:1;" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
+        <button id="btnSendUnpairing" class="bouton animScale" style="flex:1;">${tr("BT_PROG")}</button>
+        <button id="btnMarkPaired" class="bouton animScale" style="flex:1;" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
         </div>
         <div class="button-container-col" style="margin-top: 10px;">
-        <button id="btnStopUnpairing" class="boutonOutline" style="width:100%;">${tr("BT_CLOSE")}</button>
+        <button id="btnStopUnpairing" class="boutonOutline animScale" style="width:100%;">${tr("BT_CLOSE")}</button>
         </div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_1")}</div></div></div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_2")}</div></div></div>
@@ -5001,7 +4996,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divLinking" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
         <div class="instructions-content">
-        <div id="btnOverlayLinkingClose" class="boutonOverlayClose">
+        <div id="btnOverlayLinkingClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -5023,7 +5018,7 @@ class Somfy {
         </div>
         </div>
         <div class="button-container-col" style="margin-top: 10px;">
-        <button id="btnStopLinking" class="bouton" type="button">${tr("BT_CANCEL_1")}</button>
+        <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>
         </div>`;
@@ -5045,7 +5040,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divLinkRepeater" class="inst-overlay" data-type="link-repeatremote">
         <div class="instructions-content">
-        <div id="btnOverlayRepeaterClose" class="boutonOverlayClose">
+        <div id="btnOverlayRepeaterClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -5057,7 +5052,7 @@ class Somfy {
         <svg class="instructions-headerLogo"><use xlink:href="#svg-repeater"></use></svg>
         </div>
         <div class="button-container-col">
-        <button id="btnStopLinking" class="bouton" type="button">${tr("BT_CANCEL_1")}</button>
+        <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_1")}</div>
         <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_2")}</div>
@@ -5090,7 +5085,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
         <div class="instructions-content">
-        <div id="btnOverlayGroupClose" class="boutonOverlayClose">
+        <div id="btnOverlayGroupClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -5112,26 +5107,32 @@ class Somfy {
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center;font-size:25px;font-weight:bold;color:var(--accent-color);"></div>
         <div class="button-container-col wizard-step" data-stepid="3" style="margin-bottom: 15px;">
-        <button class="bouton" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
+        <button class="bouton animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="4" style="text-align:center;font-size:22px;font-weight:bold;color:var(--accent-color);"></div>
         <div class="button-container-col wizard-step" data-stepid="4" style="margin-bottom: 15px;">
-        <button class="bouton" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button>
+        <button class="bouton animScale" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button>
         </div>
         <div class="button-container-row" style="text-align:center; gap:10px;">
-        <button id="btnPrevStep" class="boutonOutline" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
+        <button id="btnPrevStep" class="boutonOutline animScale" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton animScale" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
         </div>
         <div class="button-container-col" style="text-align:center; margin-top:10px;">
-        <button id="btnStopLinking" class="boutonOutline" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
+        <button id="btnStopLinking" class="boutonOutline animScale" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
         </div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_1")}</p></div>
+        <div class="information wizard-step" data-stepid="1"><svg><use xlink:href="#icon-info"></use></svg>
+        <div style="text-align: left; flex: 1;"><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div>
+        </div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP2_DESC_2")}</p></div>
+        <div class="information wizard-step" data-stepid="2"><svg><use xlink:href="#icon-info"></use></svg>
+        <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div>
+        </div>
         <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_2")}</p></div>
+        <div class="information wizard-step" data-stepid="3"><svg><use xlink:href="#icon-info"></use></svg>
+        <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div>
+        </div>
         <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
@@ -5216,7 +5217,7 @@ class Somfy {
         div.innerHTML = `
         <div id="divUnlinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
         <div class="instructions-content">
-        <div id="btnOverlayUnlinkClose" class="boutonOverlayClose">
+        <div id="btnOverlayUnlinkClose" class="boutonOverlayClose animScale">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -5232,18 +5233,18 @@ class Somfy {
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="2" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
         <div class="button-container-col wizard-step" data-stepid="2">
-        <button class="bouton" type="button" id="btnOpenMemory" style="margin-bottom: 15px;">${tr("BT_OPEN_MEMORY")}</button>
+        <button class="bouton animScale" type="button" id="btnOpenMemory" style="margin-bottom: 15px;">${tr("BT_OPEN_MEMORY")}</button>
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
         <div class="button-container-col wizard-step" data-stepid="3">
-        <button class="bouton" type="button" id="btnUnpairFromGroup" style="margin-bottom: 15px;">${tr("BT_UNPAIR_GROUP")}</button>
+        <button class="bouton animScale" type="button" id="btnUnpairFromGroup" style="margin-bottom: 15px;">${tr("BT_UNPAIR_GROUP")}</button>
         </div>
         <div class="button-container-row" style="text-align:center; gap:10px;">
-        <button id="btnPrevStep" class="boutonOutline" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
+        <button id="btnPrevStep" class="boutonOutline animScale" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton animScale" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
         </div>
         <div class="button-container-col" style="margin-top:10px;">
-        <button id="btnStopLinking" class="boutonOutline" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
+        <button id="btnStopLinking" class="boutonOutline animScale" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
         </div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_1")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_2")}</p></div>
@@ -5611,6 +5612,7 @@ class Firmware {
         </div>`;
 
         document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
     }
     createFileUploader(service) {
         let div = document.createElement('div');
@@ -5619,7 +5621,7 @@ class Firmware {
 
         div.innerHTML = `
         <div class="overlay-content">
-        <div id="btnOverlayUploadClose" class="boutonOverlayClose" onclick="this.closest('#divUploadFile').remove();">
+        <div id="btnOverlayUploadClose" class="boutonOverlayClose animScale" onclick="this.closest('#divUploadFile').remove();">
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
@@ -5636,10 +5638,10 @@ class Firmware {
         </div>
         <div class="progress-bar" id="progFileUpload" style="--progress:0%; margin-top:10px; display:none;"></div>
         <div class="button-container-col">
-        <button id="btnBackupCfg" class="boutonOutline" type="button" onclick="firmware.backup();" style="display:none;margin-bottom:10px;">${tr('BT_BACK_UP')}</button>
+        <button id="btnBackupCfg" class="boutonOutline animScale" type="button" onclick="firmware.backup();" style="display:none;margin-bottom:10px;">${tr('BT_BACK_UP')}</button>
         <div class="button-container-row" style="gap:10px;">
-        <button id="btnUploadFile" class="bouton" type="button" style="flex:1;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
-        <button id="btnClose" class="boutonOutline" type="button" style="flex:1;" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
+        <button id="btnUploadFile" class="bouton animScale" type="button" style="flex:1;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
+        <button id="btnClose" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
         </div>
         </div>
         </form>
@@ -5770,8 +5772,8 @@ class Firmware {
                 general.reloadApp = true;
 
                 div.innerHTML = `
-                <div class="overlay-content">
-                <div class="boutonOverlayClose" onclick="document.getElementById('divGitInstall').remove();">
+                <div class="instructions-content">
+                <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
                 <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
@@ -5792,8 +5794,8 @@ class Firmware {
                 <label for="progFirmwareDownload" style="font-size:10pt; display:block; margin-bottom:15px;">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
                 <div class="progress-bar" id="progApplicationDownload" style="--progress:0%; margin-top:10px; text-align:center;"></div>
                 <label for="progApplicationDownload" style="font-size:10pt; display:block; margin-bottom:20px;">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
-                <div class="button-container-col sticky-bottom-buttons" style="text-align:center;">
-                <button id="btnCancelUpdate" class="bouton" type="button" style="padding-left:30px; padding-right:30px;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">
+                <div class="button-container-col" style="text-align:center;">
+                <button id="btnCancelUpdate" class="bouton animScale" type="button" style="padding-left:30px; padding-right:30px;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">
                 ${tr('BT_CANCEL_1')}
                 </button>
                 </div></div>`;
@@ -5841,7 +5843,7 @@ class Firmware {
                 }
                 div.innerHTML = `
                 <div class="overlay-content">
-                <div class="boutonOverlayClose" onclick="document.getElementById('divGitInstall').remove();">
+                <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
                 <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
@@ -5865,7 +5867,7 @@ class Firmware {
                 ${optionsHtml}
                 </select>
                 <hr>
-                <button class="boutonOutline" id="divReleaseNotes" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
+                <button class="boutonOutline animScale" id="divReleaseNotes" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
                 </div>
                 </div>
                 <div class="${infoClass}" style="margin-bottom:15px; width:100%;">
@@ -5875,14 +5877,15 @@ class Firmware {
                 <span>${infoText}</span>
                 </div>
                 </div>
-                ${isMob ? `<button id="btnBackupCfg" class="bouton" type="button" style="width:100%; margin-bottom:15px;" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button>` : ''}
-                <div class="button-container-row sticky-bottom-buttons">
-                <button id="btnUpdate" type="button" class="bouton" style="flex:1" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));" >${tr('BT_UPDATE')}</button>
-                <button id="btnClose" type="button" class="boutonOutline" style="flex:1" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
+                ${isMob ? `<button id="btnBackupCfg" class="bouton animScale" type="button" style="width:100%; margin-bottom:15px;" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button>` : ''}
+                <div class="button-container-row">
+                <button id="btnUpdate" type="button" class="bouton animScale" style="flex:1" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));" >${tr('BT_UPDATE')}</button>
+                <button id="btnClose" type="button" class="boutonOutline animScale" style="flex:1" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
                 </div>
                 </div>`;
 
                 document.getElementById('divContainer').appendChild(div);
+                window.scrollTo(0, 0);
                 this.gitReleaseSelected(div);
             }
         });
@@ -6012,10 +6015,6 @@ class Firmware {
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_FIRMWARE_BACKUP_DOWNLOAD_FIRMWARE');
 
         inst.innerHTML = `
-        <div class="boutonOverlayClose" onclick="document.getElementById('divUploadFile').remove();">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
         <div id="jsHeadFirmware" class="instructions-header">
         <div style="position: relative;">
         <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
@@ -6036,6 +6035,7 @@ class Firmware {
 
         div.classList.add('inst-overlay');
         document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
 
         if (isMob) {
             let btnBackup = document.getElementById('btnBackupCfg');
@@ -6054,10 +6054,6 @@ class Firmware {
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_LITTLEFS_BACKUP_DOWNLOAD');
 
         inst.innerHTML = `
-        <div class="boutonOverlayClose" onclick="document.getElementById('divUploadFile').remove();">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
         <div id="jsHeadLittlefs" class="instructions-header">
         <div style="position: relative;">
         <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
@@ -6077,6 +6073,7 @@ class Firmware {
         </div>`;
 
         document.getElementById('divContainer').appendChild(div);
+        window.scrollTo(0, 0);
 
         if (isMob) {
             let btnBackup = document.getElementById('btnBackupCfg');

@@ -114,7 +114,7 @@
             </div>
         </nav>
         <div class="sidebar-footer">
-            <button id="btnReboot" type="button" class="boutonOutline" onclick="general.rebootDevice();" data-lang="BT_REBOOT">Redémarrer</button>
+            <button id="btnReboot" type="button" class="boutonOutline animScale" onclick="general.rebootDevice();" data-lang="BT_REBOOT">Redémarrer</button>
         </div>
     </aside>
     <div id="divContainer" class="container" data-auth="false">
@@ -130,27 +130,27 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button id="btnConfig" class="btnGearHome" onclick="ui.toggleConfig();">
+                    <button id="btnConfig" class="btnGearHome animScale" onclick="ui.toggleConfig();">
                         <svg class="gearHome"><use xlink:href="#icon-tabSettings" class="icon-gear"></use></svg>
                     </button>
                 </div>
             </div>
             <div id="divConfigPnl" style="display:none;">
                 <div class="tab-container">
-                    <span class="selected" data-grpid="divSystemSettings" data-lang="TAB_SYSTEM" title="">
+                    <span class="selected animScale" data-grpid="divSystemSettings" data-lang="TAB_SYSTEM" title="">
                         <svg class="tab-icon"><use xlink:href="#icon-tabSystem"></use></svg>
                     </span>
-                    <span data-grpid="divNetworkSettings" data-lang="TAB_NETWORK" title="">
+                    <span class="animScale" data-grpid="divNetworkSettings" data-lang="TAB_NETWORK" title="">
                         <svg class="tab-icon"><use xlink:href="#icon-tabNetwork" ></use></svg>
                     </span>
-                    <span data-grpid="divSomfySettings" data-lang="TAB_SOMFY" title="">
+                    <span class="animScale" data-grpid="divSomfySettings" data-lang="TAB_SOMFY" title="">
                         <svg class="tab-icon"><use xlink:href="#icon-tabSomfy"></use></svg>
                     </span>
-                    <span data-grpid="divRadioSettings" data-lang="TAB_RADIO" title="">
+                    <span class="animScale" data-grpid="divRadioSettings" data-lang="TAB_RADIO" title="">
                         <svg class="tab-icon"><use xlink:href="#icon-tabRadio"></use></svg>
                     </span>
                 </div>
-                <div id="divSystemSettings" class="tab-content">
+                <div id="divSystemSettings" class="tab-content" style="padding-top:20px;">
                     <div class="subtab-container"><span class="selected" data-grpid="divSystemOptions" data-lang="SUB_OPTION">Options</span><span data-grpid="divSecurityOptions" data-lang="SUB_SECURITY">Sécurité</span><span data-grpid="divFirmware" ata-txt="SUB_SECURITY" data-lang="FIRMWARE">Firmware</span></div>
                     <div id="divSystemOptions" class="subtab-content">
                         <div class="field-group unibloc">
@@ -226,10 +226,10 @@
                             </div>
                         </div>
                         <div class="button-container-row">
-                            <button id="btnSaveGeneral" type="button" class="bouton" data-lang="BT_SAVE" onclick="general.setGeneral();" >
+                            <button id="btnSaveGeneral" type="button" class="bouton animScale" data-lang="BT_SAVE" onclick="general.setGeneral();" >
                                 Sauvegarder
                             </button>
-                            <button id="btnReboot" type="button" class="boutonOutline" onclick="general.rebootDevice();" data-lang="BT_REBOOT">
+                            <button id="btnReboot" type="button" class="boutonOutline animScale" onclick="general.rebootDevice();" data-lang="BT_REBOOT">
                                 Redémarrer
                             </button>
                         </div>
@@ -301,7 +301,7 @@
                             </div>
                         </div>
                         <div class="button-container-col">
-                            <button id="btnLogin" type="button" class="bouton" value="Submit" onclick="general.saveSecurity();" data-lang="BT_SAVE_SECURITY">
+                            <button id="btnLogin" type="button" class="bouton animScale" value="Submit" onclick="general.saveSecurity();" data-lang="BT_SAVE_SECURITY">
                                 Sauvegarder Securité
                             </button>
                         </div>
@@ -436,16 +436,16 @@
                             </label>
                         </div>
                         <div class="button-container-row">
-                            <button id="btnBackup" class="bouton" type="button" onclick="firmware.backup();" data-lang="BT_SAVE">
+                            <button id="btnBackup" class="bouton animScale" type="button" onclick="firmware.backup();" data-lang="BT_SAVE">
                                 Sauvegarder
                             </button>
-                            <button id="btnRestore" class="boutonOutline" type="button" onclick="firmware.restore();" data-lang="BT_RESTORE">
+                            <button id="btnRestore" class="boutonOutline animScale" type="button" onclick="firmware.restore();" data-lang="BT_RESTORE">
                                 Restorer
                             </button>
                         </div>
                     </div>
                 </div>
-                <div id="divNetworkSettings" style="display:none;">
+                <div id="divNetworkSettings" style="display:none;padding-top:20px;">
                     <div class="subtab-container"><span class="selected" data-grpid="divNetAdapter" data-lang="SUBTAB_CONNECTION">Connexion</span><span data-grpid="divDHCP" data-lang="SUBTAB_DHCP_STATIC" >DHCP/IP Fixe</span><span data-grpid="divMQTT" data-lang="MQTT" >MQTT</span></div>
                     <div id="divNetAdapter" class="subtab-content">
                         <div id="divWiFiStrength" class="field-group unibloc">
@@ -454,6 +454,9 @@
                                     <div class="uniLabel"><span data-lang="CONNECTION_WIFI_NETWORK">Réseau :</span><span id="spanNetworkSSID" class="wifi-value">-------------</span></div>
                                     <div class="uniLabel"><span data-lang="CONNECTION_WIFI_CHANNEL">Canal :</span><span id="spanNetworkChannel" class="wifi-value">--</span></div>
                                 </div>
+
+
+
                                 <div class="wifi-right">
                                     <span id="spanNetworkStrength" class="wifi-value">---</span><span data-lang="DBM"> dBm</span>
                                     <div id="divNetworkStrength" style="display:inline-block; vertical-align:middle; width:24px; height:24px;">
@@ -476,11 +479,15 @@
                                 <span class="spanMacAddress">--:--:--:--:--:--</span>
                             </div>
                         </div>
+
+
                         <div id="divEthernetStatus" class="field-group unibloc" style="display:none;">
                             <div class="uniRow">
                                 <div class="uniText">
-                                    <div class="uniLabel"><span data-lang="CONNECTION_ETH_STATUS">Status:</span></span><span id="spanEthernetStatus" style="padding-left:4px;display:inline-block;text-align:left;width:120px;">-------------</span></div>
-                                    <div class="uniLabel"><span data-lang="CONNECTION_ETH_SPEED">Speed:</span></span><span id="spanEthernetSpeed" style="padding-left:4px;display:inline-block;text-align:left;width:120px;">--</span></div>
+                                    <div class="uniLabel"><span data-lang="CONNECTION_ETH_STATUS">Status:</span></span><span id="spanEthernetStatus" class="wifi-value">-------------</span></div>
+                                    <div class="uniLabel"><span data-lang="CONNECTION_ETH_SPEED">Speed:</span></span><span id="spanEthernetSpeed" class="wifi-value">--</span></div>
+
+
                                 </div>
                             </div>
                             <hr>
@@ -563,7 +570,7 @@
                         <div id="divWiFiMode">
                             <form method="post" action="/scan">
                                 <div id="divAps" class="field-group unibloc" data-lastloaded="0"></div>
-                                <div class="button-container-col"><button id="btnScanAPs" class="boutonOutline" type="button" onclick="wifi.loadAPs();" data-lang="BT_SCAN_WIFI" >Chercher réseau WI-FI</button></div>
+                                <div class="button-container-col"><button id="btnScanAPs" class="boutonOutline animScale" type="button" onclick="wifi.loadAPs();" data-lang="BT_SCAN_WIFI" >Chercher réseau WI-FI</button></div>
 
                                 <div class="field-group unibloc">
                                     <div class="field-group">
@@ -631,7 +638,7 @@
                             </div>
                         </div>
                         <div class="button-container-col">
-                            <button id="btnSaveNetwork" type="button" class="bouton" onclick="wifi.saveNetwork();" data-lang="BT_SAVE">
+                            <button id="btnSaveNetwork" type="button" class="bouton animScale" onclick="wifi.saveNetwork();" data-lang="BT_SAVE">
                                 Sauvegarder
                             </button>
                         </div>
@@ -703,10 +710,10 @@
                             </div>
                         </div>
                         <div class="button-container-row">
-                            <button id="btnSaveIPSettings" class="bouton" type="button"  onclick="wifi.saveIPSettings();" data-lang="BT_SAVE_IP">
+                            <button id="btnSaveIPSettings" class="bouton animScale" type="button"  onclick="wifi.saveIPSettings();" data-lang="BT_SAVE_IP">
                                 Sauvegarder paramètres IP
                             </button>
-                            <button id="btnRebootWifi" class="boutonOutline" type="button"  onclick="general.rebootDevice();" data-lang="BT_REBOOT">
+                            <button id="btnRebootWifi" class="boutonOutline animScale" type="button"  onclick="general.rebootDevice();" data-lang="BT_REBOOT">
                                 Redémarrer
                             </button>
                         </div>
@@ -776,11 +783,11 @@
                             </div>
                         </div>
                         <div class="button-container-col">
-                            <button id="btnConnectMQTT" class="bouton" type="button" onclick="mqtt.connectMQTT();" data-lang="BT_SAVE_MQTT">Enregistrer paramètres MQTT</button>
+                            <button id="btnConnectMQTT" class="bouton animScale" type="button" onclick="mqtt.connectMQTT();" data-lang="BT_SAVE_MQTT">Enregistrer paramètres MQTT</button>
                         </div>
                     </div>
                 </div>
-                <div id="divSomfySettings" style="display:none;">
+                <div id="divSomfySettings" style="display:none;padding-top:20px;">
                     <div class="subtab-container"><span class="selected" data-grpid="divSomfyRooms" data-lang="SUBTAB_ROOMS">Pièces</span><span class="" data-grpid="divSomfyMotors" data-lang="SUBTAB_SHADES">Volets</span><span data-grpid="divSomfyGroups" data-lang="SUBTAB_GROUPS"> Groupes</span><span data-grpid="divRepeater" data-lang="SUBTAB_REPEATER">Répéteur</span><span class="subtab-NameHide-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_L">Télécommande Virtuelle</span><span class="subtab-NameShow-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" data-lang="SUBTAB_VIRTUAL_REMOTE_S">Télécommande</span></div>
 
 
@@ -799,7 +806,7 @@
                             </div>
 
                             <div class="button-container-col">
-                                <button id="btnAddRoom" class="bouton" type="button" onclick="somfy.openEditRoom();" data-lang="BT_ADD_ROOM">
+                                <button id="btnAddRoom" class="bouton animScale" type="button" onclick="somfy.openEditRoom();" data-lang="BT_ADD_ROOM">
                                     Ajouter pièce
                                 </button>
                             </div>
@@ -807,16 +814,16 @@
 
 
                         <div id="somfyRoom" style="width:100%;display:none;">
-                            <div style="float:rightk;;position:relative;"><span id="spanRoomId">*</span>/<span id="spanMaxRooms">16</span></div>
+                            <div style="float:right;position:relative;"><span id="spanRoomId">*</span>/<span id="spanMaxRooms">14</span></div>
                             <div class="field-group unibloc">
                                 <label class="label" for="fldRoomName" data-lang="NAME">Nom</label>
                                 <input id="fldRoomName" class="inputAndSelect" name="roomName" data-bind="name" type="text" length=20  data-lang="ROOM_NAME_PHL" placeholder="Entrer un nom de pièce">
                             </div>
                             <div class="button-container-row">
-                                <button id="btnSaveRoom" class="bouton" type="button" onclick="somfy.saveRoom();" data-lang="BT_SAVE_ROOM">
+                                <button id="btnSaveRoom" class="bouton animScale" type="button" onclick="somfy.saveRoom();" data-lang="BT_SAVE_ROOM">
                                     Sauvegarder Pièce
                                 </button>
-                                <button id="btnRoomGoBack" class="boutonOutline" type="button" onclick="somfy.showEditRoom(false);" data-lang="BT_CLOSE">
+                                <button id="btnRoomGoBack" class="boutonOutline animScale" type="button" onclick="somfy.showEditRoom(false);" data-lang="BT_CLOSE">
                                     Fermer
                                 </button>
                             </div>
@@ -837,7 +844,7 @@
                             </div>
 
                             <div class="button-container-col">
-                                <button id="btnAddShade" class="bouton" type="button" onclick="somfy.openEditShade();" data-lang="BT_ADD_SHADE">
+                                <button id="btnAddShade" class="bouton animScale" type="button" onclick="somfy.openEditShade();" data-lang="BT_ADD_SHADE">
                                     Ajouter volet
                                 </button>
                             </div>
@@ -942,16 +949,16 @@
                                         </div>
                                     </div>
                                     <div id="divshowSomfyButtons" class="uniRight">
-                                        <div class="button-outline2 btn-somfy-svg" data-cmd="up" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'up');">
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="up" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'up');">
                                             <svg><use href="#icon-up"></use></svg>
                                         </div>
-                                        <div class="button-outline2 btn-somfy-svg" data-cmd="my" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'my');">
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="my" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'my');">
                                             <svg><use href="#icon-my"></use></svg>
                                         </div>
-                                        <div class="button-outline2 btn-somfy-svg" data-cmd="down" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'down');">
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="down" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'down');">
                                             <svg><use href="#icon-down"></use></svg>
                                         </div>
-                                        <div class="button-outline2 btn-somfy-svg-wide" data-cmd="toggle" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'toggle');">
+                                        <div class="button-outline btn-somfy-svg-wide animScale" data-cmd="toggle" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'toggle');">
                                             <svg><use href="#icon-toggle"></use></svg>
                                         </div>
                                     </div>
@@ -1134,18 +1141,18 @@
                                 </div>
                             </div>
                             <div class="button-container-row" style="text-align:center;">
-                                <button id="btnPairShade" class="boutonOutline" type="button" onclick="somfy.pairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_PAIR_SHADE">
+                                <button id="btnPairShade" class="boutonOutline animScale" type="button" onclick="somfy.pairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_PAIR_SHADE">
                                     Appairer Volet
                                 </button>
-                                <button id="btnUnpairShade" class="boutonOutline" type="button" onclick="somfy.unpairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_UNPAIR_SHADE">
+                                <button id="btnUnpairShade" class="boutonOutline animScale" type="button" onclick="somfy.unpairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_UNPAIR_SHADE">
                                     Désappairer Volet
                                 </button>
-                                <button id="btnSetRollingCode" class="boutonOutline" type="button" onclick="somfy.openSetRollingCode(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_SET_ROLLING_CODE">
+                                <button id="btnSetRollingCode" class="boutonOutline animScale" type="button" onclick="somfy.openSetRollingCode(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_SET_ROLLING_CODE">
                                     Définir Code
                                 </button>
                             </div>
                             <div class="button-container-col marginB" >
-                                <button id="btnLinkRemote" class="boutonOutline" type="button" onclick="somfy.linkRemote(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_LINK_REMOTE">
+                                <button id="btnLinkRemote" class="boutonOutline animScale" type="button" onclick="somfy.linkRemote(parseInt(document.getElementById('spanShadeId').innerText, 10));" data-lang="BT_LINK_REMOTE">
                                     Appairer Télécommande
                                 </button>
                             </div>
@@ -1154,10 +1161,10 @@
 
                             <div id="divLinkedRemoteList" style="overflow-y:auto;margin-top:15px;"></div>
                             <div class="button-container-row">
-                                <button id="btnSaveShade" class="bouton" type="button" onclick="somfy.saveShade();" data-lang="BT_SAVE_SHADE">
+                                <button id="btnSaveShade" class="bouton animScale" type="button" onclick="somfy.saveShade();" data-lang="BT_SAVE_SHADE">
                                     Sauvegarder Volet
                                 </button>
-                                <button id="btnBtnShadeGoBack" class="boutonOutline" type="button" onclick="somfy.showEditShade(false);" data-lang="BT_DONE">
+                                <button id="btnBtnShadeGoBack" class="boutonOutline animScale" type="button" onclick="somfy.showEditShade(false);" data-lang="BT_DONE">
                                     Terminé
                                 </button>
                             </div>
@@ -1181,7 +1188,7 @@
                             </div>
 
                             <div class="button-container-col">
-                                <button id="btnAddGroup" class="bouton" type="button" onclick="somfy.openEditGroup();" data-lang="BT_ADD_GROUP">
+                                <button id="btnAddGroup" class="bouton animScale" type="button" onclick="somfy.openEditGroup();" data-lang="BT_ADD_GROUP">
                                     Ajouter Groupe
                                 </button>
                             </div>
@@ -1264,17 +1271,17 @@
                                 </div>
                             </div>
                             <div class="button-container-col marginB">
-                               <button id="btnLinkShade" class="boutonOutline" type="button" onclick="somfy.linkGroupShade(parseInt(document.getElementById('spanGroupId').innerText, 10));" data-lang="BT_LINK_SHADE">
+                               <button id="btnLinkShade" class="boutonOutline animScale" type="button" onclick="somfy.linkGroupShade(parseInt(document.getElementById('spanGroupId').innerText, 10));" data-lang="BT_LINK_SHADE">
                                     Associer Volet
                                 </button>
                             </div>
 
                             <div id="divLinkedShadeList" style="overflow-y:auto;margin-top:15px;"></div>
                             <div class="button-container-row">
-                                 <button id="btnSaveGroup" class="bouton" type="button" onclick="somfy.saveGroup();" data-lang="BT_SAVE_GROUP">
+                                 <button id="btnSaveGroup" class="bouton animScale" type="button" onclick="somfy.saveGroup();" data-lang="BT_SAVE_GROUP">
                                     Sauvegarder Groupe
                                 </button>
-                                <button id="btnGroupGoBack" class="boutonOutline" type="button" onclick="somfy.showEditGroup(false);" data-lang="BT_DONE">
+                                <button id="btnGroupGoBack" class="boutonOutline animScale" type="button" onclick="somfy.showEditGroup(false);" data-lang="BT_DONE">
                                     Terminer
                                 </button>
                             </div>
@@ -1292,7 +1299,7 @@
                                 <div id="divRepeatList" class="edit-repeaterlist"></div>
                             </div>
                             <div class="button-container-col">
-                                <button id="btnLinkRepeater" class="bouton" type="button" onclick="somfy.linkRepeatRemote();" data-lang="BT_SCAN_REMOTE">
+                                <button id="btnLinkRepeater" class="bouton animScale" type="button" onclick="somfy.linkRepeatRemote();" data-lang="BT_SCAN_REMOTE">
                                     Chercher Télécommande
                                 </button>
                             </div>
@@ -1309,35 +1316,35 @@
                                 </select>
                             </div>
                             <div class="vr-button vr-bloctoogle">
-                                <div class="button-outline vr-toogle vr-stop vr-80bit" data-cmd="stop" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                <div class="button-outline vr-toogle vr-stop vr-80bit animScale" data-cmd="stop" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                     <svg style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggleHand"></use></svg>
                                 </div>
-                                <div class="button-outline vr-toogle vr-updownmy" data-cmd="toggle" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                <div class="button-outline vr-toogle vr-updownmy animScale" data-cmd="toggle" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                     <svg  style="height: 100%; width: auto; fill: white; display: block;"><use xlink:href="#icon-toggle"></use></svg>
                                 </div>
                             </div>
-                            <div class="vr-updownmy vr-wheel-container">
+                            <div class="vr-updownmy vr-wheel-container animScale">
                                 <div class="vr-wheel-outer">
-                                    <div class="vr-wheel-arrow vr-arrow-up" data-cmd="up" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-up"></use></svg></div>
-                                    <div class="vr-wheel-arrow vr-arrow-down" data-cmd="down" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-down"></use></svg></div>
-                                    <div class="vr-my-center" data-cmd="my" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#icon-my"></use></svg></div>
+                                    <div class="vr-wheel-arrow vr-arrow-up animScale" data-cmd="up" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-up"></use></svg></div>
+                                    <div class="vr-wheel-arrow vr-arrow-down animScale" data-cmd="down" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-down"></use></svg></div>
+                                    <div class="vr-my-center animScale" data-cmd="my" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#icon-my"></use></svg></div>
                                 </div>
                             </div>
                             <div class="vr-progFav">
                                 <div class=" btn-top">
-                                    <div class="button-outline2 btn-prog" data-lang="VR_PROG" title="" data-cmd="Prog" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><span data-lang="BT_PROG">prog</span></div>
+                                    <div class="button-outline btn-prog animScale" data-lang="VR_PROG" title="" data-cmd="Prog" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><span data-lang="BT_PROG">prog</span></div>
                                 </div>
                                 <div class=" vr-favorite vr-80bit">
-                                    <div class="button-outline2 btn-top btn-fav" data-lang="VR_FAVORITE" title="" data-cmd="favorite" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-favori"></use></svg></div>
+                                    <div class="button-outline btn-top btn-fav animScale" data-lang="VR_FAVORITE" title="" data-cmd="favorite" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use xlink:href="#vr-favori"></use></svg></div>
                                 </div>
                             </div>
                             <div class="vr-block-boutons">
                                 <div class="vr-blockLeft">
-                                    <div class="vr-upMy" data-cmd="MyUp" data-lang="VR_MY_UP" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <div class="vr-upMy animScale" data-cmd="MyUp" data-lang="VR_MY_UP" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <div class="segment" ><svg><use xlink:href="#vr-up"></use></svg></div>
                                         <div class="segment" data-lang="MY">my</div>
                                     </div>
-                                    <div class="vr-myDown" data-cmd="MyDown" data-lang="VR_MY_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <div class="vr-myDown animScale" data-cmd="MyDown" data-lang="VR_MY_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <div class="segment" data-lang="MY">my</div>
                                         <div class="segment"><svg><use xlink:href="#vr-down"></use></svg></div>
                                     </div>
@@ -1346,34 +1353,34 @@
                                     <div class="vr-block-centerFlag">
 
 
-                                        <div class="vr-button-sunflagL btn-sunflag" style="flex:1;" data-cmd="SunFlag" data-lang="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <div class="vr-button-sunflagL btn-sunflag animScale" style="flex:1;" data-cmd="SunFlag" data-lang="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <svg><use xlink:href="#vr-sunflag-o"></use></svg>
                                         </div>
-                                        <div class="vr-button-sunflagR btn-sunflag" style="flex:1;" data-cmd="Flag" data-lang="VR_SUN_FLAG" title="" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
-                                        <svg class="button-outline2"><use xlink:href="#vr-sunflag-c"></use></svg>
+                                        <div class="vr-button-sunflagR btn-sunflag animScale" style="flex:1;" data-cmd="Flag" data-lang="VR_SUN_FLAG" title="" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="button-outline animScale"><use xlink:href="#vr-sunflag-c"></use></svg>
                                         </div>
                                     </div>
                                     <div style="border-radius: 25px;">
                                         <div class="switch-group">
                                             <div class="switch-soleil">
                                                 <input id="cbSunny" type="checkbox" data-bind="sunny" class="sunwinterbouton">
-                                                <label for="cbSunny" class="toggle-item" data-lang="VR_SUN">Soleil</label>
+                                                <label for="cbSunny" class="toggle-item animScale" data-lang="VR_SUN">Soleil</label>
                                             </div>
 
                                             <div class="switch-windy">
                                                 <input id="cbWindy" type="checkbox" data-bind="windy" class="sunwinterbouton" >
-                                                <label for="cbWindy" class="toggle-item" data-lang="VR_WIND">Vent</label>
+                                                <label for="cbWindy" class="toggle-item animScale" data-lang="VR_WIND">Vent</label>
                                             </div>
                                         </div>
-                                        <div class="btn-send btn-sunflag" data-cmd="Sensor" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);" data-lang="VR_SEND">Envoyer</div>
+                                        <div class="btn-send btn-sunflag animScale" data-cmd="Sensor" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);" data-lang="VR_SEND">Envoyer</div>
                                     </div>
                                 </div>
                                 <div class="vr-blockRight">
-                                    <div class="vr-upDown" data-cmd="UpDown" data-lang="VR_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <div class="vr-upDown animScale" data-cmd="UpDown" data-lang="VR_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <div class="segment"><svg><use xlink:href="#vr-up"></use></svg></div>
                                         <div class="segment"><svg><use xlink:href="#vr-down"></use></svg></div>
                                     </div>
-                                    <div class="vr-all" data-cmd="MyUpDown" data-lang="VR_MY_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <div class="vr-all animScale" data-cmd="MyUpDown" data-lang="VR_MY_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
                                         <div class="segment">all</div>
                                     </div>
                                 </div>
@@ -1401,7 +1408,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="divRadioSettings" style="display:none;">
+                <div id="divRadioSettings" style="display:none;padding-top:20px;">
                     <div class="subtab-container">
                         <span class="selected" data-grpid="divTransceiverSettings" data-lang="TAB_RADIO">Radio</span>
                         <span data-grpid="divFrameLog" data-lang="SUBTAB_LOGS">Journaux</span>
@@ -1643,10 +1650,10 @@
                             </div>
                         </div>
                         <div class="button-container-col">
-                            <button id="btnScanFrequency" class="boutonOutline" type="button" onclick="somfy.scanFrequency(true);" data-lang="BT_SCANFREQUENCY">
+                            <button id="btnScanFrequency" class="boutonOutline animScale" type="button" onclick="somfy.scanFrequency(true);" data-lang="BT_SCANFREQUENCY">
                                 Balayer les fréquences
                             </button>
-                            <button id="btnSaveRadio" class="bouton" type="button"  onclick="somfy.saveRadio();" data-lang="BT_SAVE">
+                            <button id="btnSaveRadio" class="bouton animScale" type="button"  onclick="somfy.saveRadio();" data-lang="BT_SAVE">
                                 Sauvegarder
                             </button>
                         </div>
@@ -1659,8 +1666,8 @@
                             </div>
                         </div>
                         <div class="button-container-row">
-                            <button id="btnCopyFrame" type="button" class="bouton" onclick="somfy.framesToClipboard();" data-lang="BT_COPY">Copié</button>
-                            <button id="btnClearFrames" type="button" class="boutonOutline" onclick="document.getElementById('divFrames').innerHTML = ''; somfy.frames = [];" data-lang="BT_CLEAR">Effacer</button>
+                            <button id="btnCopyFrame" type="button" class="bouton animScale" onclick="somfy.framesToClipboard();" data-lang="BT_COPY">Copié</button>
+                            <button id="btnClearFrames" type="button" class="boutonOutline animScale" onclick="document.getElementById('divFrames').innerHTML = ''; somfy.frames = [];" data-lang="BT_CLEAR">Effacer</button>
                         </div>
                     </div>
                 </div>
@@ -1719,11 +1726,11 @@
                     </div>
                 </div>
                  <div class="room-nav-container">
-                    <div id="btnScrollLeft" class="nav-arrow" onclick="somfy.scrollRooms(-1)">
+                    <div id="btnScrollLeft" class="nav-arrow animScale" onclick="somfy.scrollRooms(-1)">
                         <svg class="icon-svg"><use xlink:href="#svg-arrowLeft"></use></svg>
                     </div>
                     <div id="divRoomSelector" class="room-selector" data-roomid="0"></div>
-                    <div id="btnScrollRight" class="nav-arrow" onclick="somfy.scrollRooms(1)">
+                    <div id="btnScrollRight" class="nav-arrow animScale" onclick="somfy.scrollRooms(1)">
                         <svg class="icon-svg"><use xlink:href="#svg-arrowRight"></use></svg>
                     </div>
                 </div>
@@ -1772,8 +1779,8 @@
             </div>
             <div style="text-align:center;"><span id="spanLoginMessage" style="color:red"></span></div>
             <div id="loginButtons" class="button-container-row" style="display:none;text-align:center;">
-                <button id="btnLogin" class="bouton" type="button" onclick="security.login();" data-lang="BT_LOGIN">Connexion</button>
-                <button id="btnCancelLogin" class="boutonOutline" type="button" onclick="security.cancelLogin();" data-lang="BT_CANCEL">Annuler</button>
+                <button id="btnLogin" class="bouton animScale" type="button" onclick="security.login();" data-lang="BT_LOGIN">Connexion</button>
+                <button id="btnCancelLogin" class="boutonOutline animScale" type="button" onclick="security.cancelLogin();" data-lang="BT_CANCEL">Annuler</button>
             </div>
         </div>
     </div>

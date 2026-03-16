@@ -2,7 +2,6 @@
     color-scheme: light dark;
     --accent-color: #1a5fb4;
 }
-
 :root[data-theme="light"] {
     --body-color: #fff;
     --color: #000000;
@@ -469,7 +468,7 @@ button:active {
 }
 .bouton:active {
     background-color: color-mix(in srgb, var(--accent-color), black 3%);
-    transform: scale(0.95);
+
 }
 .boutonOutline,
 .boutonOutline-pop {
@@ -486,7 +485,6 @@ button:active {
 .boutonOutline:active, .bouton-pop:active, .boutonOutline-pop:active {
     background-color: #555;
     color: white;
-    transform: scale(0.95);
 }
 .button-update {
     display: flex;
@@ -517,7 +515,6 @@ button:active {
     cursor: pointer;
     z-index: 10;
     opacity: 0.6;
-    transition: opacity 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -626,7 +623,7 @@ button:active {
     width: var(--progress);
     text-align: right;
     background-color: var(--accent-color);
-    border-radius: .5em;
+    border-radius: 25px;
     height: 2em;
     display: block;
     overflow: hidden;
@@ -673,51 +670,37 @@ button:active {
 }
 /* Button : UP - DOWN - MY - TOGGLE*/
 
-.button-outline,
-.button-outline2 {
+.button-outline{
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
     cursor:pointer;
 }
-    .button-outline:active,
-    .button-outline2:active {
-        -webkit-animation: flicker .5s infinite linear;
-        animation: flicker .5s infinite linear;
-    }
 
-#divSomfyButtons div.button-outline {
-margin-top: -10px;
-margin-left: 0px;
-margin-right: 0px;
-margin-bottom: 0px;
-padding: 7px;
-cursor: pointer;
-vertical-align: middle;
-}
+
 .shadectl-buttons div.button-outline {
     display: inline-block;
 }
-.shadectl-buttons[data-shadetype="9"] .button-outline2[data-cmd="my"],
-.shadectl-buttons[data-shadetype="9"] .button-outline2[data-cmd="up"],
-.shadectl-buttons[data-shadetype="9"] .button-outline2[data-cmd="down"],
-.shadectl-buttons[data-shadetype="5"] .button-outline2[data-cmd="my"],
-.shadectl-buttons[data-shadetype="5"] .button-outline2[data-cmd="up"],
-.shadectl-buttons[data-shadetype="5"] .button-outline2[data-cmd="down"],
-.shadectl-buttons[data-shadetype="14"] .button-outline2[data-cmd="my"],
-.shadectl-buttons[data-shadetype="14"] .button-outline2[data-cmd="up"],
-.shadectl-buttons[data-shadetype="14"] .button-outline2[data-cmd="down"],
-.shadectl-buttons[data-shadetype="15"] .button-outline2[data-cmd="my"],
-.shadectl-buttons[data-shadetype="15"] .button-outline2[data-cmd="up"],
-.shadectl-buttons[data-shadetype="15"] .button-outline2[data-cmd="down"],
-.shadectl-buttons[data-shadetype="16"] .button-outline2[data-cmd="my"],
-.shadectl-buttons[data-shadetype="16"] .button-outline2[data-cmd="up"],
-.shadectl-buttons[data-shadetype="16"] .button-outline2[data-cmd="down"],
-.shadectl-buttons[data-shadetype="10"] .button-outline2[data-cmd="my"] {
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="9"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="5"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="14"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="15"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="my"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="up"],
+.shadectl-buttons[data-shadetype="16"] .button-outline[data-cmd="down"],
+.shadectl-buttons[data-shadetype="10"] .button-outline[data-cmd="my"] {
     display: none !important;
 }
-.shadectl-buttons:not([data-shadetype="5"]):not([data-shadetype="9"]):not([data-shadetype="14"]):not([data-shadetype="15"]):not([data-shadetype="16"]) .button-outline2[data-cmd="toggle"] {
+.shadectl-buttons:not([data-shadetype="5"]):not([data-shadetype="9"]):not([data-shadetype="14"]):not([data-shadetype="15"]):not([data-shadetype="16"]) .button-outline[data-cmd="toggle"] {
     display: none !important;
 }
 .shadectl-buttons[data-shadetype="14"] > .cmd-button[data-cmd="sunflag"],
@@ -745,6 +728,15 @@ vertical-align: middle;
     margin-right:14px;
 }
 
+.animScale {
+    transition: transform 0.2s ease-in-out, opacity 0.1s ease-in-out;
+    cursor: pointer;
+    user-select: none;
+}
+.animScale:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
 
 @media screen and (max-width: 780px) {
     body {

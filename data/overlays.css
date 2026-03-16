@@ -109,14 +109,14 @@ i.icss-anim:after {
 div.wait-overlay {
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
     top: 0;
     left: 0;
     background: var(--wait-overlay);
-    z-index: 20000;
+    z-index: 90000;
     cursor: no-drop;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
@@ -231,17 +231,6 @@ div.wait-overlay > .lds-roller {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-@keyframes flicker {
-    0% {
-        transform: rotate(-4deg);
-        -webkit-transform: rotate(-4deg);
-    }
-    20% { transform: rotate(1deg); }
-    40% { transform: rotate(-8deg); }
-    60% { transform: rotate(4deg) scaleY(1.04); }
-    80% { transform: rotate(-7deg) scaleY(0.92); }
-    100% { transform: rotate(7deg); }
-}
 .inst-overlay {
     display: flex;
     flex-direction: column;
@@ -267,7 +256,7 @@ div.info-message,
 div.prompt-message,
 div.error-message,
 div.socket-error {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
@@ -282,8 +271,7 @@ div.socket-error {
 .error-content,
 .message-content,
 .overlay-content,
-.instructions-content,
-.VirtualRemote-content {
+.instructions-content {
     position: relative;
     width: 90%;
     padding: 30px;
@@ -386,8 +374,8 @@ div.error-message,
         position: absolute;
         right: -10px;
         bottom: -10px;
-        width: 80px;
-        height: 80px;
+        width: 110px;
+        height: 110px;
         opacity: 0.2;
         transform: rotate(-15deg);
         color: white;
@@ -501,7 +489,7 @@ div.error-message,
     width: 100%;
     background-color: var(--barreRoomBg);
     overflow: hidden;
-    border-radius: 25px;
+  /*  border-radius: 25px; */
     margin-bottom: 30px;
 }
     .room-nav-container .icon-svg {
@@ -534,12 +522,9 @@ div.error-message,
     font-size: 0.9em;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
     user-select: none;
 }
-.room-pill:active {
-    transform: scale(0.95);
-}
+
 .room-pill.active {
     background-color: var(--accent-color);
     color: white;
@@ -565,35 +550,96 @@ div.error-message,
     font-size: 1.1em;
     margin: 0;
 }
+.somfyRoom,
+.somfyRepeater,
+.somfyGroup,
+.somfyShade,
+.somfyLinkedRemote,
+.linked-shade {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding: 12px 15px;
+    gap: 12px;
+    box-sizing: border-box;
+    border-radius: 25px;
+    margin-bottom: 8px;
+}
 .room-name,
 .group-name,
 .shade-name {
-    text-align:left;
-    width: 100%;
-    padding-left: 2px;
-    padding-right: 2px;
-    display: inline-block;
-    text-overflow: ellipsis;
-    overflow:hidden;
-    vertical-align:middle;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 .cfg-room {
-    font-size:12px;
-    color:darkorange;
+    font-size:11px;
+    opacity: 0.5;
+    line-height: 1.1;
 }
 .somfyShade[data-roomid="0"] .cfg-room,
 .somfyGroup[data-roomid="0"] .cfg-room {
     display:none;
 }
+.idRemoteAddress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+    line-height: 1;
+}
+.somfyLinkedRemote
+.addr-group {
+    margin-left: 0;
+    flex: 1;
+}
+.AddrId-label {
+    opacity: 0.5;
+    font-size: 0.7em;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+.name-text, .repeater-name, .linkedshade-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: monospace;
+    margin: 0;
+    font-size: 13px;
+}
 .group-address,
-.shade-address {
-    width:77px;
-    padding-left:2px;
-    padding-right:2px;
-    text-overflow:ellipsis;
-    overflow:hidden;
-    display:inline-block;
-    vertical-align:middle;
+.shade-address,
+.linkedremote-address,
+.linkedremote-code {
+    font-family: monospace;
+    font-size: 0.9em;
+    display: inline-block;
+    margin: 0;
+}
+.divEditDelete-svg {
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    transition: opacity 0.2s;
+}
+.divEditDelete-svg:hover {
+    opacity: 0.7;
+}
+.repeater-name-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
 }
 #divShadeControls {
     display: flex;
@@ -606,7 +652,7 @@ div.error-message,
     margin: 0 auto;
 }
 .somfyShadeCtl {
-    height: 170px;
+    height: 155px;
     max-width: 450px;
     position: relative;
     display: flex;
@@ -658,7 +704,6 @@ div.error-message,
 .shadectl-header-row {
     flex: 0 0 100%;
     text-align: center;
-    padding-bottom: 5px;
 }
 .shadectl-name {
     font-size: 1.2em;
@@ -753,7 +798,7 @@ div.error-message,
 .somfyShadeCtl .shadectl-room {
     margin: 0;
     line-height: 1.2;
-    color:darkorange;
+    color: var(--accent-color);
 }
 .somfyShadeCtl .shadectl-mypos {
     display: flex;
@@ -846,12 +891,7 @@ div.error-message,
     align-items: center;
     gap: 4px;
 }
-.somfyGroupCtl .groupctl-buttons .button-outline,
-.somfyShadeCtl .shadectl-buttons .button-outline {
-    display: inline-block;
-    padding: 6px 10px 6px 10px;
-    cursor: pointer;
-}
+
 
 /***************************
  * Popup openSetMyPosition and openSetPosition
@@ -911,13 +951,7 @@ div.error-message,
     margin-top:0px;
     margin-bottom:0px;
 }
-.sticky-bottom-buttons {
-    margin-top: auto;
-    padding-top: 20px;
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
+
 @keyframes slideFromLeft {
     0% {
         opacity: 0;
@@ -1060,7 +1094,7 @@ margin: 2px 0;
         min-height: 100vh;
         padding: 20px;
         flex-grow: 1;
-        gap: 20px;
+        gap: 10px;
     }
     .overlay-content {
         max-width: max-content;
@@ -1083,7 +1117,6 @@ margin: 2px 0;
         left: 0;
         right: auto;
         position: relative;
-        margin-bottom: 10px;
         width: 30px;
         height: 30px;
         top: 0;
