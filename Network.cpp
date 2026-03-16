@@ -681,10 +681,10 @@ void Network::emitHeap(uint8_t num) {
   uint32_t freeHeap = ESP.getFreeHeap();
   uint32_t maxHeap = ESP.getMaxAllocHeap();
   uint32_t minHeap = ESP.getMinFreeHeap();
-  if(abs((int)(freeHeap - _lastHeap)) > 1500) bValEmit = true;
-  if(abs((int)(maxHeap - _lastMaxHeap)) > 1500) bValEmit = true;
+  if(abs((int)(freeHeap - _lastHeap)) > 3500) bValEmit = true;
+  if(abs((int)(maxHeap - _lastMaxHeap)) > 3500) bValEmit = true;
   bRoomEmit = sockEmit.activeClients(0) > 0;
-  if(bValEmit) bTimeEmit = millis() - _lastHeapEmit > 7000;
+  if(bValEmit) bTimeEmit = millis() - _lastHeapEmit > 10000;
   if(bEmit || bTimeEmit || bRoomEmit || bValEmit) {
     JsonSockEvent *json = sockEmit.beginEmit("memStatus");
     json->beginObject();
