@@ -2494,9 +2494,9 @@ class Somfy {
         { val: 3, label: 'CC1101 – Olimex ESP32-PoE/EVB', showGPIO: false, pins: { SCKPin: 14, CSNPin: 13, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 36 } },
         { val: 4, label: 'CC1101 – LilyGO T-Internet POE', showGPIO: false, pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 35 } },
         { val: 5, label: 'CC1101 – wESP POE', showGPIO: false, pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 39 } },
-        { val: 5, label: 'CC1101 – ESP-PoE-32', showGPIO: false, pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
-        { val: 6, label: 'CC1101 – ESP32s3 Mini', showGPIO: false, pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
-        { val: 7, label: 'MANUAL_SETTINGS', showGPIO: true }
+        { val: 6, label: 'CC1101 – ESP-PoE-32', showGPIO: false, pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
+        { val: 7, label: 'CC1101 – ESP32s3 Mini', showGPIO: false, pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
+        { val: 8, label: 'MANUAL_SETTINGS', showGPIO: true }
     ];
     init() {
         if (this.initialized) return;
