@@ -51,7 +51,7 @@
     "FIRMWARE_RAM": "Arbeitsspeicher (RAM)",
     "FIRMWARE_AVAILABLE": "Bytes verfügbar",
     "FIRMWARE_UNIT_KO": "Bytes",
-    "FIRMWARE_STORAGE": "Dateispeicher",
+    "FIRMWARE_STORAGE": "Flash-Speicher",
     "FIRMWARE_MEMORY": "Speicher (Bytes)",
     "FIRMWARE_FREE": "Frei: ",
     "FIRMWARE_TOTAL": "Gesamt",

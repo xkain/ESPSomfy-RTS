@@ -51,7 +51,7 @@
     "FIRMWARE_RAM": "Mémoire Vive (RAM)",
     "FIRMWARE_AVAILABLE": "Octets disponibles",
     "FIRMWARE_UNIT_KO": "Octets",
-    "FIRMWARE_STORAGE": "Stockage Fichiers",
+    "FIRMWARE_STORAGE": "Mémoire Flash",
     "FIRMWARE_MEMORY": "Memoire (bytes)",
     "FIRMWARE_FREE": "Libre: ",
     "FIRMWARE_TOTAL": "Total",
