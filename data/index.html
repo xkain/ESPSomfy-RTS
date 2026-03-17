@@ -308,11 +308,11 @@
                     </div>
                     <div id="divFirmware" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
-                            <div class="uniRow" style="display:flex;">
+                            <div class="uniRow">
                                 <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CHIP"></div></div>
                                 <span class="uniValue">ESP32<span id="spanHwVersion"></span></span>
                             </div>
-                            <div class="uniRow" style="display:flex;">
+                            <div class="uniRow">
                                 <div class="uniText"><div class="uniLabel" data-lang="FIRMWARE_CPU"></div></div>
                                 <span id="info-cpu">---</span>
                             </div>
@@ -410,7 +410,7 @@
                             </button>
                         </div>
                         <div class="field-group unibloc">
-                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS', '_blank')">
+                            <label class="uniRow" style="cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS', '_blank')">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="FIRMWARE_CREDITS_MAINTAINER"></div>
                                     <div class="uniStatus" style="text-transform: uppercase;" data-lang="FIRMWARE_CREDITS_MAINTAINER_DESC"></div>
@@ -418,7 +418,7 @@
                                 <span style="font-weight: bold;">xkain</span>
                             </label>
                             <hr>
-                            <label class="uniRow" style="display:flex; cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/wiki', '_blank')">
+                            <label class="uniRow" style="cursor:pointer;" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/wiki', '_blank')">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="FIRMWARE_CREDITS_DOCUMENTATION"></div>
                                     <div class="uniStatus" style="text-transform: uppercase;" data-lang="FIRMWARE_CREDITS_DOCUMENTATION_DESC"></div>
@@ -427,7 +427,7 @@
                             </label>
                             <hr>
 
-                            <label class="uniRow" style="display:flex; cursor:pointer; opacity: 0.8;" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS', '_blank')">
+                            <label class="uniRow" style="cursor:pointer; opacity: 0.8;" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS', '_blank')">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="FIRMWARE_CREDITS_SPECIAL"></div>
                                     <div class="uniStatus" data-lang="FIRMWARE_CREDITS_SPECIAL_DESC"></div>
@@ -472,7 +472,7 @@
                                 </div>
                             </div>
                             <hr>
-                            <div class="uniRow" style="display:flex;">
+                            <div class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="CONNECTION_MAC_ADRESSE"></div>
                                 </div>
@@ -491,7 +491,7 @@
                                 </div>
                             </div>
                             <hr>
-                            <div class="uniRow" style="display:flex;">
+                            <div class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="CONNECTION_MAC_ADRESSE"></div>
                                 </div>
@@ -501,7 +501,7 @@
 
                         <div class="field-group unibloc">
                             <div id="divHiddenSSID">
-                                <label class="uniRow" style="display:flex;">
+                                <label class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_HIDDEN_SSID">Réseau Wi-Fi caché</div>
                                         <div class="uniStatus" data-lang="CONNECTION_HIDDEN_SSID_DESC">Permet de se connecter à un réseau qui ne diffuse pas son nom</div>
@@ -516,7 +516,7 @@
                                 <hr>
                             </div>
                             <div id="divRoaming">
-                                <label class="uniRow" style="display:flex;">
+                                <label class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_ROAMING">Activer Itinérance</div>
                                         <div class="uniStatus" data-lang="CONNECTION_ROAMING_DESC">Cible toujours la borne Wi-Fi la plus proche</div>
@@ -546,7 +546,7 @@
                                 <hr id="hrIdName">
                             </div>
                             <div id="divFallbackWireless">
-                                <label class="uniRow" style="display:flex;">
+                                <label class="uniRow">
                                     <div class="uniText">
                                         <div class="uniLabel" data-lang="CONNECTION_WIFI_FALLBACK">Secours Wi-Fi</div>
                                         <div class="uniStatus" data-lang="CONNECTION_WIFI_FALLBACK_DESC">Bascule sur le Wi-Fi en cas de panne Ethernet</div>
@@ -645,23 +645,14 @@
                     </div>
                     <div id="divDHCP" class="subtab-content" style="display:none;">
                         <div class="field-group unibloc">
-                            <div class="uniRow" style="display:flex;">
+                            <div class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="ADRESSIP_CURRENT_IP">Adresse IP</div>
                                 </div>
                                 <span id="spanCurrentIP"></span>
                             </div>
                             <hr>
-
-
-
-
-
-
-
-
-
-                            <label class="uniRow" style="display:flex;">
+                            <label class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="ADRESSIP_DHCP">DHCP</div>
                                     <div class="uniStatus" data-lang="ADRESSIP_DHCP_DESC">Obtenir automatiquement une adresse IP (DHCP)</div>
@@ -733,7 +724,7 @@
                                 </div>
                             </label>
                             <hr>
-                            <label class="uniRow" style="display:flex;">
+                            <label class="uniRow">
                                 <div class="uniText">
                                     <div class="uniLabel" data-lang="MQTT_PUB_DISCOVERY">Publier découverte</div>
                                     <div class="uniStatus" data-lang="MQTT_PUB_DISCOVERY_DESC">Envoie les paramètres pour une configuration automatique dans votre système</div>
