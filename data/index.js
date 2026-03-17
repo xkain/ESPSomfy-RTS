@@ -2323,6 +2323,33 @@ class Wifi {
             </div>
             </div>
 
+            <div class="field-group unibloc">
+            <label class="uniRow">
+            <div class="uniText">
+            <div class="uniLabel">${tr("ETH_SETTINGS_BOARD_TYPE")}</div>
+
+            </div>
+            <span style="font-weight: bold;">${boardType.label} [${boardType.val}]</span>
+            </label>
+            <hr>
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
             <div class="field-group error" style="padding: 15px;">
             <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; width:100%; margin:0; text-align:left;">
             <div>
@@ -5584,7 +5611,7 @@ class Firmware {
         let optionsHtml = '';
         options.forEach(opt => {
             optionsHtml += `
-            <label class="uniRow" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0;">
+            <label class="uniRow" style="padding: 8px 0;">
             <div class="uniLabel" style="font-size:14px;">${tr(opt.txt)}</div>
             <div class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></div>
             </label>`;
