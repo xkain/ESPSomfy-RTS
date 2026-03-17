@@ -2317,38 +2317,11 @@ class Wifi {
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_TYPE")}</label><span>${phyType.label} [${phyType.val}]</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_ADDRESS")}</label><span>${obj.ethernet.phyAddress}</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_CLOCK_MODE")}</label><span>${clkMode.label} [${clkMode.val}]</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_POWER_PIN")}</label><span>${obj.ethernet.PWRPin === -1 ? tr("LBL_NONE") : obj.ethernet.PWRPin}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_POWER_PIN")}</label><span>${obj.ethernet.PWRPin === -1 ? tr("NONE") : obj.ethernet.PWRPin}</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDC_PIN")}</label><span>${obj.ethernet.MDCPin}</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${obj.ethernet.MDIOPin}</span></div>
             </div>
             </div>
-
-            <div class="field-group unibloc">
-            <label class="uniRow">
-            <div class="uniText">
-            <div class="uniLabel">${tr("ETH_SETTINGS_BOARD_TYPE")}</div>
-
-            </div>
-            <span style="font-weight: bold;">${boardType.label} [${boardType.val}]</span>
-            </label>
-            <hr>
-
-
-
-
-
-            </div>
-
-
-
-
-
-
-
-
-
-
-
 
             <div class="field-group error" style="padding: 15px;">
             <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; width:100%; margin:0; text-align:left;">
