@@ -1476,7 +1476,7 @@ void SomfyShade::publishDisco() {
   JsonObject dobj = obj.createNestedObject("device");
   dobj["hw_version"] = settings.fwVersion.name;
   dobj["name"] = settings.hostname;
-  dobj["mf"] = "xkain";
+  dobj["mf"] = "rstrouse";
   JsonArray arrids = dobj.createNestedArray("identifiers");
   //snprintf(topic, sizeof(topic), "mqtt_espsomfyrts_%s_shade%d", settings.serverId, this->shadeId);
   snprintf(topic, sizeof(topic), "mqtt_espsomfyrts_%s", settings.serverId);
@@ -3348,7 +3348,7 @@ void SomfyShade::toJSON(JsonResponse &json) {
   json.addElem("myTiltPos", this->transformPosition(this->myTiltPos));
   json.addElem("direction", this->direction);
   json.addElem("shadeType", static_cast<uint8_t>(this->shadeType));
-  json.addElem("bitLength", this->bitLength);;
+  json.addElem("bitLength", this->bitLength);
   json.addElem("proto", static_cast<uint8_t>(this->proto));
   json.addElem("flags", this->flags);
   json.addElem("flipCommands", this->flipCommands);
@@ -4584,7 +4584,7 @@ void Transceiver::emitFrequencyScan(uint8_t num) {
   sockEmit.endEmit(num);
   /*
   char buf[420];
-  snprintf(buf, sizeof(buf), "{\"scanning\":%s,\"testFreq\":%f,\"testRSSI\":%d,\"frequency\":%f,\"RSSI\":%d}", rxmode == 3 ? "true" : "false", currFreq, currRSSI, markFreq, markRSSI);
+  snprintf(buf, sizeof(buf), "{\"scanning\":%s,\"testFreq\":%f,\"testRSSI\":%d,\"frequency\":%f,\"RSSI\":%d}", rxmode == 3 ? "true" : "false", currFreq, currRSSI, markFreq, markRSSI); 
   if(num >= 255) sockEmit.sendToClients("frequencyScan", buf);
   else sockEmit.sendToClient(num, "frequencyScan", buf);
   */
@@ -4645,7 +4645,7 @@ void Transceiver::emitFrame(somfy_frame_t *frame, somfy_rx_t *rx) {
     evt.appendMessage(buf);
     snprintf(buf, sizeof(buf), "\"sync\":%d,\"pulses\":[", frame->hwsync);
     evt.appendMessage(buf);
-
+    
     if(rx) {
       for(uint16_t i = 0; i < rx->pulseCount; i++) {
         snprintf(buf, sizeof(buf), "%s%d", i != 0 ? "," : "", rx->pulses[i]);
@@ -4726,7 +4726,6 @@ bool Transceiver::end() {
 }
 void transceiver_config_t::fromJSON(JsonObject& obj) {
     //Serial.print("Deserialize Radio JSON ");
-    if(obj.containsKey("boardType")) this->boardType = obj["boardType"];
     if(obj.containsKey("type")) this->type = obj["type"];
     if(obj.containsKey("CSNPin")) this->CSNPin = obj["CSNPin"];
     if(obj.containsKey("MISOPin")) this->MISOPin = obj["MISOPin"];
@@ -4740,8 +4739,7 @@ void transceiver_config_t::fromJSON(JsonObject& obj) {
     if(obj.containsKey("enabled")) this->enabled = obj["enabled"];
     if(obj.containsKey("txPower")) this->txPower = obj["txPower"];
     if(obj.containsKey("proto")) this->proto = static_cast<radio_proto>(obj["proto"].as<uint8_t>());
-
-
+    if(obj.containsKey("radioBoardType")) this->radioBoardType = obj["radioBoardType"];
     /*
     if (obj.containsKey("internalCCMode")) this->internalCCMode = obj["internalCCMode"];
     if (obj.containsKey("modulationMode")) this->modulationMode = obj["modulationMode"];
@@ -4770,7 +4768,6 @@ void transceiver_config_t::fromJSON(JsonObject& obj) {
     Serial.printf("SCK:%u MISO:%u MOSI:%u CSN:%u RX:%u TX:%u\n", this->SCKPin, this->MISOPin, this->MOSIPin, this->CSNPin, this->RXPin, this->TXPin);
 }
 void transceiver_config_t::toJSON(JsonResponse &json) {
-    json.addElem("boardType", this->boardType);
     json.addElem("type", this->type);
     json.addElem("TXPin", this->TXPin);
     json.addElem("RXPin", this->RXPin);
@@ -4785,6 +4782,7 @@ void transceiver_config_t::toJSON(JsonResponse &json) {
     json.addElem("proto", static_cast<uint8_t>(this->proto));
     json.addElem("enabled", this->enabled);
     json.addElem("radioInit", this->radioInit);
+    json.addElem("radioBoardType", this->radioBoardType);
 }
 /*
 void transceiver_config_t::toJSON(JsonObject& obj) {
@@ -4832,7 +4830,6 @@ void transceiver_config_t::toJSON(JsonObject& obj) {
 void transceiver_config_t::save() {
     pref.begin("CC1101");
     pref.clear();
-    pref.putUChar("boardType", this->boardType);
     pref.putUChar("type", this->type);
     pref.putUChar("TXPin", this->TXPin);
     pref.putUChar("RXPin", this->RXPin);
@@ -4847,7 +4844,9 @@ void transceiver_config_t::save() {
     pref.putBool("radioInit", true);
     pref.putChar("txPower", this->txPower);
     pref.putChar("proto", static_cast<uint8_t>(this->proto));
+    pref.putUChar("radioBoardType", this->radioBoardType);
 
+    
     /*
     pref.putBool("internalCCMode", this->internalCCMode);
     pref.putUChar("modulationMode", this->modulationMode);
@@ -4924,7 +4923,6 @@ void transceiver_config_t::load() {
         break;
     }
     pref.begin("CC1101");
-    this->boardType = pref.getUChar("boardType", 0);
     this->type = pref.getUChar("type", 56);
     this->TXPin = pref.getUChar("TXPin", this->TXPin);
     this->RXPin = pref.getUChar("RXPin", this->RXPin);
@@ -4938,6 +4936,7 @@ void transceiver_config_t::load() {
     this->txPower = pref.getChar("txPower", this->txPower);
     this->rxBandwidth = pref.getFloat("rxBandwidth", this->rxBandwidth);
     this->proto = static_cast<radio_proto>(pref.getChar("proto", static_cast<uint8_t>(this->proto)));
+    this->radioBoardType = pref.getUChar("radioBoardType", 0);
     this->removeNVSKey("internalCCMode");
     this->removeNVSKey("modulationMode");
     this->removeNVSKey("channel");

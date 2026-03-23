@@ -11,7 +11,7 @@ extern Preferences pref;
 #define SHADE_HDR_SIZE 76
 #define SHADE_REC_SIZE 276
 #define GROUP_REC_SIZE 200
-#define TRANS_REC_SIZE 78
+#define TRANS_REC_SIZE 82
 #define ROOM_REC_SIZE 29
 #define REPEATER_REC_SIZE 77
 
@@ -683,7 +683,7 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.enabled = this->readBool(false);
     cfg.proto = static_cast<radio_proto>(this->readUInt8(0));
     cfg.type = this->readUInt8(56);
-    cfg.boardType = this->readUInt8(0);
+    cfg.radioBoardType = this->readUInt8(0);
     cfg.SCKPin = this->readUInt8(cfg.SCKPin);
     cfg.CSNPin = this->readUInt8(cfg.CSNPin);
     cfg.MOSIPin = this->readUInt8(cfg.MOSIPin);
@@ -693,7 +693,7 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.frequency = this->readFloat(cfg.frequency);
     cfg.rxBandwidth = this->readFloat(cfg.rxBandwidth);
     cfg.deviation = this->readFloat(cfg.deviation);
-    cfg.txPower = this->readInt8(cfg.txPower);  
+    cfg.txPower = this->readInt8(cfg.txPower);
     if(this->file.position() != startPos + this->header.transRecordSize) {
       Serial.println("Reading to end of transceiver record");
       this->seekChar(CFG_REC_END);
@@ -1043,7 +1043,7 @@ bool ShadeConfigFile::writeTransRecord(transceiver_config_t &cfg) {
   this->writeBool(cfg.enabled);
   this->writeUInt8(static_cast<uint8_t>(cfg.proto));
   this->writeUInt8(cfg.type);
-  this->writeUInt8(cfg.boardType);
+  this->writeUInt8(cfg.radioBoardType);
   this->writeUInt8(cfg.SCKPin);
   this->writeUInt8(cfg.CSNPin);
   this->writeUInt8(cfg.MOSIPin);

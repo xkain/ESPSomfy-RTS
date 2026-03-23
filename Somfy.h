@@ -420,8 +420,8 @@ class SomfyGroup : public SomfyRemote {
 struct transceiver_config_t {
     bool printBuffer = false;
     bool enabled = false;
-    uint8_t boardType = 0;
-    uint8_t type = 56;                // 56 or 80 bit protocol.
+    uint8_t type = 56;                // 56 or 80 bit protocol..
+    uint8_t radioBoardType;
     radio_proto proto = radio_proto::RTS;
     uint8_t SCKPin = 18;
     uint8_t TXPin = 13;
@@ -429,8 +429,8 @@ struct transceiver_config_t {
     uint8_t MOSIPin = 23;
     uint8_t MISOPin = 19;
     uint8_t CSNPin = 5;
-    bool radioInit = true;
-    float frequency = 433.420;         // Basic frequency
+    bool radioInit = false;
+    float frequency = 433.42;         // Basic frequency
     float deviation = 47.60;          // Set the Frequency deviation in kHz. Value from 1.58 to 380.85. Default is 47.60 kHz.
     float rxBandwidth = 99.97;        // Receive bandwidth in kHz.  Value from 58.03 to 812.50.  Default is 99.97kHz.
     int8_t txPower = 10;              // Transmission power {-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12}.  Default is 12.

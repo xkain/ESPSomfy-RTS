@@ -2314,7 +2314,10 @@ void Web::begin() {
   server.on("/saveRadio", []() {
     webServer.sendCORSHeaders(server);
     if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
-    DynamicJsonDocument doc(512);
+    DynamicJsonDocument doc(1024);
+
+    Serial.print("Taille du JSON reçu : ");
+    Serial.println(server.arg("plain").length());
     DeserializationError err = deserializeJson(doc, server.arg("plain"));
     if (err) {
       Serial.print("Error parsing JSON ");
