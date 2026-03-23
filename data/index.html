@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
@@ -15,9 +15,12 @@
       else if (stored === '2') { theme = 'light'; }
       else { theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
       document.documentElement.setAttribute('data-theme', theme);
+      const storedLang = localStorage.getItem('selectedLang');
+      if (storedLang) {
+          document.documentElement.lang = storedLang;
+      }
     })();
     </script>
-
     <link rel="stylesheet" href="base.css?v=2.5.0c" type="text/css" />
     <link rel="stylesheet" href="main.css?v=2.5.0c" type="text/css" />
     <link rel="stylesheet" href="overlays.css?v=2.5.0c" type="text/css" />
