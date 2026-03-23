@@ -22,8 +22,10 @@ GitUpdater git;
 
 uint32_t oldheap = 0;
 void setup() {
-  pinMode(2, OUTPUT);
-  digitalWrite(2, LOW);
+  #if defined(LED_PIN) && LED_PIN != -1
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+  #endif
   Serial.begin(115200);
   Serial.println();
   Serial.println("Startup/Boot....");
@@ -40,6 +42,7 @@ void setup() {
   delay(1000);
   net.setup();  
   somfy.begin();
+  //git.checkForUpdate();
   esp_task_wdt_init(7, true); //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL); //add current thread to WDT watch
 
