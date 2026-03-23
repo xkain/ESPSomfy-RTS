@@ -42,25 +42,6 @@ const translator = {
         observer.observe(document.body, { childList: true, subtree: true });
     }
 };
-function displayUptime(totalSeconds, className) {
-    const elements = document.querySelectorAll('.' + className);
-    if (elements.length === 0 || isNaN(totalSeconds)) return;
-
-    let seconds = parseInt(totalSeconds, 10);
-    let days = Math.floor(seconds / (24 * 3600));
-    seconds %= (24 * 3600);
-    let hours = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    let minutes = Math.floor(seconds / 60);
-
-    const fH = hours.toString().padStart(2, '0');
-    const fM = minutes.toString().padStart(2, '0');
-    const timeString = `${days}${tr('DAY')} ${fH}${tr('HOUR')} ${fM}${tr('MIN')}`;
-
-    elements.forEach(el => {
-        el.textContent = timeString;
-    });
-}
 function loadLang(callback) {
     fetch(baseUrl + '/lang')
     .then(r => r.json())
@@ -81,6 +62,25 @@ function loadLang(callback) {
         document.body.classList.add('lang-loaded');
         if (waitLoad && waitLoad.remove) waitLoad.remove();
         if(callback) callback();
+    });
+}
+function displayUptime(totalSeconds, className) {
+    const elements = document.querySelectorAll('.' + className);
+    if (elements.length === 0 || isNaN(totalSeconds)) return;
+
+    let seconds = parseInt(totalSeconds, 10);
+    let days = Math.floor(seconds / (24 * 3600));
+    seconds %= (24 * 3600);
+    let hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    let minutes = Math.floor(seconds / 60);
+
+    const fH = hours.toString().padStart(2, '0');
+    const fM = minutes.toString().padStart(2, '0');
+    const timeString = `${days}${tr('DAY')} ${fH}${tr('HOUR')} ${fM}${tr('MIN')}`;
+
+    elements.forEach(el => {
+        el.textContent = timeString;
     });
 }
 var errors = [
@@ -1083,7 +1083,6 @@ class UIBinder {
         }
         return v;
     }
-
     waitMessage(el) {
         let div = document.createElement('div');
         div.innerHTML = '<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>';
@@ -1141,10 +1140,10 @@ class UIBinder {
             return existing;
         }
         let div = document.createElement('div');
-        div.innerHTML = `<div id="divSocketAttempts" style="position:absolute;width:100%;left:0px;padding-right:24px;text-align:right;top:0px;font-size:18px;"><span>Attempts:</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Unable to connect to the server</div><hr><div style="font-size:.7em">${msg}</div></div>`;
+        div.innerHTML = `<div id="divSocketAttempts" class="socketAttempts"><span>Attempts:</span><span id="spanSocketAttempts"></span></div><div class="inner-error"><div>Unable to connect to the server</div><hr><div style="font-size:.7em">${msg}</div></div>`;
         div.classList.add('error-message');
         div.classList.add('socket-error');
-        div.classList.add('message-overlay');
+        div.classList.add('modal-overlay');
         el.appendChild(div);
         return div;
     }
@@ -1157,7 +1156,7 @@ class UIBinder {
         let div = document.createElement('div');
         div.innerHTML = `
         <div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton animScale" type="button" onclick="ui.clearErrors();">Close</button></div>`;
-        div.classList.add('error-message', 'message-overlay');
+        div.classList.add('error-message', 'modal-overlay');
         el.appendChild(div);
         return div;
     }
@@ -1171,7 +1170,7 @@ class UIBinder {
         div.innerHTML = `
         <div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" class="bouton animScale" type="button">${tr('BT_YES')}</button><button class="boutonOutline animScale" type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
         div.classList.add('prompt-message');
-        div.classList.add('message-overlay');
+        div.classList.add('modal-overlay');
         el.appendChild(div);
         div.querySelector('#btnYes').addEventListener('click', onYes);
         return div;
@@ -1184,14 +1183,8 @@ class UIBinder {
         }
         let div = document.createElement('div');
         div.innerHTML = `
-        <div class="message-content">
-        <div class="info-text">${msg}</div>
-        <div class="sub-message"></div>
-        <div class="button-container-row">
-        <button id="btnOk" class="bouton animScale" type="button">${tr('BT_OK')}</button>
-        </div>
-        </div>`;
-        div.classList.add('info-message', 'message-overlay');
+        <div class="message-content"><div class="info-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnOk" class="bouton animScale" type="button">${tr('BT_OK')}</button></div></div>`;
+        div.classList.add('info-message', 'modal-overlay');
         el.appendChild(div);
 
         const btnOk = div.querySelector('#btnOk');
@@ -1203,7 +1196,7 @@ class UIBinder {
         return div;
     }
     clearErrors() {
-        let errors = document.querySelectorAll('div.message-overlay');
+        let errors = document.querySelectorAll('div.modal-overlay');
         if (errors && errors.length > 0) errors.forEach((el) => { el.remove(); });
     }
     selectTab(elTab) {
@@ -1232,10 +1225,10 @@ class UIBinder {
         let max = parseInt(el.getAttribute('data-maxsteps'), 10);
         if (!isNaN(max)) {
             let next = el.querySelector(`#btnNextStep`);
-            if (next) next.style.display = max < step ? 'flex' : 'none';
+            if (next) next.style.display = max < step ? 'block' : 'none';
         }
         let prev = el.querySelector(`#btnPrevStep`);
-        if (prev) prev.style.display = step <= 1 ? 'none' : 'flex';
+        if (prev) prev.style.display = step <= 1 ? 'none' : 'block';
         if (curr !== step) {
             el.setAttribute('data-stepid', step);
             let evt = new CustomEvent('stepchanged', { detail: { oldStep: curr, newStep: step }, bubbles: true, cancelable: true, composed: false });
@@ -1722,9 +1715,11 @@ class General {
 
             const langSelect = document.getElementById('langSelect');
                 if (langSelect) {
-                    const languages =
-                    [ 'en', 'fr', 'de', /*'es', 'it' */ ];
-                    langSelect.value = languages[settings.language] || 'en';
+                    const languages = [ 'en', 'fr', 'de', /*'es', 'it' */ ];
+                    const selectedLang = languages[settings.language] || 'en';
+                    localStorage.setItem('selectedLang', selectedLang);
+                    document.documentElement.lang = selectedLang;
+                    langSelect.value = selectedLang;
                     langSelect.onchange = (e) => {
                         this.onLanguageChanged(e.target.value);
                     };
@@ -1846,11 +1841,12 @@ class General {
     onLanguageChanged(lang) {
         const sel = document.getElementById('langSelect');
         if (sel) sel.disabled = true;
+        localStorage.setItem('selectedLang', lang);
         fetch(baseUrl + '/setLang?lang=' + lang)
         .then(r => r.json())
         .then(resp => {
             if (resp.status === "ok") {
-                window.location.reload();
+                window.location.reload(true);
             }
         })
         .catch(err => {
@@ -2492,7 +2488,7 @@ class Somfy {
         this.loadPins('input', document.getElementById('selTransRXPin'));
 
         ui.toElement(document.getElementById('divTransceiverSettings'), {
-            transceiver: { config: { proto: 0, boardType: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
+            transceiver: { config: { proto: 0, radioBoardType: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
         });
 
         this.loadPins('out', document.getElementById('selShadeGPIOUp'));
@@ -2543,9 +2539,20 @@ class Somfy {
 
             pins.forEach((p, i) => {
                 const pinVal = targetPins[p.key];
-                document.getElementById(`selTrans${p.key}`).value = pinVal;
-                html += `<div class="gpioRadio-item"><span class="gpioRadio-label">${p.label}</span><span class="gpioRadio-val">GPIO${pinVal}</span></div>`;
+                const sel = document.getElementById(`selTrans${p.key}`);
 
+                if (sel) {
+                    // Vérifier si l'option existe, sinon la créer
+                    let exists = false;
+                    for (let opt of sel.options) {
+                        if (parseInt(opt.value, 10) === pinVal) { exists = true; break; }
+                    }
+                    if (!exists) {
+                        sel.options.add(new Option(`GPIO-${pinVal < 10 ? '0' + pinVal : pinVal}`, pinVal));
+                    }
+                    sel.value = pinVal;
+                }
+                html += `<div class="gpioRadio-item"><span class="gpioRadio-label">${p.label}</span><span class="gpioRadio-val">GPIO${pinVal}</span></div>`;
                 if (i < pins.length - 1) {
                     const isMiddle = (i === 2);
                     html += `<div class="gpioRadio-sep${isMiddle ? ' gpioRadioSep' : ''}">|</div>`;
@@ -2575,14 +2582,13 @@ class Somfy {
 
                 const selBoard = document.getElementById('selRadioBoardType');
                 if(somfy.transceiver && somfy.transceiver.config) {
-                    selBoard.value = somfy.transceiver.config.boardType || 0;
-                    this.onRadioBoardTypeChanged(selBoard); // Force l'affichage du résumé GPIO
+                    selBoard.value = somfy.transceiver.config.radioBoardType || 0;
+                    this.onRadioBoardTypeChanged(selBoard);
                 }
                 const cbRadio = document.getElementById('cbEnableRadio');
                 const txtStatus = document.getElementById('divRadioEnableStatus');
                 const row = document.getElementById('divRadioEnableColor');
                 const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
-
                 const updateRadioText = () => {
                     const currentState = cbRadio.checked;
                     const isActuallyEnabled = radioTab && !radioTab.classList.contains('radio-error');
@@ -2594,7 +2600,7 @@ class Somfy {
                     }
                 };
                 const isRadioInit = somfy.transceiver.config.radioInit;
-                const sideNote = document.getElementById('barsideRadioDisable'); // On récupère ton span
+                const sideNote = document.getElementById('barsideRadioDisable');
                 if (radioTab) {
                     radioTab.classList.toggle('radio-error', !isRadioInit);
                     if (sideNote) sideNote.style.display = isRadioInit ? 'none' : 'inline';
@@ -2619,9 +2625,18 @@ class Somfy {
         let valid = true;
         const divSettings = document.getElementById('divTransceiverSettings');
         let trans = ui.fromElement(divSettings).transceiver;
+        if (!trans.config) trans.config = {}; // Sécurité si l'objet n'existe pas
+        const pinKeys = ['SCKPin', 'CSNPin', 'MOSIPin', 'MISOPin', 'TXPin', 'RXPin'];
+        pinKeys.forEach(key => {
+            const selEl = document.getElementById(`selTrans${key}`);
+            if (selEl) {
+                const val = parseInt(selEl.value, 10);
+                trans.config[key] = val;
+                //console.log(`Lecture manuelle pour ${key} : ${val}`);
+            }
+        });
         const selBoard = document.getElementById('selRadioBoardType');
-        trans.config.boardType = parseInt(selBoard.value, 10);
-
+        trans.config.radioBoardType = parseInt(selBoard.value, 10);
         if (typeof trans.config.type === 'undefined' || trans.config.type === '' || trans.config.type === 'none') {
             ui.errorMessage(tr('ERR_RADIO_TYPE_REQUIRED'));
             valid = false;
@@ -2629,6 +2644,7 @@ class Somfy {
         if (valid) {
             const fnValDup = (o, name) => {
                 const val = o[name];
+                console.log("Vérification de " + name + " = " + val);
                 if (typeof val === 'undefined' || isNaN(val)) {
                     ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
                     return false;
@@ -2638,7 +2654,6 @@ class Somfy {
                         const sval = o[s];
                         if (sval === val) {
                             if ((name === 'TXPin' && s === 'RXPin') || (name === 'RXPin' && s === 'TXPin')) continue;
-
                             ui.errorMessage(
                                 document.getElementById('divSomfySettings'),
                                             tr('ERR_GPIO_PIN_DUPLICATED').replace('%1', name.replace('Pin', '')).replace('%2', s.replace('Pin', ''))
@@ -2649,7 +2664,7 @@ class Somfy {
                 }
                 return true;
             };
-            const pinKeys = ['SCKPin', 'CSNPin', 'MOSIPin', 'MISOPin', 'TXPin', 'RXPin'];
+
             for (const key of pinKeys) {
                 if (!fnValDup(trans.config, key)) {
                     valid = false;
@@ -2720,7 +2735,7 @@ class Somfy {
         if (!div) {
             div = document.createElement('div');
             div.setAttribute('id', 'divScanFrequency');
-            div.className = 'inst-overlay message-overlay';
+            div.className = 'inst-overlay';
 
             div.innerHTML = `
             <div class="overlay-content">
@@ -3761,7 +3776,7 @@ class Somfy {
             let shade = group.linkedShades[i];
 
             divCfg += `<div class="linked-shade" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}">
-            <div class="group-name"><div class="linkedshade-name">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" oonclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            <div class="group-name"><div class="linkedshade-name">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
         }
         document.getElementById('divLinkedShadeList').innerHTML = divCfg;
 
@@ -3776,21 +3791,29 @@ class Somfy {
     pinMaps = [
         { name: '', maxPins: 39, inputs: [0, 1, 2, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [2, 3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },
         { name: 's2', maxPins: 46, inputs: [0, 2, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 45], outputs: [0, 2, 19, 20, 26, 27, 28, 29, 30, 31, 32, 45, 46]},
-        { name: 's3', maxPins: 48, inputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32], outputs: [2, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32] },
-        { name: 'c3', maxPins: 21, inputs: [2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], outputs: [2, 11, 12, 13, 14, 15, 16, 17, 21] }
+        { name: 's3', maxPins: 48, inputs: [19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32], outputs: [19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32] },
+        { name: 'c3', maxPins: 21, inputs: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20], outputs: [11, 12, 13, 14, 15, 16, 17, 21] }
     ];
     loadPins(type, sel, opt) {
         while (sel.firstChild) sel.removeChild(sel.firstChild);
         let cm = document.getElementById('divContainer').getAttribute('data-chipmodel');
-        let pm = this.pinMaps.find(x => x.name === cm) || { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] };
-
+        let pm = this.pinMaps.find(x => x.name === cm);
+        if (!pm) {
+            pm = { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] };
+        }
         for (let i = 0; i <= pm.maxPins; i++) {
-            // --- BANISSEMENT DU GPIO 02 pour éviter les conflits Hardware/Boot
-            if (i === 2) continue;
+            // On ne bannit le GPIO 2 QUE si on est sur un ESP32 classique
+            if (i === 2 && (cm === '' || cm === null)) {
+                continue;
+            }
             if (type.includes('in') && pm.inputs.includes(i)) continue;
             if (type.includes('out') && pm.outputs.includes(i)) continue;
 
-            sel.options[sel.options.length] = new Option(`GPIO-${i > 9 ? i.toString() : '0' + i.toString()}`, i, typeof opt !== 'undefined' && opt === i);
+            sel.options[sel.options.length] = new Option(
+                `GPIO-${i > 9 ? i.toString() : '0' + i.toString()}`,
+                                                         i,
+                                                         typeof opt !== 'undefined' && opt === i
+            );
         }
     }
     procGroupState(state) {
@@ -5090,11 +5113,11 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div style="position: relative;">
+        <div>
         <h2>${tr("LINK_GROUP_TITLE")}</h2>
-        <p id="pGroupHeaderTitle" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px;">
+        <p id="pGroupHeaderTitle">
         ${tr("LINK_GROUP_DESC")}
-        <span id="spanGroupName" style="font-weight:bold; font-size: 17px; vertical-align: middle; line-height: 1;"></span>
+        <span id="spanGroupName" class="groupNameSpan"></span>
         </p>
         </div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
@@ -5105,37 +5128,37 @@ class Somfy {
         <options style="color:black;"></options>
         </select>
         </div>
-        <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center;font-size:25px;font-weight:bold;color:var(--accent-color);"></div>
-        <div class="button-container-col wizard-step" data-stepid="3" style="margin-bottom: 15px;">
+        <div class="divWizShadeName wizard-step" data-stepid="3"></div>
+        <div class="button-container-col wizard-step marginB" data-stepid="3">
         <button class="bouton animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
         </div>
-        <div class="divWizShadeName wizard-step" data-stepid="4" style="text-align:center;font-size:22px;font-weight:bold;color:var(--accent-color);"></div>
-        <div class="button-container-col wizard-step" data-stepid="4" style="margin-bottom: 15px;">
+        <div class="divWizShadeName wizard-step" data-stepid="4"></div>
+        <div class="button-container-col wizard-step marginB" data-stepid="4">
         <button class="bouton animScale" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button>
         </div>
-        <div class="button-container-row" style="text-align:center; gap:10px;">
-        <button id="btnPrevStep" class="boutonOutline animScale" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton animScale" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
+        <div class="button-container-row">
+        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
         </div>
-        <div class="button-container-col" style="text-align:center; margin-top:10px;">
-        <button id="btnStopLinking" class="boutonOutline animScale" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
+        <div class="button-container-col">
+        <button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         <div class="information wizard-step" data-stepid="1"><svg><use xlink:href="#icon-info"></use></svg>
-        <div style="text-align: left; flex: 1;"><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div>
+        <div><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div>
         </div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
         <div class="information wizard-step" data-stepid="2"><svg><use xlink:href="#icon-info"></use></svg>
-        <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div>
+        <div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div>
         </div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
         <div class="information wizard-step" data-stepid="3"><svg><use xlink:href="#icon-info"></use></svg>
-        <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div>
+        <div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div>
         </div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="4"><p style="font-size:14px; margin:0;">${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
         </div>
         </div>`;
 
@@ -5222,37 +5245,25 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr("UNLINK_GROUP_TITLE")}</h2>
-        <p id="pGroupHeaderTitle" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px;">
-        ${tr("UNLINK_GROUP_DESC")}
-        <span id="spanGroupName" style="font-weight:bold; font-size: 17px; vertical-align: middle; line-height: 1;"></span>
-        </p>
-        </div>
+        <div><h2>${tr("UNLINK_GROUP_TITLE")}</h2><p id="pGroupHeaderTitle">${tr("UNLINK_GROUP_DESC")}<span id="spanGroupName" class="groupNameSpan"></span></p></div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
         </div>
-        <div class="divWizShadeName wizard-step" data-stepid="2" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
-        <div class="button-container-col wizard-step" data-stepid="2">
-        <button class="bouton animScale" type="button" id="btnOpenMemory" style="margin-bottom: 15px;">${tr("BT_OPEN_MEMORY")}</button>
+        <div class="divWizShadeName wizard-step" data-stepid="2"></div>
+        <div class="button-container-col wizard-step" data-stepid="2"><button class="bouton marginB animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button></div>
+        <div class="divWizShadeName wizard-step" data-stepid="3"></div>
+        <div class="button-container-col wizard-step" data-stepid="3"><button class="bouton marginB animScale" type="button" id="btnUnpairFromGroup">${tr("BT_UNPAIR_GROUP")}</button></div>
+        <div class="button-container-row">
+        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
         </div>
-        <div class="divWizShadeName wizard-step" data-stepid="3" style="text-align:center; font-size:22px; font-weight:bold; color:var(--accent-color);"></div>
-        <div class="button-container-col wizard-step" data-stepid="3">
-        <button class="bouton animScale" type="button" id="btnUnpairFromGroup" style="margin-bottom: 15px;">${tr("BT_UNPAIR_GROUP")}</button>
-        </div>
-        <div class="button-container-row" style="text-align:center; gap:10px;">
-        <button id="btnPrevStep" class="boutonOutline animScale" type="button" style="flex:1; justify-content: center;" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton animScale" type="button" style="flex:1;" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
-        </div>
-        <div class="button-container-col" style="margin-top:10px;">
-        <button id="btnStopLinking" class="boutonOutline animScale" type="button" style="width:100%;">${tr("BT_CANCEL_1")}</button>
-        </div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP1_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP2_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP2_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP3_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p style="font-size:14px; margin:0;">${tr("UNLINK_GROUP_STEP3_DESC_2")}</p></div>
+        <div class="button-container-col"><button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_3")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("UNLINK_GROUP_STEP2_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("UNLINK_GROUP_STEP2_DESC_2")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("UNLINK_GROUP_STEP3_DESC_1")}</p></div>
+        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("UNLINK_GROUP_STEP3_DESC_2")}</p></div>
         </div>
         </div>`;
 
@@ -5585,29 +5596,23 @@ class Firmware {
         options.forEach(opt => {
             optionsHtml += `
             <label class="uniRow" style="padding: 8px 0;">
-            <div class="uniLabel" style="font-size:14px;">${tr(opt.txt)}</div>
+            <div class="uniLabel">${tr(opt.txt)}</div>
             <div class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></div>
             </label>`;
         });
         inst.innerHTML = `
-        <div id="jsHeadRestore" class="instructions-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
-        <div style="text-align:left;">
-        <h2 style="margin:0;">${tr('RESTORE_TITLE')}</h2>
-        <p style="font-size:14px; margin:5px 0;">${tr('RESTORE_DESC')}</p>
-        </div>
+        <div id="jsHeadRestore" class="instructions-header">
+        <div><h2>${tr('RESTORE_TITLE')}</h2><p>${tr('RESTORE_DESC')}</p></div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-restore"></use></svg>
         </div>
-        <div class="field-group unibloc" style="margin-bottom:15px; padding: 15px; text-align: left;">
-        <div style="font-size:14px;">${tr('RESTORE_SELECT_FILE')}</div>
+        <div class="field-group unibloc">
+        <div>${tr('RESTORE_SELECT_FILE')}</div>
         </div>
         <div class="warning">
         <svg><use xlink:href="#icon-warning"></use></svg>
-        <div style="text-align:left; flex:1;">
-        <b>${tr('MSG_ALERT')}</b>
-        <span>${tr('RESTORE_NETWORK_WARNING')}</span>
+        <div><b>${tr('MSG_ALERT')}</b><span>${tr('RESTORE_NETWORK_WARNING')}</span></div>
         </div>
-        </div>
-        <div id="jsUniRestore" class="field-group unibloc" style="margin-bottom:20px; padding: 5px 15px;">
+        <div id="jsUniRestore" class="field-group unibloc">
         ${optionsHtml}
         </div>`;
 
@@ -5625,23 +5630,21 @@ class Firmware {
         <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
-        <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp" style="width:100%;">
+        <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp">
         <div id="divInstText"></div>
         <input id="fileName" type="file" name="updateFS" style="display:none;" onchange="document.getElementById('span-selected-file').innerText = this.files[0].name;"/>
-        <div class="field-group unibloc" style="padding:10px 15px; margin-bottom:20px; border-radius:30px;">
-        <label for="fileName" style="display: flex; align-items: center; cursor: pointer; width: 100%;">
-        <span id="span-selected-file" style="flex: 1; border-bottom: solid 2px var(--accent-color); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; color: var(--soustxt-color); min-height: 20px;">${tr('CHOOSE_FILE')}</span>
-        <div id="btn-select-file" style="width: 40px; height: 40px; background-color: var(--accent-color); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-        <svg style="width: 24px; height: 24px; color: white;"><use xlink:href="#svg-upload"></use></svg>
-        </div>
+        <div class="field-group unibloc FileUploaderChooseFile">
+        <label for="fileName">
+        <span id="span-selected-file">${tr('CHOOSE_FILE')}</span>
+        <div id="btn-select-file" class="fileUploaderBouton"><svg><use xlink:href="#svg-upload"></use></svg></div>
         </label>
         </div>
-        <div class="progress-bar" id="progFileUpload" style="--progress:0%; margin-top:10px; display:none;"></div>
+        <div class="progress-bar" id="progFileUpload" style="display:none;"></div>
         <div class="button-container-col">
-        <button id="btnBackupCfg" class="boutonOutline animScale" type="button" onclick="firmware.backup();" style="display:none;margin-bottom:10px;">${tr('BT_BACK_UP')}</button>
-        <div class="button-container-row" style="gap:10px;">
-        <button id="btnUploadFile" class="bouton animScale" type="button" style="flex:1;" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
-        <button id="btnClose" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
+        <button id="btnBackupCfg" class="boutonOutline marginB animScale" type="button" onclick="firmware.backup();" style="display:none;">${tr('BT_BACK_UP')}</button>
+        <div class="button-container-row">
+        <button id="btnUploadFile" class="bouton animScale" type="button" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
+        <button id="btnClose" class="boutonOutline animScale" type="button" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
         </div>
         </div>
         </form>
@@ -5679,7 +5682,7 @@ class Firmware {
             divGlobal.style.display = 'flex';
             divGlobal.style.cursor = 'pointer';
             divGlobal.onclick = () => { firmware.updateGithub(); };
-            divGlobal.innerHTML = `<svg class="btnSvg" style="width:16px; height:16px; margin:0; fill:var(--txtwarning-color); flex-shrink:0;"><use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)} <span style="color:var(--txtwarning-color); font-weight:bold;">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
+            divGlobal.innerHTML = `<svg class="procFwSvg"><use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)} <span class="procFwSpan">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
 
             divLocal.className = "error";
             statusIcon.setAttribute('xlink:href', '#icon-error');
@@ -5778,27 +5781,21 @@ class Firmware {
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
                 <div class="instructions-header">
-                <div style="position: relative;">
-                <h2>${tr('GIT_RELEASE_TITLE')}</h2>
-                <p>${tr('GIT_RELEASE_DESC').replace('%1', ver.name)}</p>
-                </div>
+                <div><h2>${tr('GIT_RELEASE_TITLE')}</h2><p>${tr('GIT_RELEASE_DESC').replace('%1', ver.name)}</p></div>
                 <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
                 </div>
-                <div class="warning" style="margin-bottom:20px;">
+                <div class="warning">
                 <svg><use xlink:href="#icon-warning"></use></svg>
-                <div style="text-align: left; flex: 1;">
-                <b>${tr('GIT_RELEASE_WAIT_WARNING')}</b>
-                <span>${tr('GIT_RELEASE_WAIT_WARNING_1')}</span>
-                </div></div>
-                <div class="progress-bar" id="progFirmwareDownload" style="--progress:0%; margin-top:10px; text-align:center;"></div>
-                <label for="progFirmwareDownload" style="font-size:10pt; display:block; margin-bottom:15px;">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
-                <div class="progress-bar" id="progApplicationDownload" style="--progress:0%; margin-top:10px; text-align:center;"></div>
-                <label for="progApplicationDownload" style="font-size:10pt; display:block; margin-bottom:20px;">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
-                <div class="button-container-col" style="text-align:center;">
-                <button id="btnCancelUpdate" class="bouton animScale" type="button" style="padding-left:30px; padding-right:30px;" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">
-                ${tr('BT_CANCEL_1')}
-                </button>
-                </div></div>`;
+                <div><b>${tr('GIT_RELEASE_WAIT_WARNING')}</b><span>${tr('GIT_RELEASE_WAIT_WARNING_1')}</span></div>
+                </div>
+                <div class="progress-bar" id="progFirmwareDownload"></div>
+                <label for="progFirmwareDownload">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
+                <div class="progress-bar" id="progApplicationDownload"></div>
+                <label for="progApplicationDownload">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
+                <div class="button-container-col">
+                <button id="btnCancelUpdate" class="bouton animScale" type="button" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">${tr('BT_CANCEL_1')}</button>
+                </div>
+                </div>`;
 
                 div.querySelectorAll('[data-lang]').forEach(el => {
                     el.innerHTML = tr(el.getAttribute('data-lang'));
@@ -5821,7 +5818,7 @@ class Firmware {
                 let chip = document.getElementById('divContainer').getAttribute('data-chipmodel');
 
                 div.setAttribute('id', 'divGitInstall');
-                div.setAttribute('class', 'inst-overlay message-overlay');
+                div.setAttribute('class', 'inst-overlay');
 
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
@@ -5848,42 +5845,29 @@ class Firmware {
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
                 <div class="instructions-header">
-                <div style="position: relative;">
-                <h2>${tr('UPDATE_GIT_TITLE')}</h2><p>${tr('UPDATE_GIT_DESC')}</p>
-                </div>
+                <div><h2>${tr('UPDATE_GIT_TITLE')}</h2><p>${tr('UPDATE_GIT_DESC')}</p></div>
                 <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
                 </div>
-                <div id="divPrereleaseWarning" class="error" style="display:none; margin-bottom:15px;">
+                <div id="divPrereleaseWarning" class="error" style="display:none;">
                 <svg><use xlink:href="#icon-error"></use></svg>
-                <div style="text-align:left; flex:1;">
-                <b>${tr('MSG_ALERT')}</b>
-                <span>${tr('UPDATE_GIT_RELEASE_DESC')}</span>
-                </div>
+                <div><b>${tr('MSG_ALERT')}</b><span>${tr('UPDATE_GIT_RELEASE_DESC')}</span></div>
                 </div>
                 <div class="field-group unibloc">
-                <div class="field-group">
-                <label class="label" for="selVersion" style="text-align:left; display:block;">${tr('UPDATE_GIT_SELECT_VERSION')}</label>
-                <select id="selVersion" class="inputAndSelect" data-bind="version" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));" style="width:100%;">
-                ${optionsHtml}
-                </select>
+                <label class="label" for="selVersion">${tr('UPDATE_GIT_SELECT_VERSION')}</label>
+                <select id="selVersion" class="inputAndSelect" data-bind="version" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));">${optionsHtml}</select>
                 <hr>
                 <button class="boutonOutline animScale" id="divReleaseNotes" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
                 </div>
-                </div>
-                <div class="${infoClass}" style="margin-bottom:15px; width:100%;">
+                <div class="${infoClass}">
                 <svg><use xlink:href="${infoIcon}"></use></svg>
-                <div style="text-align:left; flex:1;">
-                <b>${infoTitle}</b>
-                <span>${infoText}</span>
+                <div><b>${infoTitle}</b><span>${infoText}</span></div>
                 </div>
-                </div>
-                ${isMob ? `<button id="btnBackupCfg" class="bouton animScale" type="button" style="width:100%; margin-bottom:15px;" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button>` : ''}
+                ${isMob ? `<div class="button-container-col"><button id="btnBackupCfg" class="bouton marginB animScale" type="button" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button></div>` : ''}
                 <div class="button-container-row">
-                <button id="btnUpdate" type="button" class="bouton animScale" style="flex:1" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));" >${tr('BT_UPDATE')}</button>
-                <button id="btnClose" type="button" class="boutonOutline animScale" style="flex:1" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
+                <button id="btnUpdate" type="button" class="bouton animScale" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));">${tr('BT_UPDATE')}</button>
+                <button id="btnClose" type="button" class="boutonOutline animScale" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
                 </div>
                 </div>`;
-
                 document.getElementById('divContainer').appendChild(div);
                 window.scrollTo(0, 0);
                 this.gitReleaseSelected(div);
@@ -5923,10 +5907,10 @@ class Firmware {
     }
     formatInlineMarkdown(txt) {
         return txt
-        .replace(/`([^`]+)`/g, '<code style="background-color: rgba(120, 120, 120, 0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>')
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;height:auto;display:block;margin:5px 0;">')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#00aaff;text-decoration:underline;font-weight:bold;">$1</a>')
-        .replace(/(?<!["=>])(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#00aaff;text-decoration:underline;">$1</a>');
+        .replace(/`([^`]+)`/g, '<code class="md-code-inline">$1</code>')
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="md-img">')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="md-link">$1</a>')
+        .replace(/(?<!["=>])(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="md-link-auto">$1</a>');
     }
     async showReleaseNotes(tagName) {
         console.log(tagName);
@@ -6015,22 +5999,7 @@ class Firmware {
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_FIRMWARE_BACKUP_DOWNLOAD_FIRMWARE');
 
         inst.innerHTML = `
-        <div id="jsHeadFirmware" class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
-        <p>${tr('UPDATE_FIRMWARE_DESC')}</p>
-        </div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg>
-        </div>
-        <div class="field-group unibloc" style="padding: 15px; display: block; margin-bottom: 15px;">
-        <div>${tr('UPDATE_FIRMWARE_UPLOAD_FIRMWARE_DESC').replace('%1', '<span class="txt-badge">SomfyController.ino.esp32.bin</span>')}</div>
-        </div>
-        <div class="${infoClass}" style="margin-bottom: 15px; width: 100%;">
-        <svg><use xlink:href="${infoIcon}"></use></svg>
-        <div style="text-align: left; flex: 1;">
-        <b>${infoTitle}</b>
-        <span>${infoText}</span>
-        </div>
+        <div id="jsHeadFirmware" class="instructions-header"><div><h2>${tr('MANUAL_UPDATE_TITLE')}</h2><p>${tr('UPDATE_FIRMWARE_DESC')}</p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg></div><div class="field-group unibloc"><div>${tr('UPDATE_FIRMWARE_UPLOAD_FIRMWARE_DESC').replace('%1', '<span class="txt-badge">SomfyController.ino.esp32.bin</span>')}</div></div><div class="${infoClass}"><svg><use xlink:href="${infoIcon}"></use></svg><div><b>${infoTitle}</b><span>${infoText}</span></div>
         </div>`;
 
         div.classList.add('inst-overlay');
@@ -6054,22 +6023,7 @@ class Firmware {
         const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_LITTLEFS_BACKUP_DOWNLOAD');
 
         inst.innerHTML = `
-        <div id="jsHeadLittlefs" class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr('MANUAL_UPDATE_TITLE')}</h2>
-        <p>${tr('UPDATE_LITTLEFS_DESC')}</p>
-        </div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg>
-        </div>
-        <div class="field-group unibloc" style="padding: 15px; display: block; margin-bottom: 15px;">
-        <div>${tr('UPDATE_LITTLEFS_select').replace('%1', '<span class="instructionsTxt-badge">SomfyController.littlefs.bin</span>')}</div>
-        </div>
-        <div class="${infoClass}" style="margin-bottom: 15px; width: 100%;">
-        <svg><use xlink:href="${infoIcon}"></use></svg>
-        <div style="text-align: left; flex: 1;">
-        <b>${infoTitle}</b>
-        <span>${infoText}</span>
-        </div>
+        <div id="jsHeadLittlefs" class="instructions-header"><div><h2>${tr('MANUAL_UPDATE_TITLE')}</h2><p>${tr('UPDATE_LITTLEFS_DESC')}</p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg></div><div class="field-group unibloc"><div>${tr('UPDATE_LITTLEFS_select').replace('%1', '<span class="instructionsTxt-badge">SomfyController.littlefs.bin</span>')}</div></div><div class="${infoClass}"><svg><use xlink:href="${infoIcon}"></use></svg><div><b>${infoTitle}</b><span>${infoText}</span></div>
         </div>`;
 
         document.getElementById('divContainer').appendChild(div);
