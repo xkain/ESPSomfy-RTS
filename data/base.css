@@ -593,9 +593,6 @@ button:active {
     margin-right:8px;
     flex-shrink:0;
 }
-
-
-
 .progress-bar {
     display:block;
     width:100%;
@@ -604,6 +601,9 @@ button:active {
     height:2em;
     overflow:hidden;
     position:relative;
+    margin-top: 10px;
+    text-align: center;
+    --progress: 0%;
 }
 .progress-bar::after {
     content: attr(data-progress);
@@ -623,11 +623,17 @@ button:active {
     width: var(--progress);
     text-align: right;
     background-color: var(--accent-color);
-    border-radius: 25px;
+    border-radius: 8px;
     height: 2em;
     display: block;
     overflow: hidden;
 }
+.progress-bar label {
+    font-size:10pt;
+    display:block;
+    margin-bottom:15px;
+}
+
 
 /* SVG : UP - DOWN - MY - TOGGLE*/
 .somfy-shade-icon  {

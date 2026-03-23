@@ -116,7 +116,7 @@ div.wait-overlay {
     top: 0;
     left: 0;
     background: var(--wait-overlay);
-    z-index: 90000;
+    z-index: 1000;
     cursor: no-drop;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
@@ -231,6 +231,16 @@ div.wait-overlay > .lds-roller {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.socketAttempts{
+    position:absolute;
+    width:100%;
+        top:0px;
+    left:0px;
+    padding-right:24px;
+    text-align:right;
+    font-size:18px;
+}
 .inst-overlay {
     display: flex;
     flex-direction: column;
@@ -252,10 +262,7 @@ div.wait-overlay > .lds-roller {
     font-size:13px;
     overflow:auto;
 }
-div.info-message,
-div.prompt-message,
-div.error-message,
-div.socket-error {
+.modal-overlay{
     position: fixed;
     left: 0;
     top: 0;
@@ -265,7 +272,7 @@ div.socket-error {
     justify-content: center;
     align-items: center;
     background-color: var(--wait-overlay);
-    z-index: 30000;
+    z-index: 2000;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
 .error-content,
@@ -370,6 +377,12 @@ div.error-message,
         position: relative;
         z-index: 2;
     }
+    .instructions-header div p {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
     .instructions-headerLogo {
         position: absolute;
         right: -10px;
@@ -413,6 +426,10 @@ div.error-message,
             line-height: 1.4;
             color: var(--color);
         }
+.wizard-step p {
+    font-size:14px;
+    margin:0;
+}
 .wizard[data-stepid="1"] .wizard-step:not([data-stepid="1"]) { display: none; }
 .wizard[data-stepid="2"] .wizard-step:not([data-stepid="2"]) { display: none; }
 .wizard[data-stepid="3"] .wizard-step:not([data-stepid="3"]) { display: none; }
@@ -424,6 +441,19 @@ div.error-message,
 #divLinkGroup[data-stepid="4"] #btnNextStep { display: none !important; }
 #divUnlinkGroup[data-stepid="3"] #btnNextStep { display: none !important; }
 
+.divWizShadeName {
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    color:var(--accent-color);
+}
+.groupNameSpan {
+    font-weight:bold;
+    font-size: 17px;
+    vertical-align: middle;
+    line-height: 1;
+}
+
 .safety-checkbox-container input[type="checkbox"] {
     display: none;
 }
@@ -433,6 +463,18 @@ div.error-message,
 .safety-checkbox-container input[type="checkbox"]:checked + .custom-checkbox::after {
     transform: rotate(45deg) scale(1);
 }
+.procFwSvg {
+    width:16px;
+    height:16px;
+    margin:0;
+    fill:var(--txtwarning-color);
+    flex-shrink:0;
+}
+.procFwSpan {
+    color:var(--txtwarning-color);
+    font-weight:bold;
+}
+
 .firmware-message {
     display: none;
     align-items: center;
@@ -477,6 +519,29 @@ div.error-message,
 }
 .closeShow-mobile {
     display: none !important;
+}
+/*Mardown*/
+.md-code-inline {
+    background-color: rgba(120, 120, 120, 0.2);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+.md-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 5px 0;
+}
+.md-link {
+    color: #00aaff;
+    text-decoration: underline;
+    font-weight: bold;
+}
+.md-link-auto {
+    color: #00aaff;
+    text-decoration: underline;
 }
 
 /***************************
@@ -1054,6 +1119,39 @@ div.eth-setting-line label {
 #jsUniRestore .uniLabel {
 margin: 2px 0;
 }
+
+.FileUploaderChooseFile label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+.FileUploaderChooseFile span {
+    flex: 1;
+    border-bottom: solid 2px var(--accent-color);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px; color: var(--soustxt-color);
+    min-height: 20px;
+}
+.fileUploaderBouton {
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fileUploaderBouton svg {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
 
 /***************************
  * Netwook
