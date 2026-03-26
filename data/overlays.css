@@ -2,6 +2,10 @@
 .lang-loaded .top-bar-right {
     filter: blur(0px);
 }
+
+
+
+
 /* flip */
 .flip {
     transform: scaleX(-1);
@@ -426,6 +430,22 @@ div.error-message,
             line-height: 1.4;
             color: var(--color);
         }
+
+.uniblocRollingCode label {
+    color: var(--accent-color);
+}
+.uniblocRollingCode input {
+    text-align:center;
+    font-size: 35px !important;
+    color: var(--accent-color) !important;
+}
+.uniblocLinkGroupSelect select {
+    font-size:25px !important;
+    color: var(--accent-color) !important;
+}
+.uniblocLinkGroupSelect label {text-align:center;}
+.uniblocLinkGroupSelect option {font-size:14px;}
+
 .wizard-step p {
     font-size:14px;
     margin:0;
@@ -454,15 +474,6 @@ div.error-message,
     line-height: 1;
 }
 
-.safety-checkbox-container input[type="checkbox"] {
-    display: none;
-}
-.safety-checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
-    background: var(--txtwarning-color);
-}
-.safety-checkbox-container input[type="checkbox"]:checked + .custom-checkbox::after {
-    transform: rotate(45deg) scale(1);
-}
 .procFwSvg {
     width:16px;
     height:16px;
@@ -656,6 +667,10 @@ div.error-message,
     margin-left: auto;
     line-height: 1;
 }
+
+.somfyRepeater .idRemoteAddress {
+    flex-grow: 1;
+}
 .somfyLinkedRemote
 .addr-group {
     margin-left: 0;
@@ -766,6 +781,13 @@ div.error-message,
     flex-direction: column;
     min-width: 0;
 }
+.shadectl-main-content {
+    padding: 8px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
 .shadectl-header-row {
     flex: 0 0 100%;
     text-align: center;
@@ -797,6 +819,12 @@ div.error-message,
     width: 100%;
     padding: 5px 5px 0 5px;
 }
+    .shadectl-status-left {
+        display: flex;
+        gap: 5px;
+        color: #666;
+        align-items: center;
+    }
 .indicator {
     display: flex;
     align-items: center;
@@ -804,6 +832,9 @@ div.error-message,
 }
     .indicator-wind { color: #ff4500; }
     .indicator-sun { color: darkorange; }
+    .indicator-wind svg,
+    .indicator-sun svg { width:18px; height:18px; }
+
 
     .somfyShadeCtl[data-sunny="false"] .indicator-sun,
     .somfyShadeCtl:not([data-sunny]) .indicator-sun,
@@ -988,6 +1019,11 @@ div.error-message,
     width: 100%;
     padding: 0 15px;
 }
+    .popup-actions {
+        display:flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
 .slider-header {
     display: flex;
     justify-content: space-between;
@@ -1008,6 +1044,9 @@ div.error-message,
 .slider-group {
     width: 100%;
 }
+
+
+
 .slider-header .val span {
     font-variant-numeric: tabular-nums;
 }
@@ -1050,8 +1089,43 @@ div.error-message,
 }
 
 /***************************
+ * wifi
+ **************************/
+
+.wifiConnectScan {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:10px;
+}
+.no-wifi {
+    padding: 20px 10px;
+    text-align: center;
+}
+.no-wifi > div{
+    margin-bottom: 20px;
+    color: var(--txtwarning-color);
+    font-weight: bold;
+    justify-content: center;
+}
+.strength .signal {
+    width:24px; height: 24px;
+}
+
+/***************************
  * Ethernet
  **************************/
+
+.blocEthBoardSettings {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 15px 0;
+}
+.bloc-eth-setting-line {
+    text-align: left;
+    display: inline-block;
+}
 div.eth-setting-line {
     font-size:12px;
     padding-top:0px;
@@ -1064,20 +1138,35 @@ div.eth-setting-line span {
 div.eth-setting-line label {
     margin-right: 4px;
     display:inline-block;
-    width: 90px;
+    min-width: 130px;
     text-align:right;
     color: var(--color);
+}
+.safety-checkbox-container {
+    display:flex;
+    align-items:center;
+    gap:15px;
+    width:100%;
+    margin:0;
+    text-align:left;
+}
+.safety-checkbox-container input[type="checkbox"] {
+    display: none;
+}
+.safety-checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
+    background: var(--txtwarning-color);
+}
+.safety-checkbox-container input[type="checkbox"]:checked + .custom-checkbox::after {
+    transform: rotate(45deg) scale(1);
+}
+.saveEthDisabled {
+    background:#ccc;
+    cursor:not-allowed;
 }
 
 /***************************
  * Update
  **************************/
-.button-update svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    fill: currentColor;
-}
 #selVersion.inputAndSelect {
     font-size: 15px;
 }
@@ -1161,6 +1250,87 @@ margin: 2px 0;
     bottom: -14px;
     transform: rotate(15deg);
 }
+/***************************
+ * scanFrequency
+ **************************/
+.scanfreqRssiLeft,
+.scanfreqRssiRight {
+    display: flex;
+    flex-direction: column;
+}
+.scanfreqRssiLeft {align-items: flex-start;}
+.scanfreqRssiRight {align-items: flex-end;}
+
+.scanfreqRssiLeft .uniLabel,
+.scanfreqRssiRight .uniLabel {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 2px;
+}
+.scanfreqRssiLeft .uniLabel{
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 2px;
+}
+.scanfreqValue,
+.scanfreqValueColor {
+    font-size: 18px;
+}
+.scanfreqValue span,
+.scanfreqValueColor span {
+    font-family: monospace;
+    font-weight: bold;
+}
+.scanfreqValueColor span {color:var(--accent-color)}
+
+.scanfreqValue span:last-child,
+.scanfreqValueColor span:last-child {
+    font-size: 14px;
+    font-weight: normal;
+}
+.uniblocrRssiCanvas {
+    padding: 10px;
+    height: 200px;
+    background:#333;
+    margin-top: 15px;
+    border-radius: 25px;
+}
+    .uniblocrRssiCanvas canvas {
+        width: 100%;
+        height: 100%;
+    }
+.scanfreqwhat {
+    padding:15px;
+    line-height:1.4;
+}
+    .scanfreqwhat > div:first-child {
+        font-weight:bold;
+        margin-bottom:10px;
+        color:var(--accent-color);
+        display:flex;
+        align-items:center;
+    }
+    .scanfreqwhat > span {
+        margin-right:8px;
+        font-size:16px;
+    }
+    .scanfreqwhat > p {
+        margin:0 0 8px 0;
+        opacity:0.8;
+    }
+    .scanfreqSignal svg {
+        width:20px;
+        height:20px;
+        opacity:0.8;
+    }
+        .scanfreqSignal svg {
+            width:20px;
+            height:20px
+        }
+
+
+
+
 @media screen and (max-width: 1280px) {
     .somfyShadeCtl {
         width: 48%;

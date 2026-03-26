@@ -205,6 +205,8 @@ select.inputAndSelect {
     background-color: transparent;
     cursor: pointer;
 }
+
+
 .input-mqtt {
     box-sizing: border-box;
     clear: both;
@@ -226,6 +228,15 @@ select.inputAndSelect {
 .input-mqtt .select {
     color: var(--soustxt-color);
     margin-bottom: 0;
+}
+.input-mqtt select[name="mqtt-protocol"] {
+    width: 75px;
+}
+.input-mqtt input[name="mqtt-port"] {
+    width: 55px;
+}
+.input-mqtt input[name="mqtt-host"] {
+    width:calc(100% - 164px);
 }
 .custom-checkbox {
     width: 24px;
@@ -322,19 +333,7 @@ input[type=text] {
     padding: 8px;
     border-radius: 8px;
 }
-input[type="password"].pin-digit {
-    margin: 0 0.3rem;
-    font-size: 1.5rem;
-    border: 1px solid #555;
-    box-shadow: 0 0 15px rgba(200, 200, 200, 0.5);
-    background: transparent;
-    color: var(--color);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    text-align: center;
-    display: inline-block;
-}
+
 input[type="password"].pin-digit {
     margin: 0 0.3rem;
     font-size: 1.5rem;
@@ -498,6 +497,10 @@ button:active {
     background: none;
     color: var(--color);
 }
+.bouton-Danger{
+    background-color: var(--error-color, brown);
+}
+
 .version-badge {
     font-size: 0.9em;
     font-family: monospace;

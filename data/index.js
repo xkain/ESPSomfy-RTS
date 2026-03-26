@@ -2121,7 +2121,7 @@ class Wifi {
         if (btnScan.classList.contains('disabled')) return;
         divAps.innerHTML = `
         <div class="no-wifi">
-        <div style="display:flex;justify-content:center;align-items:center;margin-bottom:10px;">
+        <div class="wifiConnectScan">
         <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
         </div>
         <div>${tr("CONNECTION_SCANNING")}</div>
@@ -2164,20 +2164,12 @@ class Wifi {
             for (let i = 0; i < nets.length; i++) {
                 let ap = nets[i];
                 div += `
-                <div class="wifiSignal" onclick="wifi.selectSSID(this);" data-channel="${ap.channel}" data-encryption="${ap.encryption}" data-strength="${ap.strength}" data-mac="${ap.macAddress}">
-                <span class="ssid">${ap.name}</span>
-                <span class="strength">${this.displaySignal(ap.strength)}</span>
+                <div class="wifiSignal" onclick="wifi.selectSSID(this);" data-channel="${ap.channel}" data-encryption="${ap.encryption}" data-strength="${ap.strength}" data-mac="${ap.macAddress}"><span class="ssid">${ap.name}</span><span class="strength">${this.displaySignal(ap.strength)}</span>
                 </div>`;
             }
         } else {
             div = `
-            <div class="no-wifi" style="padding: 20px 10px; text-align: center;">
-            <div style="margin-bottom: 20px; color: #ff4444; font-weight: bold;">
-            ${tr("ERR_NO_WIFI_FOUND")}
-            </div>
-            <div class="button-container-row">
-            <button id="btnRetryWifi" class="bouton animScale" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button>
-            <button id="btnCancelWifi" class="boutonOutline animScale" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
+            <div class="no-wifi"><div>${tr("ERR_NO_WIFI_FOUND")}</div><div class="button-container-row"><button id="btnRetryWifi" class="bouton-pop animScale" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button><button id="btnCancelWifi" class="boutonOutline-pop animScale" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
             </div>`;
         }
 
@@ -2223,7 +2215,7 @@ class Wifi {
 
         return `
         <div class="signal">
-        <svg viewBox="0 0 24 24" width="24" height="24">
+        <svg>
         ${getPart(0)}
         ${getPart(1)}
         ${getPart(2)}
@@ -2296,19 +2288,12 @@ class Wifi {
             <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
             </div>
             <div id="jsHeadLan" class="instructions-header">
-            <div>
-            <h2>${tr('ETH_SETTINGS_TITLE')}</h2>
-            <p>${tr('ETH_SETTINGS_DESC')}</p>
-            </div>
+            <div><h2>${tr('ETH_SETTINGS_TITLE')}</h2><p>${tr('ETH_SETTINGS_DESC')}</p></div>
             <svg class="instructions-headerLogo"><use xlink:href="#svg-ethernet"></use></svg>
             </div>
-
-            <div class="field-group unibloc" style="margin-bottom:20px; padding: 5px 15px;">
-            <p style="font-size:14px; text-align:left;">${tr("ETH_SETTINGS_WARNING_DESC_1")}</p>
-            </div>
-
-            <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
-            <div style="text-align: left; display: inline-block;">
+            <div class="field-group unibloc"><p>${tr("ETH_SETTINGS_WARNING_DESC_1")}</p></div>
+            <div class="blocEthBoardSettings">
+            <div style="bloc-eth-setting-line">
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_BOARD_TYPE")}</label><span>${boardType.label} [${boardType.val}]</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_TYPE")}</label><span>${phyType.label} [${phyType.val}]</span></div>
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_ADDRESS")}</label><span>${obj.ethernet.phyAddress}</span></div>
@@ -2318,23 +2303,15 @@ class Wifi {
             <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${obj.ethernet.MDIOPin}</span></div>
             </div>
             </div>
-
-            <div class="field-group error" style="padding: 15px;">
-            <label class="safety-checkbox-container" style="display:flex; align-items:center; gap:15px; width:100%; margin:0; text-align:left;">
-            <div>
-            <input type="checkbox" id="chkConfirmEth" style="display:none;">
-            <span class="custom-checkbox"></span>
-            </div>
-            <div style="flex:1; line-height:1.4;">
-            <b style="display:block; margin-bottom:2px;">${tr('MSG_DANGER')}</b>
-            <span style="font-size:13px; opacity:0.9;">${tr("ETH_SETTINGS_WARNING_DESC_2")}</span>
-            </div>
+            <div class="field-group error">
+            <label class="safety-checkbox-container">
+            <div><input type="checkbox" id="chkConfirmEth"><span class="custom-checkbox"></span></div>
+            <div><b>${tr('MSG_DANGER')}</b> <span>${tr("ETH_SETTINGS_WARNING_DESC_2")}</span></div>
             </label>
             </div>
-
-            <div class="button-container-row" style="margin-top:30px; width:100%;">
-            <button id="btnSaveEthernet" class="bouton animScale" type="button" disabled style="background:#ccc; cursor:not-allowed; flex:1;">${tr("BT_SAVE_ETHERNET")}</button>
-            <button id="btnCancel" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
+            <div class="button-container-row">
+            <button id="btnSaveEthernet" class="bouton saveEthDisabled animScale" type="button" disabled>${tr("BT_SAVE_ETHERNET")}</button>
+            <button id="btnCancel" class="boutonOutline animScale" type="button" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
             </div>
             </div>
             </div>`;
@@ -2728,6 +2705,7 @@ class Somfy {
         if (scan.RSSI !== -100)
             div.setAttribute('data-frequency', scan.frequency);
     }
+
     scanFrequency(initScan) {
         if (this.isScanClosing) return;
         let div = document.getElementById('divScanFrequency');
@@ -2736,7 +2714,6 @@ class Somfy {
             div = document.createElement('div');
             div.setAttribute('id', 'divScanFrequency');
             div.className = 'inst-overlay';
-
             div.innerHTML = `
             <div class="overlay-content">
             <div class="boutonOverlayClose animScale" onclick="somfy.terminateScanUI(true);">
@@ -2744,56 +2721,36 @@ class Somfy {
             <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
             </div>
             <div id="jsHeadScanRadio" class="instructions-header">
-            <h2>${tr('SCANFREQ_TITLE')}</h2>
-            <p>${tr('SCANFREQ_DESC')}</p>
+            <h2>${tr('SCANFREQ_TITLE')}</h2><p>${tr('SCANFREQ_DESC')}</p>
             <svg class="instructions-headerLogo"><use xlink:href="#icon-tabRadio"></use></svg>
             </div>
-            <div class="field-group unibloc" style="padding: 15px; display: block; text-align: left;">
-            <div style="font-size:12px;">${tr("SCANFREQ_SCAN_DESC")}</div>
+            <div class="field-group unibloc"><div>${tr("SCANFREQ_SCAN_DESC")}</div></div>
+            <div class="field-group unibloc">
+            <div class="uniRow">
+            <div class="scanfreqRssiLeft"><div class="uniLabel">${tr("SCANFREQ_SCAN")}</div><div class="scanfreqValue"><span id="spanTestFreq">433.00</span> <span>${tr("MHZ")}</span></div></div>
+            <div class="scanfreqRssiRight"><div class="uniLabel">RSSI</div><div class="scanfreqValue"><span id="spanTestRSSI">----</span> <span>${tr("DBM")}</span></div></div>
             </div>
-            <div class="field-group unibloc" style="padding: 10px 15px;">
+            <hr>
             <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start;">
-            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_SCAN")}</div>
-            <div style="font-size: 18px;"><span id="spanTestFreq" style="font-family: monospace; font-weight: bold;">433.00</span> <span style="font-size: 14px;">${tr("MHZ")}</span></div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
-            <div style="font-size: 18px;"><span id="spanTestRSSI" style="font-family: monospace; font-weight: bold;">----</span> <span style="font-size: 14px;">${tr("DBM")}</span></div>
+            <div class="scanfreqRssiLeft"><div class="uniLabel">${tr("SCANFREQ_FREQUENCY")}</div><div class="scanfreqValueColor"><span id="spanBestFreq">---.--</span> <span>${tr("MHZ")}</span></div></div>
+            <div class="scanfreqRssiRight"><div class="uniLabel">RSSI</div><div class="scanfreqValueColor"><span id="spanBestRSSI">----</span> <span>${tr("DBM")}</span></div></div>
             </div>
             </div>
-            <hr style="margin: 8px 0;">
-            <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start;">
-            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">${tr("SCANFREQ_FREQUENCY")}</div>
-            <div style="font-size: 18px;"><span id="spanBestFreq" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">---.--</span> <span style="font-size: 14px;">${tr("MHZ")}</span></div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div class="uniLabel" style="font-size: 12px; opacity: 0.7; margin-bottom: 2px;">RSSI</div>
-            <div style="font-size: 18px;"><span id="spanBestRSSI" style="font-family: monospace; font-weight: bold; color:var(--accent-color);">----</span> <span style="font-size: 14px;">${tr("DBM")}</span></div>
-            </div>
-            </div>
-            </div>
-            <div class="field-group unibloc" style="padding: 10px; height: 200px; background:#333;">
-            <canvas id="rssiCanvas" style="width: 100%; height: 100%;"></canvas>
-            </div>
+            <div class="field-group uniblocrRssiCanvas"><canvas id="rssiCanvas"></canvas></div>
             <div class="button-container-col">
             <button id="btnStopScanning" class="bouton animScale" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
             <div style="display:flex; gap:10px; width:100%;">
-            <button id="btnRestartScanning" class="bouton animScale" type="button" style="display:none; flex:1;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
-            <button id="btnCopyFrequency" class="bouton animScale" type="button" style="display:none; flex:1;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
+            <button id="btnRestartScanning" class="bouton animScale" type="button" style="display:none;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
+            <button id="btnCopyFrequency" class="bouton animScale" type="button" style="display:none;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
             </div>
-            <button id="btnCloseScanning" class="boutonOutline animScale" type="button" style="width:100%; display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
+            <button id="btnCloseScanning" class="boutonOutline animScale" type="button" style="display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
             </div>
-            <div class="field-group unibloc" style="margin-top:15px; padding:15px; font-size:13px; line-height:1.4;">
-            <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-color); display:flex; align-items:center;">
-            <span style="margin-right:8px; font-size:16px;">💡</span> ${tr('SCANFREQ_UNDERSTANDING_RSSI')}
-            </div>
-            <p style="margin:0 0 8px 0; opacity:0.8;">${tr('SCANFREQ_RSSI_EXPLANATION')}</p>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-            <div class="success"><svg style="width:20px; height:20px;"><use xlink:href="#icon-succes"></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
-            <div class="warning"><svg style="width:20px; height:20px;"><use xlink:href="#icon-warning"></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
-            <div class="error"><svg style="width:20px; height:20px;"><use xlink:href="#icon-error"></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span style="opacity:0.9;">${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
+            <div class="field-group unibloc scanfreqwhat">
+            <div><span>💡</span> ${tr('SCANFREQ_UNDERSTANDING_RSSI')}</div><p>${tr('SCANFREQ_RSSI_EXPLANATION')}</p>
+            <div class="scanfreqSignal">
+            <div class="success"><svg><use xlink:href="#icon-succes"></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span>${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
+            <div class="warning"><svg><use xlink:href="#icon-warning"></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span>${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
+            <div class="error"><svg><use xlink:href="#icon-error"></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span>${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
             </div>
             </div>
             </div>`;
@@ -3111,15 +3068,9 @@ class Somfy {
             divPills += `<div class="room-pill animScale" data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId})">${room.name}</div>`;
             divCfg += `
             <div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">
-            <div class="divEditDelete-svg" onclick="somfy.openEditRoom(${room.roomId});">
-            <svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg>
-            </div>
-            <div class="room-name">
-            <span class="name-text">${room.name}</span>
-            </div>
-            <div class="divEditDelete-svg" onclick="somfy.deleteRoom(${room.roomId});">
-            <svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg>
-            </div>
+            <div class="divEditDelete-svg" onclick="somfy.openEditRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
+            <div class="room-name"><span class="name-text">${room.name}</span></div>
+            <div class="divEditDelete-svg" onclick="somfy.deleteRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
             </div>`;
             divOpts += `<option value="${room.roomId}">${room.name}</option>`;
             _rooms.push(room);
@@ -3208,7 +3159,7 @@ class Somfy {
         if (typeof addresses !== 'undefined') {
             for (let i = 0; i < addresses.length; i++) {
 
-                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="idRemoteAddress" style="flex-grow: 1;"><span class="AddrId-label">${tr("ADDR")}</span><span class="repeater-name">${addresses[i]}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="idRemoteAddress"><span class="AddrId-label">${tr("ADDR")}</span><span class="repeater-name">${addresses[i]}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
             }
         }
         document.getElementById('divRepeatList').innerHTML = divCfg;
@@ -3246,16 +3197,16 @@ class Somfy {
             let st = this.shadeTypes.find(x => x.type === shade.shadeType) || { type: shade.shadeType, ico: 'svg-window-shade' };
 
             // --- SECTION CONFIG ---
-            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"><div class="divEditDelete-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="shade-name"><div class="cfg-room">${room.name}</div><div class="name-text">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="shade-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"><div class="divEditDelete-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="shade-name"><div class="cfg-room">${room.name}</div><div class="name-text">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="shade-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
             // --- SECTION CONTROLE ---
             divCtl += `<div class="somfyShadeCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-shadeid="${shade.shadeId}" data-roomid="${shade.roomId}" data-direction="${shade.direction}" data-remoteaddress="${shade.remoteAddress}" data-position="${shade.position}" data-target="${shade.target}" data-mypos="${shade.myPos}" data-mytiltpos="${shade.myTiltPos}" data-shadetype="${shade.shadeType}" data-tilt="${shade.tiltType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"
             data-windy="${(shade.flags & 0x10) === 0x10 ? 'true' : 'false'}" data-sunny="${(shade.flags & 0x20) === 0x20 ? 'true' : 'false'}">
             <div class="shadectl-side-handle" onclick="event.stopPropagation(); somfy.openSetPosition(${shade.shadeId});"><svg class="handle-icon"><use href="#svg-arrowRight"></use></svg></div>
             <div class="shadectl-right-content">
-            <div class="shadectl-main-content" style="padding: 8px; width: 100%; display: flex; flex-wrap: wrap; align-items: center;">
+            <div class="shadectl-main-content">
             <div class="shadectl-header-row"><span class="shadectl-name">${shade.name}</span></div>
             <div class="shade-icon" data-shadeid="${shade.shadeId}">
-            <svg class="somfy-shade-icon" data-shadeid="${shade.shadeId}" style="--shade-position:${shade.flipPosition ? 100 - shade.position : shade.position}; --fpos:${shade.flipPosition ? 100 - shade.position : shade.position}%;vertical-align: top;">
+            <svg class="somfy-shade-icon" data-shadeid="${shade.shadeId}" style="--shade-position:${shade.flipPosition ? 100 - shade.position : shade.position}; --fpos:${shade.flipPosition ? 100 - shade.position : shade.position}%">
             <use href="#${st.ico}"></use>
             </svg>
             </div>
@@ -3271,9 +3222,9 @@ class Somfy {
             <div class="button-outline cmd-button btn-somfy-svg-wide animScale" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#icon-toggle"></use></svg></div>
             </div>
             <div class="shadectl-status-bar">
-            <div style="display: flex; gap: 5px; color: #666; align-items: center;">
-            <div class="indicator indicator-wind"><svg style="width:18px; height:18px;"><use href="#indic-wind"></use></svg></div>
-            <div class="indicator indicator-sun"><svg style="width:18px; height:18px;"><use href="#indic-sun"></use></svg></div>
+            <div class="shadectl-status-left">
+            <div class="indicator indicator-wind"><svg><use href="#indic-wind"></use></svg></div>
+            <div class="indicator indicator-sun"><svg><use href="#indic-sun"></use></svg></div>
             <div class="val-my myShade-badge">My: ${shade.myPos === -1 ? '---' : shade.myPos + '%'}</div>`;
             if (shade.tiltType !== 0) divCtl += `<div class="val-tilt myShade-badge">My Tilt: ${shade.myTiltPos === -1 ? '---' : shade.myTiltPos + '%'}</div>`;
             divCtl += `</div>
@@ -3664,34 +3615,27 @@ class Somfy {
         const myTiltPos = parseInt(shade.getAttribute('data-mytiltpos'), 10);
         const tiltType = parseInt(shade.getAttribute('data-tilt'), 10) || 0;
         const lbl = makeBool(shade.getAttribute('data-flipposition')) ? `% ${tr('POPUP_OPEN')}` : `% ${tr('POPUP_CLOSED')}`;
+
         const positionSlider = (tiltType !== 3) ? `
         <div class="slider-group">
-        <div class="slider-header">
-        <span class="title">${tr('POPUP_TARGET_POSITION')}</span>
-        <span class="val"><span id="spanShadeTarget" class="shade-target">${currPos}</span> ${lbl}</span>
-        </div>
-        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;"/>
+        <div class="slider-header"><span class="title">${tr('POPUP_TARGET_POSITION')}</span><span class="val"><span id="spanShadeTarget">${currPos}</span> ${lbl}</span></div>
+        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML=this.value;">
         </div>` : '';
 
         const tiltSlider = (tiltType > 0) ? `
-        <div class="slider-group" ${(tiltType !== 3) ? 'style="margin-top:2px;"' : ''}>
-        <div class="slider-header">
-        <span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span>
-        <span class="val"><span id="spanShadeTiltTarget" class="shade-tilt-target">${currTiltPos}</span> ${lbl}</span>
-        </div>
-        <input id="slidShadeTiltTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />
+        <div class="slider-group">
+        <div class="slider-header"><span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span><span class="val"><span id="spanShadeTiltTarget">${currTiltPos}</span> ${lbl}</span></div>
+        <input id="slidShadeTiltTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" oninput="document.getElementById('spanShadeTiltTarget').innerHTML=this.value;">
         </div>` : '';
 
         const div = document.createElement('div');
         div.className = 'shade-positioner shade-positioner-popup';
         div.setAttribute('data-shadeid', shadeId);
         div.onclick = (e) => e.stopPropagation();
-
         div.innerHTML = `
         <div class="shade-positioner-inner">
-        ${positionSlider}
-        ${tiltSlider}
-        <div class="popup-actions" style="display:flex; justify-content: flex-end; gap: 8px;">
+        ${positionSlider}${tiltSlider}
+        <div class="popup-actions">
         <button id="btnSetMyPosition" class="bouton-pop animScale" type="button">${tr("BT_SET_MY_POSITION")}</button>
         <button id="btnCancelMy" class="boutonOutline-pop animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
@@ -3764,7 +3708,7 @@ class Somfy {
 
         for (let i = 0; i < shade.linkedRemotes.length; i++) {
             let remote = shade.linkedRemotes[i];
-            divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><div class="idRemoteAddress addr-group"><span class="AddrId-label">${tr("ADDR")}</span><span class="linkedremote-address">${remote.remoteAddress}</span></div><div class="idRemoteAddress code-group"><span class="AddrId-label">${tr("CODE")}</span><span class="linkedremote-code">${remote.lastRollingCode}</span></div><div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><div class="idRemoteAddress addr-group"><span class="AddrId-label">${tr("ADDR")}</span><span class="linkedremote-address">${remote.remoteAddress}</span></div><div class="idRemoteAddress code-group"><span class="AddrId-label">${tr("CODE")}</span><span class="linkedremote-code">${remote.lastRollingCode}</span></div><div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
         }
         document.getElementById('divLinkedRemoteList').innerHTML = divCfg;
     }
@@ -4386,8 +4330,6 @@ class Somfy {
                     }
                     console.log(shade);
                     let ico = document.getElementById('icoShade');
-
-                    // --- REMPLACEMENT ICI ---
                     const tiltContainer = document.getElementById('labelTiltContainer');
                     const spanValTilt = document.getElementById('valTilt');
 
@@ -4676,36 +4618,26 @@ class Somfy {
 
                 div.innerHTML = `
                 <div class="instructions-content">
-                <div id="btnOverlayRollingClose" class="boutonOverlayClose animScale" onclick="document.getElementById('divRollingCode').remove();">
+                <div id="btnOverlayRollingClose" class="boutonOverlayClose animScale" onclick="this.closest('#divRollingCode').remove();">
                 <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
                 <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
                 </div>
                 <div class="instructions-header">
-                <div style="position: relative;">
-                <h2>${tr("ROLLING_CODE_TITLE")}</h2>
-                <p>${tr("ROLLING_CODE_DESC")}</p>
-                </div>
+                <div><h2>${tr("ROLLING_CODE_TITLE")}</h2><p>${tr("ROLLING_CODE_DESC")}</p></div>
                 <svg class="instructions-headerLogo"><use xlink:href="#icon-warning"></use></svg>
                 </div>
                 <div class="error">
                 <svg><use xlink:href="#icon-warning"></use></svg>
-                <div style="text-align: left; flex: 1;">
-                <b>${tr("MSG_DANGER")}</b>
-                <span>${tr("ROLLING_CODE_WARNING_DESC_1")}</span>
+                <div><b>${tr("MSG_DANGER")}</b><span>${tr("ROLLING_CODE_WARNING_DESC_1")}</span></div>
                 </div>
+                <div class="field-group unibloc"><p>${tr("ROLLING_CODE_WARNING_DESC_2")}</p></div>
+                <div class="field-group unibloc uniblocRollingCode">
+                <label class="label" for="fldNewRollingCode">${tr("BT_ROLLING_CODE")}</label>
+                <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number" value="${shade.lastRollingCode}">
                 </div>
-                <div class="field-group unibloc" style="padding: 15px; margin-top:15px;">
-                <p style="font-size:14px; margin:0;">${tr("ROLLING_CODE_WARNING_DESC_2")}</p>
-                </div>
-                <div class="field-group unibloc" style="padding: 20px;">
-                <label class="label" for="fldNewRollingCode" style="color: var(--accent-color);">${tr("BT_ROLLING_CODE")}</label>
-                <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number"
-                style="text-align:center; font-size:35px; color: var(--accent-color);" value="${shade.lastRollingCode}">
-                </div>
-                <div class="button-container-row" style="gap:10px;">
-                <button id="btnCancel" class="boutonOutline animScale" type="button" style="flex:1;" onclick="document.getElementById('divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
-                <button id="btnChangeRollingCode" class="bouton animScale" type="button" style="flex:1; background-color: var(--error-color, brown);"
-                onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
+                <div class="button-container-row">
+                <button id="btnChangeRollingCode" class="bouton bouton-Danger animScale" type="button" onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
+                <button id="btnCancel" class="boutonOutline animScale" type="button" onclick="this.closest('#divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
                 </div>
                 </div>`;
 
@@ -4750,39 +4682,31 @@ class Somfy {
         if (shadeType === 5 || shadeType === 6) {
             specificContent = `
             <div class="instructions-header">
-            <div style="position: relative;"><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_GARAGE_DESC")}</p></div>
+            <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_GARAGE_DESC")}</p></div>
             <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleGarage"></use></svg>
             </div>
             <div class="button-container-row">
             <button id="btnSendPairing" class="bouton animScale" type="button">${tr("BT_PROG")}</button>
             <button id="btnMarkPaired" class="bouton animScale" type="button" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_DOOR_PAIRED")}</button>
             </div>
-            <div class="button-container-col">
-            <button id="btnStopPairing" class="boutonOutline animScale" type="button">${tr("BT_CLOSE")}</button>
-            </div>
+            <div class="button-container-col"><button id="btnStopPairing" class="boutonOutline animScale" type="button">${tr("BT_CLOSE")}</button></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_GARAGE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_GARAGE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#icon-info"></use></svg>
-            <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_GARAGE_STEP_3")}</span></div>
-            </div>`;
+            <div class="information"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${tr("PAIR_GARAGE_STEP_3")}</span></div></div>`;
         } else {
             specificContent = `
             <div class="instructions-header">
-            <div style="position: relative;"><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_SHADE_DESC")}</p></div>
+            <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_SHADE_DESC")}</p></div>
             <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
             </div>
-            <div class="button-container-row" style="margin-top: 20px;">
-            <button id="btnSendPairing" class="bouton animScale" style="flex:1;">${tr("BT_PROG")}</button>
-            <button id="btnMarkPaired" class="bouton animScale" style="flex:1;" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
+            <div class="button-container-row">
+            <button id="btnSendPairing" class="bouton animScale">${tr("BT_PROG")}</button>
+            <button id="btnMarkPaired" class="bouton animScale" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
             </div>
-            <div class="button-container-col" style="margin-top: 10px;">
-            <button id="btnStopPairing" class="boutonOutline animScale" style="width:100%;">${tr("BT_CLOSE")}</button>
-            </div>
+            <div class="button-container-col"><button id="btnStopPairing" class="boutonOutline animScale">${tr("BT_CLOSE")}</button></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_SHADE_STEP_1")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_SHADE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#icon-info"></use></svg>
-            <div style="text-align: left; flex: 1;"><b>${tr("MSG_NOTE")}</b> <span>${tr("PAIR_SHADE_STEP_3")}</span></div>
-            </div>
+            <div class="information"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${tr("PAIR_SHADE_STEP_3")}</span></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("PAIR_SHADE_STEP_4")}</div></div></div>
             <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("PAIR_SHADE_STEP_5")}</div></div></div>`;
         }
@@ -4840,19 +4764,14 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr("UNPAIR_TITLE")}</h2>
-        <p>${tr("UNPAIR_SHADE_DESC_1")}</p>
-        </div>
+        <div><h2>${tr("UNPAIR_TITLE")}</h2><p>${tr("UNPAIR_SHADE_DESC_1")}</p></div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
         </div>
-        <div class="button-container-row" style="margin-top: 20px; gap:10px;">
-        <button id="btnSendUnpairing" class="bouton animScale" style="flex:1;">${tr("BT_PROG")}</button>
-        <button id="btnMarkPaired" class="bouton animScale" style="flex:1;" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
+        <div class="button-container-row">
+        <button id="btnSendUnpairing" class="bouton animScale">${tr("BT_PROG")}</button>
+        <button id="btnMarkPaired" class="bouton animScale" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
         </div>
-        <div class="button-container-col" style="margin-top: 10px;">
-        <button id="btnStopUnpairing" class="boutonOutline animScale" style="width:100%;">${tr("BT_CLOSE")}</button>
-        </div>
+        <div class="button-container-col"><button id="btnStopUnpairing" class="boutonOutline animScale">${tr("BT_CLOSE")}</button></div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_1")}</div></div></div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_2")}</div></div></div>
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_3")}</div></div></div>
@@ -4860,10 +4779,7 @@ class Somfy {
         <div class="field-group unibloc"><div class="step-item"><div class="step-number">5</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_5")}</div></div></div>
         <div class="information">
         <svg><use xlink:href="#icon-info"></use></svg>
-        <div style="text-align: left; flex: 1;">
-        <b>${tr("MSG_NOTE")}</b>
-        <span>${tr("UNPAIR_SHADE_STEP_6") || "Le volet doit effectuer un mouvement pour confirmer qu'il a bien oublié ESPSomfy."}</span>
-        </div>
+        <div><b>${tr("MSG_NOTE")}</b><span>${tr("UNPAIR_SHADE_STEP_6")}</span></div>
         </div>
         </div>
         </div>`;
@@ -5024,28 +4940,19 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr("PAIR_TITLE")}</h2>
-        <p style="font-size:14px;">${tr("LINK_REMOTE_DESC")}</p>
-        </div>
+        <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("LINK_REMOTE_DESC")}</p></div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-remote"></use></svg>
         </div>
-        <div class="field-group unibloc" style="font-size: 14px; padding: 20px;">
-        ${tr("LINK_REMOTE_DESC_1")}
-        </div>
+        <div class="field-group unibloc">${tr("LINK_REMOTE_DESC_1")}</div>
         <div class="information">
         <svg><use xlink:href="#icon-info"></use></svg>
-        <div style="text-align: left; flex: 1;">
-        <b>${tr("MSG_NOTE")}</b>
-        <span>${tr("LINK_REMOTE_DESC_2")}</span>
+        <div><b>${tr("MSG_NOTE")}</b><span>${tr("LINK_REMOTE_DESC_2")}</span></div>
         </div>
-        </div>
-        <div class="button-container-col" style="margin-top: 10px;">
+        <div class="button-container-col">
         <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>
         </div>`;
-
         const closeLinking = () => { div.remove(); };
 
         document.getElementById('divContainer').appendChild(div);
@@ -5068,26 +4975,19 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div style="position: relative;">
-        <h2>${tr("REPEAT_REMOTE_TITLE")}</h2>
-        <p style="font-size:14px;">${tr("REPEAT_REMOTE_DESC")}</p>
-        </div>
+        <div><h2>${tr("REPEAT_REMOTE_TITLE")}</h2><p>${tr("REPEAT_REMOTE_DESC")}</p></div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-repeater"></use></svg>
         </div>
         <div class="button-container-col">
         <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
-        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_1")}</div>
-        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_2")}</div>
-        <div class="field-group unibloc" style="padding: 15px; font-size:14px;">${tr("REPEAT_REMOTE_DESC_3")}</div>
+        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_1")}</div>
+        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_2")}<br>${tr("REPEAT_REMOTE_DESC_3")}</div>
         <div class="warning">
         <svg><use xlink:href="#icon-warning"></use></svg>
-        <div style="text-align: left; flex: 1;">
-        <b>${tr("MSG_ALERT")}</b>
-        <span>${tr("REPEAT_REMOTE_DESC_4")}</span>
+        <div><b>${tr("MSG_ALERT")}</b><span>${tr("REPEAT_REMOTE_DESC_4")}</span></div>
         </div>
-        </div>
-        <div class="field-group unibloc" style="padding: 15px;">${tr("REPEAT_REMOTE_DESC_5")}</div>
+        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_5")}</div>
         </div>
         </div>`;
 
@@ -5104,7 +5004,6 @@ class Somfy {
     linkGroupShade(groupId) {
         let mouseDown = false;
         let div = document.createElement('div');
-
         div.innerHTML = `
         <div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
         <div class="instructions-content">
@@ -5115,47 +5014,30 @@ class Somfy {
         <div class="instructions-header">
         <div>
         <h2>${tr("LINK_GROUP_TITLE")}</h2>
-        <p id="pGroupHeaderTitle">
-        ${tr("LINK_GROUP_DESC")}
-        <span id="spanGroupName" class="groupNameSpan"></span>
-        </p>
+        <p id="pGroupHeaderTitle">${tr("LINK_GROUP_DESC")} <span id="spanGroupName" class="groupNameSpan"></span></p>
         </div>
         <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
         </div>
-        <div class="field-group unibloc wizard-step" data-stepid="2" style="text-align:center;">
+        <div class="field-group unibloc uniblocLinkGroupSelect wizard-step" data-stepid="2">
         <label class="label" for="selAvailShades">${tr("LINK_GROUP_SELECT_SHADE")}</label>
-        <select id="selAvailShades" class="inputAndSelect" style="font-size:25px;color: var(--accent-color);" data-bind="shadeId" data-datatype="int" onchange="document.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = this.options[this.selectedIndex].text);">
-        <options style="color:black;"></options>
-        </select>
+        <select id="selAvailShades" class="inputAndSelect" data-bind="shadeId" data-datatype="int" onchange="document.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = this.options[this.selectedIndex].text);"><options></options></select>
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="3"></div>
-        <div class="button-container-col wizard-step marginB" data-stepid="3">
-        <button class="bouton animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
-        </div>
+        <div class="button-container-col wizard-step marginB" data-stepid="3"><button class="bouton animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button></div>
         <div class="divWizShadeName wizard-step" data-stepid="4"></div>
-        <div class="button-container-col wizard-step marginB" data-stepid="4">
-        <button class="bouton animScale" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button>
-        </div>
+        <div class="button-container-col wizard-step marginB" data-stepid="4"><button class="bouton animScale" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button></div>
         <div class="button-container-row">
-        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(document.getElementById('divLinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(document.getElementById('divLinkGroup'));">${tr("BT_NEXT")}</button>
+        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(this.closest('.wizard'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(this.closest('.wizard'));">${tr("BT_NEXT")}</button>
         </div>
-        <div class="button-container-col">
-        <button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button>
-        </div>
-        <div class="information wizard-step" data-stepid="1"><svg><use xlink:href="#icon-info"></use></svg>
-        <div><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div>
-        </div>
+        <div class="button-container-col"><button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button></div>
+        <div class="information wizard-step" data-stepid="1"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div></div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
-        <div class="information wizard-step" data-stepid="2"><svg><use xlink:href="#icon-info"></use></svg>
-        <div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div>
-        </div>
+        <div class="information wizard-step" data-stepid="2"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div></div>
         <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
-        <div class="information wizard-step" data-stepid="3"><svg><use xlink:href="#icon-info"></use></svg>
-        <div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div>
-        </div>
+        <div class="information wizard-step" data-stepid="3"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div></div>
         <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
         <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
@@ -5245,8 +5127,7 @@ class Somfy {
         <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
         </div>
         <div class="instructions-header">
-        <div><h2>${tr("UNLINK_GROUP_TITLE")}</h2><p id="pGroupHeaderTitle">${tr("UNLINK_GROUP_DESC")}<span id="spanGroupName" class="groupNameSpan"></span></p></div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+        <div><h2>${tr("UNLINK_GROUP_TITLE")}</h2><p id="pGroupHeaderTitle">${tr("UNLINK_GROUP_DESC")}<span id="spanGroupName" class="groupNameSpan"></span></p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
         </div>
         <div class="divWizShadeName wizard-step" data-stepid="2"></div>
         <div class="button-container-col wizard-step" data-stepid="2"><button class="bouton marginB animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button></div>
@@ -5632,7 +5513,7 @@ class Firmware {
         </div>
         <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp">
         <div id="divInstText"></div>
-        <input id="fileName" type="file" name="updateFS" style="display:none;" onchange="document.getElementById('span-selected-file').innerText = this.files[0].name;"/>
+        <input id="fileName" type="file" name="updateFS" style="display:none;" onchange="const file = this.files[0];if (file) {document.getElementById('span-selected-file').innerText = file.name;firmware.checkBackupVersion(file);}"/>
         <div class="field-group unibloc FileUploaderChooseFile">
         <label for="fileName">
         <span id="span-selected-file">${tr('CHOOSE_FILE')}</span>
@@ -5651,6 +5532,32 @@ class Firmware {
         </div>`;
 
         return div;
+    }
+    checkBackupVersion(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const lines = e.target.result.split('\n');
+            if (lines.length > 0) {
+                const version = parseInt(lines[0].split(',')[0]);
+
+                if (!isNaN(version) && version < 25) {
+                    let prompt = ui.promptMessage(tr('PROMPT_RESTORE_FILE_TITLE'), () => {
+                        prompt.remove();
+                    });
+                    prompt.querySelector('.sub-message').innerHTML = `<p style="color:var(--txt-orange); font-weight:bold;"><p>${tr('PROMPT_RESTORE_FILE_DESC')}</p><p><b>${tr('PROMPT_RESTORE_FILE_DESC_1')}</b></p><p>${tr('PROMPT_RESTORE_FILE_DESC_2')}</p>`;
+
+                    const btnCancel = prompt.querySelector('.boutonOutline');
+                    if(btnCancel) {
+                        btnCancel.addEventListener('click', () => {
+                            document.getElementById('fileName').value = "";
+                            document.getElementById('span-selected-file').innerText = tr('CHOOSE_FILE');
+                            prompt.remove();
+                        });
+                    }
+                }
+            }
+        };
+        reader.readAsText(file.slice(0, 100));
     }
     procMemoryStatus(mem) {
         console.log(mem);

@@ -220,7 +220,7 @@
     width: auto;
     background-color: var(--body-color);
     border-radius: 31px;
-    margin: 10px 15px;
+    margin: 20px 0 0 15px;
     overflow: hidden;
     gap: 2px;
 }
@@ -241,7 +241,7 @@
 }
 .subtab-content {
     display: flex;
-    padding: 25px;
+    padding: 20px 10px 0 10px;
     position: relative;
     flex-direction: column;
     flex-grow: 1;
@@ -417,6 +417,12 @@ margin-top: 9%;
     border: none;
     box-sizing: border-box;
 }
+/***** Security **/
+.blocPin-digit {
+    display:inline-block;
+    text-align:center;
+}
+.blocPin-digit label {display:block}
 
 /***** Firmware **/
 .status-detail {
@@ -438,9 +444,47 @@ margin-top: 9%;
 }
 #svg-clear{fill: var(--color) ;}
 
+.devButtonUpdate {
+    display:flex;
+    flex-direction:column;
+    text-align:left;
+    flex-grow: 1;
+}
+.button-update svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    fill: currentColor;
+}
+
 .button-update span {
     line-height: 1;
 }
+.buttonUpdateCache {
+    flex-grow: 1;
+    text-align: left;
+}
+.credits-list .uniRow {
+    cursor: pointer;
+}
+.credits-list .uniRow > span {
+    font-weight: bold;
+}
+.credits-list .uniRow:not(.special-credit) .uniStatus {
+    text-transform: uppercase;
+}
+.btnArrowRight {
+    width:20px;
+    height:20px;
+    opacity:0.6;
+}
+.credits-list .special-credit {
+    opacity: 0.8;
+}
+
+
+
+
 
 /***************************
  * Page Network
@@ -471,6 +515,16 @@ margin-top: 9%;
     align-items: center;
     gap: 2px;
 }
+    .wifi-right div {
+        display:inline-block;
+        vertical-align:middle;
+        width:24px;
+        height:24px;
+    }
+    .wifi-right svg {
+        width: 24px;
+        height: 24px;
+    }
 span.ssid {
     font-size: 14px;
     margin: 0;
@@ -544,7 +598,9 @@ div.wifiSignal {
     color: var(--color);
     border-radius: 12px;
 }
-
+.msgHotspot span:last-child {
+    margin-top:0;
+}
 /***************************
  * Page Shade, Groupe and Repeater
  **************************/
@@ -631,14 +687,36 @@ div.wifiSignal {
 .room-selector::-webkit-scrollbar {
     display: none;
 }
+.somfyMaxId {
+    display: flex;
+    justify-content: flex-end;
+}
 
-
-
-
-
-
-
-
+.somfy-status-container .somfy-shade-icon {
+    width:56px;
+    height:56px;
+}
+.bloc80slidStep input {
+    width:100%;
+}
+.bloc80slidStep label {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:1em;
+    margin-top:0px;
+    padding:0 7px;
+}
+.bloc80slidStep span {
+    display:inline-flex;
+    gap:5px;
+    align-items:center;
+}
+.LinkedList {
+    overflow-y: auto;
+    max-height: 177px;
+    margin-top:15px;
+}
 #divSomfyGroupButtons {
     display: flex;
     justify-content: center;
@@ -653,6 +731,9 @@ div.wifiSignal {
         width: 48px;
         height: 48px;
     }
+
+
+
 .disabled {
     opacity: 0.3 !important;
     filter: grayscale(1) !important;
@@ -753,7 +834,10 @@ display: none;
      border: 1px solid var(--borderShadeCtl);
      box-shadow: 0 0 6px 0 var(--shadowShadeCtl);
  }
- .vr-content .unibloc {background-color: var(--background-color);}
+ .vr-content .unibloc {
+     background-color: var(--background-color);
+     margin: 0 0 15px;
+}
  .vr-bloctoogle {
      display: flex;
      justify-content: space-between;
@@ -788,7 +872,7 @@ display: none;
      flex-direction: column;
      gap: 22px;
      justify-content: center;
-     padding: 5px;
+     padding: 10px;
  }
  .vr-toogle {
      width: 48%;
@@ -917,8 +1001,9 @@ display: none;
      overflow: hidden;
      cursor: pointer;
  }
- .vr-button-sunflagL { border-radius: 20px 0 0 20px; }
- .vr-button-sunflagR { border-radius: 0 20px 20px 0; }
+ .vr-button-sunflagL { flex: 1; border-radius: 20px 0 0 20px; }
+ .vr-button-sunflagR { flex: 1; border-radius: 0 20px 20px 0; }
+
 
  .btn-send {
      background-color: var(--accent-color);
@@ -939,6 +1024,16 @@ display: none;
      align-items: center;
      gap: 10px;
      width: 100%;
+ }
+ .vrslidStepSize {
+     flex: 1;
+     display: flex;
+     flex-direction: column;
+ }
+ .vrslidStepSize input {
+     width: 100%;
+     margin: 0;
+     cursor: pointer;
  }
  .vr-step80-arrow {
      width: 46px;
@@ -964,9 +1059,6 @@ display: none;
  }
 
  /* --- ÉTATS ACTIFS ET ÉTATS COCHÉS --- */
-
-
-
 .vr-arrow-up:active   { transform: translateX(-50%) translateY(-5px); }
 .vr-arrow-down:active { transform: translateX(-50%) translateY(5px); }
 
@@ -1067,6 +1159,35 @@ display: none;
         border-style: solid;
         border-color: #333 transparent transparent transparent;
     }
+.blocRadioHeader {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.blocRadioHeaderTitle {
+    display:flex;
+    align-items:center;
+    gap:3px;
+}
+.blocRadioHeaderTitle label {
+    font-size:1em;
+    margin:0;
+}
+
+.blocRadioSlider {
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin:5px 0;
+}
+.blocRadioSlider input {
+    flex:1;
+}
+.radioStepButtons {
+    display:flex;
+    gap:5px;
+}
+
 .rssi-row {
     display: flex;
     justify-content: space-between;
@@ -1078,6 +1199,9 @@ display: none;
     font-size: 14px;
     display: flex;
     gap: 4px;
+}
+.rssi-left span:last-child {
+    color:#535151;
 }
 .rssi-right {
     font-size: 32px;
@@ -1402,6 +1526,7 @@ div.frame-pulses {
     .welcomeCard-content p {
         font-size: 0.8rem;
     }
+
     .tab-container {
         display: flex !important;;
         padding: 0 5px;
