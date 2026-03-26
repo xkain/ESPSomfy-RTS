@@ -683,7 +683,13 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.enabled = this->readBool(false);
     cfg.proto = static_cast<radio_proto>(this->readUInt8(0));
     cfg.type = this->readUInt8(56);
-    cfg.radioBoardType = this->readUInt8(0);
+    if(this->header.transRecordSize < 82) {
+      cfg.radioBoardType = 0; // Valeur par défaut pour les anciens backups
+      Serial.println("Old backup detected (v2.4.6), skipping radioBoardType");
+    } else {
+      // Si la taille est de 82 ou plus, on lit le champ normalement
+      cfg.radioBoardType = this->readUInt8(0);
+    }
     cfg.SCKPin = this->readUInt8(cfg.SCKPin);
     cfg.CSNPin = this->readUInt8(cfg.CSNPin);
     cfg.MOSIPin = this->readUInt8(cfg.MOSIPin);
