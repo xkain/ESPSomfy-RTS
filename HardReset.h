@@ -8,7 +8,7 @@
 #include <sdkconfig.h>
 #include "Somfy.h"
 
-#define MAX_BOOT_CYCLES 3
+#define MAX_BOOT_CYCLES 4
 #define BOOT_TIMEOUT 5000
 
 // --- LOGIQUE DE DÉTECTION HARDWARE ---
