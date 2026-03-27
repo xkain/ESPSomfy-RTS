@@ -53,6 +53,29 @@ This project aims to make managing your Somfy RTS devices as beautiful as it is 
 
 <br />
 
+## Migration & Updates
+
+If you are migrating from **rstrouse/ESPSomfy-RTS** or upgrading from an older version of this fork, please read the following:
+
+#### From rstrouse to this Fork (v2.5.0+)
+* **Data Compatibility:** You can restore a `.backup` file from the original project. Your shades, groups, and remote addresses will be successfully migrated.
+* **⚠️ Radio Settings (Action Required):** Due to the new GPIO Selector in v2.5.0, radio pin assignments are **not** automatically restored from older backup files. 
+* **Warning Message:** You will see a compatibility alert during the restore process. After the import, you **must** manually verify and re-assign your GPIO pins in the **Radio tab**.
+
+#### Upgrading from v2.4.8 to v2.5.0
+* **Direct Update:** Your existing settings are automatically migrated and preserved during the update process. 
+* **⚠️ Automatic Backup Note:** The backup file created by the system *just before* the update is still in the old format. 
+* **Restoring after Update:** If you ever need to restore that specific pre-update backup onto v2.5.0+, you will trigger the "Incomplete Compatibility" alert and will need to re-assign your Radio GPIOs manually.
+
+> [!TIP]
+> After a successful update to v2.5.0, we recommend creating a **new backup** immediately. This new file will include the updated GPIO mapping and won't trigger any warnings in the future.
+
+
+## Home Assistant
+
+This fork remains 100% compatible with the official ESPSomfy-RTS-HA integration. If you are already using the integration, simply update your ESP32 with this firmware. Your entities, names, and dashboards in Home Assistant will continue to work without any modification.
+
+
 ## Roadmap
 - [x] Add Multi-language Support
     - [x] English
@@ -76,29 +99,29 @@ This project aims to make managing your Somfy RTS devices as beautiful as it is 
 - [x] Add tooltips for better understanding of frequency settings
 - [x] Add visual graph for frequency scanning feedback
 - [x] Better integration of SetMyPosition and openSetMyPosition popups
-- [x] Add Hard Reset feature if web interface access is lost
+- [x] Add Factory Reset feature
 - [x] Add visual indicator (internal blue LED) for hard reset during boot
-    - [x] Standard ESP32
-    - [ ] ESP32-S2
-    - [ ] ESP32-S3
-    - [ ] ESP32-C3
-- [x] Add connection type indicators (Wi-Fi/Ethernet/PoE)
+    - [x] Support for ESP32 boards with LED on GPIO 02 (e.g., DevKit v1, D1 Mini)
+      * *Note: No support for S2, S3, and C3 models; GPIO 02 is kept free*
 - [x] Add device and connection uptime tracking
 - [x] Display detailed device information
 - [ ] Add Automations (scheduling shade opening/closing by time or day)
  
 <br />
 
-## Troubleshooting & Hard Reset
+## Troubleshooting & Factory Reset
 
-If you lose access to the web interface (due to a network misconfiguration or forgotten password), you can perform a **Hard Reset** to restore factory settings.
+If you lose access to the web interface (due to a network misconfiguration or forgotten password), or if the device behaves erratically due to corrupted settings, you can perform a Factory Reset to restore the device to "out-of-the-box" state.
 
-### What happens during a Hard Reset?
-* **Restored:** All settings (Wi-Fi, MQTT, Rooms, Shades) are wiped and reset to default.
-* **Not Restored:** The firmware version remains the same. If you updated to v2.5.0, it will stay at v2.5.0 (it does not downgrade to the original factory version).
-* **Access:** After the reset, the device will restart in **Access Point mode** (SSID: `ESPSomfyRTS `) http://192.168.4.1.
+>[!CAUTION]
+>This process is a Full Wipe. It is designed to recover the device from any state, including corrupted configuration files. All your settings will be lost.
 
-### 🔌 How to perform the Hard Reset
+### What happens during a Factory Reset?
+* **Restored:** All settings (Wi-Fi, MQTT, Rooms, Shades) are permanently deleted. The device returns to its "out-of-the-box" state.
+* **Firmware:** The firmware version remains the same (e.g., if you are on v2.5.0, it stays on v2.5.0).
+* **Access:** After the reset, the device will restart in **Access Point mode** (SSID: `ESPSomfyRTS `) at http://192.168.4.1.
+
+### 🔌 How to perform the Factory Reset
 
 <table>
   <tr>
