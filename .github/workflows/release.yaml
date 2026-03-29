@@ -163,7 +163,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           mkdir -p build${{ matrix.name }}
-          arduino-cli compile --clean --output-dir build${{ matrix.name }} --fqbn ${{ matrix.fqbn }} --warnings none ./SomfyController
+          arduino-cli compile --clean --output-dir build${{ matrix.name }} --fqbn ${{ matrix.fqbn }}:DebugLevel=none --warnings none ./SomfyController
 
       - name: ${{ matrix.name }} Image
         run: |
