@@ -29,7 +29,6 @@
     <script type="text/javascript" src="index.js?v=2.5.0c"></script>
 </head>
 <body>
-    <div id="divFirmwareUpdate" class="firmware-message" style="display:none;">Mise à jour du firmware disponible</div>
     <header class="top-bar">
         <div class="top-bar-left">
             <svg width="100" height="100"><use xlink:href="#icon-logo"></use></svg>
@@ -116,13 +115,15 @@
                 </div>
             </div>
         </nav>
+
         <div class="sidebar-footer">
+            <button id="divSidebarUpdate" class="firmware-message boutonOutline fw-sidebar-button" style="display:none;"></button>
             <button id="btnReboot" type="button" class="boutonOutline animScale" onclick="general.rebootDevice();" data-lang="BT_REBOOT">Redémarrer</button>
         </div>
     </aside>
     <div id="divContainer" class="container" data-auth="false">
         <div id="divAuthenticated" style="display:none;">
-
+            <div id="divFirmwareUpdate" class="firmware-message fw-mobile-banner" style="display:none;">Mise à jour du firmware disponible</div>
             <div class="header">
                 <div class="header-left">
                     <div id="showLogoHeader" class="headerIdentity" >

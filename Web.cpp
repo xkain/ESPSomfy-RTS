@@ -48,6 +48,13 @@ WebServer apiServer(8081);
 WebServer server(80);
 void Web::startup() {
   Serial.println("Launching web server...");
+
+  // Ce bloc va forcer le coupable à se démasquer dans le moniteur série
+  server.on("/json", HTTP_GET, []() {
+    Serial.print(">>> REQUETE /json RECUE DE L'IP : ");
+    Serial.println(server.client().remoteIP().toString());
+    server.send(200, "application/json", "{}");
+  });
 }
 void Web::loop() {
   server.handleClient();

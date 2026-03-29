@@ -197,7 +197,9 @@
     margin-top: auto;
     padding-top: 20px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 #barsideRadioDisable {
     background-color: #e74c3c;
@@ -241,7 +243,7 @@
 }
 .subtab-content {
     display: flex;
-    padding: 20px 10px 0 10px;
+    padding: 15px 25px 25px 25px;
     position: relative;
     flex-direction: column;
     flex-grow: 1;

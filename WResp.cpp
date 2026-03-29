@@ -46,11 +46,11 @@ void JsonResponse::endResponse() {
   server->sendContent("", 0);
 }
 void JsonResponse::send() {
-    if(!this->_headersSent) server->send_P(200, "application/json", this->buff);
-    else server->sendContent(this->buff);
-    //Serial.printf("Sent %d bytes %d\n", strlen(this->buff), this->buffSize);
-    this->buff[0] = 0x00;
-    this->_headersSent = true;
+  if(!this->_headersSent) server->send_P(200, "application/json", this->buff);
+  else server->sendContent(this->buff);
+  //Serial.printf("Sent %d bytes %d\n", strlen(this->buff), this->buffSize);
+  this->buff[0] = 0x00;
+  this->_headersSent = true;
 }
 void JsonResponse::_safecat(const char *val, bool escape) {
   size_t len = (escape ? this->calcEscapedLength(val) : strlen(val)) + strlen(this->buff);

@@ -5569,92 +5569,57 @@ class Firmware {
         if (sp) sp.innerHTML = mem.min.fmt('#,##0 ');
     }
     procFwStatus(rel) {
-        console.log("Status Firmware reçu:", rel);
+        const divsGlobal = document.querySelectorAll('.firmware-message');
+        const divLocal = document.getElementById('divSystemStatus');
+        const statusDesc = document.getElementById('statusDesc');
 
-        let divGlobal = document.getElementById('divFirmwareUpdate');
-        let divLocal = document.getElementById('divSystemStatus');
-
-        if (!divGlobal || !divLocal) return;
-
-        let statusTitle = document.getElementById('statusTitle');
-        let statusDesc = document.getElementById('statusDesc');
-        let statusIcon = document.getElementById('useStatusIcon');
-
-        divGlobal.style.display = 'none';
-        divGlobal.onclick = null;
-        divGlobal.style.cursor = 'default';
-        divGlobal.style.color = '';
-
+        if (divsGlobal.length === 0) return;
+        divsGlobal.forEach(div => {
+            div.classList.remove('procFwStatusshow');
+            div.onclick = null;
+        });
         if (rel.available && rel.status === 0 && rel.checkForUpdate !== false) {
-            divGlobal.style.display = 'flex';
-            divGlobal.style.cursor = 'pointer';
-            divGlobal.onclick = () => { firmware.updateGithub(); };
-            divGlobal.innerHTML = `<svg class="procFwSvg"><use xlink:href="#svg-update"></use></svg><span>${tr('FW_INSTALLED').replace('%1', rel.fwVersion.name)} <span class="procFwSpan">${tr('FW_AVAILABLE').replace('%1', rel.latest.name)}</span></span>`;
-
-            divLocal.className = "error";
-            statusIcon.setAttribute('xlink:href', '#icon-error');
-            statusTitle.innerHTML = tr('FIRMWARE_UPDATE_AVAILABLE');
-            statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
+            divsGlobal.forEach(div => {
+                div.classList.add('procFwStatusshow');
+                div.style.cursor = 'pointer';
+                div.onclick = () => { firmware.updateGithub(); };
+                div.innerHTML = `<span>${tr('FIRMWARE_UPDATE_AVAILABLE')}</span>`;
+            });
+            if (divLocal) {
+                divLocal.className = "error";
+                document.getElementById('useStatusIcon')?.setAttribute('xlink:href', '#icon-error');
+                const st = document.getElementById('statusTitle');
+                if (st) st.innerHTML = tr('FIRMWARE_UPDATE_AVAILABLE');
+                statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
+            }
         }
         else {
-            divLocal.className = "success";
-            statusIcon.setAttribute('xlink:href', '#icon-info');
-            statusTitle.innerHTML = tr('FIRMWARE_UPDATE_UPTODATE');
-            statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC');
-
-            switch (rel.status) {
-                case 2:
-                    divGlobal.style.display = 'flex';
-                    divGlobal.style.color = 'var(--txtwarning-color)';
-                    divGlobal.innerHTML = tr('FW_PREPARING_UPDATE');
-                    break;
-                case 4:
-                    divGlobal.style.display = 'flex';
-                    if (rel.error !== 0) {
-                        divGlobal.style.color = 'var(--txtwarning-color)';
-                        let e = errors.find(x => x.code === rel.error) || { code: rel.error, desc: tr('ERR_UNSPECIFIED') };
-                        let inst = document.getElementById('divGitInstall');
-                        if (inst) inst.remove();
-                        ui.errorMessage(e.desc);
-                        divGlobal.innerHTML = e.desc;
-                    } else {
-                        divGlobal.innerHTML = tr('FW_UPDATE_DONE');
-                        ui.waitMessage(document.getElementById('divContainer'));
-                    }
-                    break;
-                case 5:
-                    divGlobal.style.display = 'flex';
-                    divGlobal.style.color = 'var(--txtwarning-color)';
-                    divGlobal.innerHTML = tr('FW_UPDATE_CANCELING');
-                    break;
-                case 6:
-                    divGlobal.style.display = 'flex';
-                    divGlobal.style.color = 'var(--txtwarning-color)';
-                    divGlobal.innerHTML = tr('FW_UPDATE_CANCELED');
-                    break;
-                default:
-                    break;
+            if (divLocal) {
+                divLocal.className = "success";
+                document.getElementById('useStatusIcon')?.setAttribute('xlink:href', '#icon-info');
+                const st = document.getElementById('statusTitle');
+                if (st) st.innerHTML = tr('FIRMWARE_UPDATE_UPTODATE');
+                statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC');
             }
         }
     }
     procUpdateProgress(prog) {
-        let pct = Math.round((prog.loaded / prog.total) * 100);
-        let file = prog.part === 100 ? 'Application' : 'Firmware';
-        let div = document.getElementById('divFirmwareUpdate');
-        if (div) {
-            div.style.color = 'red';
-            div.innerHTML = `Updating ${file} to ${prog.ver} ${pct}%`;
-        }
+        const pct = Math.round((prog.loaded / prog.total) * 100);
         general.reloadApp = true;
-        let git = document.getElementById('divGitInstall');
+        const git = document.getElementById('divGitInstall');
+
         if (git) {
-            // Update the status on the client that started the install.
-            if (pct >= 100 && prog.part === 100) git.remove();
-            else {
+            if (pct >= 100 && prog.part === 100) {
+                git.remove();
+            } else {
                 if (prog.part === 100) {
-                    document.getElementById('btnCancelUpdate').style.display = 'none';
+                    const btnCancel = document.getElementById('btnCancelUpdate');
+                    if (btnCancel) btnCancel.style.display = 'none';
                 }
-                let p = prog.part === 100 ? document.getElementById('progApplicationDownload') : document.getElementById('progFirmwareDownload');
+                const p = (prog.part === 100) ?
+                document.getElementById('progApplicationDownload') :
+                document.getElementById('progFirmwareDownload');
+
                 if (p) {
                     p.style.setProperty('--progress', `${pct}%`);
                     p.setAttribute('data-progress', `${pct}%`);
@@ -5680,7 +5645,6 @@ class Firmware {
                 ui.serviceError(err);
             } else {
                 general.reloadApp = true;
-
                 div.innerHTML = `
                 <div class="instructions-content">
                 <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
@@ -5723,10 +5687,8 @@ class Firmware {
             else {
                 let div = document.createElement('div');
                 let chip = document.getElementById('divContainer').getAttribute('data-chipmodel');
-
                 div.setAttribute('id', 'divGitInstall');
                 div.setAttribute('class', 'inst-overlay');
-
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
                 const isMob = this.isMobile();
@@ -5734,15 +5696,19 @@ class Firmware {
                 const infoIcon = isMob ? "#icon-warning" : "#icon-info";
                 const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
                 const infoText = isMob ? tr('UPDATE_GIT_NO_AUTO_BACKUP') : tr('UPDATE_GIT_BACKUP_DOWNLOAD_UP');
-
                 let optionsHtml = '';
                 for (let i = 0; i < rel.releases.length; i++) {
                     if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0) {
                         let displayName = rel.releases[i].name;
-                        if (displayName.toLowerCase() === 'main') displayName += ` - (${tr('UPDATE_GIT_RECOMMENDED')})`;
+                        let isAlpha = displayName.toLowerCase() === 'main';
+
+                        if (isAlpha) displayName += ` - ${tr('UPDATE_GIT_ALPHA')}`;
                         if (rel.releases[i].preRelease) displayName += ' - Pre';
 
-                        optionsHtml += `<option style="text-align:left;color:black;" data-prerelease="${rel.releases[i].preRelease}" value="${rel.releases[i].version.name}">${displayName}</option>`;
+                        optionsHtml += `<option style="text-align:left;color:black;"
+                        data-prerelease="${rel.releases[i].preRelease}"
+                        data-alpha="${isAlpha}"
+                        value="${rel.releases[i].version.name}">${displayName}</option>`;
                     }
                 }
                 div.innerHTML = `
@@ -5755,9 +5721,8 @@ class Firmware {
                 <div><h2>${tr('UPDATE_GIT_TITLE')}</h2><p>${tr('UPDATE_GIT_DESC')}</p></div>
                 <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
                 </div>
-                <div id="divPrereleaseWarning" class="error" style="display:none;">
-                <svg><use xlink:href="#icon-error"></use></svg>
-                <div><b>${tr('MSG_ALERT')}</b><span>${tr('UPDATE_GIT_RELEASE_DESC')}</span></div>
+                <div id="divPrereleaseWarning" class="error" style="display:none;"><svg><use xlink:href="#icon-error"></use></svg>
+                <div><b>${tr('MSG_ALERT')}</b><span id="spanUpdateWarning"></span></div>
                 </div>
                 <div class="field-group unibloc">
                 <label class="label" for="selVersion">${tr('UPDATE_GIT_SELECT_VERSION')}</label>
@@ -5775,6 +5740,7 @@ class Firmware {
                 <button id="btnClose" type="button" class="boutonOutline animScale" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
                 </div>
                 </div>`;
+
                 document.getElementById('divContainer').appendChild(div);
                 window.scrollTo(0, 0);
                 this.gitReleaseSelected(div);
@@ -5785,18 +5751,26 @@ class Firmware {
         let obj = ui.fromElement(div);
         let divNotes = div.querySelector('#divReleaseNotes');
         let divPre = div.querySelector('#divPrereleaseWarning');
-
         let sel = div.querySelector('#selVersion');
-        if (sel && sel.selectedIndex !== -1 && makeBool(sel.options[sel.selectedIndex].getAttribute('data-prerelease'))) {
-            if (divPre) divPre.style.display = '';
-        }
-        else
-            if (divPre) divPre.style.display = 'none';
+        if (sel && sel.selectedIndex !== -1) {
+            const opt = sel.options[sel.selectedIndex];
+            const isPre = makeBool(opt.getAttribute('data-prerelease'));
+            const isAlpha = makeBool(opt.getAttribute('data-alpha'));
+            if (divPre) {
+                if (isPre || isAlpha) {
+                    const translationKey = isAlpha ? 'UPDATE_GIT_RELEASE_ALPHA' : 'UPDATE_GIT_RELEASE_BETA';
+                    const spanMsg = divPre.querySelector('#spanUpdateWarning');
+                    if (spanMsg) spanMsg.innerHTML = tr(translationKey);
 
-            if (divNotes) {
-                if (!obj.version || obj.version === 'main' || obj.version === '') divNotes.style.display = 'none';
-                else divNotes.style.display = '';
+                    divPre.style.display = 'flex';
+                } else {
+                    divPre.style.display = 'none';
+                }
             }
+        }
+        if (divNotes) {
+            divNotes.style.display = (!obj.version || obj.version === 'main' || obj.version === '') ? 'none' : '';
+        }
     }
     async getReleaseInfo(tag) {
         let overlay = ui.waitMessage(document.getElementById('divContainer'));
@@ -5813,9 +5787,11 @@ class Firmware {
         finally { overlay.remove(); }
     }
     formatInlineMarkdown(txt) {
+        if (!txt) return '';
         return txt
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>')
         .replace(/`([^`]+)`/g, '<code class="md-code-inline">$1</code>')
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="md-img">')
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="md-link">$1</a>')
         .replace(/(?<!["=>])(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="md-link-auto">$1</a>');
     }
@@ -5828,47 +5804,52 @@ class Firmware {
         if (r.resp.ok) {
             let lines = r.info.body.split('\r\n');
             let ctx = { html: '', llvl: 0, lines: r.info.body.split('\r\n'), ndx: 0 };
+
             ctx.toHead = function (txt) {
                 let num = txt.indexOf(' ');
                 return `<h${num}>${txt.substring(num).trim()}</h${num}>`;
             };
             ctx.toUL = function () {
-                let txt = this.lines[this.ndx++];
-                let tok = this.token(txt);
-                this.html += `<ul>${this.toLI(tok.txt)}`;
+                this.html += '<ul class="md-list" style="padding:0; margin:0;">';
                 while (this.ndx < this.lines.length) {
-                    txt = this.lines[this.ndx];
+                    let txt = this.lines[this.ndx];
                     let t = this.token(txt);
+
                     if (t.ch === '*') {
-                        if (t.indent !== tok.indent) this.toUL();
-                        else {
-                            this.html += this.toLI(t.txt);
-                            this.ndx++;
-                        }
+                        let margin = t.indent * 8;
+                        this.html += `<li style="margin-left:${margin + 20}px; text-align:left; list-style-type:disc;">${self.formatInlineMarkdown(t.txt)}</li>`;
+                        this.ndx++;
+                    } else {
+                        break;
                     }
-                    else break;
                 }
                 this.html += '</ul>';
             };
-            ctx.toLI = function(txt) {
-                return `<li>${self.formatInlineMarkdown(txt.trim())}</li>`;
-            }
             ctx.token = function (txt) {
-                let tok = { ch: '', indent: 0, txt:'' }
-                for (let i = 0; i < txt.length; i++) {
-                    if (txt[i] === ' ') tok.indent++;
-                    else {
-                        tok.ch = txt[i];
-                        let tmp = txt.substring(tok.indent);
-                        tok.txt = tmp.substring(tmp.indexOf(' '));
-                        break;
+                let tok = { ch: '', indent: 0, txt: '' };
+                if (!txt) return tok;
+
+                let firstCharIndex = txt.search(/\S/);
+                if (firstCharIndex !== -1) {
+                    tok.indent = firstCharIndex;
+                    let char = txt[firstCharIndex];
+                    let nextChar = txt[firstCharIndex + 1];
+
+                    if (char === '*' && nextChar === ' ') {
+                        tok.ch = '*';
+                        tok.txt = txt.substring(firstCharIndex + 2);
+                    } else if (char === '#') {
+                        tok.ch = '#';
+                        tok.txt = txt.trim();
+                    } else {
+                        tok.ch = 'text';
+                        tok.txt = txt.trim();
                     }
                 }
                 return tok;
             };
             ctx.next = function () {
                 if (this.ndx >= this.lines.length) return false;
-                let line = this.lines[this.ndx].trim();
                 let tok = this.token(this.lines[this.ndx]);
 
                 switch (tok.ch) {
@@ -5883,14 +5864,19 @@ class Firmware {
                         this.html += '<div style="height:8px"></div>';
                         this.ndx++;
                         break;
+                    case 'text':
                     default:
-                        let formattedTxt = self.formatInlineMarkdown(this.lines[this.ndx]);
-                        this.html += `<p style="margin: 2px 0; line-height: 1.2;">${formattedTxt}</p>`;
+                        if (tok.txt !== '') {
+                            let formattedTxt = self.formatInlineMarkdown(tok.txt);
+                            let margin = (tok.indent * 8) + (tok.indent > 0 ? 20 : 0);
+                            this.html += `<p style="margin: 2px 0 2px ${margin}px; line-height: 1.2; text-align: left;">${formattedTxt}</p>`;
+                        }
                         this.ndx++;
                         break;
                 }
                 return true;
             };
+
             while (ctx.next());
             ui.infoMessage(ctx.html);
         }

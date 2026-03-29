@@ -224,7 +224,7 @@ int16_t GitRepo::getReleases(uint8_t num) {
         return httpCode;
       }
     }
-    https.end();  
+    https.end();
     sclient.stop();
   }
   settings.printAvailHeap();
@@ -254,11 +254,11 @@ void GitRepo::toJSON(JsonResponse &json) {
 void GitUpdater::loop() {
   if(!net.connected()) return;
   if(this->status == GIT_STATUS_READY) {
-    if(settings.checkForUpdate && 
+    if(settings.checkForUpdate &&
       (millis() > net.connectTime + 60000) && // Wait a minute before checking after connection.
       (this->lastCheck + 86400000 < millis() || this->lastCheck == 0) && !rebootDelay.reboot) { // 1 day
-      this->checkForUpdate();
-    }
+        this->checkForUpdate();
+      }
   }
   else if(this->status == GIT_AWAITING_UPDATE) {
     Serial.println("Starting update process.........");
@@ -279,9 +279,9 @@ void GitUpdater::loop() {
 void GitUpdater::checkForUpdate() {
   if(this->status != 0) return; // If we are already checking.
   Serial.println("Check github for updates...");
-  
+
   this->status = GIT_STATUS_CHECK;
-  settings.printAvailHeap();  
+  settings.printAvailHeap();
   this->lastCheck = millis();
   if(this->checkInternet() == 0) {
     GitRepo repo;
@@ -300,7 +300,7 @@ void GitUpdater::setCurrentRelease(GitRepo &repo) {
   this->updateAvailable = false;
   for(uint8_t i = 0; i < 2; i++) {
     if(repo.releases[i].draft || repo.releases[i].preRelease || repo.releases[i].id == 0) continue;
-    // Compare the versions.  
+    // Compare the versions.
     this->latest.copy(repo.releases[i].version);
     if(repo.releases[i].version.compare(settings.fwVersion) > 0) {
       // We have a new release.
@@ -392,39 +392,39 @@ void GitUpdater::emitDownloadProgress(uint8_t num, size_t total, size_t loaded, 
   json->endObject();
   sockEmit.endEmit(num);
   /*
-  char buf[420];
-  snprintf(buf, sizeof(buf), "{\"ver\":\"%s\",\"part\":%d,\"file\":\"%s\",\"total\":%d,\"loaded\":%d, \"error\":%d}", this->targetRelease, this->partition, this->currentFile, total, loaded, this->error);
-  if(num >= 255) sockEmit.sendToClients(evt, buf);
-  else sockEmit.sendToClient(num, evt, buf);
-  */
+   * char buf[420];
+   * snprintf(buf, sizeof(buf), "{\"ver\":\"%s\",\"part\":%d,\"file\":\"%s\",\"total\":%d,\"loaded\":%d, \"error\":%d}", this->targetRelease, this->partition, this->currentFile, total, loaded, this->error);
+   * if(num >= 255) sockEmit.sendToClients(evt, buf);
+   * else sockEmit.sendToClient(num, evt, buf);
+   */
   sockEmit.loop();
   webServer.loop();
 }
 void GitUpdater::setFirmwareFile() {
-    esp_chip_info_t ci;
-    esp_chip_info(&ci);
-    switch(ci.model) {
-      case esp_chip_model_t::CHIP_ESP32S3:
-        strcpy(this->currentFile, "SomfyController.ino.esp32s3.bin");
-        break;
-      case esp_chip_model_t::CHIP_ESP32S2:
-        strcpy(this->currentFile, "SomfyController.ino.esp32s2.bin");
-        break;
-      case esp_chip_model_t::CHIP_ESP32C3:
-        strcpy(this->currentFile, "SomfyController.ino.esp32c3.bin");
-        break;
-      default:
-        strcpy(this->currentFile, "SomfyController.ino.esp32.bin");
-        break;
-    }
+  esp_chip_info_t ci;
+  esp_chip_info(&ci);
+  switch(ci.model) {
+    case esp_chip_model_t::CHIP_ESP32S3:
+      strcpy(this->currentFile, "SomfyController.ino.esp32s3.bin");
+      break;
+    case esp_chip_model_t::CHIP_ESP32S2:
+      strcpy(this->currentFile, "SomfyController.ino.esp32s2.bin");
+      break;
+    case esp_chip_model_t::CHIP_ESP32C3:
+      strcpy(this->currentFile, "SomfyController.ino.esp32c3.bin");
+      break;
+    default:
+      strcpy(this->currentFile, "SomfyController.ino.esp32.bin");
+      break;
+  }
 }
 
 bool GitUpdater::beginUpdate(const char *version) {
   Serial.println("Begin update called...");
   if(strcmp(version, "Main") == 0)  strcpy(this->baseUrl, "https://raw.githubusercontent.com/xkain/ESPSomfy-RTS/main/");
-  else sprintf(this->baseUrl, "https://github.com/xkain/ESPSomfy-RTS/releases/download/%s/", version);
-  
-  strcpy(this->targetRelease, version);
+    else sprintf(this->baseUrl, "https://github.com/xkain/ESPSomfy-RTS/releases/download/%s/", version);
+
+      strcpy(this->targetRelease, version);
   this->emitUpdateCheck();
   this->setFirmwareFile();
   this->partition = U_FLASH;
@@ -575,12 +575,12 @@ int8_t GitUpdater::downloadFile() {
         Serial.printf("Invalid HTTP Code... %d", httpCode);
         return httpCode;
       }
-    }        
+    }
     else {
       Serial.printf("Invalid HTTP Code: %d\n", httpCode);
     }
-    https.end(); 
-    sclient.stop(); 
+    https.end();
+    sclient.stop();
     Serial.printf("End update %s\n", this->currentFile);
   }
   esp_task_wdt_reset();
