@@ -587,6 +587,7 @@
     "ERR_NO_SHADE_AVAILABLE_FOR_GROUP": "Es sind keine verfügbaren Rollläden vorhanden, die mit dieser Gruppe gekoppelt werden könnten.",
     "ERR_SHADE_NOT_FOUND_IN_GROUP": "Der angegebene Rollladen konnte in dieser Gruppe nicht gefunden werden.",
     "ERR_PORT_INVALID": "Ungültige Portnummer",
+    "ERR_UNSPECIFIED": "Datei fehlt oder Version für Ihren ESP32 nicht verfügbar",
     "ERR_USERNAME_INVALID": "Ungültiger Benutzername",
     "ERR_PASSWORD_INVALID": "Ungültiges Passwort",
     "ERR_ROOT_TOPIC_INVALID": "Ungültiges Root-Topic",

@@ -587,6 +587,7 @@
     "ERR_NO_SHADE_AVAILABLE_FOR_GROUP": "There are no available shades to pair to this group.",
     "ERR_SHADE_NOT_FOUND_IN_GROUP": "The specified shade could not be found in this group.",
     "ERR_PORT_INVALID": "Invalid port number",
+    "ERR_UNSPECIFIED": "Missing file or version unavailable for your ESP32",
     "ERR_USERNAME_INVALID": "Invalid Username",
     "ERR_PASSWORD_INVALID": "Invalid Password",
     "ERR_ROOT_TOPIC_INVALID": "Invalid Root Topic",

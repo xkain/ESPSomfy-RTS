@@ -588,6 +588,7 @@
     "ERR_NO_SHADE_AVAILABLE_FOR_GROUP": "Aucun volet disponible à associer à ce groupe.",
     "ERR_SHADE_NOT_FOUND_IN_GROUP": "Le volet spécifié est introuvable dans ce groupe",
     "ERR_PORT_INVALID": "Numéro de port invalide",
+    "ERR_UNSPECIFIED": "Fichier manquant ou version indisponible pour votre ESP32",
     "ERR_USERNAME_INVALID": "Nom d’utilisateur invalide",
     "ERR_PASSWORD_INVALID": "Mot de passe invalide",
     "ERR_ROOT_TOPIC_INVALID": "Invalide Root Topic",

@@ -1,3 +1,4 @@
+//var hst = '192.168.1.49';
 var hst = '192.168.1.13';
 //var hst = '192.168.2.232';
 //var hst = '192.168.4.1';
@@ -5568,16 +5569,23 @@ class Firmware {
         sp = document.getElementById('spanMinMemory');
         if (sp) sp.innerHTML = mem.min.fmt('#,##0 ');
     }
+
+
+
     procFwStatus(rel) {
         const divsGlobal = document.querySelectorAll('.firmware-message');
         const divLocal = document.getElementById('divSystemStatus');
         const statusDesc = document.getElementById('statusDesc');
 
         if (divsGlobal.length === 0) return;
+
+        // 1. On nettoie les bandeaux (on les cache par défaut)
         divsGlobal.forEach(div => {
             div.classList.remove('procFwStatusshow');
             div.onclick = null;
         });
+
+        // 2. CAS : Mise à jour disponible (Repos)
         if (rel.available && rel.status === 0 && rel.checkForUpdate !== false) {
             divsGlobal.forEach(div => {
                 div.classList.add('procFwStatusshow');
@@ -5585,6 +5593,7 @@ class Firmware {
                 div.onclick = () => { firmware.updateGithub(); };
                 div.innerHTML = `<span>${tr('FIRMWARE_UPDATE_AVAILABLE')}</span>`;
             });
+
             if (divLocal) {
                 divLocal.className = "error";
                 document.getElementById('useStatusIcon')?.setAttribute('xlink:href', '#icon-error');
@@ -5593,6 +5602,18 @@ class Firmware {
                 statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
             }
         }
+        // 3. CAS : Gestion des erreurs (Status 4 avec code erreur)
+        else if (rel.status === 4 && rel.error !== 0) {
+            let e = errors.find(x => x.code === rel.error) || { desc: tr('ERR_UNSPECIFIED') };
+
+            // Fermeture de l'overlay bloqué
+            let inst = document.getElementById('divGitInstall');
+            if (inst) inst.remove();
+
+            // On affiche uniquement le popup d'erreur (rien dans le bandeau)
+            ui.errorMessage(e.desc);
+        }
+        // 4. CAS : Tout est à jour (Page système)
         else {
             if (divLocal) {
                 divLocal.className = "success";
@@ -5627,6 +5648,10 @@ class Firmware {
             }
         }
     }
+
+
+
+
     async installGitRelease(div) {
         if (!this.isMobile()) {
             console.log('Starting backup');
@@ -5689,6 +5714,8 @@ class Firmware {
                 let chip = document.getElementById('divContainer').getAttribute('data-chipmodel');
                 div.setAttribute('id', 'divGitInstall');
                 div.setAttribute('class', 'inst-overlay');
+
+                // Tri des releases
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
                 const isMob = this.isMobile();
@@ -5696,13 +5723,23 @@ class Firmware {
                 const infoIcon = isMob ? "#icon-warning" : "#icon-info";
                 const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
                 const infoText = isMob ? tr('UPDATE_GIT_NO_AUTO_BACKUP') : tr('UPDATE_GIT_BACKUP_DOWNLOAD_UP');
+
                 let optionsHtml = '';
                 for (let i = 0; i < rel.releases.length; i++) {
+                    // On vérifie d'abord si la puce est compatible avec la release en général
                     if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0) {
                         let displayName = rel.releases[i].name;
                         let isAlpha = displayName.toLowerCase() === 'main';
 
-                        if (isAlpha) displayName += ` - ${tr('UPDATE_GIT_ALPHA')}`;
+                        // Filtre spécifique pour la branche Main (Alpha)
+                        if (isAlpha) {
+                            const cm = (chip || "").toLowerCase();
+                            if (cm !== "s3" && cm !== "" && cm !== "esp32") {
+                                continue; // On ignore cette itération pour S2, C3, etc.
+                            }
+                            displayName += ` - ${tr('UPDATE_GIT_ALPHA')}`;
+                        }
+
                         if (rel.releases[i].preRelease) displayName += ' - Pre';
 
                         optionsHtml += `<option style="text-align:left;color:black;"
@@ -5710,7 +5747,7 @@ class Firmware {
                         data-alpha="${isAlpha}"
                         value="${rel.releases[i].version.name}">${displayName}</option>`;
                     }
-                }
+                } // Fin de la boucle for
                 div.innerHTML = `
                 <div class="overlay-content">
                 <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
