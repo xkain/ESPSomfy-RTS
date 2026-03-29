@@ -159,8 +159,6 @@ form {
 .field-group2 .radioPins {
     flex: 1;
 }
-
-
 .label {
     font-size: 14px;
     color: var(--color);
@@ -205,8 +203,6 @@ select.inputAndSelect {
     background-color: transparent;
     cursor: pointer;
 }
-
-
 .input-mqtt {
     box-sizing: border-box;
     clear: both;
@@ -304,7 +300,7 @@ label.uniRow {
 .uniRight {
     display: flex;
     align-items: center;
-    gap: 8px; /* Espace entre les boutons */
+    gap: 8px;
 }
 .uniColumn {
     display: flex;
@@ -312,7 +308,6 @@ label.uniRow {
     align-items: flex-end;
     justify-content: center;
 }
-
 .numberfield {
     display: flex;
     color: var(--color);
@@ -333,7 +328,6 @@ input[type=text] {
     padding: 8px;
     border-radius: 8px;
 }
-
 input[type="password"].pin-digit {
     margin: 0 0.3rem;
     font-size: 1.5rem;
@@ -377,7 +371,6 @@ fieldset {
     margin-top: 20px;
     position: relative;
 }
-
 .switch input {
     position: absolute;
     opacity: 0;
@@ -410,10 +403,8 @@ fieldset {
     background-color: var(--bg-switch-ch-color);
 }
 .switch input:checked + div {
-    transform: translateX(16px);  /* ajusté pour la taille réduite */
+    transform: translateX(16px);
 }
-
-
 
 .button-container-row,
 .button-container-col {
@@ -431,7 +422,6 @@ fieldset {
     flex-direction: column;
     gap: 15px;
 }
-
 button:active {
     opacity: .7;
 }
@@ -467,7 +457,6 @@ button:active {
 }
 .bouton:active {
     background-color: color-mix(in srgb, var(--accent-color), black 3%);
-
 }
 .boutonOutline,
 .boutonOutline-pop {
@@ -500,7 +489,6 @@ button:active {
 .bouton-Danger{
     background-color: var(--error-color, brown);
 }
-
 .version-badge {
     font-size: 0.9em;
     font-family: monospace;
@@ -530,7 +518,6 @@ button:active {
     height: 20px;
     fill: currentColor;
 }
-
 .warning,
 .information,
 .success,
@@ -540,7 +527,6 @@ button:active {
     border-radius: 25px;
     padding: 8px 12px;
     margin-top: 15px;
-
 }
 .warning {
     background: rgba(244, 188, 54, 0.1);
@@ -550,7 +536,6 @@ button:active {
     background: rgba(54, 128, 244, 0.1);
     border: 1px solid #365df42e;
 }
-
 .success {
     background: rgba(76, 175, 80, 0.1);
     border: 1px solid #36f45d2e;
@@ -636,8 +621,6 @@ button:active {
     display:block;
     margin-bottom:15px;
 }
-
-
 /* SVG : UP - DOWN - MY - TOGGLE*/
 .somfy-shade-icon  {
     width: 72px;
@@ -678,7 +661,6 @@ button:active {
     transform-box: fill-box;
 }
 /* Button : UP - DOWN - MY - TOGGLE*/
-
 .button-outline{
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -686,8 +668,6 @@ button:active {
     user-select: none;
     cursor:pointer;
 }
-
-
 .shadectl-buttons div.button-outline {
     display: inline-block;
 }
@@ -721,7 +701,6 @@ button:active {
 {
     display: none;
 }
-/*.somfyShadeCtl[data-shadetype="5"] .shadectl-mypos,*/
 .somfyShadeCtl[data-shadetype="14"] .shadectl-mypos,
 .somfyShadeCtl[data-shadetype="15"] .shadectl-mypos,
 .somfyShadeCtl[data-shadetype="16"] .shadectl-mypos,
@@ -736,7 +715,6 @@ button:active {
 .somfyShadeCtl .shadectl-mypos span.my-pos {
     margin-right:14px;
 }
-
 .animScale {
     transition: transform 0.2s ease-in-out, opacity 0.1s ease-in-out;
     cursor: pointer;
@@ -746,7 +724,6 @@ button:active {
     transform: scale(0.95);
     opacity: 0.8;
 }
-
 @media screen and (max-width: 780px) {
     body {
         color: var(--color);

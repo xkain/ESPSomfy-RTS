@@ -9,10 +9,8 @@
     transition: margin-left 0.3s;
     position: relative;
 }
-
 /***************************
- * Header
- **************************/
+ * Header*/
 .header {
     display: none;
 }
@@ -107,10 +105,8 @@
     font-family: monospace;
     min-width: 68px;
 }
-
 /***************************
- * SideBar
- **************************/
+ * SideBar*/
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -141,7 +137,7 @@
     border-radius: 25px;
     transition: background 0.2s;
     cursor: pointer;
-    justify-content: flex-start; /* Aligne tout à gauche par défaut */
+    justify-content: flex-start;
 }
 .nav-item span {
     margin-right: 0;
@@ -215,8 +211,7 @@
 .tab-container { display: none; }
 
 /***************************
- * SubTab
- **************************/
+ * SubTab*/
 .subtab-container {
     display: inline-flex !important;
     width: auto;
@@ -253,8 +248,7 @@
 }
 
 /***************************
- * PAGE Welcome
- **************************/
+ * PAGE Welcome*/
 #divGetStarted {
 display: none;
 flex-direction: column;
@@ -390,10 +384,8 @@ margin-top: 9%;
     max-width: 900px;
     margin: auto;
 }
-
 /***************************
- * Page Général
- **************************/
+ * Page Général*/
 .chooseAccentColor {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -458,7 +450,6 @@ margin-top: 9%;
     flex-shrink: 0;
     fill: currentColor;
 }
-
 .button-update span {
     line-height: 1;
 }
@@ -483,14 +474,8 @@ margin-top: 9%;
 .credits-list .special-credit {
     opacity: 0.8;
 }
-
-
-
-
-
 /***************************
- * Page Network
- **************************/
+ * Page Network*/
 .wifi-container {
     display: flex;
     justify-content: space-between;
@@ -604,8 +589,7 @@ div.wifiSignal {
     margin-top:0;
 }
 /***************************
- * Page Shade, Groupe and Repeater
- **************************/
+* Page Shade, Groupe and Repeater*/
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -693,7 +677,6 @@ div.wifiSignal {
     display: flex;
     justify-content: flex-end;
 }
-
 .somfy-status-container .somfy-shade-icon {
     width:56px;
     height:56px;
@@ -733,9 +716,6 @@ div.wifiSignal {
         width: 48px;
         height: 48px;
     }
-
-
-
 .disabled {
     opacity: 0.3 !important;
     filter: grayscale(1) !important;
@@ -775,7 +755,6 @@ display:inline-block;
 #somfyShade[data-proto="9"] #divGPIOControl {
 display: inline-block;
 width: 100%;
-
 }
 #somfyShade[data-proto="8"] #divShadeBitLength,
 #somfyShade[data-proto="9"] #divShadeBitLength {
@@ -817,250 +796,247 @@ display: none;
 #somfyShade[data-proto="8"][data-shadetype="9"] #divGPIOUp {
 display: none;
 }
-
- /***************************
-  * télécommande virtuelle
-  **************************/
- .vr-content {
-     max-width: 380px;
-     width: 100%;
-     margin: 0 auto;
-     justify-content: center;
-     align-content: center;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     background-color: var(--unibloc-color);
-     padding: 20px;
-     border-radius: 25px;
-     border: 1px solid var(--borderShadeCtl);
-     box-shadow: 0 0 6px 0 var(--shadowShadeCtl);
- }
- .vr-content .unibloc {
-     background-color: var(--background-color);
-     margin: 0 0 15px;
+/***************************
+* télécommande virtuelle*/
+.vr-content {
+    max-width: 380px;
+    width: 100%;
+    margin: 0 auto;
+    justify-content: center;
+    align-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--unibloc-color);
+    padding: 20px;
+    border-radius: 25px;
+    border: 1px solid var(--borderShadeCtl);
+    box-shadow: 0 0 6px 0 var(--shadowShadeCtl);
 }
- .vr-bloctoogle {
-     display: flex;
-     justify-content: space-between;
-     width: 100%;
-     padding: 5px;
-     gap: 15px;
- }
- .vr-wheel-container {
-     display: flex;
-     justify-content: center;
-     align-items: center;
- }
- .vr-progFav {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     margin-bottom: 25px;
-     margin-top: -25px;
-     width: 100%;
- }
- .vr-block-boutons {
-     display: flex;
-     align-items: stretch;
-     gap: 15px;
-     min-height: 60px;
-     margin-bottom: 20px;
-     width: 100%;
- }
- .vr-block-center {
-     flex: 1;
-     display: flex;
-     flex-direction: column;
-     gap: 22px;
-     justify-content: center;
-     padding: 10px;
- }
- .vr-toogle {
-     width: 48%;
-     max-width: 130px;
-     height: 52px;
-     background-color: var(--accent-color);
-     border-radius: 30px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     cursor: pointer;
-     transition: transform 0.1s;
-     border: none;
-     overflow: hidden;
- }
- .vr-updownmy.vr-toogle {
-     margin-left: auto;
- }
- .vr-my-center {
-     width: 90px;
-     height: 90px;
-     background-color: var(--accent-color);
-     border-radius: 50%;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     font-weight: bold;
-     font-size: 28px;
-     cursor: pointer;
-     z-index: 2;
-     transition: transform 0.1s;
-     color: var(--accent-color);
- }
- .vr-wheel-outer {
-     position: relative;
-     width: 210px;
-     height: 210px;
-     background-color: var(--background-color);
-     border-radius: 50%;
-     display: flex;
-     justify-content: center;
-     align-items: center;
- }
- .vr-wheel-arrow {
-     position: absolute;
-     width: 44px;
-     height: 44px;
-     cursor: pointer;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     transition: transform 0.1s;
-     color: var(--soustxt-color);
- }
- .vr-arrow-up    { top: 10px;  left: 50%; transform: translateX(-50%); }
- .vr-arrow-down  { bottom: 10px; left: 50%; transform: translateX(-50%); }
- .vr-blockLeft, .vr-blockRight {
-     display: flex;
-     flex-direction: column;
-     width: 20%;
- }
- .vr-upMy, .vr-myDown, .vr-upDown, .vr-all {
-     background-color: var(--background-color);
-     display: flex;
-     flex-direction: column;
-     cursor: pointer;
-     transition: transform 0.1s;
-     min-height: 110px;
-     backface-visibility: hidden;
-     -webkit-font-smoothing: subpixel-antialiased;
-     transform-origin: center center;
-     color: var(--soustxt-color);
- }
- .vr-upMy, .vr-upDown      { border-radius: 35px 35px 0 0; margin-bottom: 6px; }
- .vr-myDown, .vr-all { border-radius: 0 0 35px 35px; }
- .segment {
-     flex: 1;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     font-size: 23px;
- }
- .btn-prog, .btn-fav {
-     width: 76px;
-     height: 35px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     border-radius: 15px;
-     font-size: 0.75em;
-     font-weight: bold;
-     cursor: pointer;
-     transition: transform 0.1s, filter 0.1s;
-     text-transform: uppercase;
- }
- .btn-prog { background-color: var(--background-color); color: var(--color); }
- .btn-fav  { background-color: var(--accent-color); color: white; border: none; }
- .switch-group { display: flex; gap: 5px; margin-bottom: 10px; }
- .switch-soleil, .switch-windy { flex: 1; display: flex; }
- .switch-group input { display: none; }
- .toggle-item {
-     flex: 1;
-     height: 42px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     cursor: pointer;
-     font-size: 1em;
-     font-weight: bold;
-     transition: all 0.2s;
-     background-color: var(--background-color);
-     color: var(--soustxt-color);
-     border-radius: 25px;
- }
- .vr-block-centerFlag {
-     display: flex;
-     background-color: var(--background-color);
-     color: var(--soustxt-color);
-     height: 44px;
-     border-radius:25px
- }
- .vr-button-sunflagL, .vr-button-sunflagR {
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     overflow: hidden;
-     cursor: pointer;
- }
- .vr-button-sunflagL { flex: 1; border-radius: 20px 0 0 20px; }
- .vr-button-sunflagR { flex: 1; border-radius: 0 20px 20px 0; }
+.vr-content .unibloc {
+    background-color: var(--background-color);
+    margin: 0 0 15px;
+}
+.vr-bloctoogle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 5px;
+    gap: 15px;
+}
+.vr-wheel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.vr-progFav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    margin-top: -25px;
+    width: 100%;
+}
+.vr-block-boutons {
+    display: flex;
+    align-items: stretch;
+    gap: 15px;
+    min-height: 60px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.vr-block-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    justify-content: center;
+    padding: 10px;
+}
+.vr-toogle {
+    width: 48%;
+    max-width: 130px;
+    height: 52px;
+    background-color: var(--accent-color);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+    border: none;
+    overflow: hidden;
+}
+.vr-updownmy.vr-toogle {
+    margin-left: auto;
+}
+.vr-my-center {
+    width: 90px;
+    height: 90px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.1s;
+    color: var(--accent-color);
+}
+.vr-wheel-outer {
+    position: relative;
+    width: 210px;
+    height: 210px;
+    background-color: var(--background-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.vr-wheel-arrow {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+    color: var(--soustxt-color);
+}
+.vr-arrow-up    { top: 10px;  left: 50%; transform: translateX(-50%); }
+.vr-arrow-down  { bottom: 10px; left: 50%; transform: translateX(-50%); }
+.vr-blockLeft, .vr-blockRight {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+}
+.vr-upMy, .vr-myDown, .vr-upDown, .vr-all {
+    background-color: var(--background-color);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.1s;
+    min-height: 110px;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+    transform-origin: center center;
+    color: var(--soustxt-color);
+}
+.vr-upMy, .vr-upDown      { border-radius: 35px 35px 0 0; margin-bottom: 6px; }
+.vr-myDown, .vr-all { border-radius: 0 0 35px 35px; }
+.segment {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+}
+.btn-prog, .btn-fav {
+    width: 76px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 0.75em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.1s;
+    text-transform: uppercase;
+}
+.btn-prog { background-color: var(--background-color); color: var(--color); }
+.btn-fav  { background-color: var(--accent-color); color: white; border: none; }
+.switch-group { display: flex; gap: 5px; margin-bottom: 10px; }
+.switch-soleil, .switch-windy { flex: 1; display: flex; }
+.switch-group input { display: none; }
+.toggle-item {
+    flex: 1;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s;
+    background-color: var(--background-color);
+    color: var(--soustxt-color);
+    border-radius: 25px;
+}
+.vr-block-centerFlag {
+    display: flex;
+    background-color: var(--background-color);
+    color: var(--soustxt-color);
+    height: 44px;
+    border-radius:25px
+}
+.vr-button-sunflagL, .vr-button-sunflagR {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+.vr-button-sunflagL { flex: 1; border-radius: 20px 0 0 20px; }
+.vr-button-sunflagR { flex: 1; border-radius: 0 20px 20px 0; }
 
-
- .btn-send {
-     background-color: var(--accent-color);
-     color: white;
-     border: none;
-     border-radius: 20px;
-     padding: 13px;
-     font-weight: bold;
-     text-align: center;
-     cursor: pointer;
- }
- .vr-step80 {
-     position: relative;
-     background-color: var(--background-color);
-     border-radius: 25px;
-     padding: 15px;
-     display: flex;
-     align-items: center;
-     gap: 10px;
-     width: 100%;
- }
- .vrslidStepSize {
-     flex: 1;
-     display: flex;
-     flex-direction: column;
- }
- .vrslidStepSize input {
-     width: 100%;
-     margin: 0;
-     cursor: pointer;
- }
- .vr-step80-arrow {
-     width: 46px;
-     height: 46px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     cursor: pointer;
-     transition: transform 0.1s;
-     flex-shrink: 0;
- }
- .vr-step80Label {
-     text-align: center;
-     font-size: 0.9em;
-     position: absolute;
-     bottom: 10px;
-     left: 0;
-     width: 100%;
- }
+.btn-send {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 13px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+}
+.vr-step80 {
+    position: relative;
+    background-color: var(--background-color);
+    border-radius: 25px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.vrslidStepSize {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.vrslidStepSize input {
+    width: 100%;
+    margin: 0;
+    cursor: pointer;
+}
+.vr-step80-arrow {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+    flex-shrink: 0;
+}
+.vr-step80Label {
+    text-align: center;
+    font-size: 0.9em;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+}
  #divVirtualRemote[data-bitlength="56"] .vr-80bit,
  #divVirtualRemote[data-bitlength="none"] .vr-favorite {
  display: none;
  }
 
- /* --- ÉTATS ACTIFS ET ÉTATS COCHÉS --- */
+/* --- ÉTATS ACTIFS ET ÉTATS COCHÉS --- */
 .vr-arrow-up:active   { transform: translateX(-50%) translateY(-5px); }
 .vr-arrow-down:active { transform: translateX(-50%) translateY(5px); }
 
@@ -1097,10 +1073,8 @@ display: none;
     height: 32px;
     display: block;
 }
-
 /***************************
- * Page Radio
- **************************/
+* Page Radio*/
 .gpioRadio-container {
     display: flex;
     flex-wrap: wrap;
@@ -1189,7 +1163,6 @@ display: none;
     display:flex;
     gap:5px;
 }
-
 .rssi-row {
     display: flex;
     justify-content: space-between;
@@ -1272,8 +1245,7 @@ display: none;
 .RadioSlider { min-width: 70px; }
 
 /***************************
- * Logs
- **************************/
+* Logs*/
 .log-global-container {
     width: 100%;
     overflow-x: auto;
@@ -1336,10 +1308,8 @@ div.frame-pulses {
     text-overflow:ellipsis;
     display:none;
 }
-
 /***************************
- * Sécurity
- **************************/
+* Sécurity*/
 #divPinSecurity { justify-content: center; }
 #divPinSecurity label { margin: 20px; }
 #fldPinEntry { margin-top: 20px; }
@@ -1355,7 +1325,6 @@ div.frame-pulses {
     background: var(--background-color);
     padding: 20px;
 }
-
 #divUnauthenticated p {
     margin-top: 0;
     color: var(--color);
@@ -1513,7 +1482,7 @@ div.frame-pulses {
         color: var(--color);
     }
     #divGetStarted {
-    margin-top: 0;
+        margin-top: 0;
     }
     .welcome-container {
         gap: 25px;

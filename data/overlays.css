@@ -61,7 +61,6 @@ i.icss-anim:after {
 .procFwStatusshow {
     animation: bounce-alert 20s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
 }
-
 /* PULSE */
 @keyframes pulse-warning {
     0% { opacity: 1; }
@@ -71,7 +70,6 @@ i.icss-anim:after {
 .somfyShadeCtl[data-windy="true"] .indicator-wind {
     animation: pulse-warning 1.5s infinite;
 }
-
 /* Reverse animation */
 .icss-reverse {
     animation-direction: reverse;
@@ -554,8 +552,7 @@ div.error-message,
     display: list-item;
 }
 /***************************
-* Accueil Rooms, Shades Card and Groupes
-**************************/
+* Accueil Rooms, Shades Card and Groupes*/
 .room-nav-container {
     display: none;
     position: relative;
@@ -563,7 +560,6 @@ div.error-message,
     width: 100%;
     background-color: var(--barreRoomBg);
     overflow: hidden;
-  /*  border-radius: 25px; */
     margin-bottom: 30px;
 }
     .room-nav-container .icon-svg {
@@ -598,7 +594,6 @@ div.error-message,
     cursor: pointer;
     user-select: none;
 }
-
 .room-pill.active {
     background-color: var(--accent-color);
     color: white;
@@ -665,7 +660,6 @@ div.error-message,
     margin-left: auto;
     line-height: 1;
 }
-
 .somfyRepeater .idRemoteAddress {
     flex-grow: 1;
 }
@@ -985,10 +979,8 @@ div.error-message,
     align-items: center;
     gap: 4px;
 }
-
 /***************************
- * Popup openSetMyPosition and openSetPosition
- **************************/
+ * Popup openSetMyPosition and openSetPosition*/
 .shade-positioner {
     position: absolute;
     width: 100%;
@@ -1083,9 +1075,7 @@ div.error-message,
     animation: slideToLeft 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
 }
 /***************************
- * wifi
- **************************/
-
+* wifi*/
 .wifiConnectScan {
     display:flex;
     justify-content:center;
@@ -1105,11 +1095,8 @@ div.error-message,
 .strength .signal {
     width:24px; height: 24px;
 }
-
 /***************************
- * Ethernet
- **************************/
-
+* Ethernet*/
 .blocEthBoardSettings {
     display: flex;
     justify-content: center;
@@ -1157,10 +1144,8 @@ div.eth-setting-line label {
     background:#ccc;
     cursor:not-allowed;
 }
-
 /***************************
- * Update
- **************************/
+* Update*/
 #selVersion.inputAndSelect {
     font-size: 15px;
 }
@@ -1191,17 +1176,15 @@ div.eth-setting-line label {
 #btnUpdateFirmware use {fill: #f00101 !important;}
 
 /***************************
- * Restore
- **************************/
+* Restore*/
 #jsHeadRestore .instructions-headerLogo {
     right: -13px;
     bottom: -20px;
     transform: rotate(65deg);
 }
 #jsUniRestore .uniLabel {
-margin: 2px 0;
+    margin: 2px 0;
 }
-
 .FileUploaderChooseFile label {
     display: flex;
     align-items: center;
@@ -1233,18 +1216,15 @@ margin: 2px 0;
     height: 24px;
     color: white;
 }
-
 /***************************
- * Netwook
- **************************/
+* Netwook*/
 #jsHeadLan .instructions-headerLogo {
     right: -13px;
     bottom: -16px;
     transform: rotate(15deg);
 }
 /***************************
- * scanFrequency
- **************************/
+* scanFrequency*/
 .scanfreqRssiLeft,
 .scanfreqRssiRight {
     display: flex;
@@ -1355,7 +1335,6 @@ margin: 2px 0;
     .overlay-content {
         max-width: max-content;
     }
-
     #divFirmwareUpdate.procFwStatusshow {
         display: flex !important;
     }

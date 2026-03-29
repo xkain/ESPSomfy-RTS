@@ -1,5 +1,5 @@
 //var hst = '192.168.1.49';
-//var hst = '192.168.1.13';
+var hst = '192.168.1.13';
 //var hst = '192.168.2.232';
 //var hst = '192.168.4.1';
 var _rooms = [];
@@ -2583,8 +2583,7 @@ class Somfy {
                     radioTab.classList.toggle('radio-error', !isRadioInit);
                     if (sideNote) sideNote.style.display = isRadioInit ? 'none' : 'inline';
                     row.style.backgroundColor = isRadioInit
-                    ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
-                    : "var(--unibloc-color)";
+                    ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))" : "var(--unibloc-color)";
                 }
                 cbRadio.addEventListener('change', updateRadioText);
                 updateRadioText();
@@ -2810,7 +2809,6 @@ class Somfy {
                             else ctx.lineTo(x, y);
                         });
                             ctx.stroke();
-
                             const gradient = ctx.createLinearGradient(0, 0, 0, h);
                             gradient.addColorStop(0, accentColor.includes('#') ? accentColor + '4D' : accentColor);
                             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -3388,7 +3386,6 @@ class Somfy {
                     dragDiv.style.width = `${this.clientWidth}px`;
                     dragDiv.style.top = `${this.offsetTop}px`;
                     dragDiv.style.border = 'dotted 1px silver';
-                    //dragDiv.style.background = 'gainsboro';
                     list.appendChild(dragDiv);
                     this.classList.add('dragging');
                     timerStart = null;
@@ -4389,7 +4386,6 @@ class Somfy {
                         } else {
                             btnContainer.classList.add('disabled');
                         }
-
                         this.updateGroupList();
                     }
                 });
@@ -4531,7 +4527,6 @@ class Somfy {
                 document.getElementsByName('shadeName')[0].value = shade.name;
                 document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
                 document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-
                 let svg = document.getElementById('icoShade');
                 if (svg) {
                     let pos = shade.flipPosition ? 100 - shade.position : shade.position;
@@ -4548,9 +4543,7 @@ class Somfy {
                     document.getElementById('btnPairShade').style.display = 'inline-block';
                     document.getElementById('btnUnpairShade').style.display = 'none';
                 }
-
                 this.setLinkedRemotesList(shade);
-
                 let divPairing = document.getElementById('divPairing');
                 if (divPairing) divPairing.remove();
             }
@@ -4571,7 +4564,6 @@ class Somfy {
                 document.getElementsByName('shadeName')[0].value = shade.name;
                 document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
                 document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-
                 let svg = document.getElementById('icoShade');
                 if (svg) {
                     let pos = shade.flipPosition ? 100 - shade.position : shade.position;
@@ -4588,9 +4580,7 @@ class Somfy {
                     document.getElementById('btnPairShade').style.display = 'inline-block';
                     document.getElementById('btnUnpairShade').style.display = 'none';
                 }
-
                 this.setLinkedRemotesList(shade);
-
                 let divPairing = document.getElementById('divPairing');
                 if (divPairing) divPairing.remove();
             }
@@ -5279,12 +5269,10 @@ class Somfy {
             setTimeout(() => { existing.remove(); }, 300);
             return;
         }
-
         document.querySelectorAll('.shade-positioner').forEach(el => {
             el.remove();
             document.querySelectorAll('.handle-icon use').forEach(u => u.setAttribute('href', '#svg-arrowRight'));
         });
-
         switch (parseInt(shade.getAttribute('data-shadetype'), 10)) {
             case 5: case 9: case 10: case 14: case 15: case 16: return;
         }
@@ -5569,9 +5557,6 @@ class Firmware {
         sp = document.getElementById('spanMinMemory');
         if (sp) sp.innerHTML = mem.min.fmt('#,##0 ');
     }
-
-
-
     procFwStatus(rel) {
         const divsGlobal = document.querySelectorAll('.firmware-message');
         const divLocal = document.getElementById('divSystemStatus');
@@ -5700,7 +5685,6 @@ class Firmware {
                 div.setAttribute('id', 'divGitInstall');
                 div.setAttribute('class', 'inst-overlay');
 
-                // Tri des releases
                 rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
                 const isMob = this.isMobile();
@@ -5711,16 +5695,14 @@ class Firmware {
 
                 let optionsHtml = '';
                 for (let i = 0; i < rel.releases.length; i++) {
-                    // On vérifie d'abord si la puce est compatible avec la release en général
                     if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0) {
                         let displayName = rel.releases[i].name;
                         let isAlpha = displayName.toLowerCase() === 'main';
 
-                        // Filtre spécifique pour la branche Main (Alpha)
                         if (isAlpha) {
                             const cm = (chip || "").toLowerCase();
                             if (cm !== "s3" && cm !== "" && cm !== "esp32") {
-                                continue; // On ignore cette itération pour S2, C3, etc.
+                                continue;
                             }
                             displayName += ` - ${tr('UPDATE_GIT_ALPHA')}`;
                         }
@@ -5732,7 +5714,7 @@ class Firmware {
                         data-alpha="${isAlpha}"
                         value="${rel.releases[i].version.name}">${displayName}</option>`;
                     }
-                } // Fin de la boucle for
+                }
                 div.innerHTML = `
                 <div class="overlay-content">
                 <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
