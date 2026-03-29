@@ -735,7 +735,6 @@ button:active {
         height: 52px;
     }
 }
-
 @media (max-width: 480px) {
     body {
         margin-top: 0px;

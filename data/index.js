@@ -1,7 +1,6 @@
 var hst = '192.168.1.13';
 //var hst = '192.168.1.49';
 //var hst = '192.168.2.232';
-//var hst = '192.168.4.1';
 var _rooms = [];
 let LANG = {};
 var baseUrl = window.location.protocol === 'file:' ? `http://${hst}` : '';
@@ -10,11 +9,9 @@ var waitLoad;
 if (typeof ui !== 'undefined' && ui.waitMessage) {
     waitLoad = ui.waitMessage(document.body);
 }
-
 window.tr = function(id) {
     return (LANG && LANG[id]) ? LANG[id] : id;
 };
-
 const translator = {
     translate(el) {
         if (!el || !el.dataset.lang) return;
