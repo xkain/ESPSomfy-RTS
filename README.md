@@ -24,7 +24,7 @@
 
 ## About The Project
 
-This project serves as a comprehensive controller for Somfy RTS blinds and shades, capable of managing up to **32 individual shades** and **16 groups**.
+This project serves as a comprehensive controller for Somfy RTS blinds and shades, capable of managing up to **30 individual shades** , **14 groups** and **14 rooms**.
 
 #### Supported Protocols
 * **433MHz RTx:** Full support for **RTS, RTW, RTV/L**, and **433.92MHz** protocols.
@@ -37,17 +37,13 @@ For those with "bare" motors (no built-in radio), this project includes support 
 
 <br />
 
-## Why does this exist?
+### Why does this project exist?
 
-ESPSomfy-RTS is a powerful project, but I felt it needed a more modern and localized touch. This fork is the result of three months of redesigning the user experience to make it more intuitive and accessible for everyone.
+**ESPSomfy-RTS** is a powerful project at its core, but I felt it needed a more modern and localized touch.
 
-While keeping the rock-solid foundations of the original project, I’ve completely overhauled the interface to be truly "Mobile-First" and user-friendly for non-English speakers.
+Being French (and therefore a big fan of bread and cheese), I found during my very first use that the explanations were sometimes confusing. Above all, I felt like I had to put on sunglasses every time I opened the interface! This fork is designed to save you a trip to the eye doctor and a few linguistic headaches along the way.
 
-**Here's why:**
-* **Native Multilingual Support:** Starting with French, the interface is now built to speak your language.
-* **Modern UI/UX:** A clean, responsive design optimized for smartphones, tablets, and desktops.
-* **Enhanced Visuals:** New SVG iconography for different device types (shades, garage doors, awnings).
-* **Simplified Control:** Improved navigation and settings without sacrificing the power of the original code.
+While keeping the **rock-solid foundations** of the original project, I have completely redesigned the user experience to be **truly responsive**: the interface is just as pleasant to use on mobile and tablet as it is on PC, and navigation is finally crystal clear for non-English speakers.
 
 This project aims to make managing your Somfy RTS devices as beautiful as it is functional.
 
@@ -150,23 +146,40 @@ If you lose access to the web interface (due to a network misconfiguration or fo
 
 ## 📸 Screenshots
 
+### 📱 Mobile View (Dark Mode)
 <p align="center">
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile03.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile01.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile02.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile03.png?raw=true" width="16%" /> 
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile00.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile01.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile02.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark-mobile03.png?raw=true" width="23%" />
 </p>
 
+### 💻 Desktop View (Dark Mode)
 <p align="center">
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair00.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair02.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair03.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark00.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark02.png?raw=true" width="16%" />
-   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark03.png?raw=true" width="16%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark00.png?raw=true" width="80%" /><br><br>
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark02.png?raw=true" width="80%" /><br><br>
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/dark03.png?raw=true" width="80%" />
 </p>
+
+<br>
+
+<details>
+<summary><b>✨ Click here to see Light Mode versions</b></summary>
+  
+### 📱 Mobile View 
+<p align="center">
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile00.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile01.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile02.png?raw=true" width="23%" />
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair-mobile03.png?raw=true" width="23%" />
+</p>
+### 💻 Desktop View  
+<p align="center">
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair00.png?raw=true" width="80%" /><br><br>
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair02.png?raw=true" width="80%" /><br><br>
+  <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/clair03.png?raw=true" width="80%" />
+</p>
+</details>
     
 ---
 
@@ -195,7 +208,21 @@ Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **uni
 🛒 **Disponible sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)**
 
 > [!IMPORTANT]
-> **Note sur le Firmware :** Tant que mon interface est en phase de développement, les boîtiers seront livrés avec la version '2.4.8'.  Vous pourrez installer la nouvelle version depuis l'interface dès qu'elle sera finalisée !
+> **Note sur le Firmware & Configuration**
+>
+> Les boîtiers sont livrés **prêts à l'emploi** avec la version **v2.4.8**.
+> Pour vous faciliter l'installation, le firmware a été légèrement pré-configuré : fuseau horaire (Paris), GPIO adaptés au boîtier et radio activée. Chaque exemplaire est testé individuellement avant l'envoi.
+
+### 🚀 Passage à la v2.5.0
+
+Une mise à jour vers la **v2.5.0** vous sera proposée. Elle apporte une interface plus moderne et des fonctionnalités enrichies. Vous restez libre de l'installer ou non.
+
+**Faut-il mettre à jour ?**
+
+* **OUI :** Si vous souhaitez profiter des dernières options et de la nouvelle interface visuelle.
+* **NON :** Si votre configuration actuelle vous donne entière satisfaction. Si vous utilisez principalement **Home Assistant**, par exemple, l'interface web est secondaire : la v2.4.8 reste parfaitement fonctionnelle et pertinente pour cet usage.
+  
+<br><br>
 
 <p align="center">
   <img src="https://github.com/xkain/ESPSomfy-RTS/blob/main/images/boncoin02.jpg?raw=true" width="33%" />
