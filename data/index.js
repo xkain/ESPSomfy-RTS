@@ -5877,9 +5877,9 @@ class Firmware {
                 }
                 return true;
             };
-
             while (ctx.next());
-            ui.infoMessage(ctx.html);
+            let modalDiv = ui.infoMessage(ctx.html);
+            modalDiv.classList.add('release-notes-modal');
         }
     }
     updateFirmware() {

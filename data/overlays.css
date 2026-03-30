@@ -265,7 +265,19 @@ div.wait-overlay > .lds-roller {
     max-width: 550px;
     text-align: center;
     gap: 20px;
+
 }
+.release-notes-modal .message-content {
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+.release-notes-modal .info-text {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
 .overlay-content {
     max-width: 600px;
     gap: 20px;
