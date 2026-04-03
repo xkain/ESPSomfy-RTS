@@ -16,7 +16,7 @@
 #include "Network.h"
 
 
-
+#include <WiFiClientSecure.h>
 
 extern ConfigSettings settings;
 extern SSDPClass SSDP;
@@ -269,9 +269,16 @@ void Web::handleStreamFile(WebServer &server, const char *filename, const char *
     return;
   }
   webServer.sendCORSHeaders(server);
+
   if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
   esp_task_wdt_reset();
   // Load the index html page from the data directory.
+  // --- LE MOUCHARD DE MÉMOIRE ---
+  WiFiClient clientDetect = server.client();
+  //Serial.printf("\n[DEBUG] Requête de l'IP: %s | Fichier: %s\n", clientDetect.remoteIP().toString().c_str(), filename);
+  //Serial.printf("[DEBUG] RAM Avant: Free:%d | MaxBlock:%d\n", ESP.getFreeHeap(), ESP.getMaxAllocHeap());
+  // ------------------------------
+
   Serial.print("Loading file ");
   Serial.println(filename);
   File file = LittleFS.open(filename, "r");
@@ -279,11 +286,13 @@ void Web::handleStreamFile(WebServer &server, const char *filename, const char *
     Serial.print("Error opening");
     Serial.println(filename);
     server.send(500, _encoding_text, "Error opening file");
+    return;
   }
-  esp_task_wdt_delete(NULL);
+  esp_task_wdt_reset();
   server.streamFile(file, encoding);
   file.close();
-  esp_task_wdt_add(NULL);
+  server.client().stop();
+  //Serial.printf("[DEBUG] RAM Après: Free:%d | MaxBlock:%d\n", ESP.getFreeHeap(), ESP.getMaxAllocHeap());
   esp_task_wdt_reset();
 }
 void Web::handleController(WebServer &server) {
@@ -369,6 +378,7 @@ void Web::handleGetRepeaters(WebServer &server) {
       somfy.toJSONRepeaters(resp);
       resp.endArray();
       resp.endResponse();
+      server.client().stop();
     }
     else server.send(404, _encoding_text, _response_404);
 }
@@ -383,6 +393,7 @@ void Web::handleGetRooms(WebServer &server) {
       somfy.toJSONRooms(resp);
       resp.endArray();
       resp.endResponse();
+      server.client().stop();
     }
     else server.send(404, _encoding_text, _response_404);
 }
@@ -397,6 +408,7 @@ void Web::handleGetShades(WebServer &server) {
       somfy.toJSONShades(resp);
       resp.endArray();
       resp.endResponse();
+      server.client().stop();
     }
     else server.send(404, _encoding_text, _response_404);
 }
@@ -411,6 +423,7 @@ void Web::handleGetGroups(WebServer &server) {
       somfy.toJSONGroups(resp);
       resp.endArray();
       resp.endResponse();
+      server.client().stop();
     }
     else server.send(404, _encoding_text, _response_404);
 }
@@ -898,6 +911,7 @@ void Web::handleDiscovery(WebServer &server) {
     resp.endArray();
     resp.endObject();
     resp.endResponse();
+    server.client().stop();
     net.needsBroadcast = true;
   }
   else
@@ -1052,7 +1066,8 @@ void Web::handleDownloadFirmware(WebServer &server) {
   if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
   GitRepo repo;
   GitRelease *rel = nullptr;
-  int8_t err = repo.getReleases();
+  WiFiClientSecure sclient;
+  int16_t err = repo.getReleases(sclient);
   Serial.println("downloadFirmware called...");
   if(err == 0) {
     if(server.hasArg("ver")) {
@@ -1177,8 +1192,16 @@ void Web::begin() {
   server.on("/getReleases", []() {
     webServer.sendCORSHeaders(server);
     if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
+
     GitRepo repo;
-    repo.getReleases();
+    {
+    // --- FIX HEAP : Création du client TLS sécurisé ---
+    WiFiClientSecure sclient;
+    sclient.setInsecure(); // GitHub nécessite HTTPS mais on ignore la vérif certificat
+    repo.getReleases(sclient); // On passe le client ici
+    }
+    // --------------------------------------------------
+
     git.setCurrentRelease(repo);
     JsonResponse resp;
     resp.beginResponse(&server, g_content, sizeof(g_content));
@@ -1186,6 +1209,7 @@ void Web::begin() {
     repo.toJSON(resp);
     resp.endObject();
     resp.endResponse();
+    server.client().stop();
   });
   server.on("/downloadFirmware", []() { webServer.handleDownloadFirmware(server); });
   server.on("/cancelFirmware", []() {

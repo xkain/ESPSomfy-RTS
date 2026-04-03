@@ -9,7 +9,7 @@
 #include "Somfy.h"
 #include "MQTT.h"
 #include "GitOTA.h"
-#include "HardReset.h"
+#include "Recovery.h"
 
 ConfigSettings settings;
 Web webServer;
@@ -29,20 +29,22 @@ void setup() {
   Serial.begin(115200);
   Serial.println();
   Serial.println("Startup/Boot....");
+  handlePowerCycleReset();
   Serial.println("Mounting File System...");
   if(LittleFS.begin()) Serial.println("File system mounted successfully");
   else Serial.println("Error mounting file system");
-  handlePowerCycleReset();
+  if(_pendingFactory) performFactoryReset();
   settings.begin();
+  if(_pendingNetSecuRecovery) resetAccessAndNetworkConfig();
   if(WiFi.status() == WL_CONNECTED) WiFi.disconnect(true);
   delay(10);
   Serial.println();
   webServer.startup();
   webServer.begin();
   delay(1000);
-  net.setup();  
+  net.setup();
   somfy.begin();
-  esp_task_wdt_init(12, true); //enable panic so ESP32 restarts
+  esp_task_wdt_init(15, true); //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL); //add current thread to WDT watch
 
 }
@@ -59,7 +61,7 @@ void loop() {
     return;
   }
   uint32_t timing = millis();
-  
+
   net.loop();
   if(millis() - timing > 100) Serial.printf("Timing Net: %ldms\n", millis() - timing);
   timing = millis();
