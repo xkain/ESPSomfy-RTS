@@ -5503,7 +5503,7 @@ class Firmware {
             chkNotes.onchange = () => {
                 const ok = chkNotes.checked;
                 btnUpdate.disabled = !ok;
-                btnUpdate.style.background = ok ? "var(--accent-color)" : "#ccc";
+                btnUpdate.style.backgroundColor = ok ? "var(--accent-color)" : "#ccc";
                 btnUpdate.style.cursor = ok ? "pointer" : "not-allowed";
             };
             div.querySelector('#btnClose').onclick = () => closeOverlay(div);
