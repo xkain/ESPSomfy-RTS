@@ -580,6 +580,7 @@ div.wifiSignal {
 }
 .chooseWifiEth {
     margin:0;
+    transition: background-color 0.3s ease, border 0.3s ease;
 }
 .chooseWifiEth:hover {
     background-color: color-mix(in srgb, var(--accent-color) 50%, var(--unibloc-color));

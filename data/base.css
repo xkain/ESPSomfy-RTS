@@ -195,10 +195,12 @@ form {
     border-radius: 25px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, border 0.3s ease;
 }
 .backupbRestore {
     width: inherit;
     margin: 0;
+
 }
     .backupbRestore:hover {
         background-color: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
