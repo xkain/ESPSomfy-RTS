@@ -1063,6 +1063,10 @@ display: none;
     background-color: var(--accent-color);
     border-color: var(--accent-color);
 }
+#divRadioEnableColor .switch input:checked + div::after {
+    border: solid var(--accent-color);
+    border-width: 0 2px 2px 0;
+}
 .gpioRadio-container {
     display: flex;
     flex-wrap: wrap;
