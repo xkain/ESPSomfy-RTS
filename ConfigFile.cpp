@@ -7,11 +7,11 @@
 
 extern Preferences pref;
 
-#define SHADE_HDR_VER 25
+#define SHADE_HDR_VER 26
 #define SHADE_HDR_SIZE 76
 #define SHADE_REC_SIZE 276
 #define GROUP_REC_SIZE 200
-#define TRANS_REC_SIZE 82
+#define TRANS_REC_SIZE 78
 #define ROOM_REC_SIZE 29
 #define REPEATER_REC_SIZE 77
 
@@ -683,13 +683,50 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.enabled = this->readBool(false);
     cfg.proto = static_cast<radio_proto>(this->readUInt8(0));
     cfg.type = this->readUInt8(56);
-    if(this->header.transRecordSize < 82) {
+    if(this->header.transRecordSize < 78) {
       cfg.radioBoardType = 0; // Valeur par défaut pour les anciens backups
-      Serial.println("Old backup detected (v2.4.6), skipping radioBoardType");
+      Serial.println("Old backup detected (v2.4.8), skipping radioBoardType");
     } else {
       // Si la taille est de 82 ou plus, on lit le champ normalement
       cfg.radioBoardType = this->readUInt8(0);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     cfg.SCKPin = this->readUInt8(cfg.SCKPin);
     cfg.CSNPin = this->readUInt8(cfg.CSNPin);
     cfg.MOSIPin = this->readUInt8(cfg.MOSIPin);
@@ -699,7 +736,7 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
     cfg.frequency = this->readFloat(cfg.frequency);
     cfg.rxBandwidth = this->readFloat(cfg.rxBandwidth);
     cfg.deviation = this->readFloat(cfg.deviation);
-    cfg.txPower = this->readInt8(cfg.txPower);
+    cfg.txPower = this->readInt8(cfg.txPower);  
     if(this->file.position() != startPos + this->header.transRecordSize) {
       Serial.println("Reading to end of transceiver record");
       this->seekChar(CFG_REC_END);
@@ -717,12 +754,17 @@ bool ShadeConfigFile::readSettingsRecord() {
     this->readVarString(settings.hostname, sizeof(settings.hostname));
     this->readVarString(settings.NTP.ntpServer, sizeof(settings.NTP.ntpServer));
     this->readVarString(settings.NTP.posixZone, sizeof(settings.NTP.posixZone));
+    if(this->header.version >= 26) {
+      this->readVarString(settings.accentColor, sizeof(settings.accentColor));
+    } else {
+      strncpy(settings.accentColor, "#1a5fb4", sizeof(settings.accentColor));
+    }
     settings.ssdpBroadcast = this->readBool(false);
     if(this->header.version >= 20) settings.checkForUpdate = this->readBool(true);
     if(this->header.version >= 25) {
       settings.language = this->readUInt8(0);
     } else {
-      settings.language = 0; // Anglais par défaut pour les versions antérieures
+      settings.language = 0;
     }
     if(this->file.position() != startPos + this->header.settingsRecordSize) {
       Serial.println("Reading to end of settings record");
@@ -1017,6 +1059,7 @@ bool ShadeConfigFile::writeSettingsRecord() {
   this->writeVarString(settings.hostname);
   this->writeVarString(settings.NTP.ntpServer);
   this->writeVarString(settings.NTP.posixZone);
+  this->writeVarString(settings.accentColor);
   this->writeBool(settings.ssdpBroadcast);
   this->writeBool(settings.checkForUpdate);
   this->writeUInt8(settings.language,CFG_REC_END);

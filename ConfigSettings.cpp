@@ -300,9 +300,10 @@ uint16_t ConfigSettings::calcSettingsRecSize() {
     + strlen(this->hostname) + 3
     + strlen(this->NTP.ntpServer) + 3
     + strlen(this->NTP.posixZone) + 3
+    + strlen(this->accentColor) + 3
     + 6  // ssdpbroadcast
-    + 6; // updateCheck
-    + 3;  // language
+    + 6 // updateCheck
+    + 4;  // language
 }
 uint16_t ConfigSettings::calcNetRecSize() {
   return 4 // connType

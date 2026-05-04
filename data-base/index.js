@@ -1614,7 +1614,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.5.1';
+    appVersion = 'v2.6.0';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -5724,10 +5724,12 @@ class Firmware {
             prog.setAttribute('data-progress', `${pct}%`);
         };
 
-        xhr.onload = () => {
+        xhr.onload = async () => { // Ajoute async ici
             btnCancel.innerText = tr('BT_CLOSE');
             if (service === '/restore') {
-                somfy.init().then(() => closeOverlay(get('divUploadFile')));
+                // Au lieu de .then(), utilise await pour plus de sécurité
+                await somfy.init();
+                closeOverlay(get('divUploadFile'));
             }
         };
 

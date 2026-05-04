@@ -146,19 +146,30 @@ void Web::handleLang(WebServer &server) {
     webServer.sendCORSHeaders(server);
     if (server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
 
-    String filename = "/locale/en.json"; // Par défaut
+    String filename = "/locale/en.json.gz"; // Par défaut en .gz
 
-    // On définit une liste de correspondance
-    if (settings.language == 0) filename = "/locale/en.json";
-    else if (settings.language == 1) filename = "/locale/fr.json";
-    else if (settings.language == 2) filename = "/locale/de.json"; // Allemand
-    //else if (settings.language == 3) filename = "/locale/es.json"; // Espagnol
+    // On définit le fichier selon le réglage
+    if (settings.language == 0) filename = "/locale/en.json.gz";
+    else if (settings.language == 1) filename = "/locale/fr.json.gz";
+    else if (settings.language == 2) filename = "/locale/de.json.gz";
 
     if (LittleFS.exists(filename)) {
       File file = LittleFS.open(filename, "r");
-      server.streamFile(file, _encoding_json);
+
+      // --- MÉTHODE D'ENVOI MANUELLE (Identique à handleStreamFile) ---
+      server.setContentLength(file.size());
+      server.sendHeader("Content-Encoding", "gzip");
+
+      // On envoie le Type MIME JSON
+      server.send(200, "application/json", "");
+
+      // Envoi du binaire compressé
+      server.client().write(file);
+
       file.close();
     } else {
+      Serial.print("Lang file not found: ");
+      Serial.println(filename);
       server.send(404, "text/plain", "Lang file not found");
     }
 }
@@ -1175,7 +1186,7 @@ void Web::begin() {
   server.on("/setPositions", []() { webServer.handleSetPositions(server); });
   server.on("/setSensor", []() { webServer.handleSetSensor(server); });
   server.on("/upnp.xml", []() { SSDP.schema(server.client()); });
-  server.on("/", []() { webServer.handleStreamFile(server, "/index.html", _encoding_html); });
+  server.on("/", [this]() { webServer.handleStreamFile(server, "/index.html.gz", "text/html"); });
   server.on("/login", []() { webServer.handleLogin(server); });
   server.on("/loginContext", []() { webServer.handleLoginContext(server); });
   server.on("/shades.cfg", []() { webServer.handleStreamFile(server, "/shades.cfg", _encoding_text); });
@@ -1273,11 +1284,11 @@ void Web::begin() {
 
     });
 
-  server.on("/index.js", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/index.js", "text/javascript"); });
-  server.on("/base.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/base.css", "text/css"); });
-  server.on("/main.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css", "text/css"); });
-  server.on("/overlays.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/overlays.css", "text/css"); });
-  server.on("/favicon.svg", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.svg", "image/svg+xml"); });
+  server.on("/index.js", [this]() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/index.js.gz", "application/javascript"); });
+  server.on("/base.css", [this]() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/base.css.gz", "text/css"); });
+  server.on("/main.css", [this]() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css.gz", "text/css"); });
+  server.on("/overlays.css", [this]() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/overlays.css.gz", "text/css"); });
+  server.on("/favicon.svg", [this]() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.svg.gz", "image/svg+xml"); });
   server.onNotFound([]() { webServer.handleNotFound(server); });
   server.on("/controller", []() { webServer.handleController(server); });
   server.on("/rooms", []() { webServer.handleGetRooms(server); });
