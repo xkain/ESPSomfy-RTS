@@ -44,7 +44,7 @@ jobs:
 
       - name: Create LittleFS
         run: |
-          ./mklittlefs/mklittlefs --create data --size 917504 SomfyController.littlefs.bin
+          ./mklittlefs/mklittlefs --create data --size 1441792 SomfyController.littlefs.bin
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
@@ -67,6 +67,11 @@ jobs:
             chip: ESP32
             fqbn: esp32:esp32:esp32
             name: ESP32
+          - board: esp32wrover
+            addr_bootloader: 0x1000
+            chip: ESP32
+            fqbn: esp32:esp32:esp32wrover
+            name: ESP32-Wrover
           - board: lolin_c3_mini
             addr_bootloader: 0x0
             chip: ESP32-C3
@@ -127,19 +132,8 @@ jobs:
 
       - name: Build ${{ matrix.name }}
         run: |
-          # 1. Injection de la partition custom dans le core Arduino
-          echo "nvs,data,nvs,0x9000,0x5000" > custom.csv
-          echo "otadata,data,ota,0xE000,0x2000" >> custom.csv
-          echo "app0,app,ota_0,0x10000,0x180000" >> custom.csv
-          echo "app1,app,ota_1,0x190000,0x180000" >> custom.csv
-          echo "spiffs,data,spiffs,0x310000,0x0E0000" >> custom.csv
-          echo "coredump,data,coredump,0x3F0000,0x10000" >> custom.csv
-          PART_PATH=$HOME/.arduino15/packages/esp32/hardware/esp32/${{ env.ARDUINO_ESP32_VERSION }}/tools/partitions
-          cp custom.csv $PART_PATH/huge_app.csv
-
-          # 2. Compilation
           mkdir -p build
-          arduino-cli compile --clean --output-dir build --fqbn ${{ matrix.fqbn }}:DebugLevel=none,PartitionScheme=huge_app --warnings none ./SomfyController
+          arduino-cli compile --clean --output-dir build --fqbn ${{ matrix.fqbn }}:DebugLevel=none --warnings none ./SomfyController
 
       - name: ${{ matrix.name }} Image
         run: |
@@ -148,7 +142,7 @@ jobs:
             ${{ matrix.addr_bootloader }} build/SomfyController.ino.bootloader.bin \
             0x8000 build/SomfyController.ino.partitions.bin \
             0x10000 build/SomfyController.ino.bin \
-            0x310000 SomfyController.littlefs.bin
+            0x290000 SomfyController.littlefs.bin
 
       - name: Upload ${{ matrix.name }}
         uses: actions/upload-artifact@v4
