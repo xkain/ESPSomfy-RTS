@@ -1,0 +1,2091 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ESPSomfy RTS App">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script>
+    (function(){
+      const s=localStorage, t=s.getItem('themeMode'), l=s.getItem('selectedLang');
+      let m=t==='1'?'dark':t==='2'?'light':(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+      document.documentElement.setAttribute('data-theme',m);
+      if(l)document.documentElement.lang=l;
+    })();
+    </script>
+    <link rel="stylesheet" href="base.css?v=2.5.3c">
+    <link rel="stylesheet" href="main.css?v=2.5.3c">
+    <link rel="stylesheet" href="overlays.css?v=2.5.3c">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <script src="index.js?v=2.5.3c"></script>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <svg width="100" height="100"><use href=#svg-logo></use></svg>
+            <span class="site-title">ESPSomfy-RTS</span>
+        </div>
+        <div class="top-bar-right">
+            <span class="status-item">
+                <span tr="SUBTAB_CONNECTION">Connexion</span>
+                <div class="status-options">
+                    <span class="opt-badge" data-conn="wifi">WIFI</span>
+                    <span class="opt-badge" data-conn="lan">LAN</span>
+                    <span class="opt-badge" data-conn="poe">POE</span>
+                </div>
+            </span>
+            <div class="uptime-container">
+                <div class="uptime-label" tr="TOPBAR_Uptime">Durée de fonctionnement:</div>
+                <div class="uptime-values">
+                    <div>
+                        <div tr="TOPBAR_DEVICE">Appareil</div>
+                        <span class="uptime-display">--j --h --m</span>
+                    </div>
+                    <div>
+                        <div tr="CONNECTION_WIFI_NETWORK">Réseau</div>
+                        <span class="net-display">--j --h --m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a class="nav-item" data-grpid="divHomePnl">
+                <svg class="nav-icon"><use href="#svg-tabHome"></use></svg>
+                <span tr="TAB_DASHBOARD">Tableau de bord</span>
+            </a>
+            <div class="nav-group">
+                <a class="nav-item has-submenu" data-grpid="divSystemSettings">
+                    <svg class="nav-icon"><use href="#svg-tabSystem"></use></svg>
+                    <span tr="TAB_SYSTEM">Système</span>
+                    <svg class="arrow-icon"><use href="#svg-arrowDown"></use></svg>
+                </a>
+                <div class="submenu" style="display:none;">
+                    <a class="sub-nav-item selected" data-grpid="divSystemOptions" tr="SUB_OPTION">Options</a>
+                    <a class="sub-nav-item" data-grpid="divSecurityOptions" tr="SUB_SECURITY">Sécurité</a>
+                    <a class="sub-nav-item" data-grpid="divFirmware" tr="FIRMWARE">Firmware</a>
+                </div>
+            </div>
+            <div class="nav-group">
+                <a class="nav-item has-submenu" data-grpid="divNetworkSettings">
+                    <svg class="nav-icon"><use href="#svg-tabReseau"></use></svg>
+                    <span tr="TAB_NETWORK">Réseau</span>
+                    <svg class="arrow-icon"><use href="#svg-arrowDown"></use></svg>
+                </a>
+                <div class="submenu" style="display:none;">
+                    <a class="sub-nav-item selected" data-grpid="divNetAdapter" tr="SUBTAB_CONNECTION">Connexion</a>
+                    <a class="sub-nav-item" data-grpid="divDHCP" tr="SUBTAB_DHCP_STATIC">DHCP/IP Fixe</a>
+                    <a class="sub-nav-item" data-grpid="divMQTT" tr="MQTT">MQTT</a>
+                </div>
+            </div>
+            <div class="nav-group">
+                <a class="nav-item has-submenu" data-grpid="divSomfySettings">
+                    <svg class="nav-icon"><use href="#svg-tabSomfy"></use></svg>
+                    <span tr="TAB_SOMFY">Somfy</span>
+                    <svg class="arrow-icon"><use href="#svg-arrowDown"></use></svg>
+                </a>
+                <div class="submenu" style="display:none;">
+                    <a class="sub-nav-item selected" data-grpid="divSomfyRooms" tr="SUBTAB_ROOMS">Pièces</a>
+                    <a class="sub-nav-item" data-grpid="divSomfyMotors" tr="SUBTAB_DEVICES">Volets</a>
+                    <a class="sub-nav-item" data-grpid="divSomfyGroups" tr="SUBTAB_GROUPS">Groupes</a>
+                    <a class="sub-nav-item" data-grpid="divRepeater" tr="SUBTAB_REPEATER">Répéteur</a>
+                    <a class="sub-nav-item" data-grpid="divVirtualRemote" tr="SUBTAB_VIRTUAL_REMOTE_S">Télécommande</a>
+                </div>
+            </div>
+            <div class="nav-group">
+                <a class="nav-item has-submenu" data-grpid="divRadioSettings">
+                    <svg class="nav-icon"><use href="#svg-tabRadio"></use></svg>
+                    <span tr="TAB_RADIO">Radio</span>
+                    <span id="barsideRadioDisable" style="display: none;" tr="TAB_RADIO_DISABLED">désactivé</span>
+                    <svg class="arrow-icon"><use href="#svg-arrowDown"></use></svg>
+                </a>
+                <div class="submenu" style="display:none;">
+                    <a class="sub-nav-item selected" data-grpid="divTransceiverSettings" tr="TAB_RADIO">Radio</a>
+                    <a class="sub-nav-item" data-grpid="divFrameLog" tr="SUBTAB_LOGS">Journaux</a>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="divSidebarUpdate" line class="firmware-message fw-sidebar-button" style="display:none;"></button>
+            <button id="btnReboot" type="button" line onclick="general.rebootDevice();" tr="BT_REBOOT">Redémarrer</button>
+        </div>
+    </aside>
+    <div id="divContainer" class="container" data-auth="false">
+        <div id="divAuthenticated" style="display:none;">
+            <div id="divFirmwareUpdate" class="firmware-message fw-mobile-banner" style="display:none;"></div>
+            <div class="header">
+                <div class="header-left">
+                    <div id="showLogoHeader" class="headerIdentity" >
+                        <svg width="100" height="100"><use href="#svg-logo"></use></svg>
+                        <div class="header-Label">
+                            <span>ESPSomfy-RTS</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="btnConfig" class="btnGearHome animScale" onclick="ui.toggleConfig();">
+                        <svg class="gearHome"><use href=#svg-tabSettings class="icon-gear"></use></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="divConfigPnl" style="display:none;">
+                <div class="tab-container">
+                    <span class="selected animScale" data-grpid="divSystemSettings" tr="TAB_SYSTEM" title="">
+                        <svg class="tab-icon"><use href=#svg-tabSystem></use></svg>
+                    </span>
+                    <span class="animScale" data-grpid="divNetworkSettings" tr="TAB_NETWORK" title="">
+                        <svg class="tab-icon"><use href=#svg-tabReseau ></use></svg>
+                    </span>
+                    <span class="animScale" data-grpid="divSomfySettings" tr="TAB_SOMFY" title="">
+                        <svg class="tab-icon"><use href=#svg-tabSomfy></use></svg>
+                    </span>
+                    <span class="animScale" data-grpid="divRadioSettings" tr="TAB_RADIO" title="">
+                        <svg class="tab-icon"><use href=#svg-tabRadio></use></svg>
+                    </span>
+                </div>
+                <div id="divSystemSettings">
+                    <div class="subtab-container"><span class="selected" data-grpid="divSystemOptions" tr="SUB_OPTION"></span><span data-grpid="divSecurityOptions" tr="SUB_SECURITY"></span><span data-grpid="divFirmware" tr="FIRMWARE"></span></div>
+                    <div id="divSystemOptions" class="subtab-content">
+                        <div id="divBtnLBC" class="divButton">
+                            <button  onclick="general.showLBCOverlay()" class="buttonUpdate" type="button">
+                                <svg class="svgLbc"><use xlink:href="#svg-leboncoin"></use></svg>
+                                <div class="devButtonUpdate">
+                                    <div>Boîtier Leboncoin</div>
+                                    <div class="uniStatus">Préréglages automatiques</div>
+                                </div>
+                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                            </button>
+                        </div>
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" for="fldHostname" tr="GENERAL_HOSTNAME"></label>
+                                <input id="fldHostname" class="inputAndSelect" name="hostname" type="text" data-bind="general.hostname" length=32 tr="GENERAL_PH_HOSTNAME" placeholder="Enter un Nom d'hôte">
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="selTimeZone" tr="GENERAL_TIMEZONE"></label>
+                                <select id="selTimeZone" class="inputAndSelect" name="timeZone" data-bind="general.posixZone"></select>
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="langSelect" tr="GENERAL_LANGUAGE"></label>
+                                <select id="langSelect" class="inputAndSelect" onchange="general.onLanguageChanged(this.value)">
+                                    <option value="en" tr="GENERAL_OPT_EN"></option>
+                                    <option value="fr" tr="GENERAL_OPT_FR"></option>
+                                    <option value="de" tr="GENERAL_OPT_DE"></option>
+                                </select>
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="fldNtptimeserver" tr="GENERAL_NTP_SERVER"></label>
+                                <input id="fldNtptimesever" class="inputAndSelect" name="ntptimeserver" type="text" length=32 data-bind="general.ntpServer" tr="GENERAL_PH_NTP_SERVER" placeholder="Entrer votre Serveur NTP">
+                            </div>
+                        </div>
+                        <div class="unibloc">
+                            <label class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="GENERAL_UPNP"></div>
+                                    <div class="uniStatus" tr="GENERAL_UPNP_DESC"></div>
+                                </div>
+                                <div class="uniRight">
+                                    <span class="switch">
+                                        <input id="cbSsdpBroadcast" name="ssdpBroadcast" type="checkbox" data-bind="general.ssdpBroadcast">
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                            <hr>
+                            <label class="uniRow" for="cbCheckForUpdate">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="GENERAL_UPDATES"></div>
+                                    <div class="uniStatus" tr="GENERAL_UPDATES_DESC"></div>
+                                </div>
+                                <div class="uniRight">
+                                    <span class="switch">
+                                        <input id="cbCheckForUpdate" type="checkbox" data-bind="general.checkForUpdate">
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" tr="GENERAL_DISPLAY_MODE"></label>
+                                <select id="selThemeMode" class="inputAndSelect" data-bind="general.type" onchange="general.onModeThemeChanged();" data-datatype="int">
+                                    <option value="0" selected tr="GENERAL_OPT_THEME_AUTO"></option>
+                                    <option value="1" tr="GENERAL_OPT_THEME_DARK"></option>
+                                    <option value="2" tr="GENERAL_OPT_THEME_LIGHT"></option>
+                                </select>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="GENERAL_COLOR"></div>
+                                    <div class="uniStatus" tr="GENERAL_COLOR_DESC"></div>
+                                </div>
+                                <label class="uniRight">
+                                    <input id="fldAccentColor" class="chooseAccentColor" name="accentColor" type="color" data-bind="general.accentColor"/>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnReboot" type="button" line onclick="general.rebootDevice();" tr="BT_REBOOT"></button>
+                            <button id="btnSaveGeneral" type="button" tr="BT_SAVE" onclick="general.setGeneral();" ></button>
+                        </div>
+                    </div>
+                    <div id="divSecurityOptions" class="subtab-content" style="display:none;">
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" for="fldPinEntry" tr="SECURITY_TYPE"></label>
+                                <select class="inputAndSelect" data-bind="security.type" onchange="general.onSecurityTypeChanged();" data-datatype="int">
+                                    <option value="0" selected tr="NONE"></option>
+                                    <option value="1" tr="SECURITY_PIN_CODE"></option>
+                                    <option value="2" tr="SECURITY_PASSWORD"></option>
+                                </select>
+                            </div>
+                            <div id="divPermissions" style="display:none;">
+                                <hr>
+                                <label class="uniRow">
+                                    <div class="uniText">
+                                        <div class="uniLabel" tr="SECURITY_SECURE_CONFIG_ONLY"></div>
+                                        <div class="uniStatus" tr="SECURITY_SECURE_CONFIG_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <span class="switch">
+                                            <input id="cbSecureConfigOnly" name="hardwired" type="checkbox" data-bind="security.permissions.configOnly"/>
+                                            <div></div>
+                                        </span>
+                                    </div>
+                                </label>
+                           </div>
+                        </div>
+                        <div id="divPinSecurity" style="display:none;">
+                            <div class="blocPin-digit">
+                                <div id="fldPinEntry" onkeydown="ui.pinKeyPressed(event);">
+                                    <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="security.pin.d0" onfocus="ui.pinDigitFocus(event);">
+                                    <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="security.pin.d1" onfocus="ui.pinDigitFocus(event);">
+                                    <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="security.pin.d2" onfocus="ui.pinDigitFocus(event);">
+                                    <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="security.pin.d3" onfocus="ui.pinDigitFocus(event);">
+                                </div>
+                                <label for="fldPinEntry" tr="SECURITY_ENTER_PIN" ></label>
+                            </div>
+                        </div>
+                        <div id="divPasswordSecurity" style="display:none;">
+                            <div class="unibloc">
+                                <div>
+                                    <label class="label" for="fldUsername" tr="SECURITY_USERNAME"></label>
+                                    <input id="fldUsername" class="inputAndSelect" name="username" type="text" data-bind="security.username" length=32 tr="SECURITY_USERNAME_PLH" tr="SECURITY_USERNAME_PLH" placeholder="Entrer un nom d'utilisateur">
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldPassword" tr="SECURITY_PASSWORD"></label>
+                                    <input id="fldPassword" class="inputAndSelect" name="password" type="password" data-bind="security.password" length=32 tr="SECURITY_PASSWORD_PLH" tr="SECURITY_PASSWORD_PLH" placeholder="Entrer un mot de passe">
+                                    <div class="password-eye" onclick="security.toggleFieldPassword('fldPassword', this)">
+                                        <svg class="pwd-icon pwd-iconeye"><use href="#svg-eyeOff"></use></svg>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldRenterPassword" tr="SECURITY_CONFIRM_PASSWORD"></label>
+                                    <input id="fldRenterPassword" class="inputAndSelect" name="password" type="password" data-bind="security.repeatpassword" length=32 tr="SECURITY_CONFIRM_PASSWORD_PLH" placeholder="Vous devez Confirmer le Mot de Passe">
+                                    <div class="password-eye" onclick="security.toggleFieldPassword('fldRenterPassword', this)">
+                                        <svg class="pwd-icon pwd-iconeye"><use href="#svg-eyeOff"></use></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnLogin" type="button"  value="Submit" onclick="general.saveSecurity();" tr="BT_SAVE"></button>
+                        </div>
+                    </div>
+                    <div id="divFirmware" class="subtab-content" style="display:none;">
+                        <div class="unibloc">
+                            <div class="uniRow">
+                                <div class="uniText"><div class="uniLabel" tr="FW_CHIP"></div></div>
+                                <span class="uniValue">ESP32<span id="spanHwVersion"></span></span>
+                            </div>
+                            <div class="uniRow">
+                                <div class="uniText"><div class="uniLabel" tr="FW_CPU"></div></div>
+                                <span id="info-cpu">---</span>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_RAM"></div>
+                                    <div class="uniStatus">
+                                        <span id="spanFreeMemory" class="status-detail">--</span><span tr="FW_AVAILABLE"></span>
+                                    </div>
+                                </div>
+                                <label class="uniColumn">
+                                    <div class="mem-row">
+                                        <span class="minMax550" tr="FW_MIN"></span><span class="minMaxFull" tr="FW_MIN_FULL"></span>
+                                        <span class="status-detail" id="spanMinMemory">--</span><span class="status-detail" tr="FW_UNIT_KO"></span>
+                                    </div>
+                                    <div class="mem-row" title="Plus gros bloc contigu disponible">
+                                        <span class="minMax550" tr="FW_MAX"></span><span class="minMaxFull" tr="FW_MAX_FULL"></span>
+                                        <span class="status-detail" id="spanMaxMemory">--</span><span class="status-detail" tr="FW_UNIT_KO"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_STORAGE"></div>
+                                    <div class="uniStatus">
+                                        <span id="info-flash">--</span>
+                                    </div>
+                                </div>
+                                <label class="uniColumn">
+                                    <div class="mem-row">
+                                        <span id="info-fs-status" class="status-detail" style="font-weight: bold;">--</span>
+                                    </div>
+                                    <div class="mem-row">
+                                        <span id="info-fs-pct" class="status-detail">--</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <hr class="show780">
+                            <div class="uniRow show780">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="TOPBAR_Uptime"></div>
+                                </div>
+                                <label class="uniColumn">
+                                    <div class="mem-row">
+                                        <span tr="TOPBAR_DEVICE"></span>
+                                        <span class="uptime-display status-detail">--j --h --m</span>
+                                    </div>
+                                    <div class="mem-row">
+                                        <span tr="CONNECTION_WIFI_NETWORK"></span>
+                                        <span class="net-display status-detail">--j --h --m</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="divSystemStatus" class="success">
+                            <svg><use id="useStatusIcon" href=#svg-info></use></svg>
+                            <div>
+                                <b id="statusTitle" tr="FW_UPDATE_UPTODATE"></b>
+                                <span id="statusDesc" tr="FW_UPDATE_ACTION_DESC"></span>
+                            </div>
+                        </div>
+                        <div class="firmwarblocupdate">
+                            <button id="btnUpdateGithub" onclick="firmware.updateGithub();" class="buttonUpdate" type="button">
+                                <svg><use xlink:href="#svg-github"></use></svg>
+                                <div class="devButtonUpdate">
+                                    <div tr="FW_UPDATE_GIT"></div>
+                                    <div class="uniStatus" tr="FW_UPDATE_GIT_DESC"></div>
+                                </div>
+                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                            </button>
+                            <hr>
+                            <button id="btnUpdateFirmware" onclick="firmware.updateManual();" class="buttonUpdate" type="button">
+                                <svg><use href=#svg-update></use></svg>
+                                <div class="devButtonUpdate">
+                                    <div tr="FW_UPDATE_FIRM"></div>
+                                    <div class="uniStatus" tr="FW_UPDATE_FIRM_DESC"></div>
+                                </div>
+                                <span class="version-badge" id="spanFwVersion">v-.--</span>
+                            </button>
+                            <hr>
+                            <button id="btnUpdateApplication" type="button" onclick="firmware.updateManual(true);" class="buttonUpdate">
+                                <svg><use href=#svg-update></use></svg>
+                                <div class="devButtonUpdate">
+                                    <div tr="FW_UPDATE_APP"></div>
+                                    <div class="uniStatus" tr="FW_UPDATE_APP_DESC"></div>
+                                </div>
+                                <span class="version-badge" id="spanAppVersion">v-.--</span>
+                            </button>
+                            <hr>
+                            <button id="btnReloadApplication" type="button" onclick="general.reload();" class="buttonUpdate">
+                                <svg><use href=#svg-clear></use></svg>
+                                <span class="buttonUpdateCache" tr="FW_REFRESH_CACHE"></span>
+                            </button>
+                        </div>
+                        <div class="unibloc credits-list">
+                            <label class="uniRow" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/wiki', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_CREDITS_DOC"></div>
+                                    <div class="uniStatus" tr="FW_CREDITS_DOC_DESC"></div>
+                                </div>
+                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                            </label>
+                            <hr>
+                            <label class="uniRow" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/issues/new?template=BUG-REPORT.yaml', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_CREDITS_BUG"></div>
+                                    <div class="uniStatus" tr="FW_CREDITS_BUG_DESC"></div>
+                                </div>
+                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                            </label>
+                        </div>
+                        <div class="button-container-row">
+                            <div class="divButton">
+                                <button id="btnBackup" onclick="firmware.backup();" class="buttonUpdate" type="button">
+                                    <div class="devButtonUpdate">
+                                        <div tr="FW_BACKUP"></div>
+                                        <div class="uniStatus" tr="FW_BACKUP_DESC"></div>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="divButton">
+                                <button id="btnRestore" type="button" onclick="firmware.restore();" class="buttonUpdate">
+                                    <div class="devButtonUpdate">
+                                        <div tr="FW_RESTORE"></div>
+                                        <div class="uniStatus" tr="FW_RESTORE_DESC"></div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="unibloc">
+                            <label class="uniRow" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_CREDITS_MAIN"></div>
+                                    <div class="uniStatus" tr="FW_CREDITS_MAIN_DESC"></div>
+                                </div>
+                                <span>xkain</span>
+                            </label>
+                            <hr>
+                            <label class="uniRow special-credit" onclick="window.open('https://github.com/rstrouse/ESPSomfy-RTS', '_blank')">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="FW_CREDITS_SPC"></div>
+                                    <div class="uniStatus" tr="FW_CREDITS_SPC_DESC"></div>
+                                </div>
+                                <span>rstrouse</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="divNetworkSettings" style="display:none;">
+                    <div class="subtab-container"><span class="selected" data-grpid="divNetAdapter" tr="SUBTAB_CONNECTION"></span><span data-grpid="divDHCP" tr="SUBTAB_DHCP_STATIC" ></span><span data-grpid="divMQTT" tr="MQTT" ></span></div>
+                    <div id="divNetAdapter" class="subtab-content">
+                        <div id="divWiFiStrength" class="unibloc">
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel"><span tr="CONNECTION_WIFI_NETWORK"></span><span id="spanNetworkSSID" class="wifi-value">-------------</span></div>
+                                    <div class="uniLabel"><span tr="CONNECTION_WIFI_CHANNEL"></span><span id="spanNetworkChannel" class="wifi-value">--</span></div>
+                                </div>
+                                <div class="wifi-right">
+                                    <span id="spanNetworkStrength" class="wifi-value">---</span><span tr="DBM"> dBm</span>
+                                    <div id="divNetworkStrength">
+                                        <svg width="24" height="24">
+                                            <use id="wifi_0" href=#svg-wifi-0 fill="#ccc" />
+                                            <use id="wifi_1" href=#svg-wifi-1 fill="#ccc" />
+                                            <use id="wifi_2" href=#svg-wifi-2 fill="#ccc" />
+                                            <use id="wifi_3" href=#svg-wifi-3 fill="#ccc" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="CONNECTION_MAC_ADRESSE"></div>
+                                </div>
+                                <span class="spanMacAddress">--:--:--:--:--:--</span>
+                            </div>
+                        </div>
+                        <div id="divEthernetStatus" class="unibloc" style="display:none;">
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel"><span tr="CONNECTION_ETH_STATUS"></span></span><span id="spanEthernetStatus" class="wifi-value">-------------</span></div>
+                                    <div class="uniLabel"><span tr="CONNECTION_ETH_SPEED"></span></span><span id="spanEthernetSpeed" class="wifi-value">--</span></div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="CONNECTION_MAC_ADRESSE"></div>
+                                </div>
+                                <span class="spanMacAddress">--:--:--:--:--:--</span>
+                            </div>
+                        </div>
+                        <div class="button-container-row">
+                            <div class="unibloc chooseWifiEth">
+                                <label for="radConnWifi" class="unibutton">
+                                    <div class="devButtonUpdate uniText">
+                                        <div tr="CONNECTION_WIFI"></div>
+                                        <div class="uniStatus" tr="CONNECTION_WIFI_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <input type="radio" id="radConnWifi" name="connTypeGroup" onclick="wifi.setConnectionType(false)">
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="unibloc chooseWifiEth">
+                                <label for="radConnEthernet" class="unibutton">
+                                    <div class="devButtonUpdate uniText">
+                                        <div tr="CONNECTION_ETHERNET"></div>
+                                        <div class="uniStatus" tr="CONNECTION_ETHERNET_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <input type="radio" id="radConnEthernet" name="connTypeGroup" onclick="wifi.setConnectionType(true)">
+                                    </div>
+                                </label>
+                            </div>
+                            <input id="cbHardwired" name="hardwired" type="checkbox" data-bind="ethernet.hardwired" style="display:none;">
+                        </div>
+                        <div class="unibloc">
+                            <div id="divHiddenSSID">
+                                <label class="uniRow">
+                                    <div class="uniText">
+                                        <div class="uniLabel" tr="CONNECTION_HIDDEN_SSID"></div>
+                                        <div class="uniStatus" tr="CONNECTION_HIDDEN_SSID_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <span class="switch">
+                                            <input id="cbHiddenSSID" type="checkbox" data-bind="wifi.hidden" onclick="wifi.hiddenSSIDClicked();">
+                                            <div></div>
+                                        </span>
+                                    </div>
+                                </label>
+                                <hr>
+                            </div>
+                            <div id="divRoaming">
+                                <label class="uniRow">
+                                    <div class="uniText">
+                                        <div class="uniLabel" tr="CONNECTION_ROAMING"></div>
+                                        <div class="uniStatus" tr="CONNECTION_ROAMING_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <span class="switch">
+                                            <input id="cbRoaming" type="checkbox" name="roaming" data-bind="wifi.roaming" onclick="wifi.hiddenSSIDClicked();">
+                                            <div></div>
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="divFallbackWireless">
+                                <label class="uniRow">
+                                    <div class="uniText">
+                                        <div class="uniLabel" tr="CONNECTION_WIFI_FALLBACK"></div>
+                                        <div class="uniStatus" tr="CONNECTION_WIFI_FALLBACK_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <span class="switch">
+                                            <input id="cbFallbackWireless" name="fallbackwireless" type="checkbox" data-bind="ethernet.wirelessFallback">
+                                            <div></div>
+                                        </span>
+                                    </div>
+                                </label>
+                                <hr>
+                            </div>
+                            <div id="divTypeCardMode">
+                                <div>
+                                    <label class="label" for="selETHBoardType" tr="CONNECTION_ETH_BOARD_TYPE"></label>
+                                    <select id="selETHBoardType" class="inputAndSelect" name="ethBoardType" placeholder="Type de carte" data-datatype="int" data-bind="ethernet.boardType" onchange="wifi.onETHBoardTypeChanged(this);"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divWiFiMode">
+                            <form method="post" action="/scan">
+                                <div id="divAps" class="unibloc" data-lastloaded="0"></div>
+                                <div class="button-container-col"><button id="btnScanAPs" line type="button" onclick="wifi.loadAPs();" tr="BT_SCAN_WIFI" ></button></div>
+                                <div class="unibloc">
+                                    <div>
+                                        <label class="label" for="fldSsid" tr="CONNECTION_WIFI_SSID"></label>
+                                        <input id="fldSsid" class="inputAndSelect" name="ssid" type="text" data-bind="wifi.ssid" length=32 tr="CONNECTION_WIFI_ENTER_SSID" placeholder="Entrer votre SSID">
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="fldPassphrase" tr="SECURITY_PASSWORD"></label>
+                                        <div class="LoginPassword-input password-container">
+                                            <input id="fldPassphrase" class="inputAndSelect" name="passphrase" type="password" data-bind="wifi.passphrase" length=32 tr="SECURITY_PASSWORD_PLH" placeholder="Entrer votre Mot de passe">
+                                            <div class="password-eye" onclick="security.toggleFieldPassword('fldPassphrase', this)">
+                                                <svg class="pwd-icon pwd-iconeye"><use id="wifiEyeIcon" href="#svg-eyeOff"></use></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="information">
+                            <svg><use id="useStatusIcon" href=#svg-info></use></svg>
+                            <div class="msgHotspot">
+                                <b tr="MSG_INFO"></b>
+                                <span>
+                                    <span tr="CONNECTION_AFTER_HOTSPOT_1"></span><span class="instructionsTxt-badge">http://192.168.4.1 </span><span tr="CONNECTION_AFTER_HOTSPOT_2"></span>
+                                </span>
+                                <span>
+                                    <span tr="CONNECTION_ACCESS_METHODS_1" ></span><span class="instructionsTxt-badge">http://espsomfyrts.local </span><span tr="CONNECTION_ACCESS_METHODS_2"></span><span class="instructionsTxt-badge">http://192.168.1.XX</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div id="divEthernetMode" style="display:none;">
+                            <div id="divETHSettings">
+                                <div class="unibloc">
+                                    <div>
+                                        <label class="label" for="selETHPhyType" tr="CONNECTION_ETH_PHY_TYPE"></label>
+                                        <select id="selETHPhyType" class="inputAndSelect" name="ethphytype" placeholder="PHY Type" data-datatype="int" data-bind="ethernet.phyType"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selETHAddress" tr="ETH_SETTINGS_PHY_ADDRESS"></label>
+                                        <select id="selETHAddress" class="inputAndSelect" name="address"  placeholder="Adresse" data-datatype="int" data-bind="ethernet.phyAddress"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selETHClkMode" tr="CONNECTION_ETH_CLK_MODE"> </label>
+                                        <select id="selETHClkMode" class="inputAndSelect" name="clkmode"  placeholder="Mode Clock" data-datatype="int" data-bind="ethernet.CLKMode"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selETHPWRPin" tr="CONNECTION_ETH_PWR_PIN"></label>
+                                        <select id="selETHPWRPin" class="inputAndSelect" name="pwr"  placeholder="Pin Alimentation" data-datatype="int" data-bind="ethernet.PWRPin"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selETHPMDCPin" tr="CONNECTION_ETH_MDC_PIN"></label>
+                                        <select id="selETHMDCPin" class="inputAndSelect" name="mdc"  placeholder="Pin MDC" data-datatype="int" data-bind="ethernet.MDCPin"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selETHMDIOPin" tr="CONNECTION_ETH_MDIO_PIN"></label>
+                                        <select id="selETHMDIOPin" class="inputAndSelect" name="mdio"  placeholder="Pin MDIO" data-datatype="int" data-bind="ethernet.MDIOPin"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnSaveNetwork" type="button"  onclick="wifi.saveNetwork();" tr="BT_SAVE"></button>
+                        </div>
+                    </div>
+                    <div id="divDHCP" class="subtab-content" style="display:none;">
+                        <div class="unibloc">
+                            <div class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="ADRESSIP_CURRENT_IP"></div>
+                                </div>
+                                <span id="spanCurrentIP"></span>
+                            </div>
+                            <hr>
+                            <label class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="ADRESSIP_DHCP"></div>
+                                    <div class="uniStatus" tr="ADRESSIP_DHCP_DESC"></div>
+                                </div>
+                                <div class="uniRight">
+                                    <span class="switch">
+                                        <input id="cbRoaming" type="checkbox" name="dhcp" data-bind="ip.dhcp" onclick="wifi.onDHCPClicked(this);"/>
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="divStaticIP" style="display:none;margin-top: 15px;">
+                            <div class="unibloc">
+                                <div>
+                                    <label class="label" for="fldIPAddress" tr="ADRESSIP_STATIC_IP"></label>
+                                    <input id="fldIPAddress" class="inputAndSelect" name="staticIP" type="text" data-bind="ip.ip" length=32 tr="ADRESSIP_STATIC_IP_PLH" placeholder="0.0.0.0">
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldSubnetMask" tr="ADRESSIP_SUBNET_MASK" ></label>
+                                    <input id="fldSubnetMask" class="inputAndSelect" name="subnet" type="text" data-bind="ip.subnet" length=32 tr="ADRESSIP_SUBNET_MASK_PLH" placeholder="0.0.0.0">
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldGateway" tr="ADRESSIP_GATEWAY" ></label>
+                                    <input id="fldGateway" class="inputAndSelect" name="gateway" type="text" data-bind="ip.gateway" length=32  tr="ADRESSIP_GATEWAY_PLH" placeholder="0.0.0.0">
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldDNS1" tr="ADRESSIP_DNS1"></label>
+                                    <input id="fldDNS1" class="inputAndSelect" name="dns1" type="text" data-bind="ip.dns1" length=32 tr="ADRESSIP_DNS1_PLH" placeholder="0.0.0.0">
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldDNS2" tr="ADRESSIP_DNS2"></label>
+                                    <input id="fldDNS2" class="inputAndSelect" name="dns2" type="text" data-bind="ip.dns2" length=32 tr="ADRESSIP_DNS2_PLH" placeholder="0.0.0.0">
+                                </div>
+                            </div>
+                        </div>
+                         <div id="divSystemStatus" class="information">
+                            <svg><use id="useStatusIcon" href=#svg-info></use></svg>
+                            <div style="text-align:left; flex:1;">
+                                <b id="statusTitle" tr="MSG_INFO"></b>
+                                <span id="statusDesc" tr="ADRESSIP_IP_REBOOT_INFO"></span>
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnSaveIPSettings"  type="button"  onclick="wifi.saveIPSettings();" tr="BT_SAVE"></button>
+                            <button id="btnRebootWifi" line type="button"  onclick="general.rebootDevice();" tr="BT_REBOOT"></button>
+                        </div>
+                    </div>
+                    <div id="divMQTT" class="subtab-content" style="display:none;">
+                        <div class="unibloc">
+                            <label class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="MQTT_ENABLE"></div>
+                                    <div class="uniStatus" tr="MQTT_ENABLE_DESC"></div>
+                                </div>
+                                <div class="MqttEnabled-switch">
+                                    <span class="switch">
+                                        <input id="cbMqttEnabled" type="checkbox" name="mqtt-enabled" data-bind="mqtt.enabled"/>
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                            <hr>
+                            <label class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="MQTT_PUB_DISCOVERY"></div>
+                                    <div class="uniStatus" tr="MQTT_PUB_DISCOVERY_DESC"></div>
+                                </div>
+                                <div class="uniRight">
+                                    <span class="switch">
+                                        <input id="cbPubDisco" type="checkbox" name="pub-disco" data-bind="mqtt.pubDisco" onclick="document.getElementById('divDiscoveryTopic').style.display = this.checked ? '' : 'none'; document.getElementById('hrIdDiscoveryTopic').style.display = this.checked ? '' : 'none';"/>
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="input-mqtt">
+                            <select class="mqttSelect" name="mqtt-protocol" data-bind="mqtt.protocol">
+                                <option tr="MQTT"></option>
+                                <option tr="MQTT_OPT_MQTTS"></option>
+                            </select>
+                            <span>://</span>
+                            <input class="mqttSelect" name="mqtt-host" type="text" length=64 placeholder="Host" data-bind="mqtt.hostname">
+                            <span>:</span>
+                            <input class="mqttSelect" name="mqtt-port" type="text" length=5 placeholder="Port" data-bind="mqtt.port" data-datatype="int">
+                        </div>
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" for="fldMqttUsername" tr="SECURITY_USERNAME"></label>
+                                <input id="fldMqttUsername" class="inputAndSelect" name="mqtt-username" type="text" data-bind="mqtt.username" length=32 tr="MQTT_USERNAME_PLH" placeholder="Identifiant de votre compte MQTT">
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="fldMqttPassword" tr="SECURITY_PASSWORD"></label>
+                                <div class="LoginPassword-input password-container">
+                                    <input id="fldMqttPassword" class="inputAndSelect" name="mqtt-password" type="password" data-bind="mqtt.password" length=64 tr="SECURITY_PASSWORD_PLH" placeholder="Entrer votre Mot de passe">
+                                    <div class="password-eye" onclick="security.toggleFieldPassword('fldMqttPassword', this)">
+                                        <svg class="pwd-icon pwd-iconeye"><use id="wifiEyeIcon" href="#svg-eyeOff"></use></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="fldMqttTopic" tr="MQTT_ROOT_TOPIC"></label>
+                                <input id="fldMqttTopic" class="inputAndSelect" name="mqtt-topic" type="text" length=64 data-bind="mqtt.rootTopic" tr="MQTT_ROOT_TOPIC_PLH" placeholder="Préfixe utilisé pour tous les messages de ce module">
+                            </div>
+                            <hr id="hrIdDiscoveryTopic">
+                            <div id="divDiscoveryTopic" style="display:none;">
+                                <label class="label" for="fldDiscoTopic" tr="MQTT_DISCOVERY_TOPIC"></label>
+                                <input id="fldDiscoTopic" class="inputAndSelect" name="disco-topic" type="text" length=64 data-bind="mqtt.discoTopic" tr="MQTT_DISCOVERY_TOPIC_PLH"  placeholder="Chemin utilisé pour la détection automatique par votre système, exemple: homeassistant">
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnConnectMQTT"  type="button" onclick="mqtt.connectMQTT();" tr="BT_SAVE"></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="divSomfySettings" style="display:none;">
+                    <div class="subtab-container"><span class="selected" data-grpid="divSomfyRooms" tr="SUBTAB_ROOMS"></span><span class="" data-grpid="divSomfyMotors" tr="SUBTAB_DEVICES"></span><span data-grpid="divSomfyGroups" tr="SUBTAB_GROUPS"> </span><span data-grpid="divRepeater" tr="SUBTAB_REPEATER"></span><span class="subtab-NameHide-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" tr="SUBTAB_VIRTUAL_REMOTE_L"></span><span class="subtab-NameShow-virtualRemote tabname-virtual-remote" data-grpid="divVirtualRemote" tr="SUBTAB_VIRTUAL_REMOTE_S"></span></div>
+                    <div id="divSomfyRooms" class="subtab-content">
+                        <div id="divRoomListContainer">
+
+                            <div id="divRoomEmptyState" class="empty-state" style="display:none;">
+                                <svg class="empty-icon"><use href="#svg-emptyRoom"></use></svg>
+                                <p tr="EMPTY_ROOM_TITLE"></p>
+                                <p class="empty-subtext" tr="EMPTY_ROOM_DESC"></p>
+                            </div>
+
+                            <div id="divRoomListContent">
+                                <div class="dragtxt" tr="DRAG_SORT"></div>
+                                <div id="divRoomList" class="edit-roomlist"></div>
+                            </div>
+
+                            <div class="footer-overlay">
+                                <button id="btnAddRoom"  type="button" onclick="somfy.openEditRoom();" tr="BT_ADD_ROOM"></button>
+                            </div>
+                        </div>
+                        <div id="somfyRoom" style="display:none;">
+                            <div class="somfyMaxId"><span id="spanRoomId">*</span>/<span id="spanMaxRooms">14</span></div>
+                            <div class="unibloc">
+                                <label class="label" for="fldRoomName" tr="NAME"></label>
+                                <input id="fldRoomName" class="inputAndSelect" name="roomName" data-bind="name" type="text" length=20  tr="ROOM_NAME_PHL" placeholder="Entrer un nom de pièce">
+                            </div>
+                            <div class="footer-overlay">
+                                <button id="btnRoomGoBack" line type="button" onclick="somfy.showEditRoom(false);" tr="BT_CLOSE"></button>
+                                <button id="btnSaveRoom"  type="button" onclick="somfy.saveRoom();" tr="BT_SAVE"></button>
+                            </div>
+                        </div>
+                    </div>
+                   <div id="divSomfyMotors" class="subtab-content" style="display:none;">
+                        <div id="divShadeListContainer">
+                            <div id="divShadeEmptyState" class="empty-state" style="display:none;">
+                                <svg class="empty-icon"><use href="#svg-shutter"></use></svg>
+                                <p tr="EMPTY_DEVICE_TITLE"></p>
+                                <p class="empty-subtext" tr="EMPTY_DEVICE_DESC"></p>
+                            </div>
+                            <div id="divShadeListContent">
+                                <div class="dragtxt" tr="DRAG_SORT"></div>
+                                <div id="divShadeList" class="edit-motorlist"></div>
+                            </div>
+                            <div class="footer-overlay">
+                                <button id="btnAddShade"  type="button" onclick="somfy.openEditShade();" tr="BT_ADD_DEVICE"></button>
+                            </div>
+                        </div>
+                        <div id="somfyShade" style="display:none;" data-bitlength="56">
+                            <div class="somfyMaxId"><span id="spanShadeId">*</span>/<span id="spanMaxShades">5</span></div>
+                            <div>
+                                <div class="unibloc">
+                                    <div>
+                                        <label class="label" for="fldShadeName" tr="NAME"></label>
+                                        <input id="fldShadeName" class="inputAndSelect" name="shadeName" data-bind="name" type="text" length=20 tr="SECURITY_ENTER_NAME" placeholder="Entre un nom">
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selShadeRoom" tr="ROOM"></label>
+                                        <select id="selShadeRoom" class="inputAndSelect"  data-bind="roomId" data-datatype="int"></select>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="selShadeType" tr="SHADE_TYPE">Type</label>
+                                        <select id="selShadeType" class="inputAndSelect" name="shadeType" data-bind="shadeType" data-datatype="int" onchange="somfy.onShadeTypeChanged(this);">
+                                            <option value="4" tr="SHADE_SHUTTER"></option>
+                                            <option value="0" tr="SHADE_ROLLER"></option>
+                                            <option value="1" tr="SHADE_BLIND"></option>
+                                            <option value="2" tr="SHADE_DRAPERY_LEFT"></option>
+                                            <option value="8" tr="SHADE_DRAPERY_CENTER"></option>
+                                            <option value="7" tr="SHADE_DRAPERY_RIGHT"></option>
+                                            <option value="3" tr="SHADE_AWNING"></option>
+                                            <option value="5" tr="SHADE_GARAGE_1BTN"></option>
+                                            <option value="6" tr="SHADE_GARAGE_3BTN"></option>
+                                            <option value="9" tr="SHADE_DRYCONTACT_1BTN"></option>
+                                            <option value="10" tr="SHADE_DRYCONTACT_2BTN"></option>
+                                            <option value="11" tr="SHADE_GATE_LEFT"></option>
+                                            <option value="12" tr="SHADE_GATE_CENTER"></option>
+                                            <option value="13" tr="SHADE_GATE_RIGHT"></option>
+                                            <option value="14" tr="SHADE_GATE_1BTN_LEFT"></option>
+                                            <option value="15" tr="SHADE_GATE_1BTN_CENTER"></option>
+                                            <option value="16" tr="SHADE_GATE_1BTN_RIGHT"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="unibloc">
+                                    <div>
+                                        <label class="label" for="selShadeProto" tr="PROTOCOL"></label>
+                                        <select class="inputAndSelect" id="selShadeProto" name="proto" data-bind="proto" data-datatype="int" onchange="somfy.onShadeProtoChanged(this);">
+                                            <option value="0" tr="RTS"></option>
+                                            <option value="1" tr="RTW"></option>
+                                            <option value="2" tr="RTV"></option>
+                                            <option value="8" tr="IO_RELAY"></option>
+                                            <option value="9" tr="IO_REMOTE"></option>
+                                        </select>
+                                    </div>
+                                    <div id="divShadeBitLength">
+                                    <hr>
+                                        <div>
+                                            <label class="label" for="selShadeBitLength" tr="BIT"></label>
+                                            <select class="inputAndSelect" id="selShadeBitLength" name="bitLength" data-bind="bitLength" data-datatype="int" onchange="somfy.onShadeBitLengthChanged(this);" >
+                                                <option value="56" tr="56BIT"></option>
+                                                <option value="80" tr="80BIT"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="divGPIOControl">
+                                        <div id="divGPIOUp">
+                                         <hr>
+                                            <div>
+                                                <label class="label" for="selShadeGPIOUp" tr="SHADE_GPIO_UP"></label>
+                                                <select id="selShadeGPIOUp" class="inputAndSelect" data-bind="gpioUp" data-datatype="int"></select>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div id="divGPIODown">
+                                            <label class="label" for="selShadeGPIODown" tr="SHADE_GPIO_DOWN"></label>
+                                            <select id="selShadeGPIODown" class="inputAndSelect" data-bind="gpioDown" data-datatype="int"></select>
+                                        </div>
+                                        <hr id="hrGPIOMy">
+                                        <div id="divGPIOMy">
+                                            <label class="label" for="selShadeGPIOMy" tr="SHADE_GPIO_MY"></label>
+                                            <select id="selShadeGPIOMy" class="inputAndSelect" data-bind="gpioMy" data-datatype="int"></select>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <div>
+                                            <div id="divShadeAddress">
+                                                <label class="label" for="fldShadeAddress" tr="REMOTE_ID"></label>
+                                                <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 tr="ADRESS" placeholder="Address">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="unibloc">
+                                <div id="divSomfyButtons" class="shadectl-buttons uniRow">
+                                    <div class="somfy-status-container">
+                                        <svg id="icoShade" class="somfy-shade-icon" data-shadeid="0"><use href="#svg-window-shade"></use></svg>
+                                        <div class="somfy-infoPosTilt">
+                                        <div id="labelPosContainer" style="display:none;">Pos: <span id="valPos">0</span> %</div>
+                                            <div id="labelTiltContainer" style="display:none;"><span tr="SHADE_TILT"></span><span id="valTilt">0</span> %</div>
+
+                                        </div>
+                                    </div>
+                                    <div id="divshowSomfyButtons" class="uniRight">
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="up" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'up');">
+                                            <svg><use href="#svg-up"></use></svg>
+                                        </div>
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="my" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'my');">
+                                            <svg><use href="#svg-my"></use></svg>
+                                        </div>
+                                        <div class="button-outline btn-somfy-svg animScale" data-cmd="down" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'down');">
+                                            <svg><use href="#svg-down"></use></svg>
+                                        </div>
+                                        <div class="button-outline btn-somfy-svg-wide animScale" data-cmd="toggle" onclick="somfy.sendCommand(parseInt(document.getElementById('spanShadeId').innerText, 10), 'toggle');">
+                                            <svg><use href="#svg-toggle"></use></svg>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div id="blocPairDevice" class="button-container-pair">
+                                <div class="unibloc">
+                                    <button id="btnPairShade" onclick="somfy.pairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" class="unibutton" type="button">
+                                        <div class="devButtonUpdate">
+                                            <div tr="BT_PAIR"></div>
+                                            <div class="uniStatus" tr="BT_PAIR_DESC"></div>
+                                        </div>
+                                    </button>
+                                    <button id="btnUnpairShade" onclick="somfy.unpairShade(parseInt(document.getElementById('spanShadeId').innerText, 10));" class="unibutton" type="button">
+                                        <div class="devButtonUpdate">
+                                            <div tr="BT_UNPAIR"></div>
+                                            <div class="uniStatus" tr="BT_UNPAIR_DESC"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="unibloc">
+                                    <button id="btnLinkRemote" type="button" onclick="somfy.linkRemote(parseInt(document.getElementById('spanShadeId').innerText, 10));" class="unibutton">
+                                        <div class="devButtonUpdate">
+                                            <div tr="BT_LINK_REMOTE"></div>
+                                            <div class="uniStatus" tr="BT_LINK_REMOTE_DESC"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="divLinkedRemoteList" class="LinkedRemoteList"></div>
+                            <div id="divShadeTimings" class="unibloc">
+                                <div id="divLiftSettings">
+                                    <div>
+                                        <label class="label" for="fldShadeUpTime" tr="SHADE_UP_TIME"></label>
+                                        <input id="fldShadeUpTime" class="inputAndSelect" name="shadeUpTime" data-bind="upTime" data-datatype="int" type="number" length=5 tr="SHADE_MS_PLH"  placeholder="milliseconds"/>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <label class="label" for="fldShadeDownTime" tr="SHADE_DOWN_TIME"></label>
+                                        <input id="fldShadeDownTime" class="inputAndSelect" name="shadeDownTime" type="number" data-bind="downTime" data-datatype="int" length=5 tr="SHADE_MS_PLH"  placeholder="milliseconds"/>
+                                    </div>
+                                </div>
+                                <div id="divTiltSettings" style="display:none;">
+                                <hr id="hrTiltSettings">
+                                    <div>
+                                        <label class="label" for="selTiltType" tr="SHADE_TILT_TYPE"></label>
+                                        <select id="selTiltType" class="inputAndSelect" name="tiltType" data-bind="tiltType" data-datatype="int" onchange="somfy.onShadeTypeChanged(this);">
+                                            <option value="0" tr="NONE"></option>
+                                            <option value="1" tr="SHADE_OPT_TILT_MOTOR"></option>
+                                            <option value="2" tr="SHADE_OPT_INTEGRATED"></option>
+                                            <option value="3" tr="SHADE_OPT_TILT_ONLY"></option>
+                                            <option value="4" data-v="SHADE_OPT_TILT_EURO"></option>
+                                        </select>
+                                    </div>
+                                    <hr id="hrDldTiltTime">
+                                    <div>
+                                        <label class="label" for="fldTiltTime" tr="SHADE_TILT_TIME"></label>
+                                        <input id="fldTiltTime" class="inputAndSelect" name="shadeTiltTime" type="number" data-bind="tiltTime" data-datatype="int" length=5 tr="SHADE_MS_PLH"  placeholder="milliseconds" />
+                                    </div>
+                                </div>
+                                <div id="divStepSettings">
+                                <hr id="hrDivStepSettings">
+                                    <div class="bloc80slidStep">
+                                        <input id="slidStepSize" name="stepSize" type="range" min="1" max="1000" step="1" data-bind="stepSize" data-datatype="int" oninput="somfy.stepSizeChanged(this);" />
+                                        <label for="slidStepSize">
+                                            <span tr="SHADE_STEP_SIZE_MIN"></span>
+                                            <span>
+                                                <span id="spanStepSize" data-bind="stepSize" data-datatype="int" data-fmttype="number" data-fmtmask="#,##0"></span>
+                                                <span tr="SHADE_STEP_SIZE_MAX"></span>
+                                            </span>
+
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="unibloc">
+                                <div id="divLLTrigger">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="SHADE_LL_TRIGGER"></div>
+                                            <div class="uniStatus" tr="SHADE_LL_TRIGGER_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbLLTrigger" name="hasLLTrigger" type="checkbox" data-bind="gpioLLTrigger"/>
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <hr>
+                                </div>
+                                <div id="divSunSensor">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="SHADE_SUN_SENSOR"></div>
+                                            <div class="uniStatus" tr="SHADE_SUN_SENSOR_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbHasSunsensor" name="hasSunSensor" type="checkbox" data-bind="sunSensor" onclick="wifi.useEthernetClicked();" />
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <hr>
+                                </div>
+                                <div id="divLightSwitch">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="SHADE_LIGHT_SENSOR"></div>
+                                            <div class="uniStatus" tr="SHADE_LIGHT_SENSOR_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbHasLight" name="hasLight" type="checkbox" data-bind="light"/>
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <hr>
+                                </div>
+                                <div id="divFlipCommands">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="RADIO_COMMAND"></div>
+                                            <div class="uniStatus" tr="FLIP_COMMAND_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbFlipCommands" name="flipCommands" type="checkbox" data-bind="flipCommands"/>
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <hr>
+                                </div>
+                                <div id="divFlipPosition">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="SHADE_POSITION"></div>
+                                            <div class="uniStatus" tr="SHADE_POSITION_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbFlipPosition" name="flipPos" type="checkbox" data-bind="flipPosition"/>
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <hr>
+                                </div>
+                                <div id="divSimMy">
+                                    <label class="uniRow">
+                                        <div class="uniText">
+                                            <div class="uniLabel" tr="SHADE_FAVORITE_POSITION"></div>
+                                            <div class="uniStatus" tr="SHADE_FAVORITE_POSITION_DESC"></div>
+                                        </div>
+                                        <div class="uniRight">
+                                            <span class="switch">
+                                                <input id="cbSimMy" name="simMy" type="checkbox" data-bind="simMy" onclick="wifi.useEthernetClicked();" />
+                                                <div></div>
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selRepeatCommnds" tr="REPEAT_COMMANDS" ></label>
+                                    <select id="selRepeatCommands" class="inputAndSelect" data-bind="repeats" data-datatype="int">
+                                        <option value="0" tr="OPT_NO_REPEAT">Aucune répétition</option>
+                                        <option value="1" tr="OPT_1TIME"></option>
+                                        <option value="2" tr="OPT_2TIME"></option>
+                                        <option value="3" tr="OPT_3TIME"></option>
+                                        <option value="4" tr="OPT_4TIME"></option>
+                                        <option value="5" tr="OPT_5TIME"></option>
+                                        <option value="6" tr="OPT_6TIME"></option>
+                                        <option value="7" tr="OPT_7TIME"></option>
+                                        <option value="8" tr="OPT_8TIME"></option>
+                                        <option value="9" tr="OPT_9TIME"></option>
+                                        <option value="10" tr="OPT_10TIME"></option>
+                                        <option value="11" tr="OPT_11TIME"></option>
+                                        <option value="12" tr="OPT_12TIME""></option>
+                                        <option value="13" tr="OPT_13TIME"></option>
+                                        <option value="14" tr="OPT_14TIME"></option>
+                                        <option value="15" tr="OPT_15TIME"></option>
+                                        <option value="16" tr="OPT_16TIME"></option>
+                                        <option value="17" tr="OPT_17TIME"></option>
+                                        <option value="18" tr="OPT_18TIME"></option>
+                                        <option value="19" tr="OPT_19TIME"></option>
+                                        <option value="20" tr="OPT_20TIME"></option>
+                                    </select>
+                                </div>
+                                <hr id="hrSetRollingC">
+                                <div id="btnSetRollingCode">
+                                    <button  onclick="somfy.openSetRollingCode(parseInt(document.getElementById('spanShadeId').innerText, 10));" class="unibutton" type="button">
+                                        <svg><use href=#svg-warning></use></svg>
+                                        <div class="devButtonUpdate">
+                                            <div tr="BT_SET_ROLLING_CODE"></div>
+                                            <div class="uniStatus" tr="SHADE_ROLLING_CODE_DESC"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="footer-overlay">
+                                <button id="btnBtnShadeGoBack" line type="button" onclick="somfy.showEditShade(false);" tr="BT_CLOSE"></button>
+                                <button id="btnSaveShade"  type="button" onclick="somfy.saveShade();" tr="BT_SAVE"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divSomfyGroups" class="subtab-content" style="display:none;">
+                        <div id="divGroupListContainer">
+                            <div id="divGroupEmptyState" class="empty-state" style="display:none;">
+                                <svg class="empty-icon"><use href="#svg-emptyGroup"></use></svg>
+                                <p tr="EMPTY_GROUP_TITLE"></p>
+                                <p class="empty-subtext" tr="EMPTY_GROUP_DESC"></p>
+                            </div>
+
+                            <div id="divGroupListContent">
+                                <div class="dragtxt" tr="DRAG_SORT"></div>
+                                <div id="divGroupList" class="edit-grouplist"></div>
+                            </div>
+
+                            <div class="footer-overlay">
+                                <button id="btnAddGroup"  type="button" onclick="somfy.openEditGroup();" tr="BT_ADD_GROUP"></button>
+                            </div>
+                        </div>
+                        <div id="somfyGroup" style="display:none;">
+                            <div class="somfyMaxId"><span id="spanGroupId">*</span>/<span id="spanMaxGroups">5</span></div>
+                            <div class="unibloc">
+                                <div>
+                                    <label class="label" for="fldGroupName" tr="NAME"></label>
+                                    <input id="fldGroupName" class="inputAndSelect" name="groupName" data-bind="name" type="text" length=20  tr="SECURITY_ENTER_NAME" placeholder="entrer un Nom">
+                                </div>
+                                 <hr>
+                                <div>
+                                    <label class="label" for="selGroupRoom" tr="ROOM"></label>
+                                    <select id="selGroupRoom" class="inputAndSelect" data-bind="roomId" data-datatype="int"></select>
+                                </div>
+                            </div>
+                            <div class="unibloc">
+                                <div>
+                                    <label class="label" for="selGroupProto" tr="PROTOCOL"></label>
+                                    <select id="selGroupProto" class="inputAndSelect" name="proto" data-bind="proto" data-datatype="int">
+                                        <option value="0" tr="RTS"></option>
+                                        <option value="1" tr="RTW"></option>
+                                        <option value="2" tr="RTV"></option>
+                                    </select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selGroupBitLength" tr="BIT"></label>
+                                    <select id="selGroupBitLength" class="inputAndSelect" name="bitLength" data-bind="bitLength" data-datatype="int">
+                                        <option value="56" tr="56BIT"></option>
+                                        <option value="80" tr="80BIT"></option>
+                                    </select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="fldShadeAddress" tr="REMOTE_ID"></label>
+                                    <input id="fldShadeAddress" class="inputAndSelect" name="shadeAddress" data-bind="remoteAddress" data-datatype="int" type="number" length=5 placeholder="Adresse">
+                                </div>
+                            </div>
+                            <div id="blocPairGroup" class="button-container-pair">
+                                <div class="unibloc">
+                                    <div id="divSomfyGroupButtons" class="uniGroupButton">
+                                        <div class="btn-somfy-svg" data-cmd="up" onclick="somfy.sendGroupCommand(parseInt(document.getElementById('spanGroupId').innerText, 10), 'up');">
+                                            <svg><use href="#svg-up"></use></svg>
+                                        </div>
+                                        <div class="btn-somfy-svg" data-cmd="my" onclick="somfy.sendGroupCommand(parseInt(document.getElementById('spanGroupId').innerText, 10), 'my');">
+                                            <svg><use href="#svg-my"></use></svg>
+                                        </div>
+                                        <div class="btn-somfy-svg" data-cmd="down" onclick="somfy.sendGroupCommand(parseInt(document.getElementById('spanGroupId').innerText, 10), 'down');">
+                                            <svg><use href="#svg-down"></use></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="unibloc">
+                                    <button id="btnLinkShade" type="button" onclick="somfy.linkGroupShade(parseInt(document.getElementById('spanGroupId').innerText, 10));" class="unibutton">
+                                        <div class="devButtonUpdate">
+                                            <div tr="BT_LINK_DEVICE"></div>
+                                            <div class="uniStatus" tr="GROUP_LINK_DESC"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="divLinkedShadeList" class="LinkedList"></div>
+                            <div class="unibloc">
+                                <label id="divFlipGrpCommands" class="uniRow">
+                                    <div class="uniText">
+                                        <div class="uniLabel" tr="RADIO_COMMAND"></div>
+                                        <div class="uniStatus" tr="FLIP_COMMAND_DESC"></div>
+                                    </div>
+                                    <div class="uniRight">
+                                        <span class="switch">
+                                            <input id="cbFlipGrpCommands" name="flipCommands" type="checkbox" data-bind="flipCommands"/>
+                                            <div></div>
+                                        </span>
+                                    </div>
+                                </label>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selRepeatCommnds" tr="REPEAT_COMMANDS"></label>
+                                    <select id="selRepeatCommands" class="inputAndSelect" data-bind="repeats" data-datatype="int">
+                                        <option value="0" tr="OPT_NO_REPEAT"></option>
+                                        <option value="1" tr="OPT_1TIME"></option>
+                                        <option value="2" tr="OPT_2TIME"></option>
+                                        <option value="3" tr="OPT_3TIME"></option>
+                                        <option value="4" tr="OPT_4TIME"></option>
+                                        <option value="5" tr="OPT_5TIME"></option>
+                                        <option value="6" tr="OPT_6TIME"></option>
+                                        <option value="7" tr="OPT_7TIME"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="button-container-row">
+                                <button id="btnGroupGoBack" line type="button" onclick="somfy.showEditGroup(false);" tr="BT_CLOSE"></button>
+                                <button id="btnSaveGroup"  type="button" onclick="somfy.saveGroup();" tr="BT_SAVE"></button>
+                            </div>
+                        </div>
+                    </div>
+                   <div id="divRepeater" style="display:none;" class="subtab-content">
+                        <div id="divRepeaterListContainer">
+                            <div id="divRepeaterEmptyState" class="empty-state" style="display:none;">
+                                <svg class="empty-icon"><use href="#svg-emptyRepeater"></use></svg>
+                                <p tr="EMPTY_REPEATER_TITLE"></p>
+                                <p class="empty-subtext" tr="EMPTY_REPEATER_DESC"></p>
+                            </div>
+                            <div id="divRepeaterListContent">
+                                <div class="dragtxt" tr="ALL_DUPLICATE_REMOTES"></div>
+                                <div id="divRepeatList" class="edit-repeaterlist"></div>
+                            </div>
+                            <div class="footer-overlay">
+                                <button id="btnLinkRepeater"  type="button" onclick="somfy.linkRepeatRemote();" tr="BT_SCAN_REMOTE"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divVirtualRemote" style="display:none;" class="subtab-content" data-bitlength="56">
+                        <div class="vr-content">
+                            <div class="unibloc">
+                                <label class="label" for="selVRMotor" tr="VR_SELECT_MOTOR_GROUP"></label>
+                                <select id="selVRMotor" class="inputAndSelect" onchange="document.getElementById('divVirtualRemote').setAttribute('data-bitlength', this.options[this.selectedIndex].getAttribute('data-bitlength'));">
+                                </select>
+                            </div>
+                            <div class="vr-button vr-bloctoogle">
+                                <div class="vr-toogle vr-stop vr-80bit animScale" data-cmd="stop" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <svg><use href=#svg-toggleHand></use></svg>
+                                </div>
+                                <div class="vr-toogle vr-updownmy animScale" data-cmd="toggle" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                    <svg><use href=#svg-toggle></use></svg>
+                                </div>
+                            </div>
+                            <div class="vr-updownmy vr-wheel-container">
+                                <div class="vr-wheel-outer">
+                                    <div class="vr-wheel-arrow vr-arrow-up animScale" data-cmd="up" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use href=#vr-up></use></svg></div>
+                                    <div class="vr-wheel-arrow vr-arrow-down animScale" data-cmd="down" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use href=#vr-down></use></svg></div>
+                                    <div class="vr-my-center animScale" data-cmd="my" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use href=#svg-my></use></svg></div>
+                                </div>
+                            </div>
+                            <div class="vr-progFav">
+                                <div class=" btn-top">
+                                    <div class="button-outline btn-prog animScale" tr="VR_PROG" title="" data-cmd="Prog" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><span tr="BT_PROG">prog</span></div>
+                                </div>
+                                <div class=" vr-favorite vr-80bit">
+                                    <div class="button-outline btn-top btn-fav animScale" tr="VR_FAVORITE" title="" data-cmd="favorite" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);"><svg><use href=#vr-favori></use></svg></div>
+                                </div>
+                            </div>
+                            <div class="vr-block-boutons">
+                                <div class="vr-blockLeft">
+                                    <div class="vr-upMy animScale" data-cmd="MyUp" tr="VR_MY_UP" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <div class="segment" ><svg><use href=#vr-up></use></svg></div>
+                                        <div class="segment" tr="MY">my</div>
+                                    </div>
+                                    <div class="vr-myDown animScale" data-cmd="MyDown" tr="VR_MY_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <div class="segment" tr="MY">my</div>
+                                        <div class="segment"><svg><use href=#vr-down></use></svg></div>
+                                    </div>
+                                </div>
+                                <div class="vr-block-center">
+                                    <div class="vr-block-centerFlag">
+                                        <div class="vr-button-sunflagL btn-sunflag animScale" data-cmd="SunFlag" tr="VR_SUN_FLAG" title="" data-on="true" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg><use href=#vr-sunflag-o></use></svg>
+                                        </div>
+                                        <div class="vr-button-sunflagR btn-sunflag animScale" data-cmd="Flag" tr="VR_SUN_FLAG" title="" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="button-outline animScale"><use href=#vr-sunflag-c></use></svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="switch-group">
+                                            <div class="switch-soleil">
+                                                <input id="cbSunny" type="checkbox" data-bind="sunny" class="sunwinterbouton">
+                                                <label for="cbSunny" class="toggle-item animScale" tr="VR_SUN"></label>
+                                            </div>
+                                            <div class="switch-windy">
+                                                <input id="cbWindy" type="checkbox" data-bind="windy" class="sunwinterbouton" >
+                                                <label for="cbWindy" class="toggle-item animScale" tr="VR_WIND"></label>
+                                            </div>
+                                        </div>
+                                        <div class="btn-send btn-sunflag animScale" data-cmd="Sensor" data-on="false" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);" tr="VR_SEND"></div>
+                                    </div>
+                                </div>
+                                <div class="vr-blockRight">
+                                    <div class="vr-upDown animScale" data-cmd="UpDown" tr="VR_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <div class="segment"><svg><use href=#vr-up></use></svg></div>
+                                        <div class="segment"><svg><use href=#vr-down></use></svg></div>
+                                    </div>
+                                    <div class="vr-all animScale" data-cmd="MyUpDown" tr="VR_MY_UP_DOWN" title="" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <div class="segment">all</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="vr-button vr-80bit vr-step80">
+                                <div>
+                                    <div class="vr-step80-arrow" data-cmd="StepUp" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="icon-svg"><use href=#vr-up></use></svg>
+                                    </div>
+                                </div>
+                                <div class="vrslidStepSize">
+                                    <input id="vrslidStepSize" name="stepSize" type="range" min="1" max="127" step="1" data-bind="stepSize" value="1" oninput="document.getElementById('vrspanStepSize').innerText = this.value;" />
+                                    <div class="vr-step80Label">
+                                        <label tr="VR_STEP_SIZE"></label><span id="vrspanStepSize">1</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="vr-step80-arrow" data-cmd="StepDown" onmousedown="somfy.sendVRCommand(this);" ontouchstart="somfy.sendVRCommand(this);">
+                                        <svg class="icon-svg"><use href=#vr-down></use></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="divRadioSettings" style="display:none;">
+                    <div class="subtab-container">
+                        <span class="selected" data-grpid="divTransceiverSettings" tr="TAB_RADIO"></span>
+                        <span data-grpid="divFrameLog" tr="SUBTAB_LOGS"></span>
+                    </div>
+                    <div id="divTransceiverSettings" class="subtab-content">
+                        <div id="divRadioEnableColor" class="unibloc">
+                            <label class="uniRow">
+                                <div class="uniText">
+                                    <div class="uniLabel" tr="TAB_RADIO"></div>
+                                    <div id="divRadioEnableStatus" class="uniStatus"></div>
+                                </div>
+                                <div class="uniRight">
+                                    <span class="switch">
+                                        <input id="cbEnableRadio" name="enableRadio" type="checkbox" data-bind="transceiver.config.enabled">
+                                        <div></div>
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" for="selRadioProto" tr="PROTOCOL"></label>
+                                <select id="selRadioProto" class="inputAndSelect" name="radioType" data-bind="transceiver.config.proto" data-datatype="int">
+                                    <option value="0" tr="RTS"></option>
+                                    <option value="1" tr="RTW"></option>
+                                    <option value="2" tr="RTV"></option>
+                                </select>
+                            </div>
+                            <hr>
+                            <div>
+                                <label class="label" for="selRadioType" tr="BIT"></label>
+                                <select id="selRadioType" class="inputAndSelect" name="radioType" data-bind="transceiver.config.type" data-datatype="int">
+                                    <option value="56" tr="56BIT"></option>
+                                    <option value="80" tr="80BIT"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="unibloc">
+                            <div>
+                                <label class="label" tr="RADIO_GPIO_ASSIGN"></label>
+                                <select id="selRadioBoardType" class="inputAndSelect"></select>
+                            </div>
+                            <hr>
+                            <div id="divGPIOSummary" style="display:none;"></div>
+
+                            <div id="divShowGpio" style="display:none;">
+                                <div>
+                                    <label class="label" for="selTransSCKPin">SCLK</label>
+                                    <select id="selTransSCKPin" class="inputAndSelect" name="transSCK" data-bind="transceiver.config.SCKPin" data-datatype="int"></select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selTransCSNPin">CSN</label>
+                                    <select id="selTransCSNPin" class="inputAndSelect" name="transCSN" data-bind="transceiver.config.CSNPin" data-datatype="int"></select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selTransMOSIPin">MOSI</label>
+                                    <select id="selTransMOSIPin" class="inputAndSelect" name="transMOSI" data-bind="transceiver.config.MOSIPin" data-datatype="int"></select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selTransMISOPin">MISO</label>
+                                    <select id="selTransMISOPin" class="inputAndSelect" name="transMISO" data-bind="transceiver.config.MISOPin" data-datatype="int"></select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selTransTXPin">TX</label>
+                                    <select id="selTransTXPin" class="inputAndSelect" name="transTX" data-bind="transceiver.config.TXPin" data-datatype="int"></select>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="label" for="selTransRXPin">RX</label>
+                                    <select id="selTransRXPin" class="inputAndSelect" name="transRX" data-bind="transceiver.config.RXPin" data-datatype="int"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="unibloc">
+                            <div class="rssi-row">
+                                <div class="rssi-left">
+                                    <span tr="SCANFREQ_DIV_RSSI"></span>
+                                    <span id="spanFrameCount">0</span>
+                                </div>
+                                <div class="rssi-right">
+                                    <span id="spanRssi" name="rssi">--</span>
+                                    <span class="rssi-unit" tr="DBM"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uniblocRadio">
+                            <div>
+                                <div class="blocRadioHeader">
+                                    <div class="blocRadioHeaderTitle">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use href=#icon-question></use>
+                                            </svg>
+                                            <div class="tooltip-text" tr="RADIO_BASE_FREQUENCY_HELP"></div>
+                                        </div>
+                                        <label for="slidFrequency" tr="RADIO_BASE_FREQUENCY">
+                                            Fréquence de base
+                                        </label>
+                                    </div>
+                                    <div class="numberfield">
+                                        <span>
+                                            <span id="spanFrequency" data-bind="transceiver.config.frequency"
+                                                data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
+                                            <span tr="MHZ"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="blocRadioSlider">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidFrequency', -1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowLeft></use></svg>
+                                    </button>
+                                    <input id="slidFrequency" class="RadioSlider" name="frequency" type="range"
+                                        min="433000" max="434399" step="1"
+                                        data-bind="transceiver.config.frequency" data-datatype="float" data-mult="1000"
+                                        oninput="somfy.frequencyChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidFrequency', 1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowRight></use></svg>
+                                    </button>
+                                    <div id="stepButtons" class="radioStepButtons">
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('freq', 1)">1</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('freq', 10)">10</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('freq', 100)">100</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div>
+                                <div class="blocRadioHeader">
+                                    <div class="blocRadioHeaderTitle">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use href=#icon-question></use>
+                                            </svg>
+                                            <div class="tooltip-text" tr="RADIO_RX_BANDWIDTH_HELP"></div>
+                                        </div>
+                                        <label for="slidRxBandwidth" tr="RADIO_RX_BANDWIDTH">
+                                            Largeur bande RX
+                                        </label>
+                                    </div>
+                                    <div class="numberfield">
+                                        <span>
+                                            <span id="spanRxBandwidth" data-bind="transceiver.config.rxBandwidth" data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000"></span>
+                                            <span tr="MHZ">MHz</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="blocRadioSlider">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidRxBandwidth', -1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowLeft></use></svg>
+                                    </button>
+                                    <input id="slidRxBandwidth" class="RadioSlider" name="rxBandwidth" type="range" min="5803" max="81250" step="1" data-bind="transceiver.config.rxBandwidth" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.rxBandwidthChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidRxBandwidth', 1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowRight></use></svg>
+                                    </button>
+                                     <div id="stepButtonsRx" class="radioStepButtons">
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 1)">1</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 10)">10</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('bandwidth', 100)">100</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div>
+                                <div class="blocRadioHeader">
+                                    <div class="blocRadioHeaderTitle">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg">
+                                                <use href=#icon-question></use>
+                                            </svg>
+                                            <div class="tooltip-text" tr="RADIO_FREQ_DEVIATION_HELP"></div>
+                                        </div>
+                                        <label for="slidDeviation" tr="RADIO_FREQ_DEVIATION"></label>
+                                    </div>
+                                    <div class="numberfield">
+                                        <span>
+                                            <span id="spanDeviation" data-bind="transceiver.config.deviation" data-datatype="float" data-fmttype="number" data-fmtmask="#,###.000">
+                                            </span>
+                                            <span tr="MHZ"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="blocRadioSlider">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidDeviation', -1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowLeft></use></svg>
+                                    </button>
+                                    <input id="slidDeviation" class="RadioSlider" name="deviation" type="range" min="158" max="38085" step="1" data-bind="transceiver.config.deviation" data-setonly="true" data-datatype="float" data-mult="100" oninput="somfy.deviationChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidDeviation', 1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowRight></use></svg>
+                                    </button>
+                                    <div id="stepButtonsDeviation" class="radioStepButtons">
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 1)">1</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 10)">10</button>
+                                        <button type="button" class="step-btn" onclick="somfy.setStep('deviation', 100)">100</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div>
+                                <div class="blocRadioHeader">
+                                    <div class="blocRadioHeaderTitle">
+                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                            <svg class="help-svg"><use href=#icon-question></use></svg>
+                                            <div class="tooltip-text" tr="RADIO_TX_POWER_HELP"></div>
+                                        </div>
+                                        <label for="slidTxPower"  tr="RADIO_TX_POWER">
+                                            TX Puissance
+                                        </label>
+                                    </div>
+                                    <div class="numberfield">
+                                        <span>
+                                            <span id="spanTxPower" data-bind="transceiver.config.txPower"
+                                                data-datatype="int" data-fmttype="number" data-fmtmask="#,###"></span>
+                                            <span tr="DBM"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="blocRadioSlider">
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidTxPower', -1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowLeft></use></svg>
+                                    </button>
+                                    <input id="slidTxPower" class="RadioSlider" name="txPower" type="range" min="0" max="10" step="1"
+                                        data-bind="transceiver.config.txPower" data-datatype="index" data-setonly="true" data-values="[-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12]" oninput="somfy.txPowerChanged(this);" />
+                                    <button type="button" class="radioBtnPrec" onclick="somfy.stepValue('slidTxPower', 1)">
+                                        <svg class="radioArrowSvg"><use href=#svg-arrowRight></use></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnScanFrequency" line type="button" onclick="somfy.scanFrequency(true);" tr="BT_SCANFREQ"></button>
+                            <button id="btnSaveRadio"  type="button"  onclick="somfy.saveRadio();" tr="BT_SAVE"></button>
+                        </div>
+                    </div>
+                    <div id="divFrameLog" class="subtab-content frame-log" style="display:none;">
+                        <div class="log-global-container">
+                            <div class="frame-header"><span tr="RADIO_KEY"></span><span tr="RADIO_ADRESS"></span><span tr="RADIO_COMMAND"></span><span tr="RADIO_CODE"></span><span tr="SCANFREQ_RSSI"></span><span tr="RADIO_BITS"></span><span tr="RADIO_TIME"></span></div>
+                                <div id="divFrames" class="frame-list">
+                            </div>
+                        </div>
+                        <div class="footer-overlay">
+                            <button id="btnClearFrames" type="button" line onclick="document.getElementById('divFrames').innerHTML = ''; somfy.frames = [];" tr="BT_CLEAR"></button>
+                            <button id="btnCopyFrame" type="button"  onclick="somfy.framesToClipboard();" tr="BT_COPY"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="divHomePnl" style="display: none;">
+                <div class="room-nav-container">
+                    <div id="btnScrollLeft" class="nav-arrow animScale" onclick="somfy.scrollRooms(-1)">
+                        <svg class="icon-svg"><use href=#svg-arrowLeft></use></svg>
+                    </div>
+                    <div id="divRoomSelector" class="room-selector" data-roomid="0"></div>
+                    <div id="btnScrollRight" class="nav-arrow animScale" onclick="somfy.scrollRooms(1)">
+                        <svg class="icon-svg"><use href=#svg-arrowRight></use></svg>
+                    </div>
+                </div>
+                <div id="divGroupControls" style="padding: 0 10px;"></div>
+                <div id="divShadeControls" style="padding:6px 20px;"></div>
+                <div id="divNoDevice" class="empty-state-container" style="display:none;">
+                    <svg class="icon-svg"><use href=#svg-placeholder></use></svg>
+                    <p tr="NO_DEVICE"></p>
+                </div>
+            </div>
+        </div>
+        <div id="divGetStarted" style="display:none;">
+            <div class="welcome-container">
+                <div class="welcomeTop">
+                    <svg><use href=#svg-logo></use></svg>
+                    <p>ESPSomfy-RTS</p>
+                </div>
+                <div class="welcomeMiddle">
+                    <h1 tr="WELCOME"></h1>
+                    <p tr="WELCOME_DESC"></p>
+                </div>
+                <div class="welcomeBottom">
+                    <div id="divEmptyHome" class="setup-guide">
+                        <div class="welcomeCard" onclick="ui.showNetworkConfig();">
+                            <svg><use href=#svg-tabReseau></use></svg>
+                            <div class="welcomeCard-content">
+                                <h1 tr="TAB_NETWORK"></h1>
+                                <p tr="WELCOME_NET_DESC"></p>
+                            </div>
+                        </div>
+                        <div class="welcomeCard" onclick="ui.showRadioConfig();">
+                            <svg><use href=#svg-tabRadio></use></svg>
+                            <div class="welcomeCard-content">
+                                <h1 tr="TAB_RADIO"></h1>
+                                <p tr="WELCOME_RAD_DESC"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divEmptyHome1" class="setup-guide" style="margin-top: 15px;">
+                        <div class="welcomeCard" onclick="ui.showSystemConfig();">
+                            <svg><use href=#svg-tabSystem></use></svg>
+                            <div class="welcomeCard-content">
+                                <h1 tr="TAB_SYSTEM"></h1>
+                                <p tr="WELCOME_SYS_DESC"></p>
+                            </div>
+                        </div>
+                        <div class="welcomeCard" onclick="ui.showShadeConfig();">
+                            <svg><use href=#svg-simpleShutter></use></svg>
+                            <div class="welcomeCard-content">
+                                <h1 tr="WELCOME_ADD_SHADE_TITLE"></h1>
+                                <p tr="WELCOME_ADD_SHADE_DESC"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divLBCWelcome" class="lbcWelcomelink">
+                        <div onclick="general.showLBCOverlay();">
+                            <svg><use href="#svg-leboncoin"></use></svg>
+                            <span>Vous avez acheté un boîtier sur Leboncoin ? <b>Cliquez ici pour l'auto-configuration.</b></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-overlay">
+                    <p class="welcomeBottom-desc" tr="WELCOME_FOOTER_NOTE"></p>
+                </div>
+            </div>
+        </div>
+        <div id="divUnauthenticated" style="display:none;">
+            <input id="fldLoginPin" type="hidden" name="pin" />
+            <input id="fldLoginType" type="hidden" data-bind="login.type" data-datatype="int" />
+            <div class="welcomeTop">
+                <svg><use href=#svg-logo></use></svg>
+                <p>ESPSomfy-RTS</p>
+            </div>
+            <div id="divLoginPin" style="display:none;">
+                <div style="text-align:center;">
+                    <div id="fldPinEntry" style="display:inline-block;" onkeydown="ui.pinKeyPressed(event);">
+                        <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="login.pin.d0" onfocus="ui.pinDigitFocus(event);">
+                        <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="login.pin.d1" onfocus="ui.pinDigitFocus(event);">
+                        <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="login.pin.d2" onfocus="ui.pinDigitFocus(event);">
+                        <input class="pin-digit" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-bind="login.pin.d3" onfocus="ui.pinDigitFocus(event);">
+                    </div>
+                    <label for="fldPinEntry" style="display: block;" tr="SECURITY_ENTER_PIN" ></label>
+                </div>
+            </div>
+            <div id="divLoginPassword" style="display:none;" onkeyup="if (event.code === 'Enter') security.login();">
+                <div>
+                    <div class="LoginPassword-input">
+                        <input id="fldLoginUsername" name="username" type="text" data-bind="login.username" length=32 placeholder="Nom d'utilisateur" tr="SECURITY_USERNAME"/>
+                        <svg class="pwd-icon pwd-iconLeft"><use href="#svg-user"></use></svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="LoginPassword-input password-container">
+                        <input id="fldLoginPassword" name="password" type="password" data-bind="login.password" length=32 placeholder="Entrer votre Mot de passe" tr="SECURITY_PASSWORD_PLH"/>
+                        <svg class="pwd-icon pwd-iconLeft"><use href="#svg-cadenas"></use></svg>
+                        <div id="togglePassword" class="password-eye" onclick="security.toggleFieldPassword('fldLoginPassword', this)">
+                            <svg class="pwd-icon pwd-iconeye"><use href="#svg-eyeOff"></use></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center;"><span id="spanLoginMessage" style="color:red"></span></div>
+            <div id="loginButtons" class="button-container-row" style="display:none;text-align:center;">
+                <button id="btnLogin"  type="button" onclick="security.login();" tr="BT_LOGIN"></button>
+                <button id="btnCancelLogin" line type="button" onclick="security.cancelLogin();" tr="BT_CANCEL"></button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        (async () => {
+            await init();
+        })();
+    </script>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-question" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m0-11.25c-.69 0-1.25.56-1.25 1.25v.1a.75.75 0 1 1-1.5 0V10A2.75 2.75 0 0 1 12 7.25h.1a2.6 2.6 0 0 1 1.7 4.6l-.8.7a.9.9 0 0 0-.3.7v.5a.75.75 0 0 1-1.5 0v-.5c0-.7.3-1.4.8-1.8l.8-.7a1.1 1.1 0 0 0-.7-2zM13 16a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+        </symbol>
+        <symbol id="svg-logo" viewBox="0 0 48 48">
+            <path d="m24 2-22 14v8l22-14 22 14v-8z" fill="currentColor"/><path d="m14 40v-22l-6 4v24h38v-6z" fill="currentColor"/><path d="m24 24v2h22v-2zm0 4v2h22v-2zm0 4v2h22v-2zm0-12v2h21.32v-2zm0 16v2h22v-2z" fill="currentColor"/>
+        </symbol>
+  <!--Connexion -->
+        <symbol id="svg-user" viewBox="0 0 20 20">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-cadenas" viewBox="0 0 20 20">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-eyeOn" viewBox="0 0 24 24">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>';
+        </symbol>
+        <symbol id="svg-eyeOff" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M11.83 9L15 12.16V12a3 3 0 0 0-3-3zm-4.3.8l1.55 1.55c-.05.21-.08.42-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2M2 4.27l2.28 2.28l.45.45C3.08 8.3 1.78 10 1 12c1.73 4.39 6 7.5 11 7.5c1.55 0 3.03-.3 4.38-.84l.43.42L19.73 22L21 20.73L3.27 3M12 7a5 5 0 0 1 5 5c0 .64-.13 1.26-.36 1.82l2.93 2.93c1.5-1.25 2.7-2.89 3.43-4.75c-1.73-4.39-6-7.5-11-7.5c-1.4 0-2.74.25-4 .7l2.17 2.15C10.74 7.13 11.35 7 12 7" />
+        </symbol>
+ <!--TAB Menus -->
+        <symbol id="svg-tabHome" viewBox="0 0 48 48">
+            <path fill="currentColor" d="M46 22.9l-7-6.7V6c0-.8-.7-1.5-1.5-1.5h-4.5c-.8 0-1.5.7-1.5 1.5v3l-5.4-5.2a3.1 3.1 0 0 0-4.1 0L2 22.9c-.6.6-.7 1.5-.1 2.1s1.5.6 2.1 0L23.5 6.5a.7.7 0 0 1 1 0l19.6 18.5c.6.6 1.5.6 2.1 0s.6-1.5-.3-2.1zM24.5 9.5a.7.7 0 0 0-1 0L6.2 26c-.2.2-.2.4-.2.5L6 42a3 3 0 0 0 3 3h9a1.5 1.5 0 0 0 1.5-1.5V30.8a.7.7 0 0 1 .8-.8h7.5a.7.7 0 0 1 .7.8V43.5a1.5 1.5 0 0 0 1.5 1.5h9a3 3 0 0 0 3-3V26c0-.1-.1-.3-.2-.5L24.5 9.5z"/>
+        </symbol>
+        <symbol id="svg-tabSettings" viewBox="0 0 48 48">
+            <path fill="currentColor" d="M24 31a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm14.9-5.1c0-.6.1-1.3.1-1.9s-.1-1.3-.1-2l4.2-3.3c.4-.3.5-.8.2-1.3l-4-6.9c-.2-.4-.8-.6-1.2-.4l-5 2c-1-.8-2.1-1.5-3.5-2l-.7-5.3c-.1-.5-.5-.8-1-.8h-7.8c-.5 0-.9.3-1 .8l-.7 5.3c-1.4.5-2.5 1.2-3.5 2l-5-2c-.4-.2-1 0-1.2.4l-4 6.9c-.3.4-.2 1 .2 1.3l4.2 3.3c-.1.7-.1 1.3-.1 2s0 1.3.1 1.9l-4.2 3.3c-.4.3-.5.9-.2 1.3l4 6.9c.2.4.8.6 1.2.4l5-2c1 .8 2.1 1.5 3.5 2l.7 5.3c.1.5.5.8 1 .8h7.8c.5 0 .9-.3 1-.8l.7-5.3c1.4-.5 2.5-1.2 3.5-2l5 2c.4.2 1 0 1.2-.4l4-6.9c.3-.4.2-1-.2-1.3z"/>
+        </symbol>
+        <symbol id="svg-tabSystem" viewBox="0 0 24 24">
+            <path fill="currentColor" d="m18 5c0-1.33-2-1.33-2 0v1h-12c-1.33 0-1.33 2 0 2h12v1c0 1.33 2 1.33 2 0v-1h2c1.33 0 1.33-2 0-2h-2zm-14 6c-1.33 0-1.33 2 0 2h2v1c0 1.33 2 1.33 2 0v-1h12c1.33 0 1.33-2 0-2h-12v-1c0-1.33-2-1.33-2 0v1zm-1 6c0-.55.45-1 1-1h12v-1c0-1.33 2-1.33 2 0v1h2c1.33 0 1.33 2 0 2h-2v1c0 1.33-2 1.33-2 0v-1h-12c-.55 0-1-.45-1-1"/>
+        </symbol>
+        <symbol id="svg-tabReseau" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-width="1.2">
+                <circle cx="12" cy="12" r="7.4"/><ellipse cx="12" cy="12" rx="3.2" ry="7.4"/><path d="M4.6 12h14.8" stroke-linecap="round"/>
+            </g>
+        </symbol>
+        <symbol id="svg-tabSomfy" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M3 4h18v4h-2v12h-2V8H7v12H5V8H3zm5 5h8v2H8zm0 3h8v2H8zm0 3h8v2H8zm0 3h8v2H8z" />
+        </symbol>
+        <symbol id="svg-tabRadio" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+                <path d="m4.9 19.1c-3.9-3.9-3.9-10.3 0-14.2m2.9 2.8c-1.95 2.02-2.28 5.11-.8 7.5"/>
+                <circle cx="12" cy="12" r="2"/><path d="m16.2 7.8c2 2 2.26 5.11.8 7.47m2.1-10.4c3.9 3.89 3.9 10.2 0 14.1"/>
+            </g>
+        </symbol>
+<!-- Bouton -->
+        <symbol id="svg-up" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="22" fill="currentColor"/>
+            <path d="M33 28.5l-9-9-9 9" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+        </symbol>
+        <symbol id="svg-my" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="22" fill="currentColor"/>
+            <text x="24" y="30" fill="#fff" font-family="sans-serif" font-size="18" font-weight="700" text-anchor="middle">my</text>
+        </symbol>
+        <symbol id="svg-down" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="22" fill="currentColor"/>
+            <path d="m33 19.5-9 9-9-9" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+        </symbol>
+        <symbol id="svg-toggle" viewBox="0 0 96 48">
+            <rect x="2" y="2" width="92" height="44" ry="22" fill="currentColor" />
+            <path d="m45.38 17.37a1.326 1.326 0 0 1 1.326-1.326 1.326 1.326 0 0 1 1.326 1.326v5.927l1.604 0.1724 6.55 2.904c0.7028 0.3182 1.127 1.021 1.127 1.79v5.781c-0.03977 1.087-0.9017 1.949-1.989 1.989h-8.619c-0.5039 0-0.9812-0.1989-1.326-0.5702l-6.497-5.569 0.9812-1.021c0.2519-0.2785 0.6099-0.4243 0.9812-0.4243h0.2917l4.243 2.281zm1.326-5.304a5.304 5.304 0 0 1 5.304 5.304c0 1.989-1.061 3.673-2.652 4.588v-1.618c0.8088-0.7293 1.326-1.79 1.326-2.97a3.978 3.978 0 0 0-3.978-3.978 3.978 3.978 0 0 0-3.978 3.978c0 1.18 0.5171 2.241 1.326 2.97v1.618c-1.591-0.9149-2.652-2.599-2.652-4.588a5.304 5.304 0 0 1 5.304-5.304" fill="#fff"/>
+        </symbol>
+        <symbol id="svg-toggleHand" viewBox="0 0 96 48">
+            <rect x="2" y="2" width="92" height="44" ry="22" fill="currentColor"/>
+            <path d="m56 28c0 4.42-3.58 8-8 8-3.26 0-6.19-1.99-7.4-5.02l-3.03-7.61c-0.313-0.788 0.434-1.58 1.24-1.32l0.79 0.26c0.56 0.18 1.02 0.61 1.24 1.16l1.28 3.21c0.08 0.2 0.26 0.32 0.46 0.32h0.42v-11.8c0-1.67 2.5-1.67 2.5 0v8.25c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-10.2c0-1.67 2.5-1.67 2.5 0v10.2c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-8.75c0-1.67 2.5-1.67 2.5 0v8.75c0 0.28 0.22 0.5 0.5 0.5s0.5-0.22 0.5-0.5v-5.75c0-1.67 2.5-1.67 2.5 0z" fill="#fff"/>
+        </symbol>
+
+        <symbol id="svg-arrowDown" viewBox="0 0 24 24">
+            <path d="m5 9 7 6 7-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="svg-arrowLeft" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m15 5l-6 7l6 7" />
+        </symbol>
+        <symbol id="svg-arrowRight" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m9 5l6 7l-6 7" />
+        </symbol>
+
+<!-- VR REMOTE -->
+        <symbol id="vr-up" viewBox="0 0 24 24">
+            <path d="m4.5 15.5 6.3-8.3c0.6-1 1.8-1 2.4 0l6.3 8.3c0.6 1-0.2 2.5-1.5 2.5h-12c-1.3 0-2.1-1.5-1.5-2.5z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"/>
+        </symbol>
+        <symbol id="vr-down" viewBox="0 0 24 24">
+            <path d="m19.5 8.95-6.3 8.3c-0.6 1-1.8 1-2.4 0l-6.3-8.3c-0.6-1 0.2-2.5 1.5-2.5h12c1.3 0 2.1 1.5 1.5 2.5z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"/>
+        </symbol>
+        <symbol id="vr-favori" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.c.2-.1.3-.3.3-.5" />
+        </symbol>
+        <symbol id="vr-sunflag-o" viewBox="0 0 24 24">
+            <path fill="currentColor" d="m12 2c.414 0 .75.336.75.75v1.5c0 1-1.5 1-1.5 0v-1.5c0-.414.336-.75.75-.75m0 15c2.76 0 5-2.24 5-5s-2.24-5-5-5c-6.67 0-6.67 10 0 10m9.25-4.25c1 0 1-1.5 0-1.5h-1.5c-1 0-1 1.5 0 1.5zm-9.25 6.25c.414 0 .75.336.75.75v1.5c0 1-1.5 1-1.5 0v-1.5c0-.414.336-.75.75-.75m-7.75-6.25c1 0 1-1.5 0-1.5h-1.5c-1 0-1 1.5 0 1.5zm-.03-8.53c.293-.292.767-.292 1.06 0l1.5 1.5c.658.706-.354 1.72-1.06 1.06l-1.5-1.5c-.292-.293-.292-.767 0-1.06m1.06 15.6c-.706.758-1.82-.354-1.06-1.06l1.5-1.5c.706-.758 1.82.354 1.06 1.06zm14.5-15.6c-.293-.292-.767-.292-1.06 0l-1.5 1.5c-.658.706.354 1.72 1.06 1.06l1.5-1.5c.292-.293.292-.767 0-1.06m-1.06 15.6c.706.758 1.82-.354 1.06-1.06l-1.5-1.5c-.706-.758-1.82.354-1.06 1.06z"/>
+        </symbol>
+        <symbol id="vr-sunflag-c" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 2m0 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10m0-1.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7m9.25-2.75a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5zM12 19a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 19m-7.75-6.25a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5zm-.03-8.53a.75.75 0 0 1 1.06 0l1.5 1.5a.75.75 0 0 1-1.06 1.06l-1.5-1.5a.75.75 0 0 1 0-1.06m1.06 15.56a.75.75 0 1 1-1.06-1.06l1.5-1.5a.75.75 0 1 1 1.06 1.06zm14.5-15.56a.75.75 0 0 0-1.06 0l-1.5 1.5a.75.75 0 0 0 1.06 1.06l1.5-1.5a.75.75 0 0 0 0-1.06m-1.06 15.56a.75.75 0 1 0 1.06-1.06l-1.5-1.5a.75.75 0 1 0-1.06 1.06z"/>
+        </symbol>
+<!-- indicateurs -->
+        <symbol id="indic-wind" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M.75 6c3.5-1.75 6.75-2 11.25 0s7.75 1.75 11.25 0l-3.1-1.2M.75 12c3.5-1.75 6.75-2 11.25 0s7.75 1.75 11.25 0l-3.1-1.2M.75 18c3.5-1.75 6.75-2 11.25 0s7.75 1.75 11.25 0l-3.1-1.2"/>
+        </symbol>
+        <symbol id="indic-sun" viewBox="0 0 24 24">
+            <g fill="currentColor"><circle cx="12" cy="12" r="5" opacity="0.3" /><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m12.73 0l-1.41-1.41M6.34 6.34l-1.41-1.41M12 7a5 5 0 100 10 5 5 0 000-10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></g>
+        </symbol>
+        <symbol id="svg-sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)"/>
+            <g fill="none" stroke="var(--icon-color,--cfg-SvgRight-inner)" stroke-linecap="round" stroke-width="1.12">
+                <circle cx="12" cy="12" r="3.2" fill="var(--icon-color,--cfg-SvgRight-inner)" stroke="none"/>
+                <path d="M12 4.6v1.5m0 11.8v1.5m7.4-7.4h-1.5m-11.8 0h-1.5m12.4-5-1 1m-8 8-1 1m10 0-1-1m-8-8-1-1"/>
+            </g>
+        </symbol>
+        <symbol id="svg-lightbulb" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)" /><path d="m12 4.5c-2.732 0.00331-4.947 2.218-4.95 4.95 0 0.75 0.164 1.467 0.487 2.136 0.564 1.168 1.184 2.493 1.683 3.914h5.56c0.5-1.421 1.12-2.746 1.684-3.914 0.3211-0.6662 0.4873-1.396 0.486-2.136 0-2.73-2.22-4.95-4.95-4.95m-2.5 12.5v2h5v-2z" fill="var(--icon-color, --bg-switch-ch-color)"/>
+        </symbol>
+        <symbol id="svg-favori" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="var(--crlIndicator)" /><path fill="var(--icon-color, --bg-switch-ch-color)" d="M16.23 18L12 15.45L7.77 18l1.12-4.81l-3.73-3.23l4.92-.42L12 5l1.92 4.53l4.92.42l-3.73 3.23z" />
+        </symbol>
+<!-- Edit-->
+        <symbol id="svg-drag" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 3l-4 4h8l-4-4zM6 10h12v1H6v-1zm0 3h12v1H6v-1zm6 8l4-4H8l4 4z"/>
+        </symbol>
+        <symbol id="svg-close" viewBox="0 0 24 24">
+            <path fill="var(--txtwarning-color)" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2m5 13.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41L8.41 7L12 10.59L15.59 7L17 8.41L13.41 12z" />
+        </symbol>
+        <symbol id="svg-edit" viewBox="0 0 24 24">
+            <path fill="var(--bg-switch-ch-color)" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z" />
+        </symbol>
+<!-- WIFI -->
+        <symbol id="svg-wifi-0" viewBox="0 0 24 24"><circle cx="12" cy="18" r="2" /></symbol>
+        <symbol id="svg-wifi-1" viewBox="0 0 24 24"><path d="m 17.671,14.307 c -3.074,-3.074 -8.268,-3.074 -11.342,0 l 1.414,1.414 c 2.307,-2.307 6.207,-2.307 8.514,0 z" /></symbol>
+        <symbol id="svg-wifi-2" viewBox="0 0 24 24"><path d="M 20.437,11.293 C 15.865,6.719 8.136,6.719 3.564,11.293 l 1.414,1.414 C 8.785,8.9 15.216,8.9 19.023,12.707 Z" /></symbol>
+        <symbol id="svg-wifi-3" viewBox="0 0 24 24"><path d="m 12,6 c 3.537,0 6.837,1.353 9.293,3.809 L 22.707,8.395 C 19.874,5.561 16.071,4 12,4 7.929,4.001 4.126,5.561 1.293,8.395 L 2.707,9.809 C 5.163,7.353 8.463,6 12,6" /></symbol>
+<!-- INSTRUCTION -->
+        <symbol id="svg-github" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M11.963 2.382C.554 2.621-1.82 17.93 8.852 21.602c.498.093.684-.219.684-.478v-1.68c-2.79.601-3.38-1.317-3.38-1.317a2.6 2.6 0 0 0-1.121-1.442c-.902-.612.072-.602.072-.602a2.07 2.07 0 0 1 1.536 1.038a2.167 2.167 0 0 0 2.924.819c.052-.5.275-.965.633-1.317c-2.23-.25-4.564-1.1-4.564-4.875a3.76 3.76 0 0 1 1.038-2.645a3.46 3.46 0 0 1 .103-2.634s.84-.26 2.76 1.037a9.6 9.6 0 0 1 5.02 0c1.908-1.276 2.748-1.038 2.748-1.038c.365.828.398 1.763.093 2.614a3.75 3.75 0 0 1 1.037 2.645c0 3.786-2.344 4.626-4.574 4.865c1.038.55.602 4.086.664 4.522c0 .259.176.57.695.477c10.642-3.64 8.152-18.97-3.257-19.209" />
+        </symbol>
+        <symbol id="svg-update" viewBox="0 0 24 24">
+            <path fill="var(--update-icon-color,var(--color))" d="M21 10.1h-6.8l2.7-2.8c-2.7-2.7-7.2-2.8-9.9-.1-2.7 2.7-2.7 7.1 0 9.8s7.2 2.7 9.9 0c1.4-1.3 2-2.9 2-4.9h2c0 2-.9 4.6-2.6 6.3-3.5 3.5-9.2 3.5-12.7 0-3.5-3.5-3.5-9.1 0-12.6s9.1-3.5 12.6 0l2.8-2.8z"/>
+            <circle cx="7.5" cy="16.5" r="4.5" fill="inherit"/>
+        </symbol>
+        <symbol id="svg-clear" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M9 1h6v8.5h6V14H3V9.5h6zM3 16h18v7h-5v-3h-2v3H3z" />
+        </symbol>
+        <symbol id="svg-linkOut" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5L21 3m-5 0h5v5m0 6v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+        </symbol>
+        <symbol id="svg-leboncoin" viewBox="0 0 24 24">
+            <path d="m0 3c0-2.82 3-3 3-3h18s3 0 3 3v18l-3 3h-18s-3 0-3-3z" fill="#fff"/>
+            <path d="m12 15c0-3 3-3 3-3h9v9l-3 3h-9z" fill="#ff6e14"/>
+            <path d="m24 12v9c0 3-3 3-3 3h-9z" fill="#954109"/>
+        </symbol>
+<!-- bulle info- -->
+        <symbol id="svg-succes" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10s10-4.5 10-10S17.5 2 12 2m-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8z" />
+        </symbol>
+        <symbol id="svg-info" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" />
+        </symbol>
+        <symbol id="svg-warning" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M4.47 21h15.06c1.54 0 2.5-1.67 1.73-3L13.73 4.99c-.77-1.33-2.69-1.33-3.46 0L2.74 18c-.77 1.33.19 3 1.73 3M12 14c-.55 0-1-.45-1-1v-2c0-.55.45-1 1-1s1 .45 1 1v2c0 .55-.45 1-1 1m1 4h-2v-2h2z" />
+        </symbol>
+        <symbol id="svg-error" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2zm0-4h-2V7h2z" />
+        </symbol>
+        <symbol id="svg-upload" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M6 20q-.825 0-1.412-.587T4 18v-2q0-.425.288-.712T5 15t.713.288T6 16v2h12v-2q0-.425.288-.712T19 15t.713.288T20 16v2q0 .825-.587 1.413T18 20zm5-12.15L9.125 9.725q-.3.3-.712.288T7.7 9.7q-.275-.3-.288-.7t.288-.7l3.6-3.6q.15-.15.325-.212T12 4.425t.375.063t.325.212l3.6 3.6q.3.3.288.7t-.288.7q-.3.3-.712.313t-.713-.288L13 7.85V15q0 .425-.288.713T12 16t-.712-.288T11 15z" />
+        </symbol>
+        <symbol id="svg-download" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M5 21h14a2 2 0 0 0 2-2V8a1 1 0 0 0-.29-.71l-4-4A1 1 0 0 0 16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2m10-2H9v-5h6zM13 7h-2V5h2zM5 5h2v4h8V5h.59L19 8.41V19h-2v-5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v5H5z" />
+        </symbol>
+        <symbol id="svg-ethernet" viewBox="0 0 24 24">
+            <path fill="currentColor" d="m7 14h2v3h2v-3h2v3h2v-3h2v3h2v-9h-4v-3h-6v3h-4v9h2zm15-2a10 10 0 0 1-10 10 10 10 0 0 1-10-10 10 10 0 0 1 10-10 10 10 0 0 1 10 10z"/>
+        </symbol>
+        <symbol id="svg-restore" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6a7 7 0 0 1 7-7a7 7 0 0 1 7 7a7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9a9 9 0 0 0-9-9" />
+        </symbol>
+        <symbol id="svg-simpleShutter" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M3 4h18v4h-2v12h-2V8H7v12H5V8H3zm5 5h8v2H8zm0 3h8v2H8zm0 3h8v2H8zm0 3h8v2H8z" />
+        </symbol>
+        <symbol id="svg-simpleGarage" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M22 9v11h-2v-9H4v9H2V9l10-4zm-3 3H5v2h14zm0 6H5v2h14zm0-3H5v2h14z" />
+        </symbol>
+        <symbol id="svg-repeater" viewBox="0 0 24 24">
+            <path fill="currentColor" fill-rule="evenodd" d="M23 12c0-6.075-4.925-11-11-11S1 5.925 1 12s4.925 11 11 11s11-4.925 11-11M10.707 6.707a1 1 0 0 0-1.414-1.414l-2 2a1 1 0 0 0 0 1.414l2 2a1 1 0 0 0 1.414-1.414L10.414 9H14a1 1 0 0 1 1 1v1a1 1 0 1 0 2 0v-1a3 3 0 0 0-3-3h-3.586zM9 13a1 1 0 1 0-2 0v1a3 3 0 0 0 3 3h3.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H10a1 1 0 0 1-1-1z" clip-rule="evenodd" />
+        </symbol>
+        <symbol id="svg-remote" viewBox="0 0 24 24">
+            <circle cx="12" cy="15.5" r="2.25" fill="var(--crlIndicator)"/>
+            <path fill="var(--crlIndicator)" fill-rule="evenodd" d="M5.67 3.78C5 4.79 5 6.19 5 9v6c0 2.81 0 4.21.67 5.22a4 4 0 0 0 1.11 1.11C7.79 22 9.19 22 12 22s4.21 0 5.22-.67a4 4 0 0 0 1.11-1.11C19 19.21 19 17.81 19 15V9c0-2.81 0-4.21-.67-5.22a4 4 0 0 0-1.11-1.11C16.21 2 14.81 2 12 2s-4.21 0-5.22.67a4 4 0 0 0-1.11 1.11M12 11.75a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5M8.25 5.5A.75.75 0 0 1 9 4.75h6a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2m4-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0m2 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2" clip-rule="evenodd" />
+        </symbol>
+<!-- Empty -->
+        <symbol id="svg-placeholder" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="currentColor" fill-opacity=".2"/>
+
+            <path d="M12 2a10 10 0 0 0-10 10 10 10 0 0 0 2.26 6.33l-1.97 1.96a1 1 0 0 0 1.42 1.42l1.96-1.97A10 10 0 0 0 12 22a10 10 0 0 0 10-10 10 10 0 0 0-2.26-6.33l1.97-1.96a1 1 0 0 0-1.42-1.42l-1.96 1.97A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 4.9 1.68L5.68 16.9A8 8 0 0 1 4 12a8 8 0 0 1 8-8zm6.32 3.1a8 8 0 0 1 1.68 4.9 8 8 0 0 1-8 8 8 8 0 0 1-4.9-1.68l11.22-11.22z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-emptyRoom" viewBox="0 0 24 24">
+            <path d="M12 13.8l8.9 3.6-8.9 3.6-9-3.6 9-3.6zm0 1.3L6.2 17.4l5.8 2.3 5.8-2.3-5.8-2.3zm-.3-12.1v10.1l-2.7 1.1v-4.8a1.3 1.3 0 0 0-1.8-1.2c-1 .4-1.7 1.4-1.8 2.6V15.3l-2.4 1v-10.2l8.7-3.5zm.6 0l8.7 3.5v10.2l-8.7-3.5V3zm2.4 4.7v3.6l3.6 1.5V7.7l-3.6-1.5zm-6.9 3.3c.3 0 .6.3.6.6s-.3.6-.6.6-.6-.3-.6-.6.3-.6.6-.6z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-emptyGroup" viewBox="0 0 24 24">
+            <path d="M3 3h10v2h-1v6H4V5H3V3zm2 2v1h6V5H5zm0 2v1h6V7H5zm0 2v1h6V9H5z"/>
+            <path d="M11 13h10v2h-1v6h-8v-6h-1v-2zm2 2v1h6v-1h-6zm0 2v1h6v-1h-6zm0 2v1h6v-1h-6z"/>
+            <path d="M18.4 8.8c0-.8-.2-1.7-.7-2.4-1-1.3-2.4-1.7-3.7-1.2l.3.8c1.1-.4 2.4-.1 3.1.9.4.5.5 1.2.5 1.8l-1.6-.2 1.8 2.5 2.2-2-1.6-.2z" fill="currentColor"/>
+            <path d="M5.6 15.1c-.1.8.1 1.7.6 2.4.9 1.3 2.4 1.8 3.8 1.4l-.2-.8c-1.1.4-2.5-.1-3.2-.9-.4-.5-.5-1.2-.5-1.8l1.6.3-1.7-2.5-2.4 1.8 1.6.3z" fill="currentColor"/>
+        </symbol>
+        <symbol id="svg-emptyRepeater" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                <path d="M12 12c.6-.8 1.2-1.5 2.2-1.5a1.5 1.5 0 1 1 0 3c-1 0-1.6-.7-2.2-1.5-.6.8-1.2 1.5-2.2 1.5a1.5 1.5 0 1 1 0-3c1 0 1.6.7 2.2 1.5z" stroke-width="1.2"/>
+                <path d="M5 4.9a10 10 0 0 0 0 14.2M7.8 7.7a6 6 0 0 0 0 8.6M16.2 16.3a6 6 0 0 0 0-8.6M19 19.1a10 10 0 0 0 0-14.2"/>
+            </g>
+        </symbol>
+<!-- SHADE -->
+        <symbol id="svg-window-shade" viewBox="0 0 48 48">
+            <path d="M6 11v28h36V11H6zm34 2v24H8V13h32z" fill="var(--svg-shade3)"/>
+            <g class="lattes-group" style="transform:translateY(calc(-26px + (0.26px * var(--shade-position, 0))))">
+                <path d="M7 11v26h34V11H7z" fill="var(--accent-color)"/>
+                <path d="M7 13h34v1H7zm0 3h34v1H7zm0 3h34v1H7zm0 3h34v1H7zm0 3h34v1H7zm0 3h34v1H7zm0 3h34v1H7zm0 3h34v1H7z" fill="#0002"/>
+                <path d="M8 12h1v25H8zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1zm2 0h1v25h-1z" fill="#0002"/>
+            </g>
+            <path d="M6 12h36v-1H6z" fill="var(--svg-shade3)"/>
+            <rect x="5" width="38" height="11" fill="var(--unibloc-color)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+            <path d="M4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-window-blind" viewBox="0 0 48 48">
+            <path d="M6 9v30h36V9H6zm34 2v26H8V11h32z" fill="var(--svg-shade3)"/>
+            <g class="lattes-group" style="transform:translateY(calc(-26px + (0.26px * var(--shade-position, 0))))">
+                <path d="M10 10v27h1V10h-1zm27 0v27h1V10h-1z" fill="var(--svg-shade4)"/>
+                <path d="M6 12h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6zm0 3h36v1H6z" fill="var(--accent-color)"/>
+            </g>
+            <path d="M6 10h36v-1H6z" fill="var(--svg-shade3)"/>
+            <rect x="5" width="38" height="4" fill="var(--unibloc-color)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+            <path d="M4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-awning" viewBox="0 0 48 48">
+            <g class="lattes-group" style="transform:translateY(calc(-31px + (0.31px * var(--shade-position, 0))))">
+                <path d="M7 12h34v29H7z" fill="var(--accent-color)"/>
+                <path d="M7 41h34v1H7z" fill="#b8b8b8"/>
+                <path d="M13 12h1v29h-1zm7 0h1v29h-1zm7 0h1v29h-1zm7 0h1v29h-1z" fill="#191b20"/>
+            </g>
+            <rect x="5" width="38" height="12" fill="var(--unibloc-color)"/>
+            <rect x="4" y="5" width="40" height="6" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M4 6h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-shutter" viewBox="0 0 48 48">
+            <path d="M6 9v30h36V9H6zm34 2v26H8V11h32z" fill="var(--svg-shade3)"/>
+            <g class="lattes-group" style="transform:translateY(calc(-26px + (0.26px * var(--shade-position, 0))))">
+                <rect x="8" y="11" width="32" height="26" fill="var(--accent-colorDark)"/>
+                <path d="M8 12h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8zm0 2h32v1H8z" fill="var(--accent-color)"/>
+            </g>
+            <path d="M6 10h36v-1H6z" fill="var(--svg-shade3)"/>
+            <rect x="5" width="38" height="4" fill="var(--unibloc-color)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1zM4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-garage" viewBox="0 0 48 48">
+            <g class="lattes-group" style="transform:translateY(calc(-20px + (0.2px * var(--shade-position, 0))))">
+                <rect x="10" y="19" width="28" height="21" fill="var(--accent-colorDark)"/>
+                <path d="M10 20h28v6H10zm0 7h28v6H10zm0 7h28v6H10z" fill="var(--accent-color)"/>
+                <path d="M23 35h2v1h-2z" fill="color-mix(in srgb, var(--accent-color), #000 30%)"/>
+            </g>
+            <path d="M6 0h36v20H6z" fill="var(--unibloc-color)"/>
+            <path d="M6 40V19h36v21h-4V20H10v20z" fill="var(--svg-shade2)"/>
+            <path d="M24 6l20 10v2c0 1-1 1-1 1H5c-1 0-1-1-1-1v-2z" fill="var(--svg-shade1)"/>
+            <rect x="4" y="40" width="40" height="4" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M43 40c1 0 1 1 1 1H4c0-1 1-1 1-1zM24 6l20 10v1L24 7 4 17v-1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-ldrapery" viewBox="0 0 48 48">
+            <path d="M6 9v30h36V9H6zm34 2v26H8V11h32z" fill="var(--svg-shade3)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <g class="lattes-group" style="transform:translateX(calc(-0.32px * var(--shade-position, 0)))">
+                <rect x="8" y="11" width="32" height="26" fill="var(--accent-colorDark)"/>
+                <path d="M11 10h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h2v28h-2z" fill="var(--accent-color)"/>
+            </g>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M7 10h3v28H7z" fill="var(--accent-color)"/>
+            <rect y="9" width="6" height="30" fill="var(--unibloc-color)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1zM4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-rdrapery" viewBox="0 0 48 48">
+            <path d="M6 9v30h36V9H6zm34 2v26H8V11h32z" fill="var(--svg-shade3)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <g class="lattes-group" style="transform:translateX(calc(0.32px * var(--shade-position, 0)))">
+                <rect x="8" y="11" width="32" height="26" fill="var(--accent-colorDark)"/>
+                <path d="M7 10h2v28H7zm3 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3z" fill="var(--accent-color)"/>
+            </g>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M38 10h3v28h-3z" fill="var(--accent-color)"/>
+            <rect x="42" y="9" width="6" height="30" fill="var(--unibloc-color)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1zM4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-cdrapery" viewBox="0 0 48 48">
+            <path d="M6 9v30h36V9H6zm34 2v26H8V11h32z" fill="var(--svg-shade3)"/>
+            <rect x="4" y="4" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <g class="lattes-group" style="transform:translateX(calc(-0.16px * var(--shade-position, 0)))">
+                <rect x="10" y="11" width="14" height="26" fill="var(--accent-colorDark)"/>
+                <path d="M9 10h2v28H9zm3 0h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3z" fill="var(--accent-color)"/>
+            </g>
+            <g class="lattes-group" style="transform:translateX(calc(0.16px * var(--shade-position, 0)))">
+                <rect x="24" y="11" width="16" height="26" fill="var(--accent-colorDark)"/>
+                <path d="M25 10h3v28h-3zm4 0h3v28h-3zm4 0h3v28h-3zm4 0h2v28h-2z" fill="var(--accent-color)"/>
+            </g>
+            <rect x="4" y="39" width="40" height="5" rx="1" fill="var(--svg-shade1)"/>
+            <path d="M7 10h3v28H7zm31 0h3v28h-3z" fill="var(--accent-color)"/>
+            <rect x="42" y="9" width="6" height="30" fill="var(--unibloc-color)"/>
+            <rect y="9" width="6" height="30" fill="var(--unibloc-color)"/>
+            <path d="M4 5h40c0-1-1-1-1-1H5c-1 0-1 1-1 1zM4 40h40c0-1-1-1-1-1H5c-1 0-1 1-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-lgate" viewBox="0 0 48 48">
+            <g class="lattes-group" style="transform:translateX(calc(-0.34px * var(--shade-position, 0)))">
+                <path d="M9 41h33c1 0 1-1 1-1V8h-3v31H9z" fill="var(--svg-shade5)"/>
+                <path d="M9 9v30h1V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h3V9z" fill="var(--svg-shade5)"/>
+            </g>
+            <rect width="4" height="36" y="8" fill="var(--unibloc-color)"/>
+            <path d="m5 4v40h39v-2h-34v-37c0-1-1-1-1-1z" fill="var(--svg-shade2)"/>
+            <path d="m4 5v39h40v-1h-39v-39s-1 0-1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-cgate" viewBox="0 0 48 48">
+            <g class="lattes-group" style="transform:translateX(calc(-0.13px * var(--shade-position, 0)))" fill="var(--svg-shade5)">
+                <path d="M3 41h20c1 0 1-1 1-1V8h-2v31H3z"/>
+                <path d="M3 9v2h7v28h2V11h2v28h2V11h2v28h3V9z"/>
+            </g>
+            <g class="lattes-group" style="transform:translateX(calc(0.13px * var(--shade-position, 0)))" fill="var(--svg-shade5)">
+                <path d="M39 41H25c-1 0-1-1-1-1V8h2v31h13z"/>
+                <path d="M25 9v2h3v28h2V11h2v28h2V11h2v28h2V11h1.5l0-2h-14.5z"/>
+            </g>
+            <path d="M0 6h4v36H0zm44 0h4v36h-4z" fill="var(--unibloc-color)"/>
+            <path d="m5 4v40h39v-39c0-1-1-1-1-1h-4v38h-29v-37c0-1-1-1-1-1z" fill="var(--svg-shade2)"/>
+            <path d="m4 44h40v-1h-39v-39s-1 0-1 1zm35-40c-1 0-1 1-1 1v37h1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-rgate" viewBox="0 0 48 48">
+            <g class="lattes-group" style="transform:translateX(calc(0.34px * var(--shade-position, 0)))">
+                <path d="M39 41H6c-1 0-1-1-1-1V8h3v31h31z" fill="var(--svg-shade5)"/>
+                <path d="M7 9v2h3v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h2V11h2v28h1V9z" fill="var(--svg-shade5)"/>
+            </g>
+            <rect x="44" y="7" width="4" height="36" fill="var(--unibloc-color)"/>
+            <path d="m43 4v40h-39v-2h34v-37c0-1 1-1 1-1z" fill="var(--svg-shade2)"/>
+            <path d="m44 5v39h-40v-1h39v-39s1 0 1 1z" fill="var(--svg-shade0)"/>
+        </symbol>
+        <symbol id="svg-contactBulb" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="var(--side-handle)"/>
+            <path class="contactBulbe-fill" d="M12 4.5c-2.73 0-4.95 2.22-4.95 4.95 0 .75.16 1.47.49 2.14.56 1.17 1.18 2.49 1.68 3.91h5.56c.5-1.42 1.12-2.75 1.68-3.91.32-.67.49-1.4.49-2.14 0-2.73-2.22-4.95-4.95-4.95zM9.5 17v2h5v-2h-5z"/>
+        </symbol>
+    </svg>
+</body>
+</html>

@@ -1,0 +1,6 @@
+esp32async/AsyncTCP @ 3.3.2
+links2004/WebSockets @ 2.4.1
+esp32async/ESPAsyncWebServer @ 3.6.0
+lsatan/SmartRC-CC1101-Driver-Lib @ 2.5.7
+knolleary/PubSubClient @ 2.8.0
+bblanchon/ArduinoJson @ 6.21.5
