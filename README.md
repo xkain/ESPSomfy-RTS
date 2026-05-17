@@ -89,7 +89,7 @@ If you lose access to the web interface (network configuration error or forgotte
 
 
 > [!IMPORTANT]
->The procedure depends on your firmware version. A two-tier system was introduced in **v2.5.1** to allow resetting the network without losing all your configurations (which is the case if you are on version **v2.5.0**).
+>The procedure depends on your firmware version. A two-tier system was introduced in **v2.5.1** to allow resetting the network without losing all your configurations (which is not the case if you are using version **2.5.0**).
 
 
 ### Summary of procedures
