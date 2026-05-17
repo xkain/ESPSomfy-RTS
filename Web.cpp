@@ -15,9 +15,6 @@
 #include "GitOTA.h"
 #include "Network.h"
 
-
-
-
 extern ConfigSettings settings;
 extern SSDPClass SSDP;
 extern rebootDelay_t rebootDelay;
@@ -31,10 +28,8 @@ extern Network net;
 #define WEB_MAX_RESPONSE 4096
 static char g_content[WEB_MAX_RESPONSE];
 
-
 // General responses
 static const char _response_404[] = "404: Service Not Found";
-
 
 // Encodings
 static const char _encoding_text[] = "text/plain";
@@ -42,19 +37,17 @@ static const char _encoding_html[] = "text/html";
 static const char _encoding_json[] = "application/json";
 
 
-
-
 WebServer apiServer(8081);
 WebServer server(80);
 void Web::startup() {
   Serial.println("Launching web server...");
 
-  // Ce bloc va forcer le coupable à se démasquer dans le moniteur série
-  server.on("/json", HTTP_GET, []() {
-    Serial.print(">>> REQUETE /json RECUE DE L'IP : ");
-    Serial.println(server.client().remoteIP().toString());
-    server.send(200, "application/json", "{}");
-  });
+
+  //server.on("/json", HTTP_GET, []() {
+    //Serial.print(">>> REQUETE /json RECUE DE L'IP : ");
+    //Serial.println(server.client().remoteIP().toString());
+    //server.send(200, "application/json", "{}");
+  //});
 }
 void Web::loop() {
   server.handleClient();
@@ -111,6 +104,11 @@ bool Web::isAuthenticated(WebServer &server, bool cfg) {
   }
   return true;
 }
+void sendJsonError(const char* detail = "") {
+  String msg = F("JSON Err: ");
+  msg += detail;
+  server.send(400, "text/html", msg);
+}
 bool Web::createAPIPinToken(const IPAddress ipAddress, const char *pin, char *token) {
   return this->createAPIToken((String(pin) + ":" + ipAddress.toString()).c_str(), token);
 }
@@ -146,12 +144,11 @@ void Web::handleLang(WebServer &server) {
     webServer.sendCORSHeaders(server);
     if (server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
 
-    String filename = "/locale/en.json"; // Par défaut
+    String filename = "/locale/en.json";
 
-    // On définit une liste de correspondance
     if (settings.language == 0) filename = "/locale/en.json";
     else if (settings.language == 1) filename = "/locale/fr.json";
-    else if (settings.language == 2) filename = "/locale/de.json"; // Allemand
+    else if (settings.language == 2) filename = "/locale/de.json";
     //else if (settings.language == 3) filename = "/locale/es.json"; // Espagnol
 
     if (LittleFS.exists(filename)) {
@@ -911,33 +908,25 @@ void Web::handleDiscovery(WebServer &server) {
 void Web::handleBackup(WebServer &server, bool attach) {
   webServer.sendCORSHeaders(server);
   if(server.hasArg("attach")) attach = toBoolean(server.arg("attach").c_str(), attach);
+
   if(attach) {
-    char filename[120];
     Timestamp ts;
     char * iso = ts.getISOTime();
-    // Replace the invalid characters as quickly as we can.
-    for(uint8_t i = 0; i < strlen(iso); i++) {
-      switch(iso[i]) {
-        case '.':
-          // Just trim off the ms.
-          iso[i] = '\0';
-          break;
-        case ':':
-          iso[i] = '_';
-          break;
-      }
+
+    for(char *p = iso; *p; p++) {
+      if(*p == '.') { *p = '\0'; break; }
+      if(*p == ':') *p = '_';
     }
-    snprintf(filename, sizeof(filename), "attachment; filename=\"ESPSomfyRTS %s.backup\"", iso);
-    Serial.println(filename);
-    server.sendHeader(F("Content-Disposition"), filename);
+
+    server.sendHeader(F("Content-Disposition"), String(F("attachment; filename=\"ESPSomfyRTS ")) + iso + F(".backup\""));
     server.sendHeader(F("Access-Control-Expose-Headers"), F("Content-Disposition"));
   }
-  Serial.println("Saving current shade information");
+  Serial.println(F("Backup..."));
   somfy.writeBackup();
+
   File file = LittleFS.open("/controller.backup", "r");
   if (!file) {
-    Serial.println("Error opening shades.cfg");
-    server.send(500, _encoding_text, "shades.cfg");
+    server.send(500, _encoding_text, F("Err: File"));
     return;
   }
   server.streamFile(file, _encoding_text);
@@ -1094,31 +1083,14 @@ void Web::handleDownloadFirmware(WebServer &server) {
   }
 }
 void Web::handleNotFound(WebServer &server) {
-    HTTPMethod method = server.method();
-    Serial.printf("Request %s 404-%d ", server.uri().c_str(), method);
-    switch (method) {
-    case HTTP_POST:
-      Serial.print("POST ");
-      break;
-    case HTTP_GET:
-      Serial.print("GET ");
-      break;
-    case HTTP_PUT:
-      Serial.print("PUT ");
-      break;
-    case HTTP_OPTIONS:
-      Serial.println("OPTIONS ");
-      server.send(200, "OK");
-      return;
-    default:
-      Serial.print("[");
-      Serial.print(method);
-      Serial.print("]");
-      break;
+  if(server.method() == HTTP_OPTIONS) {
+    server.send(200, _encoding_text, F("OK"));
+    return;
+  }
+  Serial.print(F("404: "));
+  Serial.println(server.uri());
 
-    }
-    snprintf(g_content, sizeof(g_content), "404 Service Not Found: %s", server.uri().c_str());
-    server.send(404, _encoding_text, g_content);
+  server.send(404, _encoding_text, F("404: Not Found"));
 }
 void Web::handleReboot(WebServer &server) {
   webServer.sendCORSHeaders(server);
@@ -1260,7 +1232,6 @@ void Web::begin() {
       }
 
     });
-
   server.on("/index.js", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/index.js", "text/javascript"); });
   server.on("/base.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/base.css", "text/css"); });
   server.on("/main.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css", "text/css"); });
@@ -1837,7 +1808,6 @@ void Web::begin() {
       }
     }
   });
-  
   server.on("/unlinkRemote", []() {
     webServer.sendCORSHeaders(server);
     if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
@@ -2284,75 +2254,61 @@ void Web::begin() {
   server.on("/reboot", []() { webServer.handleReboot(server);});
   server.on("/saveSecurity", []() {
     webServer.sendCORSHeaders(server);
-    if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
-    DynamicJsonDocument doc(512);
-    DeserializationError err = deserializeJson(doc, server.arg("plain"));
-    if (err) {
-      Serial.print("Error parsing JSON ");
-      Serial.println(err.c_str());
-      String msg = err.c_str();
-      server.send(400, _encoding_html, "Error parsing JSON body<br>" + msg);
-    }
-    else {
+    if(server.method() == HTTP_OPTIONS) return server.send(200);
+
+    StaticJsonDocument<768> doc; // Un seul doc suffit pour l'entrée et la sortie
+    if (deserializeJson(doc, server.arg("plain"))) return server.send(400, "text/plain", F("J-Err"));
+
+    if (server.method() == HTTP_POST || server.method() == HTTP_PUT) {
       JsonObject obj = doc.as<JsonObject>();
-      HTTPMethod method = server.method();
-      if (method == HTTP_POST || method == HTTP_PUT) {
-        settings.Security.fromJSON(obj);
-        settings.Security.save();
-        char token[65];
-        webServer.createAPIToken(server.client().remoteIP(), token);
-        obj["apiKey"] = token;
-        DynamicJsonDocument sdoc(1024);
-        JsonObject sobj = sdoc.to<JsonObject>();
-        settings.Security.toJSON(sobj);
-        serializeJson(sdoc, g_content);
-        server.send(200, _encoding_json, g_content);
-      }
-      else {
-        server.send(201, "application/json", "{\"status\":\"ERROR\",\"desc\":\"Invalid HTTP Method: \"}");
-      }
+      settings.Security.fromJSON(obj);
+      settings.Security.save();
+
+      doc.clear();
+      obj = doc.to<JsonObject>();
+
+      char token[65];
+      webServer.createAPIToken(server.client().remoteIP(), token);
+      settings.Security.toJSON(obj);
+      obj["apiKey"] = token;
+
+      serializeJson(doc, g_content);
+      server.send(200, _encoding_json, g_content);
+    } else {
+      server.send(405, _encoding_json, F("{\"s\":\"ERR\"}"));
     }
-    });
+  });
   server.on("/getSecurity", []() {
     webServer.sendCORSHeaders(server);
-    DynamicJsonDocument doc(512);
+    DynamicJsonDocument doc(192);
     JsonObject obj = doc.to<JsonObject>();
     settings.Security.toJSON(obj);
     serializeJson(doc, g_content);
     server.send(200, _encoding_json, g_content);
     });
+
   server.on("/saveRadio", []() {
     webServer.sendCORSHeaders(server);
-    if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
-    DynamicJsonDocument doc(1024);
+    if(server.method() == HTTP_OPTIONS) return server.send(200);
 
-    Serial.print("Taille du JSON reçu : ");
-    Serial.println(server.arg("plain").length());
-    DeserializationError err = deserializeJson(doc, server.arg("plain"));
-    if (err) {
-      Serial.print("Error parsing JSON ");
-      Serial.println(err.c_str());
-      String msg = err.c_str();
-      server.send(400, _encoding_html, "Error parsing JSON body<br>" + msg);
-    }
-    else {
+    StaticJsonDocument<512> doc; // Réduit de 1024 à 768 si tes réglages radio sont simples
+    if (deserializeJson(doc, server.arg("plain"))) return server.send(400, "text/plain", F("J-Err"));
+
+    if (server.method() == HTTP_POST || server.method() == HTTP_PUT) {
       JsonObject obj = doc.as<JsonObject>();
-      HTTPMethod method = server.method();
-      if (method == HTTP_POST || method == HTTP_PUT) {
-        somfy.transceiver.fromJSON(obj);
-        somfy.transceiver.save();
-        JsonResponse resp;
-        resp.beginResponse(&server, g_content, sizeof(g_content));
-        resp.beginObject();
-        somfy.transceiver.toJSON(resp);
-        resp.endObject();
-        resp.endResponse();
-      }
-      else {
-        server.send(201, "application/json", "{\"status\":\"ERROR\",\"desc\":\"Invalid HTTP Method: \"}");
-      }
+      somfy.transceiver.fromJSON(obj);
+      somfy.transceiver.save();
+
+      JsonResponse resp;
+      resp.beginResponse(&server, g_content, sizeof(g_content));
+      resp.beginObject();
+      somfy.transceiver.toJSON(resp);
+      resp.endObject();
+      resp.endResponse();
+    } else {
+      server.send(405, _encoding_json, F("{\"s\":\"ERR\"}"));
     }
-    });
+  });
   server.on("/getRadio", []() {
     webServer.sendCORSHeaders(server);
     JsonResponse resp;

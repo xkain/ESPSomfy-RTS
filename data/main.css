@@ -9,8 +9,7 @@
     transition: margin-left 0.3s;
     position: relative;
 }
-/***************************
- * Header*/
+/*Header*/
 .header {
     display: none;
 }
@@ -20,7 +19,7 @@
     left: 0;
     width: 100%;
     height: 100px;
-    background-color: #1a1a1a;
+    background: #1a1a1a;
     color: #ffffff;
     display: flex;
     align-items: center;
@@ -73,7 +72,7 @@
     border-color: var(--accent-color);
     font-weight: bold;
     opacity: 1;
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     color: #fff;
 }
 .uptime-container {
@@ -105,14 +104,13 @@
     font-family: monospace;
     min-width: 68px;
 }
-/***************************
- * SideBar*/
+/*SideBar*/
 .sidebar {
     display: flex;
     flex-direction: column;
     padding: 15px;
     height: calc(100vh - 100px);
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     border-right: 1px solid #333;
     width: 20%;
     min-width: 250px;
@@ -198,7 +196,7 @@
     gap: 10px;
 }
 #barsideRadioDisable {
-    background-color: #e74c3c;
+    background: #e74c3c;
     color: white !important;
     padding: 2px 8px;
     border-radius: 10px;
@@ -209,13 +207,11 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .tab-container { display: none; }
-
-/***************************
- * SubTab*/
+/*SubTab*/
 .subtab-container {
     display: inline-flex !important;
     width: auto;
-    background-color: var(--body-color);
+    background: var(--body-color);
     border-radius: 31px;
     margin: 20px 0 0 15px;
     overflow: hidden;
@@ -246,29 +242,28 @@
 .subtab-NameShow-virtualRemote {
     display: none !important;
 }
-
-/***************************
- * PAGE Welcome*/
+/* PAGE Welcome*/
 #divGetStarted {
-display: none;
-flex-direction: column;
-flex: 1;
-align-items: center;
-justify-content: center;
-text-align: center;
-animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-margin-top: 9%;
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 20px 0 20px;
+    animation: slideUpFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) ;
+    min-height: calc(100vh - 102px);
 }
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 .welcome-container {
     display: flex;
     flex-direction: column;
@@ -298,6 +293,7 @@ margin-top: 9%;
     color: var(--accent-color);
     max-width: 235px;
     margin: auto;
+    padding-bottom: 10%;
 }
 .welcomeMiddle p {
     font-size: 1.2em;
@@ -330,7 +326,7 @@ margin-top: 9%;
     align-items: flex-start;
     justify-content: flex-start;
     flex: 1;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     border-radius: 25px;
     padding: 14px 13px;
     cursor: pointer;
@@ -339,7 +335,7 @@ margin-top: 9%;
 }
 .welcomeCard:active {
     transform: translateY(0);
-    background-color: var(--bg-switch-color);
+    background: var(--bg-switch-color);
 }
 .welcomeCard svg {
     position: absolute;
@@ -357,7 +353,6 @@ margin-top: 9%;
 }
 .welcomeCard-content {
     position: relative;
-    z-index: 1;
     text-align: left;
 }
 .welcomeCard-content H1 {
@@ -371,6 +366,43 @@ margin-top: 9%;
     font-size: 13px;
     color: var(--soustxt-color);
 }
+#divLBCWelcome, #divBtnLBC {
+display: none !important;
+}
+html[lang="fr"] #divLBCWelcome,
+html[lang="fr"] #divBtnLBC {
+    display: flex !important;
+}
+.lbcWelcomelink {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--hr-soft);
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.lbcWelcomelink div {
+    display: flex;
+    align-items: center;
+    font-size: 0.85em;
+    color: var(--label-grey);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+.lbcWelcomelink:hover div{
+    opacity: 1;
+    background: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+}
+.lbcWelcomelink svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    fill: currentColor;
+}
 .welcomeBottom-desc {
     font-size: 0.8em;
     line-height: 1.6;
@@ -379,20 +411,18 @@ margin-top: 9%;
     margin: 15px auto 0 auto;
     font-style: italic;
 }
-/**/
 #divConfigPnl {
     max-width: 900px;
     margin: auto;
 }
-/***************************
- * Page Général*/
+/* Page Général*/
 .chooseAccentColor {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     width: 60px;
     height: 40px;
-    background-color: transparent;
+    background: transparent;
     border: none;
     cursor: pointer;
     outline: none;
@@ -404,21 +434,19 @@ margin-top: 9%;
 .chooseAccentColor::-webkit-color-swatch {
     border-radius: 25px;
     border: none;
-    box-sizing: border-box;
 }
 .chooseAccentColor::-moz-color-swatch {
     border-radius: 25px;
     border: none;
-    box-sizing: border-box;
 }
-/***** Security **/
+/* Security **/
 .blocPin-digit {
     display:inline-block;
     text-align:center;
+    width: 100%;
 }
 .blocPin-digit label {display:block}
-
-/***** Firmware **/
+/* Firmware **/
 .status-detail {
     font-size: 12px;
     color: var(--soustxt-color);
@@ -444,13 +472,20 @@ margin-top: 9%;
     text-align:left;
     flex-grow: 1;
 }
-.button-update svg {
+.buttonUpdate svg,
+.unibutton svg {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
     fill: currentColor;
 }
-.button-update span {
+.svgLbc{
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border-lbc);
+    border-radius: 4px;
+}
+.buttonUpdate span {
     line-height: 1;
 }
 .buttonUpdateCache {
@@ -470,12 +505,12 @@ margin-top: 9%;
     width:20px;
     height:20px;
     opacity:0.6;
+    padding: 0;
 }
 .credits-list .special-credit {
     opacity: 0.8;
 }
-/***************************
- * Page Network*/
+/* Page Network*/
 .wifi-container {
     display: flex;
     justify-content: space-between;
@@ -519,7 +554,7 @@ span.ssid {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* --- 3. ICONES ET SIGNAUX SVG --- */
+/* ICONES ET SIGNAUX SVG*/
 div.signal {
     display: flex;
     align-items: center;
@@ -588,8 +623,20 @@ div.wifiSignal {
 .msgHotspot span:last-child {
     margin-top:0;
 }
-/***************************
-* Page Shade, Groupe and Repeater*/
+.chooseWifiEth {
+    margin:0;
+    transition: background 0.3s ease, border 0.3s ease;
+}
+.chooseWifiEth:hover {
+    background: color-mix(in srgb, var(--accent-color) 50%, var(--unibloc-color));
+    cursor: pointer;
+    border: 1px solid var(--accent-color);
+}
+.chooseWifiEth:has(input:checked) {
+    background: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
+    border: 1px solid var(--accent-color);
+}
+/*Page Shade, Groupe and Repeater*/
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -602,9 +649,11 @@ div.wifiSignal {
     opacity: 0.3;
     fill: currentColor;
 }
-.empty-icon { --shade-position: 100 !important;
+.empty-icon {
+    --shade-position: 100 !important;
     --accent-color: #a1a1a1;
-    --unibloc-color:var(--background-color)
+    --accent-colorDark: color-mix(in srgb, #a1a1a1 41%, #828282);
+    --unibloc-color: var(--background-color);
 }
 .empty-subtext {
     font-size: 0.9em;
@@ -628,30 +677,7 @@ div.wifiSignal {
     min-height: 147px;
     max-height: none !important;
 }
-.room-draggable,
-.group-draggable,
-.shade-draggable,
-.somfyRepeater {
-    height: 38px;
-    margin: 3px 0;
-    padding: 8px;
-    border-radius: 25px;
-    background-color: var(--unibloc-color);
-    cursor: grab;
-}
-.room-draggable.dragging *,
-.room-draggable.over *,
-.group-draggable.dragging *,
-.group-draggable.over *,
-.shade-draggable.dragging *,
-.shade-draggable.over * {
-    pointer-events: none;
-}
-.room-draggable.over,
-.group-draggable.over,
-.shade-draggable.over {
-    border-top: solid 2px var(--accent-color, '#00bcd4');
-}
+/*room*/
 .room-selector {
     display: flex !important;
     flex-direction: row !important;
@@ -697,19 +723,12 @@ div.wifiSignal {
     gap:5px;
     align-items:center;
 }
-.LinkedList {
-    overflow-y: auto;
-    max-height: 177px;
-    margin-top:15px;
-}
 #divSomfyGroupButtons {
     display: flex;
     justify-content: center;
     margin-left: auto;
     margin-right: auto;
     width: fit-content;
-    padding: 15px;
-    margin-bottom: -15px;
     gap: 10px;
 }
     #divSomfyGroupButtons .btn-somfy-svg {
@@ -744,7 +763,6 @@ div.wifiSignal {
 #valTilt {
 color: var(--color);
 }
-
 #somfyShade #divGPIOControl {
 display: none;
 }
@@ -796,8 +814,7 @@ display: none;
 #somfyShade[data-proto="8"][data-shadetype="9"] #divGPIOUp {
 display: none;
 }
-/***************************
-* télécommande virtuelle*/
+/*télécommande virtuelle*/
 .vr-content {
     max-width: 380px;
     width: 100%;
@@ -807,14 +824,14 @@ display: none;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     padding: 20px;
     border-radius: 25px;
     border: 1px solid var(--borderShadeCtl);
     box-shadow: 0 0 6px 0 var(--shadowShadeCtl);
 }
 .vr-content .unibloc {
-    background-color: var(--background-color);
+    background: var(--background-color);
     margin: 0 0 15px;
 }
 .vr-bloctoogle {
@@ -857,7 +874,7 @@ display: none;
     width: 48%;
     max-width: 130px;
     height: 52px;
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     border-radius: 30px;
     display: flex;
     align-items: center;
@@ -873,7 +890,7 @@ display: none;
 .vr-my-center {
     width: 90px;
     height: 90px;
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -889,11 +906,13 @@ display: none;
     position: relative;
     width: 210px;
     height: 210px;
-    background-color: var(--background-color);
+    background: var(--background-color);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .vr-wheel-arrow {
     position: absolute;
@@ -914,7 +933,7 @@ display: none;
     width: 20%;
 }
 .vr-upMy, .vr-myDown, .vr-upDown, .vr-all {
-    background-color: var(--background-color);
+    background: var(--background-color);
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -924,6 +943,8 @@ display: none;
     -webkit-font-smoothing: subpixel-antialiased;
     transform-origin: center center;
     color: var(--soustxt-color);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .vr-upMy, .vr-upDown      { border-radius: 35px 35px 0 0; margin-bottom: 6px; }
 .vr-myDown, .vr-all { border-radius: 0 0 35px 35px; }
@@ -946,9 +967,11 @@ display: none;
     cursor: pointer;
     transition: transform 0.1s, filter 0.1s;
     text-transform: uppercase;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-.btn-prog { background-color: var(--background-color); color: var(--color); }
-.btn-fav  { background-color: var(--accent-color); color: white; border: none; }
+.btn-prog { background: var(--background-color); color: var(--color); }
+.btn-fav  { background: var(--accent-color); color: white; border: none; }
 .switch-group { display: flex; gap: 5px; margin-bottom: 10px; }
 .switch-soleil, .switch-windy { flex: 1; display: flex; }
 .switch-group input { display: none; }
@@ -962,16 +985,20 @@ display: none;
     font-size: 1em;
     font-weight: bold;
     transition: all 0.2s;
-    background-color: var(--background-color);
+    background: var(--background-color);
     color: var(--soustxt-color);
     border-radius: 25px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .vr-block-centerFlag {
     display: flex;
-    background-color: var(--background-color);
+    background: var(--background-color);
     color: var(--soustxt-color);
     height: 44px;
-    border-radius:25px
+    border-radius:25px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .vr-button-sunflagL, .vr-button-sunflagR {
     display: flex;
@@ -984,7 +1011,7 @@ display: none;
 .vr-button-sunflagR { flex: 1; border-radius: 0 20px 20px 0; }
 
 .btn-send {
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     color: white;
     border: none;
     border-radius: 20px;
@@ -995,7 +1022,7 @@ display: none;
 }
 .vr-step80 {
     position: relative;
-    background-color: var(--background-color);
+    background: var(--background-color);
     border-radius: 25px;
     padding: 15px;
     display: flex;
@@ -1031,21 +1058,20 @@ display: none;
     left: 0;
     width: 100%;
 }
- #divVirtualRemote[data-bitlength="56"] .vr-80bit,
- #divVirtualRemote[data-bitlength="none"] .vr-favorite {
- display: none;
+#divVirtualRemote[data-bitlength="56"] .vr-80bit,
+#divVirtualRemote[data-bitlength="none"] .vr-favorite {
+    display: none;
  }
-
-/* --- ÉTATS ACTIFS ET ÉTATS COCHÉS --- */
+/* ÉTATS ACTIFS ET ÉTATS COCHÉS */
 .vr-arrow-up:active   { transform: translateX(-50%) translateY(-5px); }
 .vr-arrow-down:active { transform: translateX(-50%) translateY(5px); }
 
 .switch-group input:checked + .toggle-item {
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     color: white;
     border: none;
 }
-/* --- GESTION DES SVG --- */
+/* GESTION DES SVG */
 .vr-toogle svg,
 .btn-fav svg,
 .segment svg,
@@ -1073,8 +1099,19 @@ display: none;
     height: 32px;
     display: block;
 }
-/***************************
-* Page Radio*/
+/* Page Radio*/
+.radioOn {
+    background:  var(--accent-colorUniDark);
+    border: 1px solid var(--accent-color);
+}
+#divRadioEnableColor .switch:has(input:checked) {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+#divRadioEnableColor .switch input:checked + div::after {
+    border: solid var(--accent-color);
+    border-width: 0 2px 2px 0;
+}
 .gpioRadio-container {
     display: flex;
     flex-wrap: wrap;
@@ -1116,7 +1153,7 @@ display: none;
     left: 50%;
     transform: translateX(-10%);
     width: 320px;
-    background-color: #333;
+    background: #333;
     color: #fff;
     text-align: left;
     border-radius: 15px;
@@ -1208,14 +1245,15 @@ display: none;
     margin: 0;
     font-size: 10px;
     border-radius: 9px;
-    background-color: transparent;
-    color: var(--color);
+    background: transparent;
+    color: var(--help);
     border: none;
 }
 #stepButtons > .step-btn.active,
 #stepButtonsRx > .step-btn.active,
 #stepButtonsDeviation > .step-btn.active {
-    background-color: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
+    background: var(--accent-colorUniDark);
+    color: var(--color);
 }
 .radioBtnPrec {
     background: none;
@@ -1232,7 +1270,7 @@ display: none;
     transition: all 0.2s ease;
 }
 .radioBtnPrec:hover {
-    background-color: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
+    background: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
     color: white;
 }
 .radioBtnPrec:active { transform: scale(0.85); }
@@ -1243,14 +1281,12 @@ display: none;
     fill: none;
 }
 .RadioSlider { min-width: 70px; }
-
-/***************************
-* Logs*/
+/* Logs*/
 .log-global-container {
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     border-radius: 15px;
     margin-top: 15px;
 }
@@ -1264,10 +1300,9 @@ display: none;
 .frame-row {
     display: flex !important;
     width: 100%;
-    box-sizing: border-box;
 }
 .frame-header {
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     color: #fff;;
     padding: 10px 0;
     border-radius: 15px 15px 0 0;
@@ -1293,11 +1328,11 @@ display: none;
 .frame-row > span:nth-child(6), .frame-header > span:nth-child(6) { flex: 0 0 120px; text-align: center; }
 .frame-row > span:nth-child(7), .frame-header > span:nth-child(7) { flex: 0 0 110px; text-align: center; }
 .frame-row {
-    background-color: color-mix(in srgb, var(--unibloc-color), #000 20%);
+    background: color-mix(in srgb, var(--unibloc-color), #000 20%);
     border-bottom: 1px solid rgba(255,255,255,0.05);
     padding: 8px 0;
 }
-.frame-list > .frame-row:nth-child(2n) { background-color: var(--unibloc-color); }
+.frame-list > .frame-row:nth-child(2n) { background: var(--unibloc-color); }
 
 div.frame-pulses {
     width:100%;
@@ -1308,8 +1343,7 @@ div.frame-pulses {
     text-overflow:ellipsis;
     display:none;
 }
-/***************************
-* Sécurity*/
+/*Sécurity*/
 #divPinSecurity { justify-content: center; }
 #divPinSecurity label { margin: 20px; }
 #fldPinEntry { margin-top: 20px; }
@@ -1393,12 +1427,6 @@ div.frame-pulses {
     max-width: 386px;
 }
 
-@media screen and (max-width: 1024px) {
-    #divGetStarted {
-        margin-top: 15%;
-        padding: 10px;
-    }
-}
 @media (max-width: 900px) {
     .gpioRadio-container {
         display: grid;
@@ -1470,19 +1498,33 @@ div.frame-pulses {
         cursor: pointer;
     }
     .btnGearHome {
-        background-color: transparent;
+        background: transparent;
         border: none;
         padding: 7px;
         display: flex;
         cursor: pointer;
+    }
+    .btnGearHome:hover {
+        background: transparent;
+        transform: scale(1.1);
     }
     .btnGearHome svg {
         width: 24px;
         height: 24px;
         color: var(--color);
     }
-    #divGetStarted {
-        margin-top: 0;
+    #divSystemOptions,
+    #divSecurityOptions,
+    #divSomfyRooms,
+    #divSomfyMotors,
+    #divSomfyGroups,
+    #divRepeater {
+        padding-bottom: 95px;
+    }
+    #divGetStarted,
+    #divNetworkSettings,
+    #divRadioSettings {
+        padding-bottom: 65px;
     }
     .welcome-container {
         gap: 25px;
@@ -1492,12 +1534,16 @@ div.frame-pulses {
         font-size: 1em;
     }
     .welcomeCard-content H1 {
-        font-size: 1rem;
+        font-size: .9rem;
+        margin-bottom: 6px;
     }
     .welcomeCard-content p {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+        margin: 0;
     }
-
+    .welcomeBottom-desc {
+        margin: 0px auto 0 auto;
+    }
     .tab-container {
         display: flex !important;;
         padding: 0 5px;
@@ -1510,7 +1556,7 @@ div.frame-pulses {
         color: var(--soustxt-color);
         cursor: pointer;
         transition: color 0.5s ease;
-        background-color: var(--unibloc-color);
+        background: var(--unibloc-color);
         margin: 4px;
         border-radius: 15px;
         padding: 2px;
@@ -1534,7 +1580,7 @@ div.frame-pulses {
         left: 50%;
         width: 45px;
         height: 4px;
-        background-color: var(--txtwarning-color);
+        background: var(--txtwarning-color);
         transform: translate(-50%, -50%) rotate(-45deg);
         box-shadow: 0 0 1px 2px var(--unibloc-color);
         border-radius: 4px;
@@ -1553,15 +1599,18 @@ div.frame-pulses {
     .show780 {
         display: flex !important;
     }
+    .chooseWifiEth .uniStatus {
+        display:none;
+    }
+
     #divUnauthenticated { min-height: 800px; }
     #divUnauthenticated .welcomeTop { margin-bottom: 8%;}
     #divUnauthenticated .button-container-row { gap: 12px; }
 }
 @media screen and (max-width: 550px) {
-    .hide550 {
-        display: none !important;
-    }
-    .minMaxFull{
+    .hide550,
+    .minMaxFull,
+    .divButton .uniStatus {
         display: none !important;
     }
     .minMax550{
@@ -1571,14 +1620,13 @@ div.frame-pulses {
 @media (max-width: 480px) {
     .container {
         min-height: 100vh;
-     /*   padding: 10px; */
     }
     .subtab-content {
         padding-left:14px;
         padding-right:14px;
     }
-    .subtab-container {
-        font-size: 12px;
+    .subtab-container > span {
+        font-size: 11px;
     }
     .subtab-NameHide-virtualRemote {
         display: none !important;

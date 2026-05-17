@@ -34,6 +34,7 @@ void visualFeedback(int durationMs, int speedMs) {
     delay(speedMs);
   }
 }
+
 void handlePowerCycleReset() {
   if (LED_PIN != -1) pinMode(LED_PIN, OUTPUT);
 
@@ -42,10 +43,14 @@ void handlePowerCycleReset() {
   int count = p.getInt("c", 0) + 1;
   p.putInt("c", count);
   p.end();
-  Serial.printf("\n[BOOT] Cycle : %d\n", count);
-  int flashSpeed = 0; // 0 = Fixe
-  if (count == 3) flashSpeed = 150;
-  else if (count >= 6) flashSpeed = 50;
+
+  Serial.print(F("\n[BOOT] Cycle: "));
+  Serial.println(count);
+
+  int flashSpeed = 0;
+  if (count == NET_RECOVERY_CYCLES) flashSpeed = 150;
+  else if (count >= FULL_FACTORY_CYCLES) flashSpeed = 50;
+
   unsigned long startWait = millis();
   while (millis() - startWait < BOOT_TIMEOUT) {
     if (LED_PIN != -1) {
@@ -60,26 +65,29 @@ void handlePowerCycleReset() {
       delay(100);
     }
   }
+
   p.begin("rst_logic", false);
   p.putInt("c", 0);
   p.end();
 
   if (LED_PIN != -1) digitalWrite(LED_PIN, LOW);
-  if (count >= 6) {
+
+  if (count >= FULL_FACTORY_CYCLES) {
     _pendingFactory = true;
-    Serial.println(F("Action : Factory Reset programmé."));
+    Serial.println(F("Pending: Factory Reset"));
   }
-  else if (count == 3) {
+  else if (count == NET_RECOVERY_CYCLES) {
     _pendingNetSecuRecovery = true;
-    Serial.println(F("Action : Network Recovery programmé."));
+    Serial.println(F("Pending: Network Recovery"));
   }
 
-  Serial.println(F("Boot validé."));
+  Serial.println(F("Boot OK"));
 }
+
 void resetAccessAndNetworkConfig() {
   if (!_pendingNetSecuRecovery) return;
 
-  Serial.println(F("\n--- ACTION : RESET RÉSEAU & SÉCURITÉ ---"));
+  Serial.println(F("\n[ACTION] Resetting Net & Secu..."));
   if (LED_PIN != -1) {
     for (int i = 0; i < 20; i++) { digitalWrite(LED_PIN, !digitalRead(LED_PIN)); delay(50); }
   }
@@ -96,13 +104,13 @@ void resetAccessAndNetworkConfig() {
   settings.Security.save();
 
   WiFi.disconnect(true, true);
-  Serial.println(F("Redémarrage..."));
+  Serial.println(F("Rebooting..."));
   delay(1000);
   ESP.restart();
 }
 
 void performFactoryReset() {
-  Serial.println(F("\n!!! INITIALISATION DU FORMATAGE PHYSIQUE !!!"));
+  Serial.println(F("\n[CRITICAL] Factory Resetting..."));
   if (LED_PIN != -1) {
     for (int i = 0; i < 40; i++) { digitalWrite(LED_PIN, !digitalRead(LED_PIN)); delay(30); }
   }
@@ -113,7 +121,7 @@ void performFactoryReset() {
   for (const char* t : targets) {
     if (LittleFS.exists(t)) LittleFS.remove(t);
   }
-  Serial.println(F("RESET TOTAL RÉUSSI."));
+  Serial.println(F("Success. Rebooting."));
   delay(2000);
   ESP.restart();
 }

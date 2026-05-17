@@ -8,6 +8,12 @@ var waitLoad;
 var mouseDown = false;
 const get = id => document.getElementById(id);
 
+const closeOverlay = (div, callback) => {
+    if (!div) return;
+    if (typeof callback === 'function') callback();
+    div.classList.add('overlay-exit');
+    setTimeout(() => div.remove(), 300);
+};
 
 if (typeof ui !== 'undefined' && ui.waitMessage) {
     waitLoad = ui.waitMessage(document.body);
@@ -16,54 +22,64 @@ window.tr = function(id) {
     return (LANG && LANG[id]) ? LANG[id] : id;
 };
 const translator = {
+    isInitialized: false,
+    observer: null,
+
     translate(el) {
-        if (!el || !el.dataset.lang) return;
-        const key = el.dataset.lang;
+        const key = el.getAttribute('tr');
+        if (!key) return;
+
         const text = tr(key);
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
             el.placeholder = text;
-        }
-        else if (el.hasAttribute('title')) {
+        } else if (el.hasAttribute('title')) {
             el.title = text;
-        }
-        else {
+        } else {
             el.textContent = text;
         }
     },
     init() {
-        document.querySelectorAll('[data-lang]').forEach(el => this.translate(el));
-        const observer = new MutationObserver((mutations) => {
+        document.querySelectorAll('[tr]').forEach(el => this.translate(el));
+        if (this.isInitialized) return;
+
+        this.observer = new MutationObserver((mutations) => {
             mutations.forEach(m => m.addedNodes.forEach(node => {
                 if (node.nodeType === 1) {
-                    if (node.dataset.lang) this.translate(node);
-                    node.querySelectorAll('[data-lang]').forEach(el => this.translate(el));
+                    if (node.hasAttribute('tr')) this.translate(node);
+                    node.querySelectorAll('[tr]').forEach(el => this.translate(el));
                 }
             }));
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        this.observer.observe(document.body, { childList: true, subtree: true });
+        this.isInitialized = true;
     }
 };
 function loadLang(callback) {
+    if (Object.keys(LANG).length > 0) {
+        console.log("Langue déjà en mémoire, utilisation du cache.");
+        if (callback) callback();
+        return;
+    }
     fetch(baseUrl + '/lang')
     .then(r => r.json())
     .then(dict => {
         LANG = dict;
         translator.init();
-
-        document.body.classList.add('lang-loaded');
-
-        if (waitLoad && waitLoad.remove) waitLoad.remove();
-        if(callback) callback();
+        finishLoad(callback);
     })
     .catch(err => {
-        console.error("Erreur langue, mode secours activé");
+        console.error("Erreur langue, mode secours activé", err);
         LANG = { "BT_LOGIN": "Login", "HOME": "Maison" };
         translator.init();
-
-        document.body.classList.add('lang-loaded');
-        if (waitLoad && waitLoad.remove) waitLoad.remove();
-        if(callback) callback();
+        finishLoad(callback);
     });
+}
+function finishLoad(callback) {
+    document.body.classList.add('lang-loaded');
+    if (waitLoad && typeof waitLoad.remove === 'function') {
+        waitLoad.remove();
+    }
+    if (callback) callback();
 }
 function displayUptime(totalSeconds, className) {
     const elements = document.querySelectorAll('.' + className);
@@ -120,57 +136,46 @@ document.oncontextmenu = (event) => {
     }
 };
 Date.prototype.toJSON = function () {
-    let tz = this.getTimezoneOffset();
-    let sign = tz > 0 ? '-' : '+';
-    let tzHrs = Math.floor(Math.abs(tz) / 60).fmt('00');
-    let tzMin = (Math.abs(tz) % 60).fmt('00');
-    return `${this.getFullYear()}-${(this.getMonth() + 1).fmt('00')}-${this.getDate().fmt('00')}T${this.getHours().fmt('00')}:${this.getMinutes().fmt('00')}:${this.getSeconds().fmt('00')}.${this.getMilliseconds().fmt('000')}${sign}${tzHrs}${tzMin}`;
+    const tz = this.getTimezoneOffset();
+    const sign = tz > 0 ? '-' : '+';
+    const absTz = Math.abs(tz);
+    const f = (n, c) => n.toString().padStart(c, '0');
+
+    return `${this.getFullYear()}-${f(this.getMonth() + 1, 2)}-${f(this.getDate(), 2)}T${f(this.getHours(), 2)}:${f(this.getMinutes(), 2)}:${f(this.getSeconds(), 2)}.${f(this.getMilliseconds(), 3)}${sign}${f(Math.floor(absTz / 60), 2)}${f(absTz % 60, 2)}`;
 };
 Date.prototype.fmt = function (fmtMask, emptyMask) {
-    if (fmtMask.match(/[hHmt]/g) !== null) { if (this.isDateTimeEmpty()) return typeof emptyMask !== 'undefined' ? emptyMask : ''; }
-    if (fmtMask.match(/[Mdy]/g) !== null) { if (this.isDateEmpty()) return typeof emptyMask !== 'undefined' ? emptyMask : ''; }
-    let formatted = typeof fmtMask !== 'undefined' && fmtMask !== null ? fmtMask : 'MM-dd-yyyy HH:mm:ss';
-    let letters = 'dMyHhmst'.split('');
-    let temp = [];
-    let count = 0;
-    let regexA;
-    let regexB = /\[(\d+)\]/;
-    let year = this.getFullYear().toString();
-    let formats = {
-        d: this.getDate().toString(),
-        dd: this.getDate().toString().padStart(2, '00'),
-        ddd: this.getDay() >= 0 ? formatType.DAYS[this.getDay()].substring(0, 3) : '',
-        dddd: this.getDay() >= 0 ? formatType.DAYS[this.getDay()] : '',
-        M: (this.getMonth() + 1).toString(),
-        MM: (this.getMonth() + 1).toString().padStart(2, '00'),
-        MMM: this.getMonth() >= 0 ? formatType.MONTHS[this.getMonth()].substring(0, 3) : '',
-        MMMM: this.getMonth() >= 0 ? formatType.MONTHS[this.getMonth()] : '',
-        y: year.charAt(2) === '0' ? year.charAt(4) : year.substring(2, 4),
-        yy: year.substring(2, 4),
-        yyyy: year,
-        H: this.getHours().toString(),
-        HH: this.getHours().toString().padStart(2, '00'),
-        h: this.getHours() === 0 ? '12' : this.getHours() > 12 ? Math.abs(this.getHours() - 12).toString() : this.getHours().toString(),
-        hh: this.getHours() === 0 ? '12' : this.getHours() > 12 ? Math.abs(this.getHours() - 12).toString().padStart(2, '00') : this.getHours().toString().padStart(2, '00'),
-        m: this.getMinutes().toString(),
-        mm: this.getMinutes().toString().padStart(2, '00'),
-        s: this.getSeconds().toString(),
-        ss: this.getSeconds().toString().padStart(2, '00'),
-        t: this.getHours() < 12 || this.getHours() === 24 ? 'a' : 'p',
-        tt: this.getHours() < 12 || this.getHours() === 24 ? 'am' : 'pm'
+    const mask = fmtMask || 'MM-dd-yyyy HH:mm:ss';
+    if (mask.match(/[hHmt]/) && this.isDateTimeEmpty?.()) return emptyMask ?? '';
+    if (mask.match(/[Mdy]/) && this.isDateEmpty?.()) return emptyMask ?? '';
+
+    const d = this;
+    const y = d.getFullYear();
+    const H = d.getHours();
+    const m = d.getMonth();
+    const map = {
+        yyyy: y,
+        yy: String(y).slice(-2),
+        MMMM: formatType.MONTHS[m],
+        MMM: formatType.MONTHS[m]?.substring(0, 3),
+        MM: String(m + 1).padStart(2, '0'),
+        M: m + 1,
+        dddd: formatType.DAYS[d.getDay()],
+        ddd: formatType.DAYS[d.getDay()]?.substring(0, 3),
+        dd: String(d.getDate()).padStart(2, '0'),
+        d: d.getDate(),
+        HH: String(H).padStart(2, '0'),
+        H: H,
+        hh: String(H % 12 || 12).padStart(2, '0'),
+        h: (H % 12 || 12),
+        mm: String(d.getMinutes()).padStart(2, '0'),
+        m: d.getMinutes(),
+        ss: String(d.getSeconds()).padStart(2, '0'),
+        s: d.getSeconds(),
+        tt: H < 12 ? 'am' : 'pm',
+        t: H < 12 ? 'a' : 'p'
     };
-    for (let i = 0; i < letters.length; i++) {
-        regexA = new RegExp('(' + letters[i] + '+)');
-        while (regexA.test(formatted)) {
-            temp[count] = RegExp.$1;
-            formatted = formatted.replace(RegExp.$1, '[' + count + ']');
-            count++;
-        }
-    }
-    while (regexB.test(formatted))
-        formatted = formatted.replace(regexB, formats[temp[RegExp.$1]]);
-    //console.log({ formatted: formatted, fmtMask: fmtMask });
-    return formatted;
+
+    return mask.replace(/yyyy|yy|MMMM|MMM|MM|M|dddd|ddd|dd|d|HH|H|hh|h|mm|m|ss|s|tt|t/g, t => map[t]);
 };
 Number.prototype.round = function (dec) { return Number(Math.round(this + 'e' + dec) + 'e-' + dec); };
 Number.prototype.fmt = function (format, empty) {
@@ -263,7 +268,6 @@ Number.prototype.fmt = function (format, empty) {
     if (rd.length === 0 && rw.length === 0) return '';
     return pfx + rw + rd + sfx;
 };
-
 function makeBool(val) {
     if (typeof val === 'boolean') return val;
     if (typeof val === 'undefined') return false;
@@ -359,7 +363,7 @@ function getJSON(url, cb) {
     xhr.send();
 }
 function getJSONSync(url, cb) {
-    let overlay = ui.waitMessage(document.getElementById('divContainer'));
+    let overlay = ui.waitMessage(get('divContainer'));
     let xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
     xhr.onload = () => {
@@ -424,7 +428,7 @@ function getText(url, cb) {
     xhr.send();
 }
 function postJSONSync(url, data, cb) {
-    let overlay = ui.waitMessage(document.getElementById('divContainer'));
+    let overlay = ui.waitMessage(get('divContainer'));
     try {
         let xhr = new XMLHttpRequest();
         console.log({ post: url, data: data });
@@ -463,7 +467,7 @@ function postJSONSync(url, data, cb) {
             overlay.remove();
         };
         xhr.send(fd);
-    } catch (err) { ui.serviceError(document.getElementById('divContainer'), err); }
+    } catch (err) { ui.serviceError(get('divContainer'), err); }
 }
 function putJSON(url, data, cb) {
     let xhr = new XMLHttpRequest();
@@ -499,7 +503,7 @@ function putJSON(url, data, cb) {
     xhr.send(JSON.stringify(data));
 }
 function putJSONSync(url, data, cb) {
-    let overlay = ui.waitMessage(document.getElementById('divContainer'));
+    let overlay = ui.waitMessage(get('divContainer'));
     try {
         let xhr = new XMLHttpRequest();
         console.log({ put: url, data: data });
@@ -535,7 +539,7 @@ function putJSONSync(url, data, cb) {
             overlay.remove();
         };
         xhr.send(JSON.stringify(data));
-    } catch (err) { ui.serviceError(document.getElementById('divContainer'), err); }
+    } catch (err) { ui.serviceError(get('divContainer'), err); }
 }
 var socket;
 var tConnect = null;
@@ -553,7 +557,7 @@ async function initSockets() {
     for (let i = 0; i < wms.length; i++) {
         wms[i].remove();
     }
-    ui.waitMessage(document.getElementById('divContainer')).classList.add('socket-wait');
+    ui.waitMessage(get('divContainer')).classList.add('socket-wait');
     let host = window.location.protocol === 'file:' ? hst : window.location.hostname;
     try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -662,7 +666,7 @@ async function initSockets() {
             wifi.procWifiStrength({ ssid: '', channel: -1, strength: -100 });
             wifi.procEthernet({ connected: false, speed: 0, fullduplex: false });
             if (document.getElementsByClassName('socket-wait').length === 0)
-                ui.waitMessage(document.getElementById('divContainer')).classList.add('socket-wait');
+                ui.waitMessage(get('divContainer')).classList.add('socket-wait');
             if (evt.wasClean) {
                 console.log({ msg: 'close-clean', evt: evt });
                 connectFailed = 0;
@@ -684,7 +688,7 @@ async function initSockets() {
                         if (connectFailed === 5) {
                             ui.socketError('Too many clients connected.  A maximum of 5 clients may be connected at any one time.  Close some connections to the ESP Somfy RTS device to proceed.');
                         }
-                        let spanAttempts = document.getElementById('spanSocketAttempts');
+                        let spanAttempts = get('spanSocketAttempts');
                         if (spanAttempts) spanAttempts.innerHTML = connectFailed.fmt("#,##0");
                     }
                     else {
@@ -709,7 +713,6 @@ function clearOverlays() {
     const selectors = ['.inst-overlay', '.info-message', '.prompt-message', '.error-message', '.instructions', '#divGitInstall'];
     selectors.forEach(s => document.querySelectorAll(s).forEach(el => el.remove()));
 }
-
 /**
  * synchronisation Sidebar et Tabs
  * @param {string} groupId - L'ID du groupe à activer
@@ -801,6 +804,44 @@ function bindNavigation() {
             }
         });
     });
+}
+function overlayHeader(title, desc, icon = 'svg-simpleShutter', showExpert = false) {
+    const expertSwitch = showExpert ? `<div class="expert-mode-container"><span class="expert-label">${tr("BT_EXPERT_MODE")}</span><span class="switch expert-switch"><input id="cbExpertMode" type="checkbox" ${ui.isExpertMode ? 'checked' : ''} onchange="ui.toggleExpertMode(this.closest('.inst-overlay'));" onclick="event.stopPropagation();"><div></div></span></div>` : '';
+
+    return `<div class="overlay-header">${expertSwitch}<div close onclick="closeOverlay(this.closest('.inst-overlay'))"><svg class="closeShow-desktop"><use href=#svg-close></use></svg></div></div><div class="instructions-header"><div><h2>${tr(title)}</h2><p>${tr(desc)}</p></div><svg class="instructions-headerLogo"><use href=#${icon}></use></svg></div>`;
+}
+function wizardStepper(stepsData, translationPrefix) {
+    let stepsHtml = '';
+    let titlesHtml = '';
+
+    const isArray = Array.isArray(stepsData);
+    const totalSteps = isArray ? stepsData.length : stepsData;
+
+    for (let i = 1; i <= totalSteps; i++) {
+        stepsHtml += `<div class="stepper-item" data-stepid="${i}"><div class="step-counter">${i}</div></div>`;
+
+        let titleKey;
+        if (isArray) {
+            titleKey = stepsData[i - 1];
+        } else {
+            titleKey = `${translationPrefix}_STEP${i}`;
+        }
+        titlesHtml += `<h3 class="step-title wizard-step" data-stepid="${i}">${tr(titleKey)}</h3>`;
+    }
+    return `
+    <div class="stepper-wrapper" style="--steps: ${totalSteps};">
+    ${stepsHtml}
+    </div>
+    <div class="step-title-container">
+    ${titlesHtml}
+    </div>`;
+}
+function shOverlay(div, onClose) {
+    if (!div) return;
+    const btn = div.querySelector('[close]');
+    if (btn) btn.onclick = () => closeOverlay(div, onClose);
+    get('divContainer').appendChild(div);
+    window.scrollTo(0, 0);
 }
 async function reopenSocket() {
     if (tConnect) clearTimeout(tConnect);
@@ -1099,7 +1140,7 @@ class UIBinder {
         let div = document.createElement('div');
         div.innerHTML = '<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>';
         div.classList.add('wait-overlay');
-        if (typeof el === 'undefined') el = document.getElementById('divContainer');
+        if (typeof el === 'undefined') el = get('divContainer');
         el.appendChild(div);
         return div;
     }
@@ -1107,7 +1148,7 @@ class UIBinder {
         let title = 'Service Error'
         if (arguments.length === 1) {
             err = el;
-            el = document.getElementById('divContainer');
+            el = get('divContainer');
         }
         let msg = '';
         if (typeof err === 'string' && err.startsWith('{')) {
@@ -1145,7 +1186,7 @@ class UIBinder {
     socketError(el, msg) {
         if (arguments.length === 1) {
             msg = el;
-            el = document.getElementById('divContainer');
+            el = get('divContainer');
         }
         let existing = document.querySelector('.socket-error');
         if (existing) {
@@ -1163,11 +1204,10 @@ class UIBinder {
         this.clearErrors();
         if (arguments.length === 1) {
             msg = el;
-            el = document.getElementById('divContainer');
+            el = get('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = `
-        <div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button class="bouton animScale" type="button" onclick="ui.clearErrors();">Close</button></div>`;
+        div.innerHTML = `<div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button type="button" onclick="ui.clearErrors();">Close</button></div>`;
         div.classList.add('error-message', 'modal-overlay');
         el.appendChild(div);
         return div;
@@ -1176,26 +1216,27 @@ class UIBinder {
         if (arguments.length === 2) {
             onYes = msg;
             msg = el;
-            el = document.getElementById('divContainer');
+            el = get('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = `
-        <div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" class="bouton animScale" type="button">${tr('BT_YES')}</button><button class="boutonOutline animScale" type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
-        div.classList.add('prompt-message');
-        div.classList.add('modal-overlay');
+        div.className = 'prompt-message modal-overlay';
+        div.innerHTML = `<div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" type="button">${tr('BT_YES')}</button><button line type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
         el.appendChild(div);
-        div.querySelector('#btnYes').addEventListener('click', onYes);
+
+        div.querySelector('#btnYes').onclick = () => {
+            if (typeof onYes === 'function') onYes();
+            ui.clearErrors();
+        };
         return div;
     }
     infoMessage(el, msg, onOk) {
         if (arguments.length === 1) {
             onOk = msg;
             msg = el;
-            el = document.getElementById('divContainer');
+            el = get('divContainer');
         }
         let div = document.createElement('div');
-        div.innerHTML = `
-        <div class="message-content"><div class="info-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnOk" class="bouton animScale" type="button">${tr('BT_OK')}</button></div></div>`;
+        div.innerHTML = `<div class="message-content"><div class="info-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnOk" type="button">${tr('BT_OK')}</button></div></div>`;
         div.classList.add('info-message', 'modal-overlay');
         el.appendChild(div);
 
@@ -1203,13 +1244,69 @@ class UIBinder {
         if (typeof onOk === 'function') {
             btnOk.addEventListener('click', onOk);
         } else {
-            btnOk.addEventListener('click', () => div.remove());
+            btnOk.addEventListener('click', () => closeOverlay(div));
         }
         return div;
     }
     clearErrors() {
         let errors = document.querySelectorAll('div.modal-overlay');
-        if (errors && errors.length > 0) errors.forEach((el) => { el.remove(); });
+        errors.forEach((el) => {
+            el.classList.add('overlay-exit');
+        });
+        if (errors.length > 0) {
+            setTimeout(() => {
+                errors.forEach(el => el.remove());
+            }, 300);
+        }
+    }
+    successMessage(msg) {
+        this.clearErrors();
+        let el = get('divContainer');
+
+        let div = document.createElement('div');
+        div.innerHTML = `<div class="success-content"><svg class="icon-svg"><use href="#svg-succes"></use></svg><span>${msg}</span></div>`;
+
+        div.classList.add('success-toast');
+        el.appendChild(div);
+
+        setTimeout(() => {
+            div.classList.add('hide');
+            setTimeout(() => {
+                if (div.parentNode) div.remove();
+            }, 400);
+
+        }, 3500);
+        return div;
+    }
+    toggleExpertMode(el) {
+        this.isExpertMode = !this.isExpertMode;
+        localStorage.setItem('expertMode', this.isExpertMode);
+
+        if (el) {
+            el.classList.toggle('is-expert', this.isExpertMode);
+            if (!this.isExpertMode) {
+                this.wizSetStep(el, this.wizCurrentStep(el));
+            }
+        }
+    }
+    /**Dirige l'attention de l'utilisateur sur un élément spécifique
+     * @param {string|HTMLElement} target - ID de l'élément ou l'élément lui-même
+     * @param {boolean} activate - Activer ou désactiver l'animation
+     * @param {string} color - Couleur spécifique (ex: 'red', '#FFA500')
+     */
+    setFocus(target, activate = true, color = null) {
+        let el = (typeof target === 'string') ? document.getElementById(target) : target;
+        if (!el) return;
+        if (el.tagName === 'BUTTON' && el.classList.contains('unibutton')) {
+            el = el.closest('.unibloc') || el;
+        }
+        if (activate) {
+            if (color) el.style.setProperty('--pulse-color', color);
+            el.classList.add('ui-pulse');
+        } else {
+            el.classList.remove('ui-pulse');
+            el.style.removeProperty('--pulse-color');
+        }
     }
     selectTab(elTab) {
         const groupId = elTab.getAttribute('data-grpid');
@@ -1221,29 +1318,48 @@ class UIBinder {
 
             let sid = sibling.getAttribute('data-grpid');
             if (sid && sid !== groupId) {
-                let section = document.getElementById(sid);
+                let section = get(sid);
                 if (section) section.style.display = 'none';
             }
         }
         elTab.classList.add(elTab.classList.contains('sub-nav-item') ? 'active' : 'selected');
 
-        const targetSection = document.getElementById(groupId);
+        const targetSection = get(groupId);
         if (targetSection) targetSection.style.display = '';
     }
     wizSetPrevStep(el) { this.wizSetStep(el, Math.max(this.wizCurrentStep(el) - 1, 1)); }
     wizSetNextStep(el) { this.wizSetStep(el, this.wizCurrentStep(el) + 1); }
     wizSetStep(el, step) {
         let curr = this.wizCurrentStep(el);
-        let max = parseInt(el.getAttribute('data-maxsteps'), 10);
-        if (!isNaN(max)) {
-            let next = el.querySelector(`#btnNextStep`);
-            if (next) next.style.display = max < step ? 'block' : 'none';
-        }
-        let prev = el.querySelector(`#btnPrevStep`);
-        if (prev) prev.style.display = step <= 1 ? 'none' : 'block';
+        let sStep = step.toString();
+        const isExpert = el.classList.contains('is-expert');
+
+        el.setAttribute('data-stepid', step);
+        el.querySelectorAll('[data-stepid], [data-ustepid], [data-mstepid]').forEach(item => {
+            if (item.classList.contains('stepper-item')) return;
+            if (item === el) return;
+
+            let show = true;
+
+            if (isExpert) {
+                show = item.hasAttribute('data-expert');
+            }
+            else {
+                if (item.hasAttribute('data-stepid')) {
+                    show = item.getAttribute('data-stepid') === sStep;
+                }
+                else if (item.hasAttribute('data-ustepid')) {
+                    show = item.getAttribute('data-ustepid') !== sStep;
+                }
+                else if (item.hasAttribute('data-mstepid')) {
+                    let steps = item.getAttribute('data-mstepid').split(',');
+                    show = steps.includes(sStep);
+                }
+            }
+            item.style.display = show ? '' : 'none';
+        });
         if (curr !== step) {
-            el.setAttribute('data-stepid', step);
-            let evt = new CustomEvent('stepchanged', { detail: { oldStep: curr, newStep: step }, bubbles: true, cancelable: true, composed: false });
+            let evt = new CustomEvent('stepchanged', { detail: { oldStep: curr, newStep: step }, bubbles: true });
             el.dispatchEvent(evt);
         }
     }
@@ -1286,36 +1402,36 @@ class UIBinder {
     pinDigitFocus(evt) {
         evt.srcElement.select();
     }
-    isConfigOpen() { return window.getComputedStyle(document.getElementById('divConfigPnl')).display !== 'none'; }
+    isConfigOpen() { return window.getComputedStyle(get('divConfigPnl')).display !== 'none'; }
     setConfigPanel() {
         if (this.isConfigOpen()) return;
-        let divCfg = document.getElementById('divConfigPnl');
-        let divHome = document.getElementById('divHomePnl');
+        let divCfg = get('divConfigPnl');
+        let divHome = get('divHomePnl');
         divHome.style.display = 'none';
         divCfg.style.display = '';
         somfy.checkEmptyState();
-        document.querySelector('#btnConfig use').setAttribute('xlink:href', '#icon-tabHome');
+        document.querySelector('#btnConfig use').setAttribute('href', '#svg-tabHome');
 
         if (sockIsOpen) socket.send('join:0');
-        let overlay = ui.waitMessage(document.getElementById('divSecurityOptions'));
+        let overlay = ui.waitMessage(get('divSecurityOptions'));
         overlay.style.borderRadius = '5px';
         getJSON('/getSecurity', (err, security) => {
             overlay.remove();
             if (err) ui.serviceError(err);
             else {
-                console.log(security);
+                //console.log(security);
                 general.setSecurityConfig(security);
             }
         });
     }
     setHomePanel() {
         if (!this.isConfigOpen()) return;
-        let divCfg = document.getElementById('divConfigPnl');
-        let divHome = document.getElementById('divHomePnl');
+        let divCfg = get('divConfigPnl');
+        let divHome = get('divHomePnl');
         divHome.style.display = '';
         divCfg.style.display = 'none';
         somfy.checkEmptyState();
-        document.querySelector('#btnConfig use').setAttribute('xlink:href', '#icon-tabSettings');
+        document.querySelector('#btnConfig use').setAttribute('href', '#svg-tabSettings');
         if (sockIsOpen) socket.send('leave:0');
         general.setSecurityConfig({ type: 0, username: '', password: '', pin: '', permissions: 0 });
     }
@@ -1324,7 +1440,7 @@ class UIBinder {
             this.setHomePanel();
         else {
             if (!security.authenticated && security.type !== 0) {
-                document.getElementById('divContainer').addEventListener('afterlogin', (evt) => {
+                get('divContainer').addEventListener('afterlogin', (evt) => {
                     if (security.authenticated) this.setConfigPanel();
                 }, { once: true });
                     security.authUser();
@@ -1371,121 +1487,89 @@ class Security {
     apiKey = '';
     permissions = 0;
     async init() {
-        let fld = document.getElementById('divUnauthenticated').querySelector('.pin-digit[data-bind="security.pin.d0"]');
-        document.getElementById('divUnauthenticated').querySelector('.pin-digit[data-bind="login.pin.d3"]').addEventListener('digitentered', (evt) => {
+        let fld = get('divUnauthenticated').querySelector('.pin-digit[data-bind="security.pin.d0"]');
+        get('divUnauthenticated').querySelector('.pin-digit[data-bind="login.pin.d3"]').addEventListener('digitentered', (evt) => {
             security.login();
         });
         await this.loadContext();
         if (this.type === 0 || (this.permissions & 0x01) === 0x01) { // No login required or only the config is protected.
             if (typeof socket === 'undefined' || !socket) (async () => { await initSockets(); })();
             //ui.setMode(mode);
-            document.getElementById('divUnauthenticated').style.display = 'none';
-            document.getElementById('divAuthenticated').style.display = '';
-            document.getElementById('divContainer').setAttribute('data-auth', true);
+            get('divUnauthenticated').style.display = 'none';
+            get('divAuthenticated').style.display = '';
+            get('divContainer').setAttribute('data-auth', true);
         }
     }
     async loadContext() {
-        const pnl = document.getElementById('divUnauthenticated');
+        const pnl = get('divUnauthenticated');
         if (!pnl) return;
 
-        pnl.style.display = 'none';
-        pnl.querySelector('#loginButtons').style.display = 'none';
-        pnl.querySelector('#divLoginPassword').style.display = 'none';
-        pnl.querySelector('#divLoginPin').style.display = 'none';
+        // Cache groupé des éléments de login
+        const qs = (s) => pnl.querySelector(s);
+        const btn = qs('#loginButtons'), pwd = qs('#divLoginPassword'), pin = qs('#divLoginPin');
+        pnl.style.display = btn.style.display = pwd.style.display = pin.style.display = 'none';
 
-        return new Promise((resolve) => {
+        return new Promise(res => {
             loadLang(() => {
                 getJSONSync('/loginContext', (err, ctx) => {
-                    if (err) {
-                        ui.serviceError(err);
-                        resolve();
-                        return;
+                    if (err) return ui.serviceError(err), res();
+
+                    // Uptime & Info CPU
+                    if (ctx.uptime) displayUptime(ctx.uptime, 'uptime-display');
+                    if (ctx.netUptime) displayUptime(ctx.netUptime, 'net-display');
+                    if (ctx.cpuFreq) get('info-cpu').textContent = `${ctx.cores > 1 ? 'Dual' : 'Single'}-Core @ ${ctx.cpuFreq} ${tr('MHZ')}`;
+                    // Flash & FileSystem (Regroupé)
+                    if (ctx.flashSize) {
+                        get('info-flash').innerHTML = `<span>${tr('FW_TOTAL')}: </span><span class="status-detail">${ctx.flashSize}</span> Mo (<span class="hide550">${tr('FW_SPEED')}: </span><span class="status-detail">${ctx.flashSpeed}</span> ${tr('MHZ')})`;
                     }
-                    if (ctx.hasOwnProperty('uptime')) {
-                        displayUptime(ctx.uptime, 'uptime-display');
+                    if (ctx.fsTotal) {
+                        const free = ctx.fsTotal - ctx.fsUsed, pct = Math.round((ctx.fsUsed / ctx.fsTotal) * 100);
+                        const el = get('info-fs-status');
+                        if (el) el.innerHTML = `<span class="status-detail">${free}</span> ${tr('FW_UNIT_KO')} ${tr('FW_FREE_SUFFIX')}<span class="hide550"> ${tr('FW_ON')} <span class="status-detail">${ctx.fsTotal}</span></span>`;
+                        const elP = get('info-fs-pct');
+                        if (elP) elP.innerHTML = `${tr('FW_USED_AT')} <span class="status-detail">${pct}</span>%`;
                     }
-                    if (ctx.hasOwnProperty('netUptime')) {
-                        displayUptime(ctx.netUptime, 'net-display');
-                    }
-                    if(ctx.cpuFreq) {
-                        const cores = ctx.cores > 1 ? 'Dual-Core' : 'Single-Core';
-                        document.getElementById('info-cpu').textContent = `${cores} @ ${ctx.cpuFreq} ${tr('MHZ')}`;
-                    }
-                    if(ctx.flashSize) {
-                        document.getElementById('info-flash').innerHTML =
-                        `<span>${tr('FIRMWARE_TOTAL')}: </span>` +
-                        `<span class="status-detail">${ctx.flashSize}</span> Mo ` +
-                        `(<span class="hide550">${tr('FIRMWARE_SPEED')} : </span>` +
-                        `<span class="status-detail">${ctx.flashSpeed}</span> ${tr('MHZ')})`;
-                    }
-                    if(ctx.fsTotal) {
-                        const free = ctx.fsTotal - ctx.fsUsed;
-                        const percent = Math.round((ctx.fsUsed / ctx.fsTotal) * 100);
-                        const elStatus = document.getElementById('info-fs-status');
-                        if (elStatus) {
-                            elStatus.innerHTML =
-                            `<span class="status-detail">${free}</span> ${tr('FIRMWARE_UNIT_KO')} ${tr('FIRMWARE_FREE_SUFFIX')}` +
-                            `<span class="hide550"> ${tr('FIRMWARE_ON')} <span class="status-detail">${ctx.fsTotal}</span> ${tr('FIRMWARE_UNIT_KO')}</span>`;
-                        }
-                        const elPct = document.getElementById('info-fs-pct');
-                        if (elPct) {
-                            elPct.innerHTML = `${tr('FIRMWARE_USED_AT')} <span class="status-detail">${percent}</span>%`;
-                        }
-                    }
-                    if(ctx.mac) {
-                        const macElements = document.querySelectorAll('.spanMacAddress');
-                        macElements.forEach(el => {
-                            el.textContent = ctx.mac;
-                        });
-                    }
+                    // MAC Addresses
+                    if (ctx.mac) document.querySelectorAll('.spanMacAddress').forEach(el => el.textContent = ctx.mac);
+
                     this.type = ctx.type;
                     this.permissions = ctx.permissions;
 
-                    const container = document.getElementById('divContainer');
-                    if (container) {
-                        container.setAttribute('data-securitytype', ctx.type);
-                    }
+                    const cont = get('divContainer');
+                    if (cont) cont.setAttribute('data-securitytype', ctx.type);
+                    // Gestion du Login
                     if (ctx.type !== 0) {
-                        pnl.querySelector('#loginButtons').style.display = '';
+                        btn.style.display = '';
+                        const fld = ctx.type === 1 ? qs('.pin-digit[data-bind="login.pin.d0"]') : qs('#fldLoginUsername');
+                        const targetDiv = ctx.type === 1 ? pin : pwd;
 
-                        switch (ctx.type) {
-                            case 1:
-                                pnl.querySelector('#divLoginPin').style.display = '';
-                                const pinFld = pnl.querySelector('.pin-digit[data-bind="login.pin.d0"]');
-                                if (pinFld) setTimeout(() => pinFld.focus(), 100);
-                                break;
+                        targetDiv.style.display = '';
+                        if (fld) setTimeout(() => fld.focus(), 100);
 
-                            case 2:
-                                pnl.querySelector('#divLoginPassword').style.display = '';
-                                const userFld = pnl.querySelector('#fldLoginUsername');
-                                if (userFld) setTimeout(() => userFld.focus(), 100);
-                                break;
-                        }
-                        const typeFld = pnl.querySelector('#fldLoginType');
+                        const typeFld = qs('#fldLoginType');
                         if (typeFld) typeFld.value = ctx.type;
-
                         pnl.style.display = 'flex';
                     }
-                    resolve();
+                    res();
                 });
             });
         });
     }
     authUser() {
-        document.getElementById('divAuthenticated').style.display = 'none';
-        document.getElementById('divUnauthenticated').style.display = '';
+        get('divAuthenticated').style.display = 'none';
+        get('divUnauthenticated').style.display = '';
         this.loadContext();
-        document.getElementById('btnCancelLogin').style.display = 'inline-block';
+        get('btnCancelLogin').style.display = 'inline-block';
     }
     cancelLogin() {
         let evt = new CustomEvent('afterlogin', { detail: { authenticated: this.authenticated } });
-        document.getElementById('divAuthenticated').style.display = '';
-        document.getElementById('divUnauthenticated').style.display = 'none';
-        document.getElementById('divContainer').dispatchEvent(evt);
+        get('divAuthenticated').style.display = '';
+        get('divUnauthenticated').style.display = 'none';
+        get('divContainer').dispatchEvent(evt);
     }
     login() {
         console.log('Logging in...');
-        let pnl = document.getElementById('divUnauthenticated');
+        let pnl = get('divUnauthenticated');
         let msg = pnl.querySelector('#spanLoginMessage');
         msg.innerHTML = '';
         let sec = ui.fromElement(pnl).login;
@@ -1509,26 +1593,26 @@ class Security {
                 if (log.success) {
                     if (typeof socket === 'undefined' || !socket) (async () => { await initSockets(); })();
 
-                    document.getElementById('divUnauthenticated').style.display = 'none';
-                    document.getElementById('divAuthenticated').style.display = '';
-                    document.getElementById('divContainer').setAttribute('data-auth', true);
+                    get('divUnauthenticated').style.display = 'none';
+                    get('divAuthenticated').style.display = '';
+                    get('divContainer').setAttribute('data-auth', true);
                     this.apiKey = log.apiKey;
                     this.authenticated = true;
                     let evt = new CustomEvent('afterlogin', { detail: { authenticated: true } });
-                    document.getElementById('divContainer').dispatchEvent(evt);
+                    get('divContainer').dispatchEvent(evt);
                 }
                 else
-                    msg.innerHTML = log.msg;
+                    msg.innerHTML = tr(log.msg);
             }
         });
     }
     toggleFieldPassword(fieldId, el) {
-        const fld = document.getElementById(fieldId);
+        const fld = get(fieldId);
         const ico = el.querySelector('use');
 
         if (fld.type === 'password') {
             fld.type = 'text';
-            if(ico) ico.setAttribute('href', '#icon-eyeOn');
+            if(ico) ico.setAttribute('href', '#svg-eyeOn');
         } else {
             fld.type = 'password';
             if(ico) ico.setAttribute('href', '#icon-eyeOff');
@@ -1539,7 +1623,7 @@ var security = new Security();
 
 class General {
     initialized = false;
-    appVersion = 'v2.5.1';
+    appVersion = 'v2.5.2';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -1553,7 +1637,7 @@ class General {
         this.setAppVersion();
         this.setTimeZones();
         if (sockIsOpen && ui.isConfigOpen()) socket.send('join:0');
-        ui.toElement(document.getElementById('divSystemSettings'), {
+        ui.toElement(get('divSystemSettings'), {
             general: { hostname: 'ESPSomfyRTS', username: '', password: '', posixZone: 'UTC0', ntpServer: 'pool.ntp.org' }
         });
 
@@ -1568,11 +1652,11 @@ class General {
             const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         }
-        const sel = document.getElementById('selThemeMode');
+        const sel = get('selThemeMode');
         if (sel) sel.value = val;
     }
     onModeThemeChanged() {
-        const sel = document.getElementById('selThemeMode');
+        const sel = get('selThemeMode');
         const val = sel.value;
         localStorage.setItem('themeMode', val);
         this.applyTheme(val);
@@ -1601,109 +1685,109 @@ class General {
         document.location.reload();
     }
     timeZones = [
-        { city: 'Africa/Cairo', code: 'EET-2' },
-        { city: 'Africa/Johannesburg', code: 'SAST-2' },
-        { city: 'Africa/Juba', code: 'CAT-2' },
-        { city: 'Africa/Lagos', code: 'WAT-1' },
-        { city: 'Africa/Mogadishu', code: 'EAT-3' },
-        { city: 'Africa/Tunis', code: 'CET-1' },
-        { city: 'America/Adak', code: 'HST10HDT,M3.2.0,M11.1.0' },
-        { city: 'America/Anchorage', code: 'AKST9AKDT,M3.2.0,M11.1.0' },
-        { city: 'America/Asuncion', code: '<-04>4<-03>,M10.1.0/0,M3.4.0/0' },
-        { city: 'America/Bahia_Banderas', code: 'CST6CDT,M4.1.0,M10.5.0' },
-        { city: 'America/Barbados', code: 'AST4' },
-        { city: 'America/Bermuda', code: 'AST4ADT,M3.2.0,M11.1.0' },
-        { city: 'America/Cancun', code: 'EST5' },
-        { city: 'America/Central_Time', code: 'CST6CDT,M3.2.0,M11.1.0' },
-        { city: 'America/Chihuahua', code: 'MST7MDT,M4.1.0,M10.5.0' },
-        { city: 'America/Eastern_Time', code: 'EST5EDT,M3.2.0,M11.1.0' },
-        { city: 'America/Godthab', code: '<-03>3<-02>,M3.5.0/-2,M10.5.0/-1' },
-        { city: 'America/Havana', code: 'CST5CDT,M3.2.0/0,M11.1.0/1' },
-        { city: 'America/Mexico_City', code: 'CST6' },
-        { city: 'America/Miquelon', code: '<-03>3<-02>,M3.2.0,M11.1.0' },
-        { city: 'America/Mountain_Time', code: 'MST7MDT,M3.2.0,M11.1.0' },
-        { city: 'America/Pacific_Time', code: 'PST8PDT,M3.2.0,M11.1.0' },
-        { city: 'America/Phoenix', code: 'MST7' },
-        { city: 'America/Santiago', code: '<-04>4<-03>,M9.1.6/24,M4.1.6/24' },
-        { city: 'America/St_Johns', code: 'NST3:30NDT,M3.2.0,M11.1.0' },
-        { city: 'Antarctica/Troll', code: '<+00>0<+02>-2,M3.5.0/1,M10.5.0/3' },
-        { city: 'Asia/Amman', code: 'EET-2EEST,M2.5.4/24,M10.5.5/1' },
-        { city: 'Asia/Beirut', code: 'EET-2EEST,M3.5.0/0,M10.5.0/0' },
-        { city: 'Asia/Colombo', code: '<+0530>-5:30' },
-        { city: 'Asia/Damascus', code: 'EET-2EEST,M3.5.5/0,M10.5.5/0' },
-        { city: 'Asia/Gaza', code: 'EET-2EEST,M3.4.4/50,M10.4.4/50' },
-        { city: 'Asia/Hong_Kong', code: 'HKT-8' },
-        { city: 'Asia/Jakarta', code: 'WIB-7' },
-        { city: 'Asia/Jayapura', code: 'WIT-9' },
-        { city: 'Asia/Jerusalem', code: 'IST-2IDT,M3.4.4/26,M10.5.0' },
-        { city: 'Asia/Kabul', code: '<+0430>-4:30' },
-        { city: 'Asia/Karachi', code: 'PKT-5' },
-        { city: 'Asia/Kathmandu', code: '<+0545>-5:45' },
-        { city: 'Asia/Kolkata', code: 'IST-5:30' },
-        { city: 'Asia/Makassar', code: 'WITA-8' },
-        { city: 'Asia/Manila', code: 'PST-8' },
-        { city: 'Asia/Seoul', code: 'KST-9' },
-        { city: 'Asia/Shanghai', code: 'CST-8' },
-        { city: 'Asia/Tehran', code: '<+0330>-3:30' },
-        { city: 'Asia/Tokyo', code: 'JST-9' },
-        { city: 'Atlantic/Azores', code: '<-01>1<+00>,M3.5.0/0,M10.5.0/1' },
-        { city: 'Australia/Adelaide', code: 'ACST-9:30ACDT,M10.1.0,M4.1.0/3' },
-        { city: 'Australia/Brisbane', code: 'AEST-10' },
-        { city: 'Australia/Darwin', code: 'ACST-9:30' },
-        { city: 'Australia/Eucla', code: '<+0845>-8:45' },
-        { city: 'Australia/Lord_Howe', code: '<+1030>-10:30<+11>-11,M10.1.0,M4.1.0' },
-        { city: 'Australia/Melbourne', code: 'AEST-10AEDT,M10.1.0,M4.1.0/3' },
-        { city: 'Australia/Perth', code: 'AWST-8' },
-        { city: 'Etc/GMT-1', code: '<+01>-1' },
-        { city: 'Etc/GMT-2', code: '<+02>-2' },
-        { city: 'Etc/GMT-3', code: '<+03>-3' },
-        { city: 'Etc/GMT-4', code: '<+04>-4' },
-        { city: 'Etc/GMT-5', code: '<+05>-5' },
-        { city: 'Etc/GMT-6', code: '<+06>-6' },
-        { city: 'Etc/GMT-7', code: '<+07>-7' },
-        { city: 'Etc/GMT-8', code: '<+08>-8' },
-        { city: 'Etc/GMT-9', code: '<+09>-9' },
-        { city: 'Etc/GMT-10',code: '<+10>-10' },
-        { city: 'Etc/GMT-11', code: '<+11>-11' },
-        { city: 'Etc/GMT-12', code: '<+12>-12' },
-        { city: 'Etc/GMT-13', code: '<+13>-13' },
-        { city: 'Etc/GMT-14', code: '<+14>-14' },
-        { city: 'Etc/GMT+0', code: 'GMT0' },
-        { city: 'Etc/GMT+1', code: '<-01>1' },
-        { city: 'Etc/GMT+2', code: '<-02>2' },
-        { city: 'Etc/GMT+3', code: '<-03>3' },
-        { city: 'Etc/GMT+4', code: '<-04>4' },
-        { city: 'Etc/GMT+5', code: '<-05>5' },
-        { city: 'Etc/GMT+6', code: '<-06>6' },
-        { city: 'Etc/GMT+7', code: '<-07>7' },
-        { city: 'Etc/GMT+8', code: '<-08>8' },
-        { city: 'Etc/GMT+9', code: '<-09>9' },
-        { city: 'Etc/GMT+10', code: '<-10>10' },
-        { city: 'Etc/GMT+11', code: '<-11>11' },
-        { city: 'Etc/GMT+12', code: '<-12>12' },
-        { city: 'Etc/UTC', code: 'UTC0' },
-        { city: 'Europe/Athens', code: 'EET-2EEST,M3.5.0/3,M10.5.0/4' },
-        { city: "Europe/Berlin", code: "CEST-1CET,M3.2.0/2:00:00,M11.1.0/2:00:00" },
-        { city: 'Europe/Brussels', code: 'CET-1CEST,M3.5.0,M10.5.0/3' },
-        { city: 'Europe/Chisinau', code: 'EET-2EEST,M3.5.0,M10.5.0/3' },
-        { city: 'Europe/Dublin', code: 'IST-1GMT0,M10.5.0,M3.5.0/1' },
-        { city: 'Europe/Lisbon',  code: 'WET0WEST,M3.5.0/1,M10.5.0' },
-        { city: 'Europe/London', code: 'GMT0BST,M3.5.0/1,M10.5.0' },
-        { city: 'Europe/Moscow', code: 'MSK-3' },
-        { city: 'Europe/Paris', code: 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00' },
-        { city: 'Indian/Cocos',  code: '<+0630>-6:30' },
-        { city: 'Pacific/Auckland', code: 'NZST-12NZDT,M9.5.0,M4.1.0/3' },
-        { city: 'Pacific/Chatham', code: '<+1245>-12:45<+1345>,M9.5.0/2:45,M4.1.0/3:45' },
-        { city: 'Pacific/Easter', code: '<-06>6<-05>,M9.1.6/22,M4.1.6/22' },
-        { city: 'Pacific/Fiji', code: '<+12>-12<+13>,M11.2.0,M1.2.3/99' },
-        { city: 'Pacific/Guam',  code: 'ChST-10' },
-        { city: 'Pacific/Honolulu', code: 'HST10' },
-        { city: 'Pacific/Marquesas', code: '<-0930>9:30' },
-        { city: 'Pacific/Midway',  code: 'SST11' },
-        { city: 'Pacific/Norfolk', code: '<+11>-11<+12>,M10.1.0,M4.1.0/3' }
+        "Africa/Cairo|EET-2",
+        "Africa/Johannesburg|SAST-2",
+        "Africa/Juba|CAT-2",
+        "Africa/Lagos|WAT-1",
+        "Africa/Mogadishu|EAT-3",
+        "Africa/Tunis|CET-1",
+        "America/Adak|HST10HDT,M3.2.0,M11.1.0",
+        "America/Anchorage|AKST9AKDT,M3.2.0,M11.1.0",
+        "America/Asuncion|<-04>4<-03>,M10.1.0/0,M3.4.0/0",
+        "America/Bahia_Banderas|CST6CDT,M4.1.0,M10.5.0",
+        "America/Barbados|AST4",
+        "America/Bermuda|AST4ADT,M3.2.0,M11.1.0",
+        "America/Cancun|EST5",
+        "America/Central_Time|CST6CDT,M3.2.0,M11.1.0",
+        "America/Chihuahua|MST7MDT,M4.1.0,M10.5.0",
+        "America/Eastern_Time|EST5EDT,M3.2.0,M11.1.0",
+        "America/Godthab|<-03>3<-02>,M3.5.0/-2,M10.5.0/-1",
+        "America/Havana|CST5CDT,M3.2.0/0,M11.1.0/1",
+        "America/Mexico_City|CST6",
+        "America/Miquelon|<-03>3<-02>,M3.2.0,M11.1.0",
+        "America/Mountain_Time|MST7MDT,M3.2.0,M11.1.0",
+        "America/Pacific_Time|PST8PDT,M3.2.0,M11.1.0",
+        "America/Phoenix|MST7",
+        "America/Santiago|<-04>4<-03>,M9.1.6/24,M4.1.6/24",
+        "America/St_Johns|NST3:30NDT,M3.2.0,M11.1.0",
+        "Antarctica/Troll|<+00>0<+02>-2,M3.5.0/1,M10.5.0/3",
+        "Asia/Amman|EET-2EEST,M2.5.4/24,M10.5.5/1",
+        "Asia/Beirut|EET-2EEST,M3.5.0/0,M10.5.0/0",
+        "Asia/Colombo|<+0530>-5:30",
+        "Asia/Damascus|EET-2EEST,M3.5.5/0,M10.5.5/0",
+        "Asia/Gaza|EET-2EEST,M3.4.4/50,M10.4.4/50",
+        "Asia/Hong_Kong|HKT-8",
+        "Asia/Jakarta|WIB-7",
+        "Asia/Jayapura|WIT-9",
+        "Asia/Jerusalem|IST-2IDT,M3.4.4/26,M10.5.0",
+        "Asia/Kabul|<+0430>-4:30",
+        "Asia/Karachi|PKT-5",
+        "Asia/Kathmandu|<+0545>-5:45",
+        "Asia/Kolkata|IST-5:30",
+        "Asia/Makassar|WITA-8",
+        "Asia/Manila|PST-8",
+        "Asia/Seoul|KST-9",
+        "Asia/Shanghai|CST-8",
+        "Asia/Tehran|<+0330>-3:30",
+        "Asia/Tokyo|JST-9",
+        "Atlantic/Azores|<-01>1<+00>,M3.5.0/0,M10.5.0/1",
+        "Australia/Adelaide|ACST-9:30ACDT,M10.1.0,M4.1.0/3",
+        "Australia/Brisbane|AEST-10",
+        "Australia/Darwin|ACST-9:30",
+        "Australia/Eucla|<+0845>-8:45",
+        "Australia/Lord_Howe|<+1030>-10:30<+11>-11,M10.1.0,M4.1.0",
+        "Australia/Melbourne|AEST-10AEDT,M10.1.0,M4.1.0/3",
+        "Australia/Perth|AWST-8",
+        "Etc/GMT-1|<+01>-1",
+        "Etc/GMT-2|<+02>-2",
+        "Etc/GMT-3|<+03>-3",
+        "Etc/GMT-4|<+04>-4",
+        "Etc/GMT-5|<+05>-5",
+        "Etc/GMT-6|<+06>-6",
+        "Etc/GMT-7|<+07>-7",
+        "Etc/GMT-8|<+08>-8",
+        "Etc/GMT-9|<+09>-9",
+        "Etc/GMT-10|<+10>-10",
+        "Etc/GMT-11|<+11>-11",
+        "Etc/GMT-12|<+12>-12",
+        "Etc/GMT-13|<+13>-13",
+        "Etc/GMT-14|<+14>-14",
+        "Etc/GMT+0|GMT0",
+        "Etc/GMT+1|<-01>1",
+        "Etc/GMT+2|<-02>2",
+        "Etc/GMT+3|<-03>3",
+        "Etc/GMT+4|<-04>4",
+        "Etc/GMT+5|<-05>5",
+        "Etc/GMT+6|<-06>6",
+        "Etc/GMT+7|<-07>7",
+        "Etc/GMT+8|<-08>8",
+        "Etc/GMT+9|<-09>9",
+        "Etc/GMT+10|<-10>10",
+        "Etc/GMT+11|<-11>11",
+        "Etc/GMT+12|<-12>12",
+        "Etc/UTC|UTC0",
+        "Europe/Athens|EET-2EEST,M3.5.0/3,M10.5.0/4",
+        "Europe/Berlin|CEST-1CET,M3.2.0/2:00:00,M11.1.0/2:00:00",
+        "Europe/Brussels|CET-1CEST,M3.5.0,M10.5.0/3",
+        "Europe/Chisinau|EET-2EEST,M3.5.0,M10.5.0/3",
+        "Europe/Dublin|IST-1GMT0,M10.5.0,M3.5.0/1",
+        "Europe/Lisbon|WET0WEST,M3.5.0/1,M10.5.0",
+        "Europe/London|GMT0BST,M3.5.0/1,M10.5.0",
+        "Europe/Moscow|MSK-3",
+        "Europe/Paris|CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00",
+        "Indian/Cocos|<+0630>-6:30",
+        "Pacific/Auckland|NZST-12NZDT,M9.5.0,M4.1.0/3",
+        "Pacific/Chatham|<+1245>-12:45<+1345>,M9.5.0/2:45,M4.1.0/3:45",
+        "Pacific/Easter|<-06>6<-05>,M9.1.6/22,M4.1.6/22",
+        "Pacific/Fiji|<+12>-12<+13>,M11.2.0,M1.2.3/99",
+        "Pacific/Guam|ChST-10",
+        "Pacific/Honolulu|HST10",
+        "Pacific/Marquesas|<-0930>9:30",
+        "Pacific/Midway|SST11",
+        "Pacific/Norfolk|<+11>-11<+12>,M10.1.0,M4.1.0/3"
     ];
     loadGeneral() {
-        const pnl = document.getElementById('divSystemOptions');
+        const pnl = get('divSystemOptions');
 
         getJSONSync('/modulesettings', (err, settings) => {
             if (err) {
@@ -1713,19 +1797,17 @@ class General {
             console.log("Settings reçus:", settings);
             if (typeof somfy !== 'undefined') somfy.initPins();
 
-            loadLang(() => {
-                document.getElementById('spanFwVersion').innerText = settings.fwVersion;
-                document.getElementById('spanHwVersion').innerText = settings.chipModel.length > 0 ? '-' + settings.chipModel : '';
-                document.getElementById('divContainer').setAttribute('data-chipmodel', settings.chipModel);
+            get('spanFwVersion').innerText = settings.fwVersion;
+            get('spanHwVersion').innerText = settings.chipModel.length > 0 ? '-' + settings.chipModel : '';
+            get('divContainer').setAttribute('data-chipmodel', settings.chipModel);
 
-                this.setAppVersion();
+            this.setAppVersion();
+
+            loadLang(() => {
+
                 ui.toElement(pnl, { general: settings });
 
-                if (typeof wifi !== 'undefined') wifi.init();
-
-            if (typeof somfy !== 'undefined') somfy.loadSomfy();
-
-            const langSelect = document.getElementById('langSelect');
+                const langSelect = get('langSelect');
                 if (langSelect) {
                     const languages = [ 'en', 'fr', 'de', /*'es', 'it' */ ];
                     const selectedLang = languages[settings.language] || 'en';
@@ -1736,20 +1818,21 @@ class General {
                         this.onLanguageChanged(e.target.value);
                     };
                 }
-                if (settings.accentColor) {
-                    document.documentElement.style.setProperty('--accent-color', settings.accentColor);
-                    localStorage.setItem('accentColor', settings.accentColor);
-
-                    const accentInput = document.getElementById('fldAccentColor');
-                    if (accentInput) {
-                        accentInput.value = settings.accentColor;
-                        accentInput.addEventListener('input', (e) => {
-                            document.documentElement.style.setProperty('--accent-color', e.target.value);
-                            localStorage.setItem('accentColor', e.target.value);
-                        });
-                    }
-                }
             });
+            if (settings.accentColor) {
+                document.documentElement.style.setProperty('--accent-color', settings.accentColor);
+                localStorage.setItem('accentColor', settings.accentColor);
+
+                const accentInput = get('fldAccentColor');
+                if (accentInput) {
+                    accentInput.value = settings.accentColor;
+                    accentInput.addEventListener('input', (e) => {
+                        document.documentElement.style.setProperty('--accent-color', e.target.value);
+                        localStorage.setItem('accentColor', e.target.value);
+                    });
+                }
+            }
+
         });
     }
     loadLogin() {
@@ -1761,44 +1844,39 @@ class General {
             if (err) ui.serviceError(err);
             else {
                 console.log(ctx);
-                let pnl = document.getElementById('divContainer');
+                let pnl = get('divContainer');
                 pnl.setAttribute('data-securitytype', ctx.type);
                 let fld;
                 switch (ctx.type) {
                     case 1:
-                        document.getElementById('divPinSecurity').style.display = '';
-                        fld = document.getElementById('divPinSecurity').querySelector('.pin-digit[data-bind="security.pin.d0"]');
-                        document.getElementById('divPinSecurity').querySelector('.pin-digit[data-bind="security.pin.d3"]').addEventListener('digitentered', (evt) => {
+                        get('divPinSecurity').style.display = '';
+                        fld = get('divPinSecurity').querySelector('.pin-digit[data-bind="security.pin.d0"]');
+                        get('divPinSecurity').querySelector('.pin-digit[data-bind="security.pin.d3"]').addEventListener('digitentered', (evt) => {
                             general.login();
                         });
                         break;
                     case 2:
-                        document.getElementById('divPasswordSecurity').style.display = '';
-                        fld = document.getElementById('fldUsername');
+                        get('divPasswordSecurity').style.display = '';
+                        fld = get('fldUsername');
                         break;
                 }
                 if (fld) fld.focus();
             }
         });
     }
-    setAppVersion() { document.getElementById('spanAppVersion').innerText = this.appVersion; }
+    setAppVersion() { get('spanAppVersion').innerText = this.appVersion; }
     setTimeZones() {
-        let dd = document.getElementById('selTimeZone');
-        dd.length = 0;
-        let maxLength = 0;
-        for (let i = 0; i < this.timeZones.length; i++) {
-            let opt = document.createElement('option');
-            opt.text = this.timeZones[i].city;
-            opt.value = this.timeZones[i].code;
-            maxLength = Math.max(maxLength, this.timeZones[i].code.length);
-            dd.add(opt);
-        }
+        const dd = get('selTimeZone');
+        dd.innerHTML = this.timeZones.map(tz => {
+            const [city, code] = tz.split('|');
+            return `<option value="${code}">${city}</option>`;
+        }).join('');
+
         dd.value = 'UTC0';
-        console.log(`Max TZ:${maxLength}`);
     }
     setGeneral() {
         let valid = true;
-        let pnl = document.getElementById('divSystemSettings');
+        let pnl = get('divSystemSettings');
         let obj = ui.fromElement(pnl).general;
         const msg = tr('ERR_HOSTNAME');
         if (typeof obj.hostname === 'undefined' || !obj.hostname || obj.hostname === '') {
@@ -1819,8 +1897,12 @@ class General {
         }
         if (valid) {
             putJSONSync('/setgeneral', obj, (err, response) => {
-                if (err) ui.serviceError(err);
-                console.log(response);
+                if (err) {
+                    ui.serviceError(err);
+                } else {
+                    ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                    console.log(response);
+                }
             });
         }
     }
@@ -1837,28 +1919,36 @@ class General {
                 }
             }
         };
-        ui.toElement(document.getElementById('divSecurityOptions'), obj);
+        ui.toElement(get('divSecurityOptions'), obj);
         this.onSecurityTypeChanged();
     }
     rebootDevice() {
-        ui.promptMessage(document.getElementById('divContainer'), tr('PROMPT_REBOOT_CONFIRM'), () => {
+        ui.promptMessage(get('divContainer'), tr('PROMPT_REBOOT_CONFIRM'), () => {
             if(typeof socket !== 'undefined') socket.close(3000, 'reboot');
             putJSONSync('/reboot', {}, (err, response) => {
-                document.getElementById('btnSaveGeneral').classList.remove('disabled');
+                get('btnSaveGeneral').classList.remove('disabled');
                 console.log(response);
             });
             ui.clearErrors();
         });
     }
-    onLanguageChanged(lang) {
-        const sel = document.getElementById('langSelect');
+    onLanguageChanged(lang, reload = true) {
+        const sel = get('langSelect');
         if (sel) sel.disabled = true;
         localStorage.setItem('selectedLang', lang);
+
         fetch(baseUrl + '/setLang?lang=' + lang)
         .then(r => r.json())
         .then(resp => {
             if (resp.status === "ok") {
-                window.location.reload(true);
+                if (reload) {
+                    window.location.reload(true);
+                } else {
+                    if (sel) {
+                        sel.value = lang;
+                        sel.disabled = false;
+                    }
+                }
             }
         })
         .catch(err => {
@@ -1867,7 +1957,7 @@ class General {
         });
     }
     onModeThemeChanged() {
-        const sel = document.getElementById('selThemeMode');
+        const sel = get('selThemeMode');
         const val = sel.value;
 
         localStorage.setItem('themeMode', val);
@@ -1882,84 +1972,131 @@ class General {
         }
     }
     onSecurityTypeChanged() {
-        let pnl = document.getElementById('divSecurityOptions');
-        let sec = ui.fromElement(pnl).security;
-        switch (sec.type) {
-            case 0:
-                pnl.querySelector('#divPermissions').style.display = 'none';
-                pnl.querySelector('#divPinSecurity').style.display = 'none';
-                pnl.querySelector('#divPasswordSecurity').style.display = 'none';
-                break;
-            case 1:
-                pnl.querySelector('#divPermissions').style.display = '';
-                pnl.querySelector('#divPinSecurity').style.display = '';
-                pnl.querySelector('#divPasswordSecurity').style.display = 'none';
-                break;
-            case 2:
-                pnl.querySelector('#divPermissions').style.display = '';
-                pnl.querySelector('#divPinSecurity').style.display = 'none';
-                pnl.querySelector('#divPasswordSecurity').style.display = '';
-                break;
-        }
+        let pnl = get('divSecurityOptions'),
+        type = ui.fromElement(pnl).security.type,
+        // [Permissions, Pin, Password] - Type (0, 1 ou 2)
+        states = [
+            ['none', 'none', 'none'],
+            ['',     '',     'none'],
+            ['',     'none', '']
+        ][type];
+
+        ['#divPermissions', '#divPinSecurity', '#divPasswordSecurity'].forEach((id, i) => {
+            pnl.querySelector(id).style.display = states[i];
+        });
     }
     saveSecurity() {
-        let security = ui.fromElement(document.getElementById('divSecurityOptions')).security;
-        console.log(security);
-        let sec = { type: security.type, username: security.username, password: security.password, pin: '', perm: 0 };
-        // Pin entry.
-        for (let i = 0; i < 4; i++) {
-            sec.pin += security.pin[`d${i}`];
+        const s = ui.fromElement(get('divSecurityOptions')).security;
+        const pin = [0, 1, 2, 3].map(i => s.pin[`d${i}`]).join('');
+        const data = {
+            type: s.type, username: s.username, password: s.password, pin,
+            perm: s.permissions.configOnly ? 1 : 0,
+            permissions: s.permissions.configOnly ? 0x01 : 0x00
+        };
+        let confirmText = '';
+        if (s.type === 1) {
+            if (pin.length !== 4) return this.secError('ERR_PIN_INVALID', 'ERR_PIN_INVALID_DESC');
+            confirmText = `<p>${tr('SAVESECURITY_PIN_WARNING')}</p><p>${tr('SAVESECURITY_PIN_CONFIRM')}</p>`;
         }
-        sec.permissions |= security.permissions.configOnly ? 0x01 : 0x00;
-        let confirm = '';
-        console.log(sec);
-        if (security.type === 1) { // Pin Entry
-            // Make sure our pin is 4 digits.
-            if (sec.pin.length !== 4) {
-                ui.errorMessage(tr('ERR_PIN_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_PIN_INVALID_DESC');
-                return;
-            }
-            confirm =  `<p>${tr('SAVESECURITY_PIN_WARNING')}</p><p>${tr('SAVESECURITY_PIN_CONFIRM')}</p>`;
+        else if (s.type === 2) {
+            if (!s.username) return this.secError('ERR_USERNAME_MISSING', 'ERR_USERNAME_MISSING_DESC');
+            if (s.password !== s.repeatpassword) return this.secError('ERR_PASSWORD_MISMATCH', 'ERR_PASSWORD_MISMATCH_DESC');
+            confirmText = `<p>${tr('SAVESECURITY_PASSWORD_WARNING')}</p><p>${tr('SAVESECURITY_PASSWORD_CONFIRM')}</p>`;
         }
-        else if (security.type === 2) { // Password
-            if (sec.username.length === 0) {
-                ui.errorMessage(tr('ERR_USERNAME_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_USERNAME_MISSING_DESC');
-                return;
-            }
-            if (sec.username.length > 32) {
-                ui.errorMessage(tr('ERR_USERNAME_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_USERNAME_INVALID_DESC');
-                return;
-            }
-
-            if (sec.password.length === 0) {
-                ui.errorMessage(tr('ERR_PASSWORD_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_MISSING_DESC');
-                return;
-            }
-            if (sec.password.length > 32) {
-                ui.errorMessage(tr('ERR_PASSWORD_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_INVALID_DESC');
-                return;
-            }
-
-            if (security.repeatpassword.length === 0) {
-                ui.errorMessage(tr('ERR_PASSWORD_CONFIRM_MISSING')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_CONFIRM_MISSING_DESC');
-                return;
-            }
-            if (sec.password !== security.repeatpassword) {
-                ui.errorMessage(tr('ERR_PASSWORD_MISMATCH')).querySelector('.sub-message').innerHTML = tr('ERR_PASSWORD_MISMATCH_DESC');
-                return;
-            }
-            confirm = `<p>${tr('SAVESECURITY_PASSWORD_WARNING')}</p><p>${tr('SAVESECURITY_PASSWORD_CONFIRM')}</p>`;
-        }
-        let prompt = ui.promptMessage(tr('PROMPT_SECURITY_CONFIRM'), () => {
-            putJSONSync('/saveSecurity', sec, (err, objApiKey) => {
+        const prompt = ui.promptMessage(tr('PROMPT_SECURITY_CONFIRM'), () => {
+            putJSONSync('/saveSecurity', data, (e) => {
                 prompt.remove();
-                if (err) ui.serviceError(err);
-                else {
-                    console.log(objApiKey);
-                }
+                if (e) ui.serviceError(e);
             });
         });
-        prompt.querySelector('.sub-message').innerHTML = confirm;
+        prompt.querySelector('.sub-message').innerHTML = confirmText;
+    }
+    secError(title, desc) {
+        ui.errorMessage(tr(title)).querySelector('.sub-message').innerHTML = tr(desc);
+    }
+    showLBCOverlay() {
+        const div = document.createElement('div');
+        div.id = 'divLBCConfig';
+        div.className = 'inst-overlay';
+
+        const steps = [
+            ['tz', 'Réglage du fuseau horaire Europe/Paris'],
+            ['lang', 'Passage de l\'interface en Français'],
+            ['gpio', 'Assignation des GPIO: CC1101 - ESP32 - D1'],
+            ['radio', 'Activation de la radio']
+        ];
+
+        let stepsHtml = '';
+        for (const [id, text] of steps) {
+            stepsHtml += `<div id="lbc-step-${id}" class="divLbc-step"><div class="lbc-icon-wrapper"><svg id="svg-step-${id}" class="svgLbc-step"><use href="#svg-succes"></use></svg></div><span class="lbcLabel-step">${text}</span></div>`;
+        }
+
+        div.innerHTML = `
+        <div class="instructions-content">
+        ${overlayHeader('Configuration du Boîtier', 'Assistant de configuration automatique pour votre boitier', 'svg-leboncoin')}
+        <div>
+        <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boitiers</a> sur Leboncoin, si ce n'est pas votre cas fermer cette page</span></div></div>
+        <div class="divInfoLine">
+        <div class="InfoLine"><p>Par défaut, le firmware adopte des réglages universels et sécurisés. Cet assistant applique les paramètres régionaux et certains paramètres spécifiques de votre boîtier.</p></div>
+        <p class="uppercaseText">Actions prévues :</p>
+        <div id="lbc-steps-list">${stepsHtml}</div>
+        <div id="lbc-success-msg"><svg class="svgInTextSmall"><use href="#svg-success"></use></svg> Configuration appliquée avec succès !</div>
+        </div>
+        </div>
+        <div class="hrDivFooter"></div>
+        <div class="button-container-overlay"><div class="footer-sticky-content"><div class="button-container-row">
+        <button id="btnCloseLBC" line type="button" onclick="closeOverlay(get('divLBCConfig'))">${tr('BT_CLOSE')}</button>
+        <button id="btnConfirmLBC" type="button" class="btn-main" onclick="general.onLBCChanged('1')">Démarrer</button>
+        </div></div></div>
+        </div>`;
+
+        shOverlay(div);
+    }
+    async onLBCChanged(val) {
+        if (val !== "1") return;
+        const btn = get('btnConfirmLBC'), cls = get('btnCloseLBC');
+        if (btn) btn.style.display = 'none';
+        if (cls) cls.style.display = 'none';
+
+        const validateStep = (id) => {
+            const row = get(`lbc-step-${id}`), svg = get(`svg-step-${id}`), lbl = row?.querySelector('.lbcLabel-step');
+            if (svg) {
+                svg.style.cssText = "color:#4CAF50;opacity:1;transform:scale(1.1)";
+                setTimeout(() => svg.style.transform = "scale(1)", 200);
+            }
+            if (lbl) lbl.style.cssText = "color:var(--text-color);font-weight:bold";
+        };
+
+            try {
+                const tz = get('selTimeZone');
+                if (tz) { tz.value = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; tz.dispatchEvent(new Event('change')); }
+                validateStep('tz');
+                await new Promise(r => setTimeout(r, 500));
+
+                this.onLanguageChanged('fr', false);
+                validateStep('lang');
+                await new Promise(r => setTimeout(r, 500));
+
+                const sb = get('selRadioBoardType');
+                if (sb) { sb.value = "1"; sb.dispatchEvent(new Event('change')); }
+                validateStep('gpio');
+                await new Promise(r => setTimeout(r, 500));
+
+                const cb = get('cbEnableRadio');
+                if (cb && !cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
+
+                if (typeof this.setGeneral === 'function') this.setGeneral();
+                await new Promise(r => setTimeout(r, 800));
+
+                if (typeof somfy !== 'undefined' && typeof somfy.saveRadio === 'function') somfy.saveRadio();
+                validateStep('radio');
+
+                get('lbc-success-msg').style.display = 'block';
+                setTimeout(() => window.location.reload(true), 1500);
+
+            } catch (e) {
+                if (btn) { btn.style.display = 'block'; btn.textContent = "Réessayer"; }
+            }
     }
 }
 var general = new General();
@@ -1998,25 +2135,25 @@ class Wifi {
             { val: 5, label: 'KZ8081' }
         ];
 
-        const divStrength = document.getElementById("divNetworkStrength");
+        const divStrength = get("divNetworkStrength");
         this.procWifiStrength({strength: -100, ssid: '', channel: -1});
 
         if (this.initialized) return;
 
-        this.loadETHDropdown(document.getElementById('selETHClkMode'), this.ethClockModes);
-        this.loadETHDropdown(document.getElementById('selETHPhyType'), this.ethPhyTypes);
-        this.loadETHDropdown(document.getElementById('selETHBoardType'), this.ethBoardTypes);
+        this.loadETHDropdown(get('selETHClkMode'), this.ethClockModes);
+        this.loadETHDropdown(get('selETHPhyType'), this.ethPhyTypes);
+        this.loadETHDropdown(get('selETHBoardType'), this.ethBoardTypes);
 
         let addr = [];
         for (let i = 0; i < 32; i++) {
             addr.push({ val: i, label: `PHY ${i}` });
         }
-        this.loadETHDropdown(document.getElementById('selETHAddress'), addr);
-        this.loadETHPins(document.getElementById('selETHPWRPin'), 'power');
-        this.loadETHPins(document.getElementById('selETHMDCPin'), 'mdc', 23);
-        this.loadETHPins(document.getElementById('selETHMDIOPin'), 'mdio', 18);
+        this.loadETHDropdown(get('selETHAddress'), addr);
+        this.loadETHPins(get('selETHPWRPin'), 'power');
+        this.loadETHPins(get('selETHMDCPin'), 'mdc', 23);
+        this.loadETHPins(get('selETHMDIOPin'), 'mdio', 18);
 
-        ui.toElement(document.getElementById('divNetAdapter'), {
+        ui.toElement(get('divNetAdapter'), {
             wifi: { ssid: '', passphrase: '' },
             ethernet: {
                 boardType: 1,
@@ -2028,7 +2165,7 @@ class Wifi {
                 gateway: ''
             }
         });
-        this.onETHBoardTypeChanged(document.getElementById('selETHBoardType'));
+        this.onETHBoardTypeChanged(get('selETHBoardType'));
         this.initialized = true;
     }
     loadETHPins(sel, type, selected) {
@@ -2054,31 +2191,31 @@ class Wifi {
     onETHBoardTypeChanged(sel) {
         let type = this.ethBoardTypes.find(elem => parseInt(sel.value, 10) === elem.val);
         if (typeof type !== 'undefined') {
-            if(typeof type.ct !== 'undefined') document.getElementById('selETHPhyType').value = type.ct;
-            if (typeof type.clk !== 'undefined') document.getElementById('selETHClkMode').value = type.clk;
-            if (typeof type.addr !== 'undefined') document.getElementById('selETHAddress').value = type.addr;
-            if (typeof type.pwr !== 'undefined') document.getElementById('selETHPWRPin').value = type.pwr;
-            if (typeof type.mdc !== 'undefined') document.getElementById('selETHMDCPin').value = type.mdc;
-            if (typeof type.mdio !== 'undefined') document.getElementById('selETHMDIOPin').value = type.mdio;
-            document.getElementById('divETHSettings').style.display = type.val === 0 ? '' : 'none';
+            if(typeof type.ct !== 'undefined') get('selETHPhyType').value = type.ct;
+            if (typeof type.clk !== 'undefined') get('selETHClkMode').value = type.clk;
+            if (typeof type.addr !== 'undefined') get('selETHAddress').value = type.addr;
+            if (typeof type.pwr !== 'undefined') get('selETHPWRPin').value = type.pwr;
+            if (typeof type.mdc !== 'undefined') get('selETHMDCPin').value = type.mdc;
+            if (typeof type.mdio !== 'undefined') get('selETHMDIOPin').value = type.mdio;
+            get('divETHSettings').style.display = type.val === 0 ? '' : 'none';
         }
     }
-    onDHCPClicked(cb) { document.getElementById('divStaticIP').style.display = cb.checked ? 'none' : ''; }
+    onDHCPClicked(cb) { get('divStaticIP').style.display = cb.checked ? 'none' : ''; }
     loadNetwork() {
-        let pnl = document.getElementById('divNetAdapter');
+        let pnl = get('divNetAdapter');
         getJSONSync('/networksettings', (err, settings) => {
             console.log(settings);
             if (err) {
                 ui.serviceError(err);
             }
             else {
-                document.getElementById('cbHardwired').checked = settings.connType >= 2;
-                document.getElementById('cbFallbackWireless').checked = settings.connType === 3;
+                get('cbHardwired').checked = settings.connType >= 2;
+                get('cbFallbackWireless').checked = settings.connType === 3;
                 ui.toElement(pnl, settings);
-                ui.toElement(document.getElementById('divDHCP'), settings);
-                document.getElementById('divETHSettings').style.display = settings.ethernet.boardType === 0 ? '' : 'none';
-                document.getElementById('divStaticIP').style.display = settings.ip.dhcp ? 'none' : '';
-                document.getElementById('spanCurrentIP').innerHTML = settings.ip.ip;
+                ui.toElement(get('divDHCP'), settings);
+                get('divETHSettings').style.display = settings.ethernet.boardType === 0 ? '' : 'none';
+                get('divStaticIP').style.display = settings.ip.dhcp ? 'none' : '';
+                get('spanCurrentIP').innerHTML = settings.ip.ip;
                 this.updateStatusBadge(settings);
                 this.useEthernetClicked();
                 this.hiddenSSIDClicked();
@@ -2088,10 +2225,8 @@ class Wifi {
     updateStatusBadge(settings) {
         const options = document.querySelectorAll('.opt-badge');
         if (!options.length) return;
-
         const connType = parseInt(settings.connType);
         let activeType = "wifi";
-
         if (connType >= 2) {
             const boardType = (settings.ethernet && settings.ethernet.boardType !== undefined)
             ? parseInt(settings.ethernet.boardType) : 0;
@@ -2111,33 +2246,59 @@ class Wifi {
             opt.classList.toggle('active', opt.getAttribute('data-conn') === activeType);
         });
     }
+    loadNetwork() {
+        let pnl = get('divNetAdapter');
+        getJSONSync('/networksettings', (err, settings) => {
+            console.log(settings);
+            if (err) {
+                ui.serviceError(err);
+            }
+            else {
+                get('cbHardwired').checked = settings.connType >= 2;
+                get('cbFallbackWireless').checked = settings.connType === 3;
+                ui.toElement(pnl, settings);
+                ui.toElement(get('divDHCP'), settings);
+                get('divETHSettings').style.display = settings.ethernet.boardType === 0 ? '' : 'none';
+                get('divStaticIP').style.display = settings.ip.dhcp ? 'none' : '';
+                get('spanCurrentIP').innerHTML = settings.ip.ip;
+                this.updateStatusBadge(settings);
+                this.syncRadiosWithCheckbox();
+                this.useEthernetClicked();
+                this.hiddenSSIDClicked();
+            }
+        });
+    }
+    setConnectionType(isEthernet) {
+        get('cbHardwired').checked = isEthernet;
+        this.syncRadiosWithCheckbox();
+        this.useEthernetClicked();
+        get('cbHardwired').dispatchEvent(new Event('change'));
+    }
+    syncRadiosWithCheckbox() {
+        const isEthernet = get('cbHardwired').checked;
+        get('radConnEthernet').checked = isEthernet;
+        get('radConnWifi').checked = !isEthernet;
+    }
     useEthernetClicked() {
-        let useEthernet = document.getElementById('cbHardwired').checked;
-        document.getElementById('divWiFiMode').style.display = useEthernet ? 'none' : '';
-        document.getElementById('hrIdName').style.display = useEthernet ? '' : 'none';
-        document.getElementById('divEthernetMode').style.display = useEthernet ? '' : 'none';
-        document.getElementById('divTypeCardMode').style.display = useEthernet ? '' : 'none';
-        document.getElementById('divFallbackWireless').style.display = useEthernet ? '' : 'none';
-        document.getElementById('divRoaming').style.display = useEthernet ? 'none' : '';
-        document.getElementById('divHiddenSSID').style.display = useEthernet ? 'none' : '';
+        let useEthernet = get('cbHardwired').checked;
+        get('divWiFiMode').style.display = useEthernet ? 'none' : '';
+        get('divEthernetMode').style.display = useEthernet ? '' : 'none';
+        get('divTypeCardMode').style.display = useEthernet ? '' : 'none';
+        get('divFallbackWireless').style.display = useEthernet ? '' : 'none';
+        get('divRoaming').style.display = useEthernet ? 'none' : '';
+        get('divHiddenSSID').style.display = useEthernet ? 'none' : '';
     }
     hiddenSSIDClicked() {
-        let hidden = document.getElementById('cbHiddenSSID').checked;
-        if (hidden) document.getElementById('cbRoaming').checked = false;
-        document.getElementById('cbRoaming').disabled = hidden;
+        let hidden = get('cbHiddenSSID').checked;
+        if (hidden) get('cbRoaming').checked = false;
+        get('cbRoaming').disabled = hidden;
     }
     async loadAPs() {
-        const btnScan = document.getElementById('btnScanAPs');
-        const divAps = document.getElementById('divAps');
+        const btnScan = get('btnScanAPs');
+        const divAps = get('divAps');
 
         if (btnScan.classList.contains('disabled')) return;
-        divAps.innerHTML = `
-        <div class="no-wifi">
-        <div class="wifiConnectScan">
-        <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-        </div>
-        <div>${tr("CONNECTION_SCANNING")}</div>
-        </div>`;
+        divAps.innerHTML = `<div class="no-wifi"><div class="wifiConnectScan"><div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div><div>${tr("CONNECTION_SCANNING")}</div></div>`;
 
         btnScan.classList.add('disabled');
 
@@ -2181,20 +2342,20 @@ class Wifi {
             }
         } else {
             div = `
-            <div class="no-wifi"><div>${tr("ERR_NO_WIFI_FOUND")}</div><div class="button-container-row"><button id="btnRetryWifi" class="bouton-pop animScale" type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button><button id="btnCancelWifi" class="boutonOutline-pop animScale" type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
+            <div class="no-wifi"><div>${tr("ERR_NO_WIFI_FOUND")}</div><div class="button-container-row"><button id="btnRetryWifi" pop type="button" onclick="wifi.loadAPs();">${tr("BT_RETRY")}</button><button id="btnCancelWifi" pop line type="button" onclick="wifi.cancelScan();">${tr("BT_CANCEL_1")}</button>
             </div>`;
         }
 
-        let divAps = document.getElementById('divAps');
+        let divAps = get('divAps');
         divAps.setAttribute('data-lastloaded', new Date().getTime());
         divAps.innerHTML = div;
     }
 
     cancelScan() {
-        const btnScan = document.getElementById('btnScanAPs');
+        const btnScan = get('btnScanAPs');
         if (btnScan) btnScan.classList.remove('disabled');
 
-        const divAps = document.getElementById('divAps');
+        const divAps = get('divAps');
         if (divAps) divAps.innerHTML = '';
         if (typeof ui !== 'undefined' && ui.unlock) ui.unlock();
     }
@@ -2222,7 +2383,7 @@ class Wifi {
 
         const getPart = (idNum) => {
             const active = idNum <= level;
-            return `<use xlink:href="#icon-wifi-${idNum}" fill="${active ? '#069800' : '#ccc'}" style="opacity:${active ? '1' : '0.3'}" />`;
+            return `<use href="#svg-wifi-${idNum}" fill="${active ? 'var(--accent-sucess)' : '#ccc'}" style="opacity:${active ? '1' : '0.3'}" />`;
         };
 
         return `
@@ -2236,7 +2397,7 @@ class Wifi {
         </div>`;
     }
     saveIPSettings() {
-        let pnl = document.getElementById('divDHCP');
+        let pnl = get('divDHCP');
         let obj = ui.fromElement(pnl).ip;
         console.log(obj);
         if (!obj.dhcp) {
@@ -2277,74 +2438,63 @@ class Wifi {
         putJSONSync('/setIP', obj, (err, response) => {
             if (err) {
                 ui.serviceError(err);
+            } else {
+                ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                console.log(response);
             }
-            console.log(response);
         });
     }
     saveNetwork() {
-        let pnl = document.getElementById('divNetAdapter');
-        let obj = ui.fromElement(pnl);
-        obj.connType = obj.ethernet.hardwired ? (obj.ethernet.wirelessFallback ? 3 : 2) : 1;
+        let pnl = get('divNetAdapter'), obj = ui.fromElement(pnl);
+        const eth = obj.ethernet;
+        obj.connType = eth.hardwired ? (eth.wirelessFallback ? 3 : 2) : 1;
 
         if (obj.connType >= 2) {
-            const boardType = this.ethBoardTypes.find(elem => obj.ethernet.boardType === elem.val);
-            const phyType = this.ethPhyTypes.find(elem => obj.ethernet.phyType === elem.val);
-            const clkMode = this.ethClockModes.find(elem => obj.ethernet.CLKMode === elem.val);
+            const [board, phy, clk] = [
+                this.ethBoardTypes.find(e => eth.boardType === e.val),
+                this.ethPhyTypes.find(e => eth.phyType === e.val),
+                this.ethClockModes.find(e => eth.CLKMode === e.val)
+            ];
             let div = document.createElement('div');
-
+            div.className = 'inst-overlay';
             div.innerHTML = `
-            <div id="divLanSettings" class="inst-overlay">
             <div class="instructions-content">
-            <div class="boutonOverlayClose animScale" onclick="document.getElementById('divLanSettings').remove();">
-            <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-            <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-            </div>
-            <div id="jsHeadLan" class="instructions-header">
-            <div><h2>${tr('ETH_SETTINGS_TITLE')}</h2><p>${tr('ETH_SETTINGS_DESC')}</p></div>
-            <svg class="instructions-headerLogo"><use xlink:href="#svg-ethernet"></use></svg>
-            </div>
-            <div class="field-group unibloc"><p>${tr("ETH_SETTINGS_WARNING_DESC_1")}</p></div>
+            ${overlayHeader('ETH_SETTINGS_TITLE', 'ETH_SETTINGS_DESC', 'svg-ethernet')}
+            <div class="unibloc"><p>${tr("ETH_SETTINGS_WARNING_DESC_1")}</p></div>
             <div class="blocEthBoardSettings">
-            <div style="bloc-eth-setting-line">
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_BOARD_TYPE")}</label><span>${boardType.label} [${boardType.val}]</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_TYPE")}</label><span>${phyType.label} [${phyType.val}]</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_ADDRESS")}</label><span>${obj.ethernet.phyAddress}</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_CLOCK_MODE")}</label><span>${clkMode.label} [${clkMode.val}]</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_POWER_PIN")}</label><span>${obj.ethernet.PWRPin === -1 ? tr("NONE") : obj.ethernet.PWRPin}</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDC_PIN")}</label><span>${obj.ethernet.MDCPin}</span></div>
-            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${obj.ethernet.MDIOPin}</span></div>
+            <div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_BOARD_TYPE")}</label><span>${board.label} [${board.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_TYPE")}</label><span>${phy.label} [${phy.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_PHY_ADDRESS")}</label><span>${eth.phyAddress}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_CLOCK_MODE")}</label><span>${clk.label} [${clk.val}]</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_POWER_PIN")}</label><span>${eth.PWRPin === -1 ? tr("NONE") : eth.PWRPin}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDC_PIN")}</label><span>${eth.MDCPin}</span></div>
+            <div class="eth-setting-line"><label>${tr("ETH_SETTINGS_MDIO_PIN")}</label><span>${eth.MDIOPin}</span></div>
             </div>
             </div>
-            <div class="field-group error">
+            <div class="error">
             <label class="safety-checkbox-container">
             <div><input type="checkbox" id="chkConfirmEth"><span class="custom-checkbox"></span></div>
             <div><b>${tr('MSG_DANGER')}</b> <span>${tr("ETH_SETTINGS_WARNING_DESC_2")}</span></div>
             </label>
             </div>
-            <div class="button-container-row">
-            <button id="btnSaveEthernet" class="bouton saveEthDisabled animScale" type="button" disabled>${tr("BT_SAVE_ETHERNET")}</button>
-            <button id="btnCancel" class="boutonOutline animScale" type="button" onclick="document.getElementById('divLanSettings').remove();">${tr("BT_CANCEL_1")}</button>
-            </div>
+            <div class="button-container-overlay">
+            <button id="btnCancel" line type="button">${tr("BT_CANCEL_1")}</button>
+            <button id="btnSaveEthernet" style="background:#ccc;cursor:not-allowed" type="button" disabled>${tr("BT_SAVE")}</button>
             </div>
             </div>`;
 
-            document.getElementById('divContainer').appendChild(div);
-            window.scrollTo(0, 0);
+            shOverlay(div);
 
-            const checkbox = div.querySelector('#chkConfirmEth');
-            const saveBtn = div.querySelector('#btnSaveEthernet');
-
-            checkbox.addEventListener('change', (e) => {
-                const isChecked = e.target.checked;
-                saveBtn.disabled = !isChecked;
-                saveBtn.style.background = isChecked ? "var(--txtwarning-color)" : "#ccc";
-                saveBtn.style.cursor = isChecked ? "pointer" : "not-allowed";
-            });
-
-            saveBtn.onclick = () => {
-                this.sendNetworkSettings(obj);
-                setTimeout(() => { div.remove(); }, 1);
+            const chk = div.querySelector('#chkConfirmEth'), btn = div.querySelector('#btnSaveEthernet');
+            chk.onchange = () => {
+                const ok = chk.checked;
+                btn.disabled = !ok;
+                btn.style.background = ok ? "var(--txtwarning-color)" : "#ccc";
+                btn.style.cursor = ok ? "pointer" : "not-allowed";
             };
+            btn.onclick = () => { this.sendNetworkSettings(obj); closeOverlay(div); };
+            div.querySelector('#btnCancel').onclick = () => closeOverlay(div);
         } else {
             this.sendNetworkSettings(obj);
         }
@@ -2353,13 +2503,15 @@ class Wifi {
         putJSONSync('/setNetwork', obj, (err, response) => {
             if (err) {
                 ui.serviceError(err);
+            } else {
+                ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                console.log("Network settings updated:", response);
             }
-            console.log(response);
         });
     }
     connectWiFi() {
-        if (document.getElementById('btnConnectWiFi').classList.contains('disabled')) return;
-        document.getElementById('btnConnectWiFi').classList.add('disabled');
+        if (get('btnConnectWiFi').classList.contains('disabled')) return;
+        get('btnConnectWiFi').classList.add('disabled');
         let obj = {
             ssid: document.getElementsByName('ssid')[0].value,
             passphrase: document.getElementsByName('passphrase')[0].value
@@ -2372,10 +2524,10 @@ class Wifi {
             ui.errorMessage(tr('ERR_WIFI_PASSPHRASE_INVALID')).querySelector('.sub-message').innerHTML = tr('ERR_WIFI_PASSPHRASE_MAX_LENGTH_64');
             return;
         }
-        let overlay = ui.waitMessage(document.getElementById('divNetAdapter'));
+        let overlay = ui.waitMessage(get('divNetAdapter'));
         putJSON('/connectwifi', obj, (err, response) => {
             overlay.remove();
-            document.getElementById('btnConnectWiFi').classList.remove('disabled');
+            get('btnConnectWiFi').classList.remove('disabled');
             console.log(response);
         });
     }
@@ -2384,9 +2536,9 @@ class Wifi {
 
         const ssid = strength.ssid || strength.name;
         const sVal = parseInt(strength.strength);
-        const elSSID = document.getElementById('spanNetworkSSID');
-        const elChan = document.getElementById('spanNetworkChannel');
-        const elStrength = document.getElementById('spanNetworkStrength');
+        const elSSID = get('spanNetworkSSID');
+        const elChan = get('spanNetworkChannel');
+        const elStrength = get('spanNetworkStrength');
 
         if (elSSID) elSSID.innerHTML = !ssid || ssid === '' ? '-------------' : ssid;
         if (elChan) elChan.innerHTML = isNaN(strength.channel) || strength.channel < 0 ? '--' : strength.channel;
@@ -2396,7 +2548,7 @@ class Wifi {
         if (level >= 3) level = 3;
 
         for (let i = 0; i <= 3; i++) {
-            const part = document.getElementById('wifi_' + i);
+            const part = get('wifi_' + i);
             if (part) {
                 if (i <= level) {
                     part.classList.add('active');
@@ -2408,15 +2560,15 @@ class Wifi {
     }
     procEthernet(ethernet) {
         console.log(ethernet);
-        const spanStatus = document.getElementById('spanEthernetStatus');
-        const divStatus = document.getElementById('divEthernetStatus');
-        const divWifi = document.getElementById('divWiFiStrength');
-        const spanSpeed = document.getElementById('spanEthernetSpeed');
+        const spanStatus = get('spanEthernetStatus');
+        const divStatus = get('divEthernetStatus');
+        const divWifi = get('divWiFiStrength');
+        const spanSpeed = get('spanEthernetSpeed');
 
         divStatus.style.display = ethernet.connected ? '' : 'none';
         divWifi.style.display = ethernet.connected ? 'none' : '';
         spanStatus.innerHTML = ethernet.connected ? 'Connected' : 'Disconnected';
-        spanStatus.style.color = ethernet.connected ? '#069800' : '';
+        spanStatus.style.color = ethernet.connected ? 'var(--accent-sucess)' : '';
         spanSpeed.innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed} Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
     }
 }
@@ -2465,32 +2617,32 @@ class Somfy {
         .getElementById('selRadioBoardType')
         .addEventListener('change', e => this.onRadioBoardTypeChanged(e.target));
 
-        const sel = document.getElementById('selRadioBoardType');
+        const sel = get('selRadioBoardType');
 
         sel.addEventListener('change', e => this.onRadioBoardTypeChanged(e.target));
 
-        this.loadPins('inout', document.getElementById('selTransSCKPin'));
-        this.loadPins('inout', document.getElementById('selTransCSNPin'));
-        this.loadPins('inout', document.getElementById('selTransMOSIPin'));
-        this.loadPins('input', document.getElementById('selTransMISOPin'));
-        this.loadPins('out', document.getElementById('selTransTXPin'));
-        this.loadPins('input', document.getElementById('selTransRXPin'));
+        this.loadPins('inout', get('selTransSCKPin'));
+        this.loadPins('inout', get('selTransCSNPin'));
+        this.loadPins('inout', get('selTransMOSIPin'));
+        this.loadPins('input', get('selTransMISOPin'));
+        this.loadPins('out', get('selTransTXPin'));
+        this.loadPins('input', get('selTransRXPin'));
 
-        ui.toElement(document.getElementById('divTransceiverSettings'), {
+        ui.toElement(get('divTransceiverSettings'), {
             transceiver: { config: { proto: 0, radioBoardType: 0, SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 13, RXPin: 12, frequency: 433.42, rxBandwidth: 97.96, type: 56, deviation: 11.43, txPower: 10, enabled: false } }
         });
 
-        this.loadPins('out', document.getElementById('selShadeGPIOUp'));
-        this.loadPins('out', document.getElementById('selShadeGPIODown'));
-        this.loadPins('out', document.getElementById('selShadeGPIOMy'));
-        this.loadRadioBoardTypes(document.getElementById('selRadioBoardType'));
+        this.loadPins('out', get('selShadeGPIOUp'));
+        this.loadPins('out', get('selShadeGPIODown'));
+        this.loadPins('out', get('selShadeGPIOMy'));
+        this.loadRadioBoardTypes(get('selRadioBoardType'));
         this.loadRadioBoardTypes(sel);
         this.onRadioBoardTypeChanged(sel);
     }
     loadRadioBoardTypes(sel) {
         while (sel.firstChild) sel.removeChild(sel.firstChild);
 
-        const cm = (document.getElementById('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
+        const cm = (get('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
         const isStandard = (cm === "" || cm === "esp32");
 
         this.radioBoardTypes.forEach(t => {
@@ -2502,9 +2654,9 @@ class Somfy {
     }
     onRadioBoardTypeChanged(sel) {
         const val = parseInt(sel.value, 10);
-        const cm = (document.getElementById('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
-        const divSummary = document.getElementById('divGPIOSummary');
-        const divShowGpio = document.getElementById('divShowGpio');
+        const cm = (get('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
+        const divSummary = get('divGPIOSummary');
+        const divShowGpio = get('divShowGpio');
         let targetPins = null;
         const board = this.radioBoardTypes.find(t => t.val === val);
 
@@ -2524,11 +2676,11 @@ class Somfy {
             ];
 
             let html = `<div class="gpioRadio-container">`;
-            html += `<div class="help-container" onclick="somfy.toggleTooltip(this)"><svg class="help-svg"><use xlink:href="#icon-question"></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i><br><br><span style="color: #ffcc00;">${tr('RADIO_TOOLTIP_GPIO_4')}</span></div></div>`;
+            html += `<div class="help-container" onclick="somfy.toggleTooltip(this)"><svg class="help-svg"><use href=#icon-question></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i><br><br><span style="color: #ffcc00;">${tr('RADIO_TOOLTIP_GPIO_4')}</span></div></div>`;
 
             pins.forEach((p, i) => {
                 const pinVal = targetPins[p.key];
-                const sel = document.getElementById(`selTrans${p.key}`);
+                const sel = get(`selTrans${p.key}`);
 
                 if (sel) {
                     // Vérifier si l'option existe, sinon la créer
@@ -2558,25 +2710,26 @@ class Somfy {
         }
     }
     async loadSomfy() {
+        //console.trace("Appel à loadSomfy");
         getJSONSync('/controller', (err, somfy) => {
             if (err) {
                 console.log(err);
                 ui.serviceError(err);
             } else {
-                document.getElementById('spanMaxRooms').innerText = (somfy.maxRooms - 2);
-                document.getElementById('spanMaxShades').innerText = (somfy.maxShades - 2);
-                document.getElementById('spanMaxGroups').innerText = (somfy.maxGroups - 2);
+                get('spanMaxRooms').innerText = (somfy.maxRooms - 2);
+                get('spanMaxShades').innerText = (somfy.maxShades - 2);
+                get('spanMaxGroups').innerText = (somfy.maxGroups - 2);
 
-                ui.toElement(document.getElementById('divTransceiverSettings'), somfy);
+                ui.toElement(get('divTransceiverSettings'), somfy);
 
-                const selBoard = document.getElementById('selRadioBoardType');
+                const selBoard = get('selRadioBoardType');
                 if(somfy.transceiver && somfy.transceiver.config) {
                     selBoard.value = somfy.transceiver.config.radioBoardType || 0;
                     this.onRadioBoardTypeChanged(selBoard);
                 }
-                const cbRadio = document.getElementById('cbEnableRadio');
-                const txtStatus = document.getElementById('divRadioEnableStatus');
-                const row = document.getElementById('divRadioEnableColor');
+                const cbRadio = get('cbEnableRadio');
+                const txtStatus = get('divRadioEnableStatus');
+                const row = get('divRadioEnableColor');
                 const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
                 const updateRadioText = () => {
                     const currentState = cbRadio.checked;
@@ -2589,12 +2742,11 @@ class Somfy {
                     }
                 };
                 const isRadioInit = somfy.transceiver.config.radioInit;
-                const sideNote = document.getElementById('barsideRadioDisable');
+                const sideNote = get('barsideRadioDisable');
                 if (radioTab) {
                     radioTab.classList.toggle('radio-error', !isRadioInit);
                     if (sideNote) sideNote.style.display = isRadioInit ? 'none' : 'inline';
-                    row.style.backgroundColor = isRadioInit
-                    ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))" : "var(--unibloc-color)";
+                    row.classList.toggle('radioOn', !!isRadioInit);
                 }
                 cbRadio.addEventListener('change', updateRadioText);
                 updateRadioText();
@@ -2611,19 +2763,19 @@ class Somfy {
     }
     saveRadio() {
         let valid = true;
-        const divSettings = document.getElementById('divTransceiverSettings');
+        const divSettings = get('divTransceiverSettings');
         let trans = ui.fromElement(divSettings).transceiver;
-        if (!trans.config) trans.config = {}; // Sécurité si l'objet n'existe pas
+        if (!trans.config) trans.config = {};
         const pinKeys = ['SCKPin', 'CSNPin', 'MOSIPin', 'MISOPin', 'TXPin', 'RXPin'];
         pinKeys.forEach(key => {
-            const selEl = document.getElementById(`selTrans${key}`);
+            const selEl = get(`selTrans${key}`);
             if (selEl) {
                 const val = parseInt(selEl.value, 10);
                 trans.config[key] = val;
                 //console.log(`Lecture manuelle pour ${key} : ${val}`);
             }
         });
-        const selBoard = document.getElementById('selRadioBoardType');
+        const selBoard = get('selRadioBoardType');
         trans.config.radioBoardType = parseInt(selBoard.value, 10);
         if (typeof trans.config.type === 'undefined' || trans.config.type === '' || trans.config.type === 'none') {
             ui.errorMessage(tr('ERR_RADIO_TYPE_REQUIRED'));
@@ -2632,9 +2784,9 @@ class Somfy {
         if (valid) {
             const fnValDup = (o, name) => {
                 const val = o[name];
-                console.log("Vérification de " + name + " = " + val);
+                //console.log("Vérification de " + name + " = " + val);
                 if (typeof val === 'undefined' || isNaN(val)) {
-                    ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
+                    ui.errorMessage(get('divSomfySettings'), tr('ERR_RADIO_PINS_REQUIRED'));
                     return false;
                 }
                 for (let s in o) {
@@ -2643,7 +2795,7 @@ class Somfy {
                         if (sval === val) {
                             if ((name === 'TXPin' && s === 'RXPin') || (name === 'RXPin' && s === 'TXPin')) continue;
                             ui.errorMessage(
-                                document.getElementById('divSomfySettings'),
+                                get('divSomfySettings'),
                                             tr('ERR_GPIO_PIN_DUPLICATED').replace('%1', name.replace('Pin', '')).replace('%2', s.replace('Pin', ''))
                             );
                             return false;
@@ -2652,7 +2804,6 @@ class Somfy {
                 }
                 return true;
             };
-
             for (const key of pinKeys) {
                 if (!fnValDup(trans.config, key)) {
                     valid = false;
@@ -2665,20 +2816,19 @@ class Somfy {
                 if (err) {
                     ui.serviceError(err);
                 } else {
-                    document.getElementById('btnSaveRadio').classList.remove('disabled');
+                    ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                    get('btnSaveRadio').classList.remove('disabled');
                     const radioTab = document.querySelector('.tab-container span[data-grpid="divRadioSettings"]');
-                    const row = document.getElementById('divRadioEnableColor');
-                    const txtStatus = document.getElementById('divRadioEnableStatus');
-                    const cbRadio = document.getElementById('cbEnableRadio');
-                    const sideNote = document.getElementById('barsideRadioDisable');
+                    const row = get('divRadioEnableColor');
+                    const txtStatus = get('divRadioEnableStatus');
+                    const cbRadio = get('cbEnableRadio');
+                    const sideNote = get('barsideRadioDisable');
                     const isInit = response.config.radioInit;
 
                     if (radioTab) {
                         radioTab.classList.toggle('radio-error', !isInit);
                         if (sideNote) sideNote.style.display = isInit ? 'none' : 'inline';
-                        row.style.backgroundColor = isInit
-                        ? "color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color))"
-                        : "var(--unibloc-color)";
+                        row.classList.toggle('radioOn', !!isInit);
                     }
                     if (cbRadio.checked === isInit) {
                         txtStatus.textContent = cbRadio.checked ? tr('RADIO_ENABLED') : tr('RADIO_DISABLED');
@@ -2692,10 +2842,10 @@ class Somfy {
     procFrequencyScan(scan) {
         // console.log(scan);
         let div = this.scanFrequency();
-        let spanTestFreq = document.getElementById('spanTestFreq');
-        let spanTestRSSI = document.getElementById('spanTestRSSI');
-        let spanBestFreq = document.getElementById('spanBestFreq');
-        let spanBestRSSI = document.getElementById('spanBestRSSI');
+        let spanTestFreq = get('spanTestFreq');
+        let spanTestRSSI = get('spanTestRSSI');
+        let spanBestFreq = get('spanBestFreq');
+        let spanBestRSSI = get('spanBestRSSI');
 
         if (spanBestFreq) {
             spanBestFreq.innerHTML = scan.RSSI !== -100 ? scan.frequency.fmt('###.00') : '----';
@@ -2716,146 +2866,129 @@ class Somfy {
         if (scan.RSSI !== -100)
             div.setAttribute('data-frequency', scan.frequency);
     }
-
     scanFrequency(initScan) {
         if (this.isScanClosing) return;
-        let div = document.getElementById('divScanFrequency');
+        let div = get('divScanFrequency');
 
         if (!div) {
             div = document.createElement('div');
-            div.setAttribute('id', 'divScanFrequency');
+            div.id = 'divScanFrequency';
             div.className = 'inst-overlay';
             div.innerHTML = `
-            <div class="overlay-content">
-            <div class="boutonOverlayClose animScale" onclick="somfy.terminateScanUI(true);">
-            <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-            <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-            </div>
-            <div id="jsHeadScanRadio" class="instructions-header">
-            <h2>${tr('SCANFREQ_TITLE')}</h2><p>${tr('SCANFREQ_DESC')}</p>
-            <svg class="instructions-headerLogo"><use xlink:href="#icon-tabRadio"></use></svg>
-            </div>
-            <div class="field-group unibloc"><div>${tr("SCANFREQ_SCAN_DESC")}</div></div>
-            <div class="field-group unibloc">
+            <div class="instructions-content">
+            ${overlayHeader('SCANFREQ_TITLE', 'SCANFREQ_DESC', 'icon-tabRadio')}
+            <div class="unibloc"><div>${tr("SCANFREQ_SCAN_DESC")}</div></div>
+            <div class="unibloc">
             <div class="uniRow">
             <div class="scanfreqRssiLeft"><div class="uniLabel">${tr("SCANFREQ_SCAN")}</div><div class="scanfreqValue"><span id="spanTestFreq">433.00</span> <span>${tr("MHZ")}</span></div></div>
             <div class="scanfreqRssiRight"><div class="uniLabel">RSSI</div><div class="scanfreqValue"><span id="spanTestRSSI">----</span> <span>${tr("DBM")}</span></div></div>
             </div>
             <hr>
-            <div class="uniRow" style="justify-content: space-between; align-items: flex-end;">
+            <div class="uniRow" style="justify-content:space-between;align-items:flex-end">
             <div class="scanfreqRssiLeft"><div class="uniLabel">${tr("SCANFREQ_FREQUENCY")}</div><div class="scanfreqValueColor"><span id="spanBestFreq">---.--</span> <span>${tr("MHZ")}</span></div></div>
             <div class="scanfreqRssiRight"><div class="uniLabel">RSSI</div><div class="scanfreqValueColor"><span id="spanBestRSSI">----</span> <span>${tr("DBM")}</span></div></div>
             </div>
             </div>
-            <div class="field-group uniblocrRssiCanvas"><canvas id="rssiCanvas"></canvas></div>
+            <div class="uniblocrRssiCanvas"><canvas id="rssiCanvas"></canvas></div>
             <div class="button-container-col">
-            <button id="btnStopScanning" class="bouton animScale" type="button" onclick="somfy.stopScanningFrequency(true);">${tr("BT_STOP_SCAN")}</button>
-            <div style="display:flex; gap:10px; width:100%;">
-            <button id="btnRestartScanning" class="bouton animScale" type="button" style="display:none;" onclick="somfy.scanFrequency(true);">${tr("BT_START_SCAN")}</button>
-            <button id="btnCopyFrequency" class="bouton animScale" type="button" style="display:none;" onclick="somfy.setScannedFrequency();">${tr("BT_COPY_FREQUENCY")}</button>
+            <button id="btnStopScanning" type="button" onclick="somfy.stopScanningFrequency(true)">${tr("BT_STOP_SCAN")}</button>
+            <div style="display:flex;gap:10px;width:100%">
+            <button id="btnRestartScanning" type="button" style="display:none" onclick="somfy.scanFrequency(true)">${tr("BT_START_SCAN")}</button>
+            <button id="btnCopyFrequency" type="button" style="display:none" onclick="somfy.setScannedFrequency()">${tr("BT_COPY_FREQUENCY")}</button>
             </div>
-            <button id="btnCloseScanning" class="boutonOutline animScale" type="button" style="display:none;" onclick="document.getElementById('divScanFrequency').remove();">${tr("BT_CLOSE")}</button>
+            <button id="btnCloseScanning" line type="button" style="display:none" line>${tr("BT_CLOSE")}</button>
             </div>
-            <div class="field-group unibloc scanfreqwhat">
+            <div class="unibloc scanfreqwhat">
             <div><span>💡</span> ${tr('SCANFREQ_UNDERSTANDING_RSSI')}</div><p>${tr('SCANFREQ_RSSI_EXPLANATION')}</p>
             <div class="scanfreqSignal">
-            <div class="success"><svg><use xlink:href="#icon-succes"></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span>${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
-            <div class="warning"><svg><use xlink:href="#icon-warning"></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span>${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
-            <div class="error"><svg><use xlink:href="#icon-error"></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span>${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
+            <div class="success"><svg><use href=#svg-succes></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span>${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
+            <div class="warning"><svg><use href=#svg-warning></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span>${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
+            <div class="error"><svg><use href=#svg-error></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span>${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
             </div>
             </div>
             </div>`;
 
-            document.getElementById('divContainer').appendChild(div);
-            window.scrollTo(0, 0);
+            shOverlay(div);
+            div.querySelector('#btnCloseScanning').onclick = () => closeOverlay(div);
 
             if (this.scanObserver) this.scanObserver.disconnect();
-            this.scanObserver = new MutationObserver(() => {
-                if (!document.getElementById('divScanFrequency')) this.terminateScanUI(true);
-            });
-                this.scanObserver.observe(document.getElementById('divContainer'), { childList: true });
+            this.scanObserver = new MutationObserver(() => { if (!get('divScanFrequency')) this.terminateScanUI(true); });
+            this.scanObserver.observe(get('divContainer'), { childList: true });
 
-                this.rssiGraph = {
-                    points: [],
-                    maxPoints: 100,
-                    canvas: document.getElementById('rssiCanvas'),
-                    update(val) {
-                        if (!this.canvas) return;
-                        const ctx = this.canvas.getContext('2d');
-                        const w = this.canvas.width = this.canvas.clientWidth;
-                        const h = this.canvas.height = this.canvas.clientHeight;
-                        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#f8a525';
+            this.rssiGraph = {
+                points: [],
+                maxPoints: 100,
+                canvas: get('rssiCanvas'),
+                update(val) {
+                    const c = this.canvas;
+                    if (!c) return;
+                    const ctx = c.getContext('2d'), w = c.width = c.clientWidth, h = c.height = c.clientHeight;
+                    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#f8a525';
+                    const lblW = 50, gW = w - lblW;
+                    let v = parseInt(val);
+                    if (isNaN(v) || v === -100) v = -110;
 
-                        const labelWidth = 50;
-                        const graphWidth = w - labelWidth;
-                        let v = parseInt(val);
-                        if (isNaN(v) || v === -100) v = -110;
+                    this.points.push(v);
+                    if (this.points.length > this.maxPoints) this.points.shift();
 
-                        this.points.push(v);
-                        if (this.points.length > this.maxPoints) this.points.shift();
+                    ctx.clearRect(0, 0, w, h);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                    ctx.setLineDash([5, 5]);
+                    ctx.font = "10px Arial";
+                    ctx.fillStyle = "rgba(255,255,255,0.5)";
 
-                        ctx.clearRect(0, 0, w, h);
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                        ctx.setLineDash([5, 5]);
-                        ctx.font = "10px Arial";
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    [-40, -70, -100].forEach(lv => {
+                        const y = h - (((lv + 110) / 90) * h);
+                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                        ctx.fillText(lv + " dBm", 5, y - 5);
+                    });
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.strokeStyle = accent;
+                    ctx.lineWidth = 2;
+                    ctx.lineJoin = 'round';
 
-                        [-40, -70, -100].forEach(level => {
-                            const y = h - (((level + 110) / 90) * h);
-                            ctx.beginPath();
-                            ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-                            ctx.fillText(level + " dBm", 5, y - 5);
-                        });
-                        ctx.setLineDash([]);
-                        ctx.beginPath();
-                        ctx.strokeStyle = accentColor;
-                        ctx.lineWidth = 2;
-                        ctx.lineJoin = 'round';
+                    const step = gW / (this.maxPoints - 1);
+                    this.points.forEach((p, i) => {
+                        const x = lblW + (i * step), y = h - (((p + 110) / 90) * h);
+                        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    });
+                    ctx.stroke();
 
-                        const step = graphWidth / (this.maxPoints - 1);
-                        this.points.forEach((p, i) => {
-                            const x = labelWidth + (i * step);
-                            const y = h - (((p + 110) / 90) * h);
-                            if (i === 0) ctx.moveTo(x, y);
-                            else ctx.lineTo(x, y);
-                        });
-                            ctx.stroke();
-                            const gradient = ctx.createLinearGradient(0, 0, 0, h);
-                            gradient.addColorStop(0, accentColor.includes('#') ? accentColor + '4D' : accentColor);
-                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                            ctx.lineTo(labelWidth + ((this.points.length - 1) * step), h);
-                            ctx.lineTo(labelWidth, h);
-                            ctx.fillStyle = gradient;
-                            ctx.fill();
-                    }
-                };
+                    const grad = ctx.createLinearGradient(0, 0, 0, h);
+                    grad.addColorStop(0, accent.includes('#') ? accent + '4D' : accent);
+                    grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.lineTo(lblW + ((this.points.length - 1) * step), h);
+                    ctx.lineTo(lblW, h);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                }
+            };
         }
         if (initScan) {
             div.setAttribute('data-initscan', true);
-            putJSONSync('/beginFrequencyScan', {}, (err, trans) => {
+            putJSONSync('/beginFrequencyScan', {}, (err) => {
                 if (!err) {
-                    document.getElementById('btnStopScanning').style.display = '';
-                    document.getElementById('btnRestartScanning').style.display = 'none';
-                    document.getElementById('btnCopyFrequency').style.display = 'none';
-                    document.getElementById('btnCloseScanning').style.display = 'none';
+                    ['btnStopScanning'].forEach(id => get(id).style.display = '');
+                    ['btnRestartScanning', 'btnCopyFrequency', 'btnCloseScanning'].forEach(id => get(id).style.display = 'none');
                 }
             });
         }
         return div;
     }
     setScannedFrequency() {
-        let div = document.getElementById('divScanFrequency');
+        let div = get('divScanFrequency');
         let freq = parseFloat(div.getAttribute('data-frequency'));
-        let slid = document.getElementById('slidFrequency');
+        let slid = get('slidFrequency');
         slid.value = Math.round(freq * 1000);
         somfy.frequencyChanged(slid);
-        div.remove();
+        closeOverlay(div);
     }
     stopScanningFrequency(killScan) {
-        let div = document.getElementById('divScanFrequency');
+        let div = get('divScanFrequency');
         if (!div) return;
         if (killScan !== true) {
-            div.remove();
+            closeOverlay(div);
             return;
         }
         putJSONSync('/endFrequencyScan', {}, (err, trans) => {
@@ -2865,12 +2998,12 @@ class Somfy {
                 let freqAttr = div.getAttribute('data-frequency');
                 let freq = parseFloat(freqAttr);
 
-                document.getElementById('btnStopScanning').style.display = 'none';
-                document.getElementById('btnRestartScanning').style.display = '';
+                get('btnStopScanning').style.display = 'none';
+                get('btnRestartScanning').style.display = '';
                 if (typeof freq === 'number' && !isNaN(freq) && freq > 0) {
-                    document.getElementById('btnCopyFrequency').style.display = '';
+                    get('btnCopyFrequency').style.display = '';
                 }
-                document.getElementById('btnCloseScanning').style.display = '';
+                get('btnCloseScanning').style.display = '';
             }
         });
     }
@@ -2886,8 +3019,8 @@ class Somfy {
                 if (err) console.error(err);
             });
         }
-        let div = document.getElementById('divScanFrequency');
-        if (div) div.remove();
+        let div = get('divScanFrequency');
+        if (div) closeOverlay(div);
         setTimeout(() => { this.isScanClosing = false; }, 1000);
     }
 
@@ -2904,7 +3037,7 @@ class Somfy {
         const config = map[type];
         if (!config) return;
 
-        const slider = document.getElementById(config.slider);
+        const slider = get(config.slider);
         if (slider) slider.step = stepValue;
 
         const container = document.querySelector(config.container);
@@ -2915,7 +3048,7 @@ class Somfy {
         }
     }
     stepValue(sliderId, direction) {
-        const slider = document.getElementById(sliderId);
+        const slider = get(sliderId);
         if (!slider) return;
         const currentVal = parseFloat(slider.value);
         const step = parseFloat(slider.step) || 1;
@@ -2943,14 +3076,15 @@ class Somfy {
         }
     }
     checkEmptyState() {
-        const divGetStarted = document.getElementById('divGetStarted');
-        const divGroupControls = document.getElementById('divGroupControls');
-        const divShadeControls = document.getElementById('divShadeControls');
-        const divNoDevice = document.getElementById('divNoDevice');
-        const divConfigPnl = document.getElementById('divConfigPnl');
-        const showLogoHeader = document.getElementById('showLogoHeader');
-        const divRepeatList = document.getElementById('divRepeatList');
-
+        const getEl = id => get(id);
+        const setDisp = (el, show) => { if (el) el.style.display = show ? 'block' : 'none'; };
+        const togglePair = (hasData, emptyId, contentId) => {
+            setDisp(getEl(emptyId), !hasData);
+            setDisp(getEl(contentId), hasData);
+        };
+        const divShadeControls = getEl('divShadeControls');
+        const divGroupControls = getEl('divGroupControls');
+        const divConfigPnl = getEl('divConfigPnl');
         if (!divShadeControls || !divGroupControls) return;
 
         const activePill = document.querySelector('.room-pill.active');
@@ -2959,63 +3093,40 @@ class Somfy {
         const shades = divShadeControls.querySelectorAll('.somfyShadeCtl');
         const groups = divGroupControls.querySelectorAll('.somfyGroupCtl');
         const hasRooms = _rooms.length > 1;
+
+        togglePair(hasRooms, 'divRoomEmptyState', 'divRoomListContent');
+        togglePair(groups.length > 0, 'divGroupEmptyState', 'divGroupListContent');
+        togglePair(shades.length > 0, 'divShadeEmptyState', 'divShadeListContent');
+
+        const divRepeatList = getEl('divRepeatList');
+        togglePair(divRepeatList && divRepeatList.children.length > 0, 'divRepeaterEmptyState', 'divRepeaterListContent');
+
+        const countVisible = (list) => [...list].filter(el =>
+        currentRoomId === 0 || parseInt(el.getAttribute('data-roomid'), 10) === currentRoomId
+        ).length;
+
+        const visibleCount = countVisible(shades) + countVisible(groups);
         const totalDevices = shades.length + groups.length;
-        const roomEmpty = document.getElementById('divRoomEmptyState');
-        const roomContent = document.getElementById('divRoomListContent');
-        if (roomEmpty && roomContent) {
-            roomEmpty.style.display = !hasRooms ? 'block' : 'none';
-            roomContent.style.display = !hasRooms ? 'none' : 'block';
+        const showLogoHeader = getEl('showLogoHeader');
+        if (showLogoHeader) {
+            showLogoHeader.style.visibility = (isConfigOpen || totalDevices > 0 || hasRooms) ? 'visible' : 'hidden';
         }
-        const groupEmpty = document.getElementById('divGroupEmptyState');
-        const groupContent = document.getElementById('divGroupListContent');
-        if (groupEmpty && groupContent) {
-            const hasGroups = groups.length > 0;
-            groupEmpty.style.display = hasGroups ? 'none' : 'block';
-            groupContent.style.display = hasGroups ? 'block' : 'none';
+        const divGetStarted = getEl('divGetStarted');
+        const divNoDevice = getEl('divNoDevice');
+
+        if (totalDevices === 0 && !hasRooms) {
+            setDisp(divGetStarted, !isConfigOpen);
+            if (divGetStarted) divGetStarted.style.display = isConfigOpen ? 'none' : 'flex';
+            setDisp(divNoDevice, false);
+            setDisp(divShadeControls, false);
+            setDisp(divGroupControls, false);
+        } else {
+            setDisp(divGetStarted, false);
+            const noDevShow = visibleCount === 0 && !isConfigOpen;
+            if (divNoDevice) divNoDevice.style.display = noDevShow ? 'flex' : 'none';
+            divShadeControls.style.display = visibleCount === 0 ? 'none' : '';
+            divGroupControls.style.display = visibleCount === 0 ? 'none' : '';
         }
-        const shadeEmpty = document.getElementById('divShadeEmptyState');
-        const shadeContent = document.getElementById('divShadeListContent');
-        if (shadeEmpty && shadeContent) {
-            const hasShades = shades.length > 0;
-            shadeEmpty.style.display = hasShades ? 'none' : 'block';
-            shadeContent.style.display = hasShades ? 'block' : 'none';
-        }
-        const repeatEmpty = document.getElementById('divRepeaterEmptyState');
-        const repeatContent = document.getElementById('divRepeaterListContent');
-        if (repeatEmpty && repeatContent && divRepeatList) {
-            const hasRepeated = divRepeatList.children.length > 0;
-            repeatEmpty.style.display = hasRepeated ? 'none' : 'block';
-            repeatContent.style.display = hasRepeated ? 'block' : 'none';
-        }
-        let visibleCount = 0;
-        shades.forEach(s => {
-            const rId = parseInt(s.getAttribute('data-roomid'), 10);
-            if (currentRoomId === 0 || rId === currentRoomId) visibleCount++;
-        });
-            groups.forEach(g => {
-                const rId = parseInt(g.getAttribute('data-roomid'), 10);
-                if (currentRoomId === 0 || rId === currentRoomId) visibleCount++;
-            });
-                if (showLogoHeader) {
-                    showLogoHeader.style.visibility = (isConfigOpen || totalDevices > 0 || hasRooms) ? 'visible' : 'hidden';
-                }
-                if (totalDevices === 0 && !hasRooms) {
-                    divGetStarted.style.display = isConfigOpen ? 'none' : 'flex';
-                    if (divNoDevice) divNoDevice.style.display = 'none';
-                    divShadeControls.style.display = 'none';
-                    divGroupControls.style.display = 'none';
-                } else {
-                    divGetStarted.style.display = 'none';
-                    if (visibleCount === 0) {
-                        if (divNoDevice) divNoDevice.style.display = isConfigOpen ? 'none' : 'flex';
-                        divShadeControls.style.display = 'none';
-                        divGroupControls.style.display = 'none';
-                    } else {
-                        if (divNoDevice) divNoDevice.style.display = 'none';
-                        divShadeControls.style.display = '';
-                        divGroupControls.style.display = '';
-                    }
-                }
     }
     procRoomAdded(room) {
         let r = _rooms.find(x => x.roomId === room.roomId);
@@ -3034,9 +3145,9 @@ class Somfy {
             _rooms.sort((a, b) => { return a.sortOrder - b.sortOrder });
             this.setRoomsList(_rooms);
             this.checkEmptyState();
-            let rs = document.getElementById('divRoomSelector');
-            let ss = document.getElementById('divShadeControls');
-            let gs = document.getElementById('divGroupControls');
+            let rs = get('divRoomSelector');
+            let ss = get('divShadeControls');
+            let gs = get('divGroupControls');
             let ctls = ss.querySelectorAll('.somfyShadeCtl');
             for (let i = 0; i < ctls.length; i++) {
                 let x = ctls[i];
@@ -3068,7 +3179,7 @@ class Somfy {
     setRoomsList(rooms) {
         let divCfg = '';
         const homeName = tr('HOME');
-        const slider = document.getElementById('divRoomSelector');
+        const slider = get('divRoomSelector');
         let divPills = `<div class="room-pill active" data-roomid="0" onclick="somfy.selectRoom(0)">${homeName}</div>`;
         let divOpts = `<option value="0">${homeName}</option>`;
         _rooms = [{ roomId: 0, name: homeName }];
@@ -3076,12 +3187,14 @@ class Somfy {
         rooms.sort((a, b) => a.sortOrder - b.sortOrder);
         rooms.forEach(room => {
             divPills += `<div class="room-pill animScale" data-roomid="${room.roomId}" onclick="somfy.selectRoom(${room.roomId})">${room.name}</div>`;
-            divCfg += `
-            <div class="somfyRoom room-draggable" draggable="true" data-roomid="${room.roomId}">
-            <div class="divEditDelete-svg" onclick="somfy.openEditRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div>
-            <div class="room-name"><span class="name-text">${room.name}</span></div>
-            <div class="divEditDelete-svg" onclick="somfy.deleteRoom(${room.roomId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div>
+            // ... foreach room ...
+            divCfg += `<div class="somfyRoom room-draggable" data-roomid="${room.roomId}">
+            <div class="drag-handle"><svg class="icon-svg"><use href=#svg-drag></use></svg></div>
+            <div class="room-name"><span class="name-text">${room.name}</span></div><span class="vr"></span>
+            <div class="divEditDelete-svg" onclick="somfy.openEditRoom(${room.roomId});"><svg class="icon-svg"><use href=#svg-edit></use></svg></div>
+            <div class="divEditDelete-svg" onclick="somfy.deleteRoom(${room.roomId});"><svg class="icon-svg"><use href=#svg-close></use></svg></div>
             </div>`;
+
             divOpts += `<option value="${room.roomId}">${room.name}</option>`;
             _rooms.push(room);
         });
@@ -3092,12 +3205,12 @@ class Somfy {
         const navContainer = document.querySelector('.room-nav-container');
         if(navContainer) navContainer.style.display = rooms.length === 0 ? 'none' : 'flex';
 
-        document.getElementById('divRoomList').innerHTML = divCfg;
-        document.getElementById('selShadeRoom').innerHTML = divOpts;
-        document.getElementById('selGroupRoom').innerHTML = divOpts;
+        get('divRoomList').innerHTML = divCfg;
+        get('selShadeRoom').innerHTML = divOpts;
+        get('selGroupRoom').innerHTML = divOpts;
 
         this.checkEmptyState();
-        this.setListDraggable(document.getElementById('divRoomList'), '.room-draggable', (list) => {
+        this.setListDraggable(get('divRoomList'), '.room-draggable', (list) => {
             let order = Array.from(list.querySelectorAll('.room-draggable')).map(item =>
             parseInt(item.getAttribute('data-roomid'), 10)
             );
@@ -3108,71 +3221,53 @@ class Somfy {
         });
         this.initRoomScroll(slider);
     }
-
-    initRoomScroll(container) {
-        const newContainer = container.cloneNode(true);
-        container.parentNode.replaceChild(newContainer, container);
-        const update = () => this.checkArrows();
-        let isDown = false, startX, scrollLeft;
-
-        newContainer.addEventListener('wheel', (e) => {
-            if (e.deltaY !== 0) {
-                e.preventDefault();
-                newContainer.scrollLeft += e.deltaY;
-                update();
+    initRoomScroll(c) {
+        const update = () => {
+            const btnL = get('btnScrollLeft'), btnR = get('btnScrollRight');
+            if (c && btnL && btnR) {
+                btnL.style.display = c.scrollLeft > 10 ? 'block' : 'none';
+                btnR.style.display = c.scrollWidth > (c.scrollLeft + c.clientWidth + 10) ? 'block' : 'none';
             }
+        };
+        let isDown = 0, startX, scrollLeft;
+
+        c.addEventListener('wheel', (e) => {
+            if (e.deltaY) { e.preventDefault(); c.scrollLeft += e.deltaY; }
         }, { passive: false });
 
-        newContainer.addEventListener('mousedown', (e) => {
-            isDown = true;
-            newContainer.style.cursor = 'grabbing';
-            startX = e.pageX - newContainer.offsetLeft;
-            scrollLeft = newContainer.scrollLeft;
-        });
-        const stopScroll = () => { isDown = false; newContainer.style.cursor = 'grab'; };
-        newContainer.addEventListener('mouseleave', stopScroll);
-        newContainer.addEventListener('mouseup', stopScroll);
-        newContainer.addEventListener('mousemove', (e) => {
+        c.onmousedown = (e) => {
+            isDown = 1;
+            c.style.cursor = 'grabbing';
+            startX = e.pageX - c.offsetLeft;
+            scrollLeft = c.scrollLeft;
+        };
+
+        const stop = () => { isDown = 0; c.style.cursor = 'grab'; };
+        c.onmouseleave = c.onmouseup = stop;
+
+        c.onmousemove = (e) => {
             if (!isDown) return;
             e.preventDefault();
-            const walk = (e.pageX - newContainer.offsetLeft - startX) * 2;
-            newContainer.scrollLeft = scrollLeft - walk;
-            update();
-        });
-        newContainer.addEventListener('scroll', update);
+            c.scrollLeft = scrollLeft - (e.pageX - c.offsetLeft - startX) * 2;
+        };
+
+        c.onscroll = update;
+        window.onresize = update;
         setTimeout(update, 150);
-        window.addEventListener('resize', update);
+        this.checkArrows = update;
     }
-    scrollRooms(direction) {
-        const container = document.getElementById('divRoomSelector');
-        if (container) {
-            container.scrollBy({
-                left: direction * 200,
-                behavior: 'smooth'
-            });
-        }
-    }
-    checkArrows() {
-        const container = document.getElementById('divRoomSelector');
-        const btnLeft = document.getElementById('btnScrollLeft');
-        const btnRight = document.getElementById('btnScrollRight');
-
-        if (!container || !btnLeft || !btnRight) return;
-
-        btnLeft.style.display = container.scrollLeft > 10 ? 'block' : 'none';
-
-        const hasMoreRight = container.scrollWidth > (container.scrollLeft + container.clientWidth + 10);
-        btnRight.style.display = hasMoreRight ? 'block' : 'none';
+    scrollRooms(dir) {
+        get('divRoomSelector')?.scrollBy({ left: dir * 200, behavior: 'smooth' });
     }
     setRepeaterList(addresses) {
         let divCfg = '';
         if (typeof addresses !== 'undefined') {
             for (let i = 0; i < addresses.length; i++) {
 
-                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="idRemoteAddress"><span class="AddrId-label">${tr("ADDR")}</span><span class="repeater-name">${addresses[i]}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+                divCfg += `<div class="somfyRepeater" data-address="${addresses[i]}"><div class="idRemoteAddress"><span class="AddrId-label">${tr("ADDR")}</span><span class="repeater-name">${addresses[i]}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkRepeater('${addresses[i]}');"><svg class="icon-svg"><use href=#svg-close></use></svg></div></div>`;
             }
         }
-        document.getElementById('divRepeatList').innerHTML = divCfg;
+        get('divRepeatList').innerHTML = divCfg;
         this.checkEmptyState();
     }
     setShadesList(shades) {
@@ -3182,9 +3277,9 @@ class Somfy {
         shades.sort((a, b) => { return a.sortOrder - b.sortOrder });
         console.log(shades);
         let roomId = document.querySelector('.room-pill.active') ? parseInt(document.querySelector('.room-pill.active').getAttribute('data-roomid'), 10) : 0;
-        let vrList = document.getElementById('selVRMotor');
+        let vrList = get('selVRMotor');
         // First get the optiongroup for the shades.
-        let optGroup = document.getElementById('optgrpVRShades');
+        let optGroup = get('optgrpVRShades');
         if (typeof shades === 'undefined' || shades.length === 0) {
             if (optGroup && typeof optGroup !== 'undefined') optGroup.remove();
         }
@@ -3206,8 +3301,7 @@ class Somfy {
             let isSunOn = (shade.flags & 0x01);
             let st = this.shadeTypes.find(x => x.type === shade.shadeType) || { type: shade.shadeType, ico: 'svg-window-shade' };
 
-            // --- SECTION CONFIG ---
-            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"><div class="divEditDelete-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="shade-name"><div class="cfg-room">${room.name}</div><div class="name-text">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="shade-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+            divCfg += `<div class="somfyShade shade-draggable" draggable="true" data-roomid="${shade.roomId}" data-mypos="${shade.myPos}" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}" data-tilt="${shade.tiltType}" data-shadetype="${shade.shadeType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"><div class="drag-handle"><svg class="icon-svg"><use href=#svg-drag></use></svg></div><div class="shade-name"><div class="cfg-room">${room.name}</div><div class="name-text">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="shade-address">${shade.remoteAddress}</span></div><span class="vr"></span><div class="divEditDelete-svg" onclick="somfy.openEditShade(${shade.shadeId});"><svg class="icon-svg"><use href=#svg-edit></use></svg></div><div class="divEditDelete-svg" onclick="somfy.deleteShade(${shade.shadeId});"><svg class="icon-svg"><use href=#svg-close></use></svg></div></div>`;
             // --- SECTION CONTROLE ---
             divCtl += `<div class="somfyShadeCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-shadeid="${shade.shadeId}" data-roomid="${shade.roomId}" data-direction="${shade.direction}" data-remoteaddress="${shade.remoteAddress}" data-position="${shade.position}" data-target="${shade.target}" data-mypos="${shade.myPos}" data-mytiltpos="${shade.myTiltPos}" data-shadetype="${shade.shadeType}" data-tilt="${shade.tiltType}" data-flipposition="${shade.flipPosition ? 'true' : 'false'}"
             data-windy="${(shade.flags & 0x10) === 0x10 ? 'true' : 'false'}" data-sunny="${(shade.flags & 0x20) === 0x20 ? 'true' : 'false'}">
@@ -3226,10 +3320,10 @@ class Somfy {
             if (shade.tiltType !== 0) divCtl += `<span class="val-pos"> Tilt: ${shade.tiltPosition}%</span>`;
             divCtl += `</span></div>
             <div class="shadectl-buttons" data-shadeType="${shade.shadeType}">
-            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-shadeid="${shade.shadeId}"><svg><use href="#icon-up"></use></svg></div>
-            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-shadeid="${shade.shadeId}"><svg><use href="#icon-my"></use></svg></div>
-            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-shadeid="${shade.shadeId}"><svg><use href="#icon-down"></use></svg></div>
-            <div class="button-outline cmd-button btn-somfy-svg-wide animScale" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#icon-toggle"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-shadeid="${shade.shadeId}"><svg><use href="#svg-up"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-shadeid="${shade.shadeId}"><svg><use href="#svg-my"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-shadeid="${shade.shadeId}"><svg><use href="#svg-down"></use></svg></div>
+            <div class="button-outline cmd-button btn-somfy-svg-wide animScale" data-cmd="toggle" data-shadeid="${shade.shadeId}"><svg><use href="#svg-toggle"></use></svg></div>
             </div>
             <div class="shadectl-status-bar">
             <div class="shadectl-status-left">
@@ -3244,7 +3338,7 @@ class Somfy {
             </div>`;
             if (shade.sunSensor) {
                 divCtl += `<div class="button-sunflag cmd-button" data-cmd="sunflag" data-shadeid="${shade.shadeId}" data-on="${isSunOn ? 'true' : 'false'}">
-                <svg><use href="#icon-sun"></use></svg>
+                <svg><use href="#svg-sun"></use></svg>
                 </div>`;
             }
             divCtl += `<div class="button-my" onclick="event.stopPropagation(); somfy.openSetMyPosition(${shade.shadeId});">
@@ -3262,9 +3356,9 @@ class Somfy {
             optGroup.appendChild(opt);
         }
         let sopt = vrList.options[vrList.selectedIndex];
-        document.getElementById('divVirtualRemote').setAttribute('data-bitlength', sopt ? sopt.getAttribute('data-bitlength') : 'none');
-        document.getElementById('divShadeList').innerHTML = divCfg;
-        let shadeControls = document.getElementById('divShadeControls');
+        get('divVirtualRemote').setAttribute('data-bitlength', sopt ? sopt.getAttribute('data-bitlength') : 'none');
+        get('divShadeList').innerHTML = divCfg;
+        let shadeControls = get('divShadeControls');
         shadeControls.innerHTML = divCtl;
         this.checkEmptyState();
         // Attach the timer for setting the My Position for the shade.
@@ -3355,7 +3449,7 @@ class Somfy {
                 }
             }, true);
         }
-        this.setListDraggable(document.getElementById('divShadeList'), '.shade-draggable', (list) => {
+        this.setListDraggable(get('divShadeList'), '.shade-draggable', (list) => {
             // Get the shade order
             let items = list.querySelectorAll('.shade-draggable');
             let order = [];
@@ -3373,139 +3467,110 @@ class Somfy {
             });
         });
     }
-    setListDraggable(list, itemclass, onChanged) {
-        let items = list.querySelectorAll(itemclass);
-        let changed = false;
-        let timerStart = null;
-        let dragDiv = null;
-        let fnDragStart = function (e) {
-            //console.log({ evt: 'dragStart', e: e, this: this });
-            if (typeof e.dataTransfer !== 'undefined') {
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/html', this.innerHTML);
-                this.style.opacity = '0.4';
-                this.classList.add('dragging');
+    setListDraggable(list, cl, cb) {
+        let el = null, gh = null, ch = false, sA = null;
+        let r = null, sY = 0, cY = 0, its = [];
+
+        const stop = () => { if(sA) cancelAnimationFrame(sA); sA = null; };
+        const scroll = (y) => {
+            stop();
+            let sp = 0;
+            if (y < 100) sp = -14;
+            else if (y > window.innerHeight - 100) sp = 14;
+
+            if (sp && gh) {
+                window.scrollBy(0, sp);
+                cY += sp;
+                gh.style.transform = "translateY(" + (cY - sY) + "px)";
+                sA = requestAnimationFrame(() => scroll(y));
+                sort();
             }
-            else {
-                timerStart = setTimeout(() => {
-                    this.style.opacity = '0.4';
-                    dragDiv = document.createElement('div');
-                    dragDiv.innerHTML = this.innerHTML;
-                    dragDiv.style.position = 'absolute';
-                    dragDiv.classList.add('somfyShade');
-                    dragDiv.style.left = `${this.offsetLeft}px`;
-                    dragDiv.style.width = `${this.clientWidth}px`;
-                    dragDiv.style.top = `${this.offsetTop}px`;
-                    dragDiv.style.border = 'dotted 1px silver';
-                    list.appendChild(dragDiv);
-                    this.classList.add('dragging');
-                    timerStart = null;
-                }, 1000);
-            }
-            e.stopPropagation();
         };
-        let fnDragEnter = function (e) {
-            //console.log({ evt: 'dragEnter', e: e, this: this });
-            this.classList.add('over');
-        };
-        let fnDragOver = function (e) {
-            //console.log({ evt: 'dragOver', e: e, this: this });
-            if (timerStart) {
-                clearTimeout(timerStart);
-                timerStart = null;
-                return;
-            }
-            e.preventDefault();
-            if (typeof e.dataTransfer !== 'undefined') e.dataTransfer.dropEffect = 'move';
-            else if (dragDiv) {
-                let rc = list.getBoundingClientRect();
-                let pageY = e.targetTouches[0].pageY;
-                let y = pageY - rc.top;
-                if (y < 0) y = 0;
-                else if (y > rc.height) y = rc.height;
-                dragDiv.style.top = `${y}px`;
-                // Now lets calculate which element we are over.
-                let ndx = -1;
-                for (let i = 0; i < items.length; i++) {
-                    let irc = items[i].getBoundingClientRect();
-                    if (pageY <= irc.bottom - (irc.height / 2)) {
-                        ndx = i;
-                        break;
-                    }
+        const sort = () => {
+            if (!el || !gh) return;
+            let mid = gh.getBoundingClientRect().top + (r.height / 2);
+            let idx = its.indexOf(el);
+
+            its.forEach((it, i) => {
+                if (it === el) return;
+                let iM = it.getBoundingClientRect().top + (r.height / 2);
+                let o = 0;
+                if (mid < iM && its.indexOf(el) > i) {
+                    o = r.height + 10;
+                    if(i < idx) idx = i;
+                } else if (mid > iM && its.indexOf(el) < i) {
+                    o = -(r.height + 10);
+                    if(i >= idx) idx = i + 1;
                 }
-                let over = items[ndx];
-                if (ndx < 0) [].forEach.call(items, (item) => { item.classList.remove('over') });
-                else if (!over.classList.contains['over']) {
-                    [].forEach.call(items, (item) => { item.classList.remove('over') });
-                    over.classList.add('over');
+                it.style.transform = o ? "translateY(" + o + "px)" : "";
+            });
+            el.dataset.idx = idx;
+        };
+        const end = () => {
+            stop();
+            if (gh) { gh.remove(); gh = null; }
+            if (el) {
+                el.classList.remove('drag-orig');
+                let n = parseInt(el.dataset.idx, 10), o = its.indexOf(el);
+                if (!isNaN(n) && n !== o) {
+                    list.insertBefore(el, its[n] || null);
+                    ch = true;
                 }
             }
-            return false;
+            its.forEach(it => it.style.transform = "");
+            if (ch && typeof cb === 'function') cb(list);
+            el = null; ch = false; its = [];
         };
-        let fnDragLeave = function (e) {
-            console.log({ evt: 'dragLeave', e: e, this: this });
-            this.classList.remove('over');
+        const move = (e) => {
+            if (!gh) return;
+            if (e.cancelable) e.preventDefault();
+            let t = e.touches ? e.touches[0] : e;
+            cY = t.clientY;
+            gh.style.transform = "translateY(" + (cY - sY) + "px)";
+            scroll(cY);
+            sort();
         };
-        let fnDrop = function (e) {
-            // Shift around the items.
-            console.log({ evt: 'drop', e: e, this: this });
-            let elDrag = list.querySelector('.dragging');
-            if (elDrag !== this) {
-                let curr = 0, end = 0;
-                for (let i = 0; i < items.length; i++) {
-                    if (this === items[i]) end = i;
-                    if (elDrag === items[i]) curr = i;
+        const start = (e, it) => {
+            if (e.type === 'mousedown') e.preventDefault();
+            el = it;
+            r = el.getBoundingClientRect();
+            its = Array.prototype.slice.call(list.querySelectorAll(cl));
+            let t = e.touches ? e.touches[0] : e;
+            sY = cY = t.clientY;
+
+            gh = el.cloneNode(true);
+            gh.className = 'drag-ghost';
+
+            const style = window.getComputedStyle(el);
+            Object.assign(gh.style, {
+                width: r.width + 'px',
+                height: r.height + 'px',
+                top: r.top + 'px',
+                left: r.left + 'px',
+            });
+            document.body.appendChild(gh);
+            el.classList.add('drag-orig');
+            if (navigator.vibrate) navigator.vibrate(30);
+        };
+
+            list.querySelectorAll(cl).forEach(it => {
+                let h = it.querySelector('.drag-handle');
+                if (h) {
+                    h.addEventListener('touchstart', (e) => start(e, it), {passive:true});
+                    h.addEventListener('mousedown', (e) => start(e, it));
                 }
-                if (curr !== end) {
-                    this.before(elDrag);
-                    changed = true;
-                }
-            }
-        };
-        let fnDragEnd = function (e) {
-            console.log({ evt: 'dragEnd', e: e, this: this });
-            let elOver = list.querySelector('.over');
-            [].forEach.call(items, (item) => { item.classList.remove('over') });
-            this.style.opacity = '1';
-            //overCounter = 0;
-            if (timerStart) {
-                clearTimeout(timerStart);
-                timerStart = null;
-            }
-            if (dragDiv) {
-                dragDiv.remove();
-                dragDiv = null;
-                if (elOver && typeof elOver !== 'undefined') fnDrop.call(elOver, e);
-            }
-            if (changed && typeof onChanged === 'function') {
-                onChanged(list);
-            }
-            this.classList.remove('dragging');
-        };
-        [].forEach.call(items, (item) => {
-            if (firmware.isMobile()) {
-                item.addEventListener('touchstart', fnDragStart);
-                item.addEventListener('touchmove', fnDragOver);
-                item.addEventListener('touchleave', fnDragLeave);
-                item.addEventListener('drop', fnDrop);
-                item.addEventListener('touchend', fnDragEnd);
-            }
-            else {
-                item.addEventListener('dragstart', fnDragStart);
-                item.addEventListener('dragenter', fnDragEnter);
-                item.addEventListener('dragover', fnDragOver);
-                item.addEventListener('dragleave', fnDragLeave);
-                item.addEventListener('drop', fnDrop);
-                item.addEventListener('dragend', fnDragEnd);
-            }
-        });
+            });
+            window.addEventListener('touchmove', move, {passive:false});
+            window.addEventListener('touchend', end);
+            window.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', end);
     }
     setGroupsList(groups) {
         this.groups = groups;
         let divCfg = '';
         let divCtl = '';
-        let vrList = document.getElementById('selVRMotor');
-        let optGroup = document.getElementById('optgrpVRGroups');
+        let vrList = get('selVRMotor');
+        let optGroup = get('optgrpVRGroups');
 
         if (typeof groups === 'undefined' || groups.length === 0) {
             if (optGroup) optGroup.remove();
@@ -3528,7 +3593,7 @@ class Somfy {
                 let group = groups[i];
                 let room = _rooms.find(x => x.roomId === group.roomId) || { roomId: 0, name: '' };
                 // --- Section Configuration ---
-                divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}"><div class="divEditDelete-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use xlink:href="#icon-edit"></use></svg></div><div class="group-name"><div class="cfg-room">${room.name}</div><div class="name-text">${group.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${group.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.deleteGroup(${group.groupId});"><svg class="icon-svg" style="color: var(--danger-color, red);"><use xlink:href="#icon-close"></use></svg></div></div>`;
+                divCfg += `<div class="somfyGroup group-draggable" draggable="true" data-roomid="${group.roomId}" data-groupid="${group.groupId}" data-remoteaddress="${group.remoteAddress}"><div class="drag-handle"><svg class="icon-svg"><use href=#svg-drag></use></svg></div> <div class="group-name"><div class="cfg-room">${room.name}</div><div class="name-text">${group.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${group.remoteAddress}</span></div><span class="vr"></span><div class="divEditDelete-svg" onclick="somfy.openEditGroup(${group.groupId});"><svg class="icon-svg"><use href=#svg-edit></use></svg></div><div class="divEditDelete-svg" onclick="somfy.deleteGroup(${group.groupId});"><svg class="icon-svg" style="color: var(--danger-color, red);"><use href=#svg-close></use></svg></div></div>`;
                 // --- Section Contrôle (divCtl) ---
                 divCtl += `<div class="somfyGroupCtl" style="${roomId === 0 || roomId === room.roomId ? '' : 'display:none'}" data-groupId="${group.groupId}" data-roomid="${group.roomId}" data-remoteaddress="${group.remoteAddress}">
                 <div class="group-name">
@@ -3540,10 +3605,10 @@ class Somfy {
                 }
                 divCtl += `</div></div>
                 <div class="groupctl-buttons">
-                <div class="button-sunflag cmd-button" data-cmd="sunflag" data-groupid="${group.groupId}" data-on="${(group.flags & 0x01) ? 'true' : 'false'}" style="${!group.sunSensor ? 'display:none' : ''}"><svg><use href="#icon-sun"></use></svg></div>
-                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-groupid="${group.groupId}"><svg><use href="#icon-up"></use></svg></div>
-                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-groupid="${group.groupId}"><svg><use href="#icon-my"></use></svg></div>
-                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-groupid="${group.groupId}"><svg><use href="#icon-down"></use></svg></div>
+                <div class="button-sunflag cmd-button" data-cmd="sunflag" data-groupid="${group.groupId}" data-on="${(group.flags & 0x01) ? 'true' : 'false'}" style="${!group.sunSensor ? 'display:none' : ''}"><svg><use href="#svg-sun"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="up" data-groupid="${group.groupId}"><svg><use href="#svg-up"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="my" data-groupid="${group.groupId}"><svg><use href="#svg-my"></use></svg></div>
+                <div class="button-outline cmd-button btn-somfy-svg animScale" data-cmd="down" data-groupid="${group.groupId}"><svg><use href="#svg-down"></use></svg></div>
                 </div>
                 </div>`;
 
@@ -3557,9 +3622,9 @@ class Somfy {
             }
         }
         let sopt = vrList.options[vrList.selectedIndex];
-        document.getElementById('divVirtualRemote').setAttribute('data-bitlength', sopt ? sopt.getAttribute('data-bitlength') : 'none');
-        document.getElementById('divGroupList').innerHTML = divCfg;
-        let groupControls = document.getElementById('divGroupControls');
+        get('divVirtualRemote').setAttribute('data-bitlength', sopt ? sopt.getAttribute('data-bitlength') : 'none');
+        get('divGroupList').innerHTML = divCfg;
+        let groupControls = get('divGroupControls');
         groupControls.innerHTML = divCtl;
         this.checkEmptyState();
         // Attach the timer for setting the My Position for the Group.
@@ -3580,7 +3645,7 @@ class Somfy {
                     this.sendGroupCommand(groupId, cmd);
             }, true);
         }
-        this.setListDraggable(document.getElementById('divGroupList'), '.group-draggable', (list) => {
+        this.setListDraggable(get('divGroupList'), '.group-draggable', (list) => {
             // Get the shade order
             let items = list.querySelectorAll('.group-draggable');
             let order = [];
@@ -3628,13 +3693,13 @@ class Somfy {
         const positionSlider = (tiltType !== 3) ? `
         <div class="slider-group">
         <div class="slider-header"><span class="title">${tr('POPUP_TARGET_POSITION')}</span><span class="val"><span id="spanShadeTarget">${currPos}</span> ${lbl}</span></div>
-        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="document.getElementById('spanShadeTarget').innerHTML=this.value;">
+        <input id="slidShadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" oninput="get('spanShadeTarget').innerHTML=this.value;">
         </div>` : '';
 
         const tiltSlider = (tiltType > 0) ? `
         <div class="slider-group">
         <div class="slider-header"><span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span><span class="val"><span id="spanShadeTiltTarget">${currTiltPos}</span> ${lbl}</span></div>
-        <input id="slidShadeTiltTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" oninput="document.getElementById('spanShadeTiltTarget').innerHTML=this.value;">
+        <input id="slidShadeTiltTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" oninput="get('spanShadeTiltTarget').innerHTML=this.value;">
         </div>` : '';
 
         const div = document.createElement('div');
@@ -3645,8 +3710,8 @@ class Somfy {
         <div class="shade-positioner-inner">
         ${positionSlider}${tiltSlider}
         <div class="popup-actions">
-        <button id="btnSetMyPosition" class="bouton-pop animScale" type="button">${tr("BT_SET_MY_POSITION")}</button>
-        <button id="btnCancelMy" class="boutonOutline-pop animScale" type="button">${tr("BT_CANCEL_1")}</button>
+        <button id="btnSetMyPosition" pop type="button">${tr("BT_SET_MY_POSITION")}</button>
+        <button id="btnCancelMy" pop line type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
@@ -3658,12 +3723,10 @@ class Somfy {
             if (arrowUse) arrowUse.setAttribute('href', '#svg-arrowRight');
             setTimeout(() => { div.remove(); }, 300);
         };
-
         const elTarget = div.querySelector('#slidShadeTarget');
         const elTiltTarget = div.querySelector('#slidShadeTiltTarget');
         const elBtnSave = div.querySelector('#btnSetMyPosition');
         const elBtnCancel = div.querySelector('#btnCancelMy');
-
         const fnUpdateUI = () => {
             const pos = elTarget ? parseInt(elTarget.value, 10) : 0;
             const tilt = elTiltTarget ? parseInt(elTiltTarget.value, 10) : 0;
@@ -3678,16 +3741,15 @@ class Somfy {
             }
         };
         if (elTarget) elTarget.oninput = () => {
-            document.getElementById('spanShadeTarget').innerHTML = elTarget.value;
+            get('spanShadeTarget').innerHTML = elTarget.value;
             fnUpdateUI();
         };
         if (elTiltTarget) elTiltTarget.oninput = () => {
-            document.getElementById('spanShadeTiltTarget').innerHTML = elTiltTarget.value;
+            get('spanShadeTiltTarget').innerHTML = elTiltTarget.value;
             fnUpdateUI();
         };
 
         elBtnCancel.onclick = (e) => { e.preventDefault(); animateClose(); };
-
         elBtnSave.onclick = (e) => {
             e.preventDefault();
             const pos = elTarget ? parseInt(elTarget.value, 10) : 0;
@@ -3704,7 +3766,7 @@ class Somfy {
     }
     sendShadeMyPosition(shadeId, pos, tilt) {
         console.log(`Sending My Position for shade id ${shadeId} to ${pos} and ${tilt}`);
-        let overlay = ui.waitMessage(document.getElementById('divContainer'));
+        let overlay = ui.waitMessage(get('divContainer'));
         putJSON('/setMyPosition', { shadeId: shadeId, pos: pos, tilt: tilt }, (err, response) => {
             this.closeShadePositioners();
             overlay.remove();
@@ -3712,34 +3774,64 @@ class Somfy {
         });
     }
     setLinkedRemotesList(shade) {
-        let divCfg = '';
-        const btnContainer = document.getElementById('divshowSomfyButtons');
+        const container = get('divLinkedRemoteList');
+        const remotes = shade.linkedRemotes || [];
 
-        for (let i = 0; i < shade.linkedRemotes.length; i++) {
-            let remote = shade.linkedRemotes[i];
-            divCfg += `<div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><div class="idRemoteAddress addr-group"><span class="AddrId-label">${tr("ADDR")}</span><span class="linkedremote-address">${remote.remoteAddress}</span></div><div class="idRemoteAddress code-group"><span class="AddrId-label">${tr("CODE")}</span><span class="linkedremote-code">${remote.lastRollingCode}</span></div><div class="button-outline-svg" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+        if (remotes.length === 0) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            return;
         }
-        document.getElementById('divLinkedRemoteList').innerHTML = divCfg;
+        container.style.display = 'block';
+
+        let html = `<div class="linkedRheader">${tr("LINKED_R")}</div>`;
+
+        html += `<div class="linkedScrollArea">`;
+        html += remotes.map((remote, i) => `
+        ${i > 0 ? '<hr>' : ''}
+        <div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${remote.remoteAddress}"><div class="linkedWrap"><svg class="icon-svg"><use href=#svg-remote></use></svg></div><div class="linkedContent"><div class="label">${tr("LINKED_R_T")} ${i + 1}</div><div><span class="uniStatus">${tr("ADDR")} ${remote.remoteAddress}, </span><span class="uniStatus">${tr("CODE")} ${remote.lastRollingCode}</span></div></div><div class="button-outline-svg svgDelete" onclick="somfy.unlinkRemote(${shade.shadeId}, '${remote.remoteAddress}');"><svg class="icon-svg"><use href=#svg-close></use></svg></div></div>
+        `).join('');
+
+        html += `</div>`;
+
+        container.innerHTML = html;
     }
     setLinkedShadesList(group) {
-        let divCfg = '';
-        const btnContainer = document.getElementById('divSomfyGroupButtons');
+        const container = get('divLinkedShadeList');
+        const btnContainer = get('divSomfyGroupButtons');
+        const btnLink = get('btnLinkShade');
+        const shades = group.linkedShades || [];
 
-        for (let i = 0; i < group.linkedShades.length; i++) {
-            let shade = group.linkedShades[i];
-
-            divCfg += `<div class="linked-shade" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}">
-            <div class="group-name"><div class="linkedshade-name">${shade.name}</div></div><div class="idRemoteAddress"><span class="AddrId-label">${tr("ID")}</span><span class="group-address">${shade.remoteAddress}</span></div><div class="divEditDelete-svg" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use xlink:href="#icon-close"></use></svg></div></div>`;
+        if (shades.length === 0) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'block';
         }
-        document.getElementById('divLinkedShadeList').innerHTML = divCfg;
-
+        const hasShades = shades.length > 0;
         if (btnContainer) {
-            if (group.linkedShades.length > 0) {
-                btnContainer.classList.remove('disabled');
-            } else {
+            if (!hasShades) {
                 btnContainer.classList.add('disabled');
+            } else {
+                btnContainer.classList.remove('disabled');
             }
         }
+        ui.setFocus(btnLink, !hasShades);
+
+        if (!hasShades) return;
+
+        let html = `<div class="linkedRheader">${tr("GROUP_LINKED_S")}</div>`;
+
+        html += `<div class="linkedScrollArea">`;
+        html += shades.map((shade, i) => `
+        ${i > 0 ? '<hr>' : ''}
+        <div class="somfyLinkedRemote" data-shadeid="${shade.shadeId}" data-remoteaddress="${shade.remoteAddress}">
+        <div class="linkedWrap"><svg class="icon-svg"><use href=#svg-simpleShutter></use></svg></div><div class="linkedContent"><div class="label">${shade.name}</div><div><span class="uniStatus">${tr("ADDR")} ${shade.remoteAddress}</span></div></div><div class="button-outline-svg svgDelete" onclick="somfy.unlinkGroupShade(${group.groupId}, ${shade.shadeId});"><svg class="icon-svg"><use href=#svg-close></use></svg></div></div>
+        `).join('');
+
+        html += `</div>`;
+
+        container.innerHTML = html;
     }
     pinMaps = [
         { name: '', maxPins: 39, inputs: [0, 1, 2, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [2, 3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },
@@ -3749,7 +3841,7 @@ class Somfy {
     ];
     loadPins(type, sel, opt) {
         while (sel.firstChild) sel.removeChild(sel.firstChild);
-        let cm = document.getElementById('divContainer').getAttribute('data-chipmodel');
+        let cm = get('divContainer').getAttribute('data-chipmodel');
         let pm = this.pinMaps.find(x => x.name === cm);
         if (!pm) {
             pm = { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] };
@@ -3778,126 +3870,118 @@ class Somfy {
         }
     }
     procShadeState(state) {
-        console.log(state);
-        let icons = document.querySelectorAll(`.somfy-shade-icon[data-shadeid="${state.shadeId}"]`);
-        for (let i = 0; i < icons.length; i++) {
-            icons[i].style.setProperty('--shade-position', `${state.flipPosition ? 100 - state.position : state.position}`);
-            icons[i].style.setProperty('--fpos', `${state.position}%`);
-        }
-        const labelTiltContainer = document.getElementById('labelTiltContainer');
-        const spanValTilt = document.getElementById('valTilt');
+        const g = get, sId = state.shadeId;
 
-        if (state.tiltType !== 0) {
-            if (labelTiltContainer) labelTiltContainer.style.display = 'block';
-            if (spanValTilt) spanValTilt.innerText = state.tiltPosition;
-        } else {
-            if (labelTiltContainer) labelTiltContainer.style.display = 'none';
-        }
+        document.querySelectorAll(`.somfy-shade-icon[data-shadeid="${sId}"]`).forEach(ico => {
+            const p = state.flipPosition ? 100 - state.position : state.position;
+            ico.style.setProperty('--shade-position', p);
+            ico.style.setProperty('--fpos', state.position + '%');
+        });
+        if (g('spanShadeId')?.innerText == sId) {
+            if (g('valPos')) g('valPos').innerText = state.position;
 
-        let flags = document.querySelectorAll(`.button-sunflag[data-shadeid="${state.shadeId}"]`);
-        for (let i = 0; i < flags.length; i++) {
-            flags[i].style.display = state.sunSensor ? '' : 'none';
-            flags[i].setAttribute('data-on', (state.flags & 0x01) === 0x01 ? 'true' : 'false');
+            const lTC = g('labelTiltContainer'), sVT = g('valTilt');
+            if (state.tiltType !== 0) {
+                if (lTC) lTC.style.display = 'block';
+                if (sVT) sVT.innerText = state.tiltPosition;
+            } else if (lTC) {
+                lTC.style.display = 'none';
+            }
         }
-
-        let divs = document.querySelectorAll(`.somfyShadeCtl[data-shadeid="${state.shadeId}"]`);
-        for (let i = 0; i < divs.length; i++) {
-            divs[i].setAttribute('data-direction', state.direction);
-            divs[i].setAttribute('data-position', state.position);
-            divs[i].setAttribute('data-target', state.target);
-            divs[i].setAttribute('data-mypos', state.myPos);
-            divs[i].setAttribute('data-windy', (state.flags & 0x10) === 0x10 ? 'true' : 'false');
-            divs[i].setAttribute('data-sunny', (state.flags & 0x20) === 0x20 ? 'true' : 'false');
-            if (typeof state.myTiltPos !== 'undefined') divs[i].setAttribute('data-mytiltpos', state.myTiltPos);
-            else divs[i].setAttribute('data-mytiltpos', -1);
+        document.querySelectorAll(`.button-sunflag[data-shadeid="${sId}"]`).forEach(btn => {
+            btn.style.display = state.sunSensor ? '' : 'none';
+            btn.dataset.on = (state.flags & 0x01) === 0x01;
+        });
+        document.querySelectorAll(`.somfyShadeCtl[data-shadeid="${sId}"]`).forEach(d => {
+            Object.assign(d.dataset, {
+                direction: state.direction,
+                position: state.position,
+                target: state.target,
+                mypos: state.myPos,
+                windy: (state.flags & 0x10) === 0x10,
+                          sunny: (state.flags & 0x20) === 0x20,
+                          mytiltpos: state.myTiltPos ?? -1
+            });
 
             if (state.tiltType !== 0) {
-                divs[i].setAttribute('data-tiltdirection', state.tiltDirection);
-                divs[i].setAttribute('data-tiltposition', state.tiltPosition);
-                divs[i].setAttribute('data-tilttarget', state.tiltTarget);
+                Object.assign(d.dataset, {
+                    tiltdirection: state.tiltDirection,
+                    tiltposition: state.tiltPosition,
+                    tilttarget: state.tiltTarget
+                });
             }
 
-            let spanPos = divs[i].querySelector('.val-pos');
-            if (spanPos) {
-                spanPos.innerHTML = `Pos: ${state.position}%`;
-            }
-            if (state.tiltType !== 0) {
-                let spans = divs[i].querySelectorAll('.val-pos');
-                if (spans.length > 1) {
-                    spans[1].innerHTML = `Tilt: ${state.tiltPosition}%`;
-                }
-            }
-            let spanMy = divs[i].querySelector('.val-my');
-            if (spanMy) {
-                spanMy.innerHTML = (state.myPos !== undefined && state.myPos >= 0) ? `My: ${state.myPos}%` : 'My: ---';
-            }
-            let spanMyTilt = divs[i].querySelector('.val-tilt');
-            if (spanMyTilt) {
-                spanMyTilt.innerHTML = (state.myTiltPos !== undefined && state.myTiltPos >= 0) ? `My Tilt: ${state.myTiltPos}%` : 'My Tilt: ---';
-            }
-        }
+            const spans = d.querySelectorAll('.val-pos');
+            if (spans[0]) spans[0].innerText = `Pos: ${state.position}%`;
+            if (state.tiltType !== 0 && spans[1]) spans[1].innerText = `Tilt: ${state.tiltPosition}%`;
+
+            const upTxt = (sel, pre, val) => {
+                const el = d.querySelector(sel);
+                if (el) el.innerText = `${pre}: ${val !== undefined && val >= 0 ? val + '%' : '---'}`;
+            };
+            upTxt('.val-my', 'My', state.myPos);
+            upTxt('.val-tilt', 'My Tilt', state.myTiltPos);
+        });
     }
     procRemoteFrame(frame) {
-        //console.log(frame);
-        document.getElementById('spanRssi').innerHTML = frame.rssi;
-        document.getElementById('spanFrameCount').innerHTML = parseInt(document.getElementById('spanFrameCount').innerHTML, 10) + 1;
-        let lnk = document.getElementById('divLinking');
+        const qs = (s) => get(s);
+        qs('spanRssi').innerHTML = frame.rssi;
+        qs('spanFrameCount').innerHTML = parseInt(qs('spanFrameCount').innerHTML || 0, 10) + 1;
+
+        const lnk = qs('divLinking') || qs('divLinkRepeater');
         if (lnk) {
-            let obj = {
+            const isRepeater = lnk.id === 'divLinkRepeater';
+            const url = isRepeater ? '/linkRepeater' : '/linkRemote';
+            const obj = isRepeater ? {address: frame.address} : {
                 shadeId: parseInt(lnk.dataset.shadeid, 10),
                 remoteAddress: frame.address,
                 rollingCode: frame.rcode
             };
-            let overlay = ui.waitMessage(document.getElementById('divLinking'));
-            putJSON('/linkRemote', obj, (err, shade) => {
-                console.log(shade);
+
+            const overlay = ui.waitMessage(lnk);
+            putJSON(url, obj, (err, data) => {
                 overlay.remove();
                 lnk.remove();
-                this.setLinkedRemotesList(shade);
+                if (err) ui.serviceError(err);
+                else isRepeater ? this.setRepeaterList(data) : this.setLinkedRemotesList(data);
             });
         }
-        else {
-            lnk = document.getElementById('divLinkRepeater');
-            if (lnk) {
-                putJSONSync(`/linkRepeater`, {address:frame.address}, (err, repeaters) => {
-                    lnk.remove();
-                    if (err) ui.serviceError(err);
-                    else this.setRepeaterList(repeaters);
-                });
-            }
-        }
-        let frames = document.getElementById('divFrames');
-        let row = document.createElement('div');
-        row.classList.add('frame-row');
-        row.setAttribute('data-valid', frame.valid);
-        // The socket is not sending the current date so we will snag the current receive date from
-        // the browser.
-        let fnFmtDate = (dt) => {
-            return `${(dt.getMonth() + 1).fmt('00')}/${dt.getDate().fmt('00')} ${dt.getHours().fmt('00')}:${dt.getMinutes().fmt('00')}:${dt.getSeconds().fmt('00')}.${dt.getMilliseconds().fmt('000')}`;
-        };
-        let fnFmtTime = (dt) => {
-            return `${dt.getHours().fmt('00')}:${dt.getMinutes().fmt('00')}:${dt.getSeconds().fmt('00')}.${dt.getMilliseconds().fmt('000')}`;
-        };
-        frame.time = new Date();
-        let proto = '-S';
-        switch (frame.proto) {
-            case 1:
-                proto = '-W';
-                break;
-            case 2:
-                proto = '-V';
-                break;
-        }
-        let html = `<span>${frame.encKey}</span><span>${frame.address}</span><span>${frame.command}<sup>${frame.stepSize ? frame.stepSize : ''}</sup></span><span>${frame.rcode}</span><span>${frame.rssi}dBm</span><span>${frame.bits}${proto}</span><span>${fnFmtTime(frame.time)}</span><div class="frame-pulses">`;
-        for (let i = 0; i < frame.pulses.length; i++) {
-            if (i !== 0) html += ',';
-            html += `${frame.pulses[i]}`;
-        }
-        html += '</div>';
-        row.innerHTML = html;
-        frames.prepend(row);
+        const dt = new Date();
+        const timeStr = `${dt.getHours().fmt('00')}:${dt.getMinutes().fmt('00')}:${dt.getSeconds().fmt('00')}.${dt.getMilliseconds().fmt('000')}`;
+        const protos = { 1: '-W', 2: '-V' };
+        const proto = protos[frame.proto] || '-S';
+        const row = document.createElement('div');
+        row.className = 'frame-row';
+        row.dataset.valid = frame.valid;
+
+        row.innerHTML = `<span>${frame.encKey}</span><span>${frame.address}</span><span>${frame.command}<sup>${frame.stepSize || ''}</sup></span><span>${frame.rcode}</span><span>${frame.rssi}dBm</span><span>${frame.bits}${proto}</span><span>${timeStr}</span><div class="frame-pulses">${frame.pulses.join(',')}</div>`;
+
+        qs('divFrames').prepend(row);
         this.frames.push(frame);
     }
+    JSONPretty(obj, indent = 2) {
+        if (Array.isArray(obj)) {
+            let output = '[';
+            for (let i = 0; i < obj.length; i++) {
+                if (i !== 0) output += ',\n';
+                output += this.JSONPretty(obj[i], indent);
+            }
+            output += ']';
+            return output;
+        }
+        else {
+            let output = JSON.stringify(obj, function (k, v) {
+                if (Array.isArray(v)) return JSON.stringify(v);
+                return v;
+            }, indent).replace(/\\/g, '')
+            .replace(/\"\[/g, '[')
+            .replace(/\]\"/g, ']')
+            .replace(/\"\{/g, '{')
+                .replace(/\}\"/g, '}')
+                .replace(/\{\n\s+/g, '{');
+                    return output;
+                }
+        }
     JSONPretty(obj, indent = 2) {
         if (Array.isArray(obj)) {
             let output = '[';
@@ -3935,69 +4019,77 @@ class Somfy {
         }
     }
     onShadeTypeChanged(el) {
-        let sel = document.getElementById('selShadeType');
-        let tilt = parseInt(document.getElementById('selTiltType').value, 10);
-        let ico = document.getElementById('icoShade');
-        let type = parseInt(sel.value, 10);
-        let bitLength = document.getElementById('selShadeBitLength')?.value;
+        const g = get,
+        type = parseInt(g('selShadeType').value, 10),
+        tilt = parseInt(g('selTiltType').value, 10),
+        bitL = g('selShadeBitLength')?.value,
+        ico = g('icoShade'),
+        isNew = g('spanShadeId').innerText === '*',
+        st = this.shadeTypes.find(x => x.type === type) || { type };
 
-        document.getElementById('somfyShade').setAttribute('data-shadetype', type);
-        document.getElementById('divSomfyButtons').setAttribute('data-shadetype', type);
+        ['somfyShade', 'divSomfyButtons'].forEach(id => g(id)?.setAttribute('data-shadetype', type));
 
-        let st = this.shadeTypes.find(x => x.type === type) || { type: type };
+        if (ico) {
 
-        for (let i = 0; i < this.shadeTypes.length; i++) {
-            let t = this.shadeTypes[i];
-            if (t.type !== type) {
-                if (ico.classList.contains(t.ico) && t.ico !== st.ico) ico.classList.remove(t.ico);
-            } else {
-                const useTag = ico.querySelector('use');
-                if (useTag && st.ico) {
-                    const newHref = '#' + st.ico;
-                    useTag.setAttribute('href', newHref);
-                    useTag.setAttribute('xlink:href', newHref);
-                }
-                let lift = st.lift || false;
-                if (lift && tilt == 3) lift = false;
-                if (!st.tilt) tilt = 0;
+            this.shadeTypes.forEach(t => t.ico !== st.ico && ico.classList.remove(t.ico));
 
-                document.getElementById('divTiltSettings').style.display = st.tilt ? '' : 'none';
-                document.getElementById('fldTiltTime').parentElement.style.display = tilt ? 'inline-block' : 'none';
-                document.getElementById('hrDivStepSettings')?.style.setProperty('display', tilt ? '' : 'none');
-                document.getElementById('hrTiltSettings')?.style.setProperty('display', (tilt === 3) ? 'none' : '');
-                document.getElementById('hrDldTiltTime')?.style.setProperty('display', (tilt === 0 && bitLength === "56") ? 'none' : '');
-                document.getElementById('divLiftSettings').style.display = lift ? '' : 'none';
-                document.getElementById('labelTiltContainer')?.style.setProperty('display', tilt ? 'block' : 'none');
-                document.getElementById('divSunSensor').style.display = st.sun ? '' : 'none';
-                document.getElementById('divLightSwitch').style.display = st.light ? '' : 'none';
-                document.getElementById('divFlipPosition').style.display = st.fpos ? '' : 'none';
-                document.getElementById('divFlipCommands').style.display = st.fcmd ? '' : 'none';
-
-                if (!st.light) document.getElementById('cbHasLight').checked = false;
-                if (!st.sun) document.getElementById('cbHasSunsensor').checked = false;
+            const use = ico.querySelector('use');
+            if (use && st.ico) {
+                const href = '#' + st.ico;
+                use.setAttribute('href', href);
+                use.setAttribute('xlink:href', href);
             }
         }
+        const hasLift = !!st.lift;
+        const curTilt = st.tilt ? tilt : 0;
+        const showLiftSettings = hasLift && tilt !== 3;
+        const disp = (id, cond, d = 'block') => {
+            const e = g(id);
+            if (e) e.style.display = cond ? d : 'none';
+        };
+
+            disp('divTiltSettings', st.tilt);
+            disp('divShadeTimings', hasLift);
+            disp('divLiftSettings', showLiftSettings);
+            disp('divSunSensor', st.sun);
+            disp('divLightSwitch', st.light);
+            disp('divFlipPosition', st.fpos);
+            disp('divFlipCommands', st.fcmd);
+
+            const fldTilt = g('fldTiltTime')?.parentElement;
+            if (fldTilt) fldTilt.style.display = curTilt ? 'inline-block' : 'none';
+
+            const showStepHR = [7, 8, 2, 4, 0].includes(type) || (type === 1 && [2, 3, 4].includes(tilt));
+
+        disp('hrDivStepSettings', showStepHR);
+        disp('hrTiltSettings', curTilt !== 3);
+        disp('hrDldTiltTime', !(curTilt === 0 && bitL === "56"));
+        disp('labelPosContainer', hasLift && !isNew);
+        disp('labelTiltContainer', curTilt && !isNew);
+
+        if (!st.light && g('cbHasLight')) g('cbHasLight').checked = false;
+        if (!st.sun && g('cbHasSunsensor')) g('cbHasSunsensor').checked = false;
     }
     onShadeBitLengthChanged(el) {
-        document.getElementById('somfyShade').setAttribute('data-bitlength', el.value);
+        get('somfyShade').setAttribute('data-bitlength', el.value);
         this.onShadeTypeChanged(el);
     }
     onShadeProtoChanged(el) {
-        document.getElementById('somfyShade').setAttribute('data-proto', el.value);
+        get('somfyShade').setAttribute('data-proto', el.value);
     }
     openEditRoom(roomId) {
         if (typeof roomId === 'undefined') {
             if (_rooms.length >= 15) {
-                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_ROOM_LIMIT_REACHED'));
+                ui.errorMessage(get('divSomfySettings'), tr('ERR_ROOM_LIMIT_REACHED'));
                 return;
             }
-            document.getElementById('btnSaveRoom').innerText = tr('BT_ADD_ROOM');
+            get('btnSaveRoom').innerText = tr('BT_CREATE');
             getJSONSync('/getNextRoom', (err, room) => {
-                document.getElementById('spanRoomId').innerText = '*';
+                get('spanRoomId').innerText = '*';
                 if (err) ui.serviceError(err);
                 else {
                     console.log(room);
-                    let elRoom = document.getElementById('somfyRoom');
+                    let elRoom = get('somfyRoom');
                     room.name = '';
                     ui.toElement(elRoom, room);
                     this.showEditRoom(true);
@@ -4005,189 +4097,141 @@ class Somfy {
             });
         }
         else {
-            document.getElementById('btnSaveRoom').innerText = tr('BT_SAVE_ROOM');
+            get('btnSaveRoom').innerText = tr('BT_SAVE');
             getJSONSync(`/room?roomId=${roomId}`, (err, room) => {
                 if (err) ui.serviceError(err);
                 else {
                     console.log(room);
-                    document.getElementById('spanRoomId').innerText = roomId;
-                    ui.toElement(document.getElementById('somfyRoom'), room);
+                    get('spanRoomId').innerText = roomId;
+                    ui.toElement(get('somfyRoom'), room);
                     this.showEditRoom(true);
-                    document.getElementById('btnSaveRoom').style.display = 'inline-block';
+                    get('btnSaveRoom').style.display = 'inline-block';
                 }
             });
         }
     }
     openEditShade(shadeId) {
-        const elShade = document.getElementById('somfyShade');
-        const btnContainer = document.getElementById('divshowSomfyButtons');
-        const ico = document.getElementById('icoShade');
-        const tiltContainer = document.getElementById('labelTiltContainer');
-        const spanValTilt = document.getElementById('valTilt');
-        const btnSave = document.getElementById('btnSaveShade');
-        if (typeof shadeId === 'undefined') {
-            // On utilise "this.shades" qui est défini dans setShadesList
-            if (this.shades && this.shades.length >= 30) {
-                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_SHADE_LIMIT_REACHED'));
-                return;
+        const g = get,
+        isNew = shadeId === undefined,
+        ico = g('icoShade'),
+        btns = ['btnPairShade', 'btnUnpairShade', 'btnLinkRemote', 'hrSetRollingC', 'btnSetRollingCode'];
+
+        if (isNew && this.shades?.length >= 30)
+            return ui.errorMessage(g('divSomfySettings'), tr('ERR_DEVICE_LIMIT_REACHED'));
+
+        const s = (id, d) => { const e = g(id); if(e) e.style.display = d; };
+
+        s('divshowSomfyButtons', 'flex');
+        g('divshowSomfyButtons')?.classList.toggle('disabled', isNew);
+        btns.forEach(id => s(id, 'none'));
+        ['blocPairDevice', 'divLinkedRemoteList', 'labelPosContainer'].forEach(id => s(id, 'none'));
+
+        getJSONSync(isNew ? '/getNextShade' : `/shade?shadeId=${shadeId}`, (err, shade) => {
+            if (err) return ui.serviceError(err);
+
+            if (isNew) {
+                Object.assign(shade, {
+                    name: '', shadeType: 4, downTime: 10000, upTime: 10000,
+                    tiltTime: 7000, tiltType: 0, flipCommands: 0, flipPosition: 0, paired: 0
+                });
             }
-        }
-        btnContainer.style.display = 'flex';
-        btnContainer.classList.remove('disabled');
-        if (typeof shadeId === 'undefined') {
-            btnContainer.classList.add('disabled');
-            getJSONSync('/getNextShade', (err, shade) => {
-                document.getElementById('btnPairShade').style.display = 'none';
-                document.getElementById('btnUnpairShade').style.display = 'none';
-                document.getElementById('btnLinkRemote').style.display = 'none';
-                document.getElementById('btnSetRollingCode').style.display = 'none';
-                btnSave.innerText = tr('BT_ADD_SHADE');
-                btnSave.style.display = 'inline-block';
-                document.getElementById('spanShadeId').innerText = '*';
-                document.getElementById('divLinkedRemoteList').innerHTML = '';
-                if (err) {
-                    ui.serviceError(err);
-                } else {
-                    shade.name = '';
-                    shade.downTime = shade.upTime = 10000;
-                    shade.tiltTime = 7000;
-                    //shade.bitLength = 56;
-                    shade.flipCommands = shade.flipPosition = false;
-                    ui.toElement(elShade, shade);
-                    if (ico) {
-                        ico.setAttribute('data-shadeid', '*');
-                        ico.style.setProperty('--shade-position', '0');
-                        ico.style.setProperty('--fpos', '0%');
-                        ico.style.setProperty('--tilt-position', '0%');
-                    }
-                    if (tiltContainer) tiltContainer.style.display = 'none';
-                    if (spanValTilt) spanValTilt.innerText = '0';
+            if (!isNew) {
+                s('labelPosContainer', 'block');
+                s('blocPairDevice', 'flex');
+                ['btnLinkRemote', 'btnSetRollingCode'].forEach(id => s(id, 'flex'));
+                s('hrSetRollingC', 'block');
+                s(shade.paired ? 'btnUnpairShade' : 'btnPairShade', 'inline-block');
 
-                    this.showEditShade(true);
-                    elShade.setAttribute('data-bitlength', shade.bitLength);
-                }
-            });
-        } else {
-            btnSave.style.display = 'none';
-            document.getElementById('btnPairShade').style.display = 'none';
-            document.getElementById('btnUnpairShade').style.display = 'none';
-            document.getElementById('btnLinkRemote').style.display = 'none';
+                if (g('valPos')) g('valPos').innerText = shade.position;
+                this.setLinkedRemotesList(shade);
+            }
 
-            btnSave.innerText = tr('BT_SAVE_SHADE');
-            document.getElementById('spanShadeId').innerText = shadeId;
-            if (ico) ico.setAttribute('data-shadeid', shadeId);
+            if (g('valTilt')) g('valTilt').innerText = shade.tiltPosition || 0;
 
-            getJSONSync(`/shade?shadeId=${shadeId}`, (err, shade) => {
-                if (err) {
-                    ui.serviceError(err);
-                } else {
-                    btnContainer.classList.remove('disabled');
-                    ui.toElement(elShade, shade);
-                    this.showEditShade(true);
-                    btnSave.style.display = 'inline-block';
-                    document.getElementById('btnLinkRemote').style.display = '';
-                    this.onShadeTypeChanged(document.getElementById('selShadeType'));
+            ui.setFocus('btnPairShade', !isNew && !shade.paired);
 
-                    if (tiltContainer) {
-                        tiltContainer.style.display = shade.tiltType !== 0 ? 'block' : 'none';
-                    }
-                    if (spanValTilt) spanValTilt.innerText = shade.tiltPosition;
+            const rev = shade.flipPosition,
+            p = rev ? 100 - shade.position : shade.position,
+            tp = rev ? 100 - shade.tiltPosition : shade.tiltPosition;
 
-                    if (ico) {
-                        const pos = shade.flipPosition ? 100 - shade.position : shade.position;
-                        const tPos = shade.flipPosition ? 100 - shade.tiltPosition : shade.tiltPosition;
-                        ico.style.setProperty('--shade-position', pos);
-                        ico.style.setProperty('--fpos', `${shade.position}%`);
-                        ico.style.setProperty('--tilt-position', `${tPos}%`);
-                    }
-                    somfy.onShadeBitLengthChanged(document.getElementById('selShadeBitLength'));
-                    somfy.onShadeProtoChanged(document.getElementById('selShadeProto'));
-                    document.getElementById('btnSetRollingCode').style.display = 'inline-block';
-                    if (shade.paired) {
-                        document.getElementById('btnUnpairShade').style.display = 'inline-block';
-                    } else {
-                        document.getElementById('btnPairShade').style.display = 'inline-block';
-                    }
-                    this.setLinkedRemotesList(shade);
-                }
-            });
-        }
+            if (ico) {
+                const st = ico.style;
+                st.setProperty('--shade-position', p);
+                st.setProperty('--fpos', p + '%');
+                st.setProperty('--tilt-position', tp + '%');
+                ico.setAttribute('data-shadeid', isNew ? '*' : shadeId);
+            }
+            g('btnSaveShade').innerText = tr(isNew ? 'BT_CREATE' : 'BT_SAVE');
+            g('spanShadeId').innerText = isNew ? '*' : shadeId;
+
+            ui.toElement(g('somfyShade'), shade);
+            this.onShadeTypeChanged(g('selShadeType'));
+            this.showEditShade(true);
+        });
     }
     openEditGroup(groupId) {
-        const btnContainer = document.getElementById('divSomfyGroupButtons');
-        const btnLink = document.getElementById('btnLinkShade');
-        const btnSave = document.getElementById('btnSaveGroup');
-        const elGroup = document.getElementById('somfyGroup');
+        const g = get,
+        isNew = groupId === undefined,
+        elGroup = g('somfyGroup'),
+        btnLink = g('btnLinkShade'),
+        btnSave = g('btnSaveGroup'),
+        btnContainer = g('divSomfyGroupButtons'),
+        divLinkedShades = g('divLinkedShadeList'),
+        blocPairParent = g('blocPairGroup');
 
-        if (typeof groupId === 'undefined') {
-            // On vérifie this.groups qu'on vient de créer dans setGroupsList
-            if (this.groups && this.groups.length >= 14) {
-                ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GROUP_LIMIT_REACHED'));
-                return;
+        if (isNew && this.groups?.length >= 14)
+            return ui.errorMessage(g('divSomfySettings'), tr('ERR_GROUP_LIMIT_REACHED'));
+
+        const s = (idOrElem, d) => { const e = (typeof idOrElem === 'string') ? g(idOrElem) : idOrElem; if(e) e.style.display = d; };
+
+        divLinkedShades.innerHTML = '';
+
+        s(btnContainer, 'flex');
+        btnContainer?.classList.toggle('disabled', isNew);
+        s(btnLink, 'none');
+        s(btnSave, 'none');
+        s(blocPairParent, 'none');
+        s(divLinkedShades, 'none');
+
+        getJSONSync(isNew ? '/getNextGroup' : `/group?groupId=${groupId}`, (err, group) => {
+            if (err) return ui.serviceError(err);
+
+            if (isNew) {
+                Object.assign(group, {
+                    name: '', flipCommands: false, shades: []
+                });
             }
-        }
-        btnLink.style.display = 'none';
-        btnContainer.style.display = 'flex';
-        btnContainer.classList.add('disabled');
+            if (!isNew) {
+                s(btnLink, 'inline-block');
+                s(blocPairParent, 'flex');
+                s(divLinkedShades, 'block');
 
-        if (typeof groupId === 'undefined') {
-            getJSONSync('/getNextGroup', (err, group) => {
-                btnSave.innerText = tr('BT_ADD_GROUP');
-                btnSave.style.display = 'inline-block';
-                document.getElementById('spanGroupId').innerText = '*';
-                document.getElementById('divLinkedShadeList').innerHTML = '';
+                const hasShades = (group.shades && group.shades.length > 0);
+                btnContainer?.classList.toggle('disabled', !hasShades);
 
-                if (err) {
-                    ui.serviceError(err);
-                }
-                else {
-                    console.log(group);
-                    group.name = '';
-                    group.flipCommands = false;
-                    ui.toElement(elGroup, group);
-                    this.showEditGroup(true);
-                }
-            });
-        }
-        else {
-            btnSave.style.display = 'none';
-            btnSave.innerText = tr('BT_SAVE_GROUP');
-            document.getElementById('spanGroupId').innerText = groupId;
+                ui.setFocus(btnLink, !isNew && !hasShades);
+                this.setLinkedShadesList(group);
+            }
+            g('btnSaveGroup').innerText = tr(isNew ? 'BT_CREATE' : 'BT_SAVE');
+            s(btnSave, 'inline-block');
+            g('spanGroupId').innerText = isNew ? '*' : groupId;
 
-            getJSONSync(`/group?groupId=${groupId}`, (err, group) => {
-                if (err) {
-                    ui.serviceError(err);
-                }
-                else {
-                    console.log(group);
-
-                    if (group.shades && group.shades.length > 0) {
-                        btnContainer.classList.remove('disabled');
-                    } else {
-                        btnContainer.classList.add('disabled');
-                    }
-                    ui.toElement(elGroup, group);
-                    this.showEditGroup(true);
-
-                    btnSave.style.display = 'inline-block';
-                    btnLink.style.display = '';
-                    this.setLinkedShadesList(group);
-                }
-            });
-        }
+            ui.toElement(elGroup, group);
+            this.showEditGroup(true);
+        });
     }
     showEditRoom(bShow) {
-        let el = document.getElementById('divLinking');
+        let el = get('divLinking');
         if (el) el.remove();
-        el = document.getElementById('divLinkRepeater');
+        el = get('divLinkRepeater');
         if (el) el.remove();
-        el = document.getElementById('divPairing');
+        el = get('divPairing');
         if (el) el.remove();
-        el = document.getElementById('divRollingCode');
+        el = get('divRollingCode');
         if (el) el.remove();
-        el = document.getElementById('somfyRoom');
+        el = get('somfyRoom');
         if (el) el.style.display = bShow ? '' : 'none';
-        el = document.getElementById('divRoomListContainer');
+        el = get('divRoomListContainer');
         if (el) el.style.display = bShow ? 'none' : '';
         if (bShow) {
             this.showEditGroup(false);
@@ -4195,17 +4239,17 @@ class Somfy {
         }
     }
     showEditShade(bShow) {
-        let el = document.getElementById('divLinking');
+        let el = get('divLinking');
         if (el) el.remove();
-        el = document.getElementById('divLinkRepeater');
+        el = get('divLinkRepeater');
         if (el) el.remove();
-        el = document.getElementById('divPairing');
+        el = get('divPairing');
         if (el) el.remove();
-        el = document.getElementById('divRollingCode');
+        el = get('divRollingCode');
         if (el) el.remove();
-        el = document.getElementById('somfyShade');
+        el = get('somfyShade');
         if (el) el.style.display = bShow ? '' : 'none';
-        el = document.getElementById('divShadeListContainer');
+        el = get('divShadeListContainer');
         if (el) el.style.display = bShow ? 'none' : '';
         if (bShow) {
             this.showEditGroup(false);
@@ -4213,17 +4257,17 @@ class Somfy {
         }
     }
     showEditGroup(bShow) {
-        let el = document.getElementById('divLinking');
+        let el = get('divLinking');
         if (el) el.remove();
-        el = document.getElementById('divLinkRepeater');
+        el = get('divLinkRepeater');
         if (el) el.remove();
-        el = document.getElementById('divPairing');
+        el = get('divPairing');
         if (el) el.remove();
-        el = document.getElementById('divRollingCode');
+        el = get('divRollingCode');
         if (el) el.remove();
-        el = document.getElementById('somfyGroup');
+        el = get('somfyGroup');
         if (el) el.style.display = bShow ? '' : 'none';
-        el = document.getElementById('divGroupListContainer');
+        el = get('divGroupListContainer');
         if (el) el.style.display = bShow ? 'none' : '';
         if (bShow) {
             this.showEditRoom(false);
@@ -4231,11 +4275,11 @@ class Somfy {
         }
     }
     saveRoom() {
-        let roomId = parseInt(document.getElementById('spanRoomId').innerText, 10);
-        let obj = ui.fromElement(document.getElementById('somfyRoom'));
+        let roomId = parseInt(get('spanRoomId').innerText, 10);
+        let obj = ui.fromElement(get('somfyRoom'));
         let valid = true;
         if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_ROOM_NAME_INVALID'));
+            ui.errorMessage(get('divSomfySettings'), tr('ERR_ROOM_NAME_INVALID'));
             valid = false;
         }
         if (valid) {
@@ -4248,9 +4292,10 @@ class Somfy {
                     }
                     else {
                         console.log(room);
-                        document.getElementById('spanRoomId').innerText = room.roomId;
-                        document.getElementById('btnSaveRoom').innerText = tr('BT_SAVE_ROOM');
-                        document.getElementById('btnSaveRoom').style.display = 'inline-block';
+                        ui.successMessage(tr('MSG_ADD_SUCCESS'));
+                        get('spanRoomId').innerText = room.roomId;
+                        get('btnSaveRoom').innerText = tr('BT_SAVE');
+                        get('btnSaveRoom').style.display = 'inline-block';
                         this.updateRoomsList();
                     }
                 });
@@ -4258,150 +4303,79 @@ class Somfy {
             else {
                 obj.roomId = roomId;
                 putJSONSync('/saveRoom', obj, (err, room) => {
-                    if (err) ui.serviceError(err);
-                    else this.updateRoomsList();
+                    if (err) {
+                        ui.serviceError(err);
+                    } else {
+                        ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                        this.updateRoomsList();
+                    }
                     console.log(room);
                 });
             }
         }
     }
     saveShade() {
-        let shadeId = parseInt(document.getElementById('spanShadeId').innerText, 10);
-        let obj = ui.fromElement(document.getElementById('somfyShade'));
-        let valid = true;
-        if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_REMOTE_ADDRESS_INVALID'));
-            valid = false;
-        }
-        if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_SHADE_NAME_INVALID'));
-            valid = false;
-        }
-        if (valid && (isNaN(obj.upTime) || obj.upTime < 1 || obj.upTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_UP_TIME_INVALID'));
-            valid = false;
-        }
-        if (valid && (isNaN(obj.downTime) || obj.downTime < 1 || obj.downTime > 4294967295)) {
-            ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_DOWN_TIME_INVALID'));
-            valid = false;
-        }
+        const g = get,
+        sId = parseInt(g('spanShadeId').innerText, 10),
+        obj = ui.fromElement(g('somfyShade')),
+        settings = g('divSomfySettings');
+
+        const checks = [
+            [isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215, 'ERR_REMOTE_ADDRESS_INVALID'],
+            [!obj.name || obj.name.length > 20, 'ERR_DEVIVE_NAME_INVALID'],
+            [isNaN(obj.upTime) || obj.upTime < 1 || obj.upTime > 180000, 'ERR_UP_TIME_INVALID'],
+            [isNaN(obj.downTime) || obj.downTime < 1 || obj.downTime > 180000, 'ERR_DOWN_TIME_INVALID']
+        ];
+
+        const basicError = checks.find(c => c[0]);
+        if (basicError) return ui.errorMessage(settings, tr(basicError[1]));
         if (obj.proto === 8 || obj.proto === 9) {
-            switch (obj.shadeType) {
-                case 5: case 14: case 15: case 16: case 10:
-                    if (obj.proto !== 9 && obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_NOT_UNIQUE'));
-                        valid = false;
-                    }
-                    break;
-                case 9: break;
-                default:
-                    if (obj.gpioUp === obj.gpioDown) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_NOT_UNIQUE'));
-                        valid = false;
-                    } else if (obj.proto === 9 && (obj.gpioMy === obj.gpioUp || obj.gpioMy === obj.gpioDown)) {
-                        ui.errorMessage(document.getElementById('divSomfySettings'), tr('ERR_GPIO_UP_DOWN_MY_NOT_UNIQUE'));
-                        valid = false;
-                    }
-                    break;
+            const isSp = [5, 14, 15, 16, 10].includes(obj.shadeType);
+
+            if (obj.gpioUp === obj.gpioDown && !(isSp && obj.proto === 9)) {
+                return ui.errorMessage(settings, tr('ERR_GPIO_UP_DOWN_NOT_UNIQUE'));
+            }
+            if (!isSp && obj.proto === 9 && (obj.gpioMy === obj.gpioUp || obj.gpioMy === obj.gpioDown)) {
+                return ui.errorMessage(settings, tr('ERR_GPIO_UP_DOWN_MY_NOT_UNIQUE'));
             }
         }
-        if (valid) {
-            if (isNaN(shadeId) || shadeId >= 255) {
-                putJSONSync('/addShade', obj, (err, shade) => {
-                    if (err) {
-                        ui.serviceError(err);
-                        console.log(err);
-                    }
-                    else {
-                        console.log(shade);
-                        document.getElementById('spanShadeId').innerText = shade.shadeId;
-                        document.getElementById('icoShade').setAttribute('data-shadeid', shade.shadeId);
-                        const btnContainer = document.getElementById('divshowSomfyButtons');
-                        btnContainer.style.display = 'flex';
-                        btnContainer.classList.remove('disabled');
+        const isNew = isNaN(sId) || sId >= 255;
+        if (!isNew) obj.shadeId = sId;
 
-                        document.getElementById('btnSaveShade').innerText = tr('BT_SAVE_SHADE');
-                        document.getElementById('btnSaveShade').style.display = 'inline-block';
-                        document.getElementById('btnLinkRemote').style.display = '';
-                        document.getElementById(shade.paired ? 'btnUnpairShade' : 'btnPairShade').style.display = 'inline-block';
-                        document.getElementById('btnSetRollingCode').style.display = 'inline-block';
-                        this.updateShadeList();
-                    }
-                });
-            }
-            else {
-                obj.shadeId = shadeId;
-                putJSONSync('/saveShade', obj, (err, shade) => {
-                    if (err) ui.serviceError(err);
-                    else {
-                        document.getElementById('divshowSomfyButtons').classList.remove('disabled');
-                        this.updateShadeList();
-                    }
-                    console.log(shade);
-                    let ico = document.getElementById('icoShade');
-                    const tiltContainer = document.getElementById('labelTiltContainer');
-                    const spanValTilt = document.getElementById('valTilt');
+        putJSONSync(isNew ? '/addShade' : '/saveShade', obj, (err, shade) => {
+            if (err) return ui.serviceError(err);
 
-                    if (tiltContainer) tiltContainer.style.display = shade.tiltType !== 0 ? 'block' : 'none';
-                    if (spanValTilt) spanValTilt.innerText = shade.tiltPosition;
-
-                    ico.style.setProperty('--shade-position', `${shade.flipPosition ? 100 - shade.position : shade.position}`);
-                    ico.style.setProperty('--fpos', `${shade.position}%`);
-                    ico.style.setProperty('--tilt-position', `${shade.flipPosition ? 100 - shade.tiltPosition : shade.tiltPosition}%`);
-                });
-            }
-        }
+            console.log("Shade saved/added:", shade);
+            const msg = isNew ? tr('MSG_ADD_SUCCESS') : tr('MSG_SAVE_SUCCESS');
+            ui.successMessage(msg);
+            this.updateShadeList();
+            this.openEditShade(shade.shadeId);
+        });
     }
     saveGroup() {
-        let groupId = parseInt(document.getElementById('spanGroupId').innerText, 10);
-        let obj = ui.fromElement(document.getElementById('somfyGroup'));
-        let valid = true;
-        const btnContainer = document.getElementById('divSomfyGroupButtons');
+        const g = get,
+        sId = g('spanGroupId').innerText,
+        groupId = parseInt(sId, 10),
+        obj = ui.fromElement(g('somfyGroup')),
+        isNew = isNaN(groupId) || groupId >= 255;
 
-        if (valid && (isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215)) {
-            ui.errorMessage(tr('ERR_REMOTE_ADDRESS_INVALID'));
-            valid = false;
-        }
-        if (valid && (typeof obj.name !== 'string' || obj.name === '' || obj.name.length > 20)) {
-            ui.errorMessage(tr('ERR_SHADE_NAME_INVALID'));
-            valid = false;
-        }
+        const checks = [
+            [isNaN(obj.remoteAddress) || obj.remoteAddress < 1 || obj.remoteAddress > 16777215, 'ERR_REMOTE_ADDRESS_INVALID'],
+            [!obj.name || obj.name.length > 20, 'ERR_DEVIVE_NAME_INVALID']
+        ];
+        const error = checks.find(c => c[0]);
+        if (error) return ui.errorMessage(tr(error[1]));
+        if (!isNew) obj.groupId = groupId;
 
-        if (valid) {
-            if (isNaN(groupId) || groupId >= 255) {
-                putJSONSync('/addGroup', obj, (err, group) => {
-                    if (err) {
-                        ui.serviceError(err);
-                    }
-                    else {
-                        console.log(group);
-                        document.getElementById('spanGroupId').innerText = group.groupId;
-                        btnContainer.classList.add('disabled');
-                        document.getElementById('btnSaveGroup').innerText = tr('BT_SAVE_GROUP');
-                        document.getElementById('btnSaveGroup').style.display = 'inline-block';
-                        document.getElementById('btnLinkShade').style.display = '';
-                        this.updateGroupList();
-                    }
-                });
-            }
-            else {
-                obj.groupId = groupId;
-                putJSONSync('/saveGroup', obj, (err, group) => {
-                    if (err) {
-                        ui.serviceError(err);
-                    }
-                    else {
-                        console.log(group);
-                        if (group.shades && group.shades.length > 0) {
-                            btnContainer.classList.remove('disabled');
-                        } else {
-                            btnContainer.classList.add('disabled');
-                        }
-                        this.updateGroupList();
-                    }
-                });
-            }
-        }
+        putJSONSync(isNew ? '/addGroup' : '/saveGroup', obj, (err, group) => {
+            if (err) return ui.serviceError(err);
+
+            console.log("Group saved:", group);
+            const msg = isNew ? tr('MSG_ADD_SUCCESS') : tr('MSG_SAVE_SUCCESS');
+            ui.successMessage(msg);
+            this.openEditGroup(group.groupId);
+            this.updateGroupList();
+        });
     }
     updateRoomsList() {
         getJSONSync('/rooms', (err, shades) => {
@@ -4476,13 +4450,13 @@ class Somfy {
     deleteShade(shadeId) {
         let valid = true;
         if (isNaN(shadeId) || shadeId >= 255 || shadeId <= 0) {
-            ui.errorMessage(tr('ERR_SHADE_ID_REQUIRED'));
+            ui.errorMessage(tr('ERR_DEVICE_ID_REQUIRED'));
             valid = false;
         }
         if (valid) {
             getJSONSync(`/shade?shadeId=${shadeId}`, (err, shade) => {
                 if (err) ui.serviceError(err);
-                else if (shade.inGroup) ui.errorMessage(tr('ERR_SHADE_IN_GROUP'));
+                else if (shade.inGroup) ui.errorMessage(tr('ERR_DEVICE_IN_GROUP'));
                 else {
                     let prompt = ui.promptMessage(tr('PROMPT_DELETE_SHADE'), () => {
                         ui.clearErrors();
@@ -4524,133 +4498,111 @@ class Somfy {
         }
     }
     sendPairCommand(shadeId) {
-        putJSON('/pairShade', { shadeId: shadeId }, (err, shade) => {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                console.log(shade);
-                document.getElementById('somfyMain').style.display = 'none';
-                document.getElementById('somfyShade').style.display = '';
-                document.getElementById('btnSaveShade').style.display = 'inline-block';
-                document.getElementById('btnLinkRemote').style.display = '';
-                document.getElementsByName('shadeAddress')[0].value = shade.remoteAddress;
-                document.getElementsByName('shadeName')[0].value = shade.name;
-                document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
-                document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-                let svg = document.getElementById('icoShade');
-                if (svg) {
-                    let pos = shade.flipPosition ? 100 - shade.position : shade.position;
+        putJSON('/pairShade', { shadeId }, (err, shade) => {
+            if (err) return console.log(err);
+            console.log(shade);
 
-                    svg.style.setProperty('--shade-position', pos);
-                    svg.style.setProperty('--fpos', `${shade.position}%`);
-                    svg.setAttribute('data-shadeid', shade.shadeId);
-                }
-                if (shade.paired) {
-                    document.getElementById('btnUnpairShade').style.display = 'inline-block';
-                    document.getElementById('btnPairShade').style.display = 'none';
-                }
-                else {
-                    document.getElementById('btnPairShade').style.display = 'inline-block';
-                    document.getElementById('btnUnpairShade').style.display = 'none';
-                }
-                this.setLinkedRemotesList(shade);
-                let divPairing = document.getElementById('divPairing');
-                if (divPairing) divPairing.remove();
+            get('somfyMain').style.display = 'none';
+            get('somfyShade').style.display = '';
+            get('btnSaveShade').style.display = 'inline-block';
+            get('btnLinkRemote').style.display = '';
+
+            const fields = { shadeAddress: 'remoteAddress', shadeName: 'name', shadeUpTime: 'upTime', shadeDownTime: 'downTime' };
+            for (const f in fields) document.getElementsByName(f)[0].value = shade[fields[f]];
+
+            const svg = get('icoShade');
+            if (svg) {
+                const pos = shade.flipPosition ? 100 - shade.position : shade.position;
+                svg.style.setProperty('--shade-position', pos);
+                svg.style.setProperty('--fpos', `${shade.position}%`);
+                svg.setAttribute('data-shadeid', shade.shadeId);
             }
+
+            get('btnPairShade').style.display = shade.paired ? 'none' : 'inline-block';
+            get('btnUnpairShade').style.display = shade.paired ? 'inline-block' : 'none';
+
+            this.setLinkedRemotesList(shade);
+            const divP = qs('divPairing');
+            if (divP) divP.remove();
         });
     }
     sendUnpairCommand(shadeId) {
-        putJSON('/unpairShade', { shadeId: shadeId }, (err, shade) => {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                console.log(shade);
-                document.getElementById('somfyMain').style.display = 'none';
-                document.getElementById('somfyShade').style.display = '';
-                document.getElementById('btnSaveShade').style.display = 'inline-block';
-                document.getElementById('btnLinkRemote').style.display = '';
-                document.getElementsByName('shadeAddress')[0].value = shade.remoteAddress;
-                document.getElementsByName('shadeName')[0].value = shade.name;
-                document.getElementsByName('shadeUpTime')[0].value = shade.upTime;
-                document.getElementsByName('shadeDownTime')[0].value = shade.downTime;
-                let svg = document.getElementById('icoShade');
-                if (svg) {
-                    let pos = shade.flipPosition ? 100 - shade.position : shade.position;
+        putJSON('/unpairShade', { shadeId }, (err, shade) => {
+            if (err) return console.log(err);
+            console.log(shade);
 
-                    svg.style.setProperty('--shade-position', pos);
-                    svg.style.setProperty('--fpos', `${shade.position}%`);
-                    svg.setAttribute('data-shadeid', shade.shadeId);
-                }
-                if (shade.paired) {
-                    document.getElementById('btnUnpairShade').style.display = 'inline-block';
-                    document.getElementById('btnPairShade').style.display = 'none';
-                }
-                else {
-                    document.getElementById('btnPairShade').style.display = 'inline-block';
-                    document.getElementById('btnUnpairShade').style.display = 'none';
-                }
-                this.setLinkedRemotesList(shade);
-                let divPairing = document.getElementById('divPairing');
-                if (divPairing) divPairing.remove();
+            get('somfyMain').style.display = 'none';
+            get('somfyShade').style.display = '';
+            get('btnSaveShade').style.display = 'inline-block';
+            get('btnLinkRemote').style.display = '';
+
+            const fields = { shadeAddress: 'remoteAddress', shadeName: 'name', shadeUpTime: 'upTime', shadeDownTime: 'downTime' };
+            for (const f in fields) document.getElementsByName(f)[0].value = shade[fields[f]];
+
+            const svg = get('icoShade');
+            if (svg) {
+                const pos = shade.flipPosition ? 100 - shade.position : shade.position;
+                svg.style.setProperty('--shade-position', pos);
+                svg.style.setProperty('--fpos', `${shade.position}%`);
+                svg.setAttribute('data-shadeid', shade.shadeId);
             }
+
+            get('btnPairShade').style.display = shade.paired ? 'none' : 'inline-block';
+            get('btnUnpairShade').style.display = shade.paired ? 'inline-block' : 'none';
+
+            this.setLinkedRemotesList(shade);
+            const divP = get('divPairing');
+            if (divP) divP.remove();
         });
     }
     setRollingCode(shadeId, rollingCode) {
         putJSONSync('/setRollingCode', { shadeId: shadeId, rollingCode: rollingCode }, (err, shade) => {
-            if (err) ui.serviceError(document.getElementById('divSomfySettings'), err);
+            if (err) ui.serviceError(get('divSomfySettings'), err);
             else {
-                let dlg = document.getElementById('divRollingCode');
+                let dlg = get('divRollingCode');
                 if (dlg) dlg.remove();
             }
         });
     }
     openSetRollingCode(shadeId) {
-        let overlay = ui.waitMessage(document.getElementById('divContainer'));
+        let overlay = ui.waitMessage(get('divContainer'));
         getJSON(`/shade?shadeId=${shadeId}`, (err, shade) => {
             overlay.remove();
-            if (err) {
-                ui.serviceError(err);
-            }
-            else {
-                let div = document.createElement('div');
-                div.setAttribute('id', 'divRollingCode');
-                div.setAttribute('class', 'inst-overlay');
+            if (err) return ui.serviceError(err);
 
-                div.innerHTML = `
-                <div class="instructions-content">
-                <div id="btnOverlayRollingClose" class="boutonOverlayClose animScale" onclick="this.closest('#divRollingCode').remove();">
-                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-                </div>
-                <div class="instructions-header">
-                <div><h2>${tr("ROLLING_CODE_TITLE")}</h2><p>${tr("ROLLING_CODE_DESC")}</p></div>
-                <svg class="instructions-headerLogo"><use xlink:href="#icon-warning"></use></svg>
-                </div>
-                <div class="error">
-                <svg><use xlink:href="#icon-warning"></use></svg>
-                <div><b>${tr("MSG_DANGER")}</b><span>${tr("ROLLING_CODE_WARNING_DESC_1")}</span></div>
-                </div>
-                <div class="field-group unibloc"><p>${tr("ROLLING_CODE_WARNING_DESC_2")}</p></div>
-                <div class="field-group unibloc uniblocRollingCode">
-                <label class="label" for="fldNewRollingCode">${tr("BT_ROLLING_CODE")}</label>
-                <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number" value="${shade.lastRollingCode}">
-                </div>
-                <div class="button-container-row">
-                <button id="btnChangeRollingCode" class="bouton bouton-Danger animScale" type="button" onclick="somfy.setRollingCode(${shadeId}, parseInt(document.getElementById('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
-                <button id="btnCancel" class="boutonOutline animScale" type="button" onclick="this.closest('#divRollingCode').remove();">${tr("BT_CANCEL_1")}</button>
-                </div>
-                </div>`;
+            let div = document.createElement('div');
+            div.id = 'divRollingCode';
+            div.className = 'inst-overlay';
 
-                document.getElementById('divContainer').appendChild(div);
-                window.scrollTo(0, 0);
-            }
+            div.innerHTML = `
+            <div class="instructions-content">
+            ${overlayHeader("ROLLING_CODE_TITLE", "ROLLING_CODE_DESC", "svg-warning")}
+            <div class="error">
+            <svg><use href=#svg-warning></use></svg>
+            <div><b>${tr("MSG_DANGER")}</b><span>${tr("ROLLING_CODE_WARNING_DESC_1")}</span></div>
+            </div>
+            <div class="uniblocStep">${tr("ROLLING_CODE_WARNING_DESC_2")}</div>
+            <div class="unibloc uniblocRollingCode">
+            <label class="label" for="fldNewRollingCode">${tr("BT_ROLLING_CODE")}</label>
+            <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number" value="${shade.lastRollingCode}">
+            </div>
+            <div class="button-container-overlay">
+            <button id="btnChangeRollingCode" class="bouton-Danger" type="button"
+            onclick="somfy.setRollingCode(${shadeId}, parseInt(get('fldNewRollingCode').value, 10));">
+            ${tr("BT_SET_ROLLING_CODE")}
+            </button>
+            <button id="btnCancel" line type="button">${tr("BT_CANCEL_1")} </button>
+            </div>
+            </div>`;
+
+            shOverlay(div);
+            div.querySelector('#btnCancel').onclick = () => closeOverlay(div);
+            ui.setFocus(btnCancel, true, 'var(--accent-sucess)');
         });
     }
     setPaired(shadeId, paired) {
         let obj = { shadeId: shadeId, paired: paired || false };
-        let div = document.getElementById('divPairing');
+        let div = get('divPairing');
         let overlay = typeof div === 'undefined' ? undefined : ui.waitMessage(div);
         putJSONSync('/setPaired', obj, (err, shade) => {
             if (overlay) overlay.remove();
@@ -4661,161 +4613,108 @@ class Somfy {
             else if (div) {
                 console.log(shade);
                 this.showEditShade(true);
-                document.getElementById('btnSaveShade').style.display = 'inline-block';
-                document.getElementById('btnLinkRemote').style.display = '';
+                get('btnSaveShade').style.display = 'inline-block';
+                get('btnLinkRemote').style.display = '';
                 if (shade.paired) {
-                    document.getElementById('btnUnpairShade').style.display = 'inline-block';
-                    document.getElementById('btnPairShade').style.display = 'none';
+                    get('btnUnpairShade').style.display = 'inline-block';
+                    get('btnPairShade').style.display = 'none';
                 }
                 else {
-                    document.getElementById('btnPairShade').style.display = 'inline-block';
-                    document.getElementById('btnUnpairShade').style.display = 'none';
+                    get('btnPairShade').style.display = 'inline-block';
+                    get('btnUnpairShade').style.display = 'none';
                 }
                 this.setLinkedRemotesList(shade);
-                div.remove();
+                closeOverlay(div);
             }
         });
     }
-    pairShade(shadeId) {
-        let shadeType = parseInt(document.getElementById('somfyShade').getAttribute('data-shadetype'), 10);
-        let div = document.createElement('div');
-        let specificContent = '';
+    _shWiz(shadeId, isUnpair) {
+        const sType = parseInt(get('somfyShade').getAttribute('data-shadetype'), 10);
+        const isG = (sType === 5 || sType === 6);
+        const pre = isUnpair ? 'UNPAIR' : 'PAIR';
+        const dev = isG ? 'GARAGE' : 'SHADE';
+        const progId = isUnpair ? 'btnSendUnpairing' : 'btnSendPairing';
+        const stopId = isUnpair ? 'btnStopUnpairing' : 'btnStopPairing';
+        const sucBtnId = isUnpair ? 'btnUnpairShade' : 'btnPairShade';
+        const sucVal = isUnpair ? 0 : 1;
+        const focusVal = isUnpair ? 1 : 0;
+        const sucAction = `somfy.setPaired(${shadeId},${sucVal});ui.setFocus('${sucBtnId}',${focusVal});closeOverlay(get('divPairing'));`;
+        const descKey = `${pre}_${dev}_DESC`;
+        const stepTitles = ["WIZ_TITLE_STEP1", `${pre}_TITLE_STEP2`, "WIZ_TITLE_STEP3"];
+        const t = (s, l) => {
+            const sk = `${pre}_${dev}_STEP_${s}_${l}`, fk = `WIZ_${dev}_STEP_${s}_${l}`, r = tr(sk);
+            return (r === sk) ? tr(fk) : r;
+        };
+        const it = (n, s, l) => `<div class="step-item"><div class="step-number">${n}</div><div class="step-text">${t(s, l)}</div></div>`;
+        const inf = (s, l) => `<div class="information wizard-step" data-stepid="${s}"><svg><use href=#svg-info></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${t(s, l)}</span></div></div>`;
 
-        if (shadeType === 5 || shadeType === 6) {
-            specificContent = `
-            <div class="instructions-header">
-            <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_GARAGE_DESC")}</p></div>
-            <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleGarage"></use></svg>
-            </div>
-            <div class="button-container-row">
-            <button id="btnSendPairing" class="bouton animScale" type="button">${tr("BT_PROG")}</button>
-            <button id="btnMarkPaired" class="bouton animScale" type="button" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_DOOR_PAIRED")}</button>
-            </div>
-            <div class="button-container-col"><button id="btnStopPairing" class="boutonOutline animScale" type="button">${tr("BT_CLOSE")}</button></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_GARAGE_STEP_1")}</div></div></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_GARAGE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${tr("PAIR_GARAGE_STEP_3")}</span></div></div>`;
-        } else {
-            specificContent = `
-            <div class="instructions-header">
-            <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("PAIR_SHADE_DESC")}</p></div>
-            <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
-            </div>
-            <div class="button-container-row">
-            <button id="btnSendPairing" class="bouton animScale">${tr("BT_PROG")}</button>
-            <button id="btnMarkPaired" class="bouton animScale" onclick="somfy.setPaired(${shadeId}, true);">${tr("BT_SHADE_PAIRED")}</button>
-            </div>
-            <div class="button-container-col"><button id="btnStopPairing" class="boutonOutline animScale">${tr("BT_CLOSE")}</button></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("PAIR_SHADE_STEP_1")}</div></div></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("PAIR_SHADE_STEP_2")}</div></div></div>
-            <div class="information"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${tr("PAIR_SHADE_STEP_3")}</span></div></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("PAIR_SHADE_STEP_4")}</div></div></div>
-            <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("PAIR_SHADE_STEP_5")}</div></div></div>`;
-        }
+        let div = document.createElement('div');
+        div.className = `inst-overlay wizard${ui.isExpertMode ? ' is-expert' : ''}`;
+        div.id = 'divPairing';
+        div.setAttribute('data-stepid', '1');
+        div.setAttribute('data-type', 'link-remote');
+        div.setAttribute('data-shadeid', shadeId);
 
         div.innerHTML = `
-        <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
         <div class="instructions-content">
-        <div id="btnOverlayPairingClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        ${overlayHeader(isUnpair ? "UNPAIR_TITLE" : "PAIR_TITLE", tr(descKey), isG ? "svg-simpleGarage" : "svg-simpleShutter", 1)}
+        ${wizardStepper(stepTitles)}
+        <div class="blocsteps">
+        <div class="uniblocStep wizard-step" data-stepid="1">
+        ${it('a', 1, 1)} ${it('b', 1, 2)} ${isG ? it('c', 1, 3) : ''}
         </div>
-        ${specificContent}
+        ${!isG ? inf(1, 3) : ''}
+        <div class="button-container-col wizard-step marginB" data-expert data-stepid="2">
+        <button id="${progId}" type="button">${tr("BT_PROG")}</button>
+        </div>
+        <div class="uniblocStep wizard-step" data-stepid="2">
+        ${it('a', 2, 1)} ${it('b', 2, 2)} ${!isG ? it('c', 2, 3) : ''}
+        </div>
+        ${!isG ? inf(2, 4) : ''}
+        <div class="button-container-col wizard-step marginB" data-expert data-stepid="3">
+        <button id="btnWizMarkSuc" type="button" class="btn-success" onclick="${sucAction}">${tr(isUnpair ? "BT_UNPAIRING_SUCCESS" : "BT_PAIRING_SUCCESS")}</button>
+        </div>
+        <div class="uniblocStep wizard-step" data-stepid="3">${it('a', 3, 1)}</div>
+        <div class="empty-state wizard-step" data-stepid="3"><svg class="empty-icon"><use href=#svg-succes></use></svg></div>
+        </div>
+        <div class="expert-only-buttons" data-expert>
+        <button type="button" line onclick="closeOverlay(this.closest('.inst-overlay'))">${tr("BT_CANCEL_1")}</button>
+        </div>
+        <div class="button-container-overlay">
+        <button id="${stopId}" class="wizard-step" data-stepid="1" line type="button">${tr("BT_CLOSE")}</button>
+        <button id="btnWizPrev" class="wizard-step" data-mstepid="2,3" line type="button" onclick="ui.wizSetPrevStep(this.closest('.wizard'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnWizNext" class="wizard-step" data-mstepid="1,2" type="button" onclick="ui.wizSetNextStep(this.closest('.wizard'));">${tr("BT_NEXT")}</button>
+        <button id="btnWizEnd" class="wizard-step" data-stepid="3" type="button">${tr(isG ? "BT_CLOSE" : "BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
+        const clearT = () => { if (this.btnTimer) { clearInterval(this.btnTimer); this.btnTimer = null; } };
+        const fnRep = (err, shade) => {
+            clearT();
+            if (!err && mouseDown) somfy.sendCommandRepeat(shadeId, 'prog', null, fnRep);
+        };
 
-        const closePairing = () => {
-            if (this.btnTimer) {
-                clearInterval(this.btnTimer);
-                this.btnTimer = null;
-            }
-            document.getElementById('divPairing').remove();
-        };
-        document.getElementById('btnStopPairing').addEventListener('click', closePairing);
-        document.getElementById('btnOverlayPairingClose').addEventListener('click', closePairing);
-        let fnRepeatProg = (err, shade) => {
-            if (this.btnTimer) {
-                clearTimeout(this.btnTimer);
-                this.btnTimer = null;
-            }
-            if (err) return;
-            if (mouseDown) {
-                somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
-            }
+        let btnProg = div.querySelector(`#${progId}`);
+        if (btnProg) {
+            const onP = () => somfy.sendCommand(shadeId, 'prog', null, fnRep);
+            btnProg.addEventListener('mousedown', onP, true);
+            btnProg.addEventListener('touchstart', onP, true);
         }
-        let btn = document.getElementById('btnSendPairing');
-        const onProgClick = (event) => {
-            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        };
-        btn.addEventListener('mousedown', onProgClick, true);
-        btn.addEventListener('touchstart', onProgClick, true);
+        div.querySelectorAll(`#${stopId}, #btnWizEnd`).forEach(btn => {
+            btn.onclick = () => closeOverlay(div, clearT);
+        });
+
+        ui.wizSetStep(div, 1);
+        shOverlay(div, clearT);
 
         return div;
     }
+    pairShade(shadeId) {
+        return this._shWiz(shadeId, false);
+    }
+
     unpairShade(shadeId) {
-        let div = document.createElement('div');
-
-        div.innerHTML = `
-        <div id="divPairing" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
-        <div class="instructions-content">
-        <div id="btnOverlayPairingClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
-        <div class="instructions-header">
-        <div><h2>${tr("UNPAIR_TITLE")}</h2><p>${tr("UNPAIR_SHADE_DESC_1")}</p></div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
-        </div>
-        <div class="button-container-row">
-        <button id="btnSendUnpairing" class="bouton animScale">${tr("BT_PROG")}</button>
-        <button id="btnMarkPaired" class="bouton animScale" onclick="somfy.setPaired(${shadeId}, false);">${tr("BT_SHADE_UNPAIRED")}</button>
-        </div>
-        <div class="button-container-col"><button id="btnStopUnpairing" class="boutonOutline animScale">${tr("BT_CLOSE")}</button></div>
-        <div class="field-group unibloc"><div class="step-item"><div class="step-number">1</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_1")}</div></div></div>
-        <div class="field-group unibloc"><div class="step-item"><div class="step-number">2</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_2")}</div></div></div>
-        <div class="field-group unibloc"><div class="step-item"><div class="step-number">3</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_3")}</div></div></div>
-        <div class="field-group unibloc"><div class="step-item"><div class="step-number">4</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_4")}</div></div></div>
-        <div class="field-group unibloc"><div class="step-item"><div class="step-number">5</div><div class="step-text">${tr("UNPAIR_SHADE_STEP_5")}</div></div></div>
-        <div class="information">
-        <svg><use xlink:href="#icon-info"></use></svg>
-        <div><b>${tr("MSG_NOTE")}</b><span>${tr("UNPAIR_SHADE_STEP_6")}</span></div>
-        </div>
-        </div>
-        </div>`;
-
-        const closeUnpair = () => {
-            if (this.btnTimer) {
-                clearTimeout(this.btnTimer);
-                this.btnTimer = null;
-            }
-            div.remove();
-        };
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-        document.getElementById('btnStopUnpairing').onclick = closeUnpair;
-        document.getElementById('btnOverlayPairingClose').onclick = closeUnpair;
-
-        let fnRepeatProg = (err, shade) => {
-            if (this.btnTimer) {
-                clearTimeout(this.btnTimer);
-                this.btnTimer = null;
-            }
-            if (err) return;
-            if (mouseDown) {
-                somfy.sendCommandRepeat(shadeId, 'prog', null, fnRepeatProg);
-            }
-        };
-        let btn = document.getElementById('btnSendUnpairing');
-        const onProgClick = (event) => {
-            somfy.sendCommand(shadeId, 'prog', null, (err, shade) => { fnRepeatProg(err, shade); });
-        };
-        btn.addEventListener('mousedown', onProgClick, true);
-        btn.addEventListener('touchstart', onProgClick, true);
-
-        return div;
+        return this._shWiz(shadeId, true);
     }
     sendCommand(shadeId, command, repeat, cb) {
         let obj = {};
@@ -4863,7 +4762,7 @@ class Somfy {
     }
     sendVRCommand(el) {
         if (typeof mouseDown === 'undefined') window.mouseDown = false;
-        let pnl = document.getElementById('divVirtualRemote');
+        let pnl = get('divVirtualRemote');
         let dd = pnl.querySelector('#selVRMotor');
         let opt = dd.selectedOptions[0];
         let o = {
@@ -4933,274 +4832,246 @@ class Somfy {
     }
     linkRemote(shadeId) {
         let div = document.createElement('div');
+        div.className = 'inst-overlay';
+        div.id = 'divLinking';
+        div.setAttribute('data-type', 'link-remote');
+        div.setAttribute('data-shadeid', shadeId);
 
         div.innerHTML = `
-        <div id="divLinking" class="inst-overlay" data-type="link-remote" data-shadeid="${shadeId}">
         <div class="instructions-content">
-        <div id="btnOverlayLinkingClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
-        <div class="instructions-header">
-        <div><h2>${tr("PAIR_TITLE")}</h2><p>${tr("LINK_REMOTE_DESC")}</p></div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-remote"></use></svg>
-        </div>
-        <div class="field-group unibloc">${tr("LINK_REMOTE_DESC_1")}</div>
+        ${overlayHeader("PAIR_TITLE", "LINK_REMOTE_DESC", "svg-remote")}
+        <div class="uniblocStep">${tr("LINK_REMOTE_DESC_1")}</div>
         <div class="information">
-        <svg><use xlink:href="#icon-info"></use></svg>
+        <svg><use href=#svg-info></use></svg>
         <div><b>${tr("MSG_NOTE")}</b><span>${tr("LINK_REMOTE_DESC_2")}</span></div>
         </div>
-        <div class="button-container-col">
-        <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
-        </div>
+        <div class="button-container-overlay">
+        <button id="btnStopLink" line type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
-        const closeLinking = () => { div.remove(); };
 
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-
-        document.getElementById('btnStopLinking').onclick = closeLinking;
-        document.getElementById('btnOverlayLinkingClose').onclick = closeLinking;
+        shOverlay(div);
+        div.querySelector('#btnStopLink').onclick = () => closeOverlay(div);
 
         return div;
     }
-
     linkRepeatRemote() {
         let div = document.createElement('div');
+        div.className = 'inst-overlay';
+        div.id = 'divLinkRepeater';
+        div.setAttribute('data-type', 'link-repeatremote');
 
         div.innerHTML = `
-        <div id="divLinkRepeater" class="inst-overlay" data-type="link-repeatremote">
         <div class="instructions-content">
-        <div id="btnOverlayRepeaterClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
-        <div class="instructions-header">
-        <div><h2>${tr("REPEAT_REMOTE_TITLE")}</h2><p>${tr("REPEAT_REMOTE_DESC")}</p></div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-repeater"></use></svg>
-        </div>
-        <div class="button-container-col">
-        <button id="btnStopLinking" class="bouton animScale" type="button">${tr("BT_CANCEL_1")}</button>
-        </div>
-        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_1")}</div>
-        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_2")}<br>${tr("REPEAT_REMOTE_DESC_3")}</div>
+        ${overlayHeader("REPEAT_REMOTE_TITLE", "REPEAT_REMOTE_DESC", "svg-repeater")}
         <div class="warning">
-        <svg><use xlink:href="#icon-warning"></use></svg>
-        <div><b>${tr("MSG_ALERT")}</b><span>${tr("REPEAT_REMOTE_DESC_4")}</span></div>
+        <svg><use href=#svg-warning></use></svg>
+        <div><b>${tr("MSG_ALERT")}</b><span>${tr("REPEAT_REMOTE_DESC_4")}<br><br>   ${tr("REPEAT_REMOTE_DESC_3")} </span></div>
         </div>
-        <div class="field-group unibloc">${tr("REPEAT_REMOTE_DESC_5")}</div>
+        <div class="uniblocStep">
+        <div class="step-item"><div class="step-number">a</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_1")}</div></div>
+        <div class="step-item"><div class="step-number">b</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_2")}</div></div>
+        <div class="step-item"><div class="step-number">c</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_5")}</div></div>
+        </div>
+        <div class="button-container-overlay">
+        <button id="btnStopLinking" type="button" line class="marginB" >${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
-        const closeRepeater = () => { div.remove(); };
-
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-
-        document.getElementById('btnStopLinking').onclick = closeRepeater;
-        document.getElementById('btnOverlayRepeaterClose').onclick = closeRepeater;
+        shOverlay(div);
+        div.querySelector('#btnStopLinking').onclick = () => closeOverlay(div);
 
         return div;
     }
-    linkGroupShade(groupId) {
-        let mouseDown = false;
+    _gpWiz(groupId, isUnlink, shadeId = null) {
+        const pre = isUnlink ? 'UNLINK' : 'LINK';
+        const stepsCount = isUnlink ? 3 : 4;
+        const btnActionId = isUnlink ? 'btnUnpairFromGroup' : 'btnPairToGroup';
+        const titleKey = `${pre}_GROUP_TITLE`;
+        const descKey = `${pre}_GROUP_DESC`;
+        const t = (s, l) => {
+            const sk = `${pre}_GROUP_STEP_${s}_${l}`;
+            const fk = `WIZ_LINK_GROUP_STEP_${s}_${l}`;
+            const r = tr(sk);
+            return (r === sk) ? tr(fk) : r;
+        };
+        const it = (n, s, l) => `<div class="step-item"><div class="step-number">${n}</div><div class="step-text">${t(s, l)}</div></div>`;
+        const inf = (s, l) => `<div class="information wizard-step" data-stepid="${s}"><svg><use href=#svg-info></use></svg><div><b>${tr("MSG_NOTE")}</b><span>${t(s, l)}</span></div></div>`;
+
         let div = document.createElement('div');
-        div.innerHTML = `
-        <div id="divLinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
-        <div class="instructions-content">
-        <div id="btnOverlayGroupClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
-        <div class="instructions-header">
-        <div>
-        <h2>${tr("LINK_GROUP_TITLE")}</h2>
-        <p id="pGroupHeaderTitle">${tr("LINK_GROUP_DESC")} <span id="spanGroupName" class="groupNameSpan"></span></p>
-        </div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
-        </div>
-        <div class="field-group unibloc uniblocLinkGroupSelect wizard-step" data-stepid="2">
-        <label class="label" for="selAvailShades">${tr("LINK_GROUP_SELECT_SHADE")}</label>
-        <select id="selAvailShades" class="inputAndSelect" data-bind="shadeId" data-datatype="int" onchange="document.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = this.options[this.selectedIndex].text);"><options></options></select>
-        </div>
-        <div class="divWizShadeName wizard-step" data-stepid="3"></div>
-        <div class="button-container-col wizard-step marginB" data-stepid="3"><button class="bouton animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button></div>
-        <div class="divWizShadeName wizard-step" data-stepid="4"></div>
-        <div class="button-container-col wizard-step marginB" data-stepid="4"><button class="bouton animScale" type="button" id="btnPairToGroup">${tr("BT_PAIR_TO_GROUP")}</button></div>
-        <div class="button-container-row">
-        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(this.closest('.wizard'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(this.closest('.wizard'));">${tr("BT_NEXT")}</button>
-        </div>
-        <div class="button-container-col"><button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button></div>
-        <div class="information wizard-step" data-stepid="1"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_INFO")}</b> <span>${tr("LINK_GROUP_STEP1_DESC_1")}</span></div></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("LINK_GROUP_STEP1_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("LINK_GROUP_STEP2_DESC_1")}</p></div>
-        <div class="information wizard-step" data-stepid="2"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP2_DESC_2")}</span></div></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_1")}</p></div>
-        <div class="information wizard-step" data-stepid="3"><svg><use xlink:href="#icon-info"></use></svg><div><b>${tr("MSG_NOTE")}</b> <span>${tr("LINK_GROUP_STEP3_DESC_2")}</span></div></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("LINK_GROUP_STEP3_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="4"><p>${tr("LINK_GROUP_STEP4_DESC_2")}</p></div>
-        </div>
-        </div>`;
+        div.className = `inst-overlay wizard${ui.isExpertMode ? ' is-expert' : ''}`;
+        div.id = isUnlink ? 'divUnlinkGroup' : 'divLinkGroup';
+        div.setAttribute('data-groupid', groupId);
+        div.setAttribute('data-stepid', '1');
 
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-        ui.wizSetStep(div, 1);
+        const stepTitles = [];
+        for (let i = 1; i <= stepsCount; i++) {
+            let titleIndex = i;
+            if (isUnlink && i === 2) titleIndex = 3;
+            if (isUnlink && i === 3) titleIndex = 3;
 
-        const closeWiz = () => { div.remove(); };
-        div.querySelector('#btnStopLinking').onclick = closeWiz;
-        div.querySelector('#btnOverlayGroupClose').onclick = closeWiz;
-
-        let btnOpenMemory = div.querySelector('#btnOpenMemory');
-        btnOpenMemory.addEventListener('click', (evt) => {
-            let obj = ui.fromElement(div);
-            putJSONSync('/shadeCommand', { shadeId: obj.shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
-                if (err) ui.serviceError(err);
-                else {
-                    let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
-                        ui.wizSetNextStep(document.getElementById('divLinkGroup'));
-                        prompt.remove();
-                    });
-                    prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("LINK_GROUP_MEMORY_READY_FOR_GROUP")}</p>`;
-                }
-            });
-        });
-        let btnPairToGroup = div.querySelector('#btnPairToGroup');
-        let fnRepeatProgCommand = (err, o) => {
-            if (this.btnTimer) { clearTimeout(this.btnTimer); this.btnTimer = null; }
-            if (err) return;
-            if (mouseDown) {
-                if (o.cmd === 'Sensor') somfy.sendSetSensor(o);
-                else if (typeof o.groupId !== 'undefined') somfy.sendGroupRepeat(o.groupId, 'prog', null, fnRepeatProgCommand);
-                else somfy.sendCommandRepeat(o.shadeId, 'prog', null, fnRepeatProgCommand);
+            let tk = `WIZ_LINK_GROUP_TITLE_STEP${titleIndex}`;
+            if (tr(tk) === tk || (isUnlink && i === 3) || (!isUnlink && i === 2) || (!isUnlink && i === 4)) {
+                tk = `${pre}_GROUP_TITLE_STEP${isUnlink && i === 3 ? '_3' : titleIndex}`;
             }
+            stepTitles.push(tk);
         }
-        btnPairToGroup.addEventListener('mousedown', (evt) => {
-            mouseDown = true;
-            somfy.sendGroupCommand(groupId, 'prog', null, fnRepeatProgCommand);
-        });
-        btnPairToGroup.addEventListener('mouseup', (evt) => {
-            mouseDown = false;
-            let obj = ui.fromElement(div);
-            let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
-                putJSONSync('/linkToGroup', { groupId: groupId, shadeId: obj.shadeId }, (err, group) => {
-                    somfy.setLinkedShadesList(group);
-                    this.updateGroupList();
-                });
-                prompt.remove();
-                div.remove();
-            });
-            prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_SHADE_GROUP_LINK_CONFIRM")}</p><p>${tr("LINK_GROUP_LINK_DONE")}</p>`;
-        });
-        getJSONSync(`/groupOptions?groupId=${groupId}`, (err, options) => {
-            if (err) { div.remove(); ui.serviceError(err); }
-            else {
-                if (options.availShades.length > 0) {
-                    let spanName = div.querySelector('#spanGroupName');
-                    if (spanName) spanName.innerHTML = options.name;
-
-                    let selAvail = div.querySelector('#selAvailShades');
-                    options.availShades.forEach(shade => {
-                        selAvail.options.add(new Option(shade.name, shade.shadeId));
-                    });
-
-                    div.querySelectorAll('.divWizShadeName').forEach(el => {
-                        el.innerHTML = options.availShades[0].name;
-                    });
-                } else {
-                    div.remove();
-                    ui.errorMessage(tr('ERR_NO_SHADE_AVAILABLE_FOR_GROUP'));
-                }
-            }
-        });
-        return div;
-    }
-    unlinkGroupShade(groupId, shadeId) {
-        let div = document.createElement('div');
 
         div.innerHTML = `
-        <div id="divUnlinkGroup" class="inst-overlay wizard" data-type="link-shade" data-groupid="${groupId}" data-stepid="1">
         <div class="instructions-content">
-        <div id="btnOverlayUnlinkClose" class="boutonOverlayClose animScale">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
+        ${overlayHeader(titleKey, tr(descKey), "svg-simpleShutter", 1)}
+        ${wizardStepper(stepTitles)}
+        <div class="blocGroupsteps">
+        ${inf(1, 1)}
+        <div class="uniblocStep wizard-step" data-stepid="1">
+        ${it('a', 1, 2)} ${it('c', 1, 3)}
         </div>
-        <div class="instructions-header">
-        <div><h2>${tr("UNLINK_GROUP_TITLE")}</h2><p id="pGroupHeaderTitle">${tr("UNLINK_GROUP_DESC")}<span id="spanGroupName" class="groupNameSpan"></span></p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-simpleShutter"></use></svg>
+        ${!isUnlink ? `
+        <div class="unibloc LinkGroupSelect wizard-step" data-expert data-stepid="2">
+        <label class="label" for="selAvailShades">${tr("LINK_GROUP_SELECT_SHADE")}</label>
+        <select id="selAvailShades" class="inputAndSelect" data-bind="shadeId" onchange="document.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = this.options[this.selectedIndex].text);"></select>
         </div>
-        <div class="divWizShadeName wizard-step" data-stepid="2"></div>
-        <div class="button-container-col wizard-step" data-stepid="2"><button class="bouton marginB animScale" type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button></div>
-        <div class="divWizShadeName wizard-step" data-stepid="3"></div>
-        <div class="button-container-col wizard-step" data-stepid="3"><button class="bouton marginB animScale" type="button" id="btnUnpairFromGroup">${tr("BT_UNPAIR_GROUP")}</button></div>
-        <div class="button-container-row">
-        <button id="btnPrevStep" class="boutonOutline animScale" type="button" onclick="ui.wizSetPrevStep(document.getElementById('divUnlinkGroup'));">${tr("BT_GO_BACK")}</button>
-        <button id="btnNextStep" class="bouton animScale" type="button" onclick="ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));">${tr("BT_NEXT")}</button>
+        <div class="uniblocStep wizard-step" data-stepid="2">
+        ${it('a', 2, 1)} ${it('b', 2, 2)}
         </div>
-        <div class="button-container-col"><button id="btnStopLinking" class="boutonOutline animScale" type="button">${tr("BT_CANCEL_1")}</button></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="1"><p>${tr("UNLINK_GROUP_STEP1_DESC_3")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("UNLINK_GROUP_STEP2_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="2"><p>${tr("UNLINK_GROUP_STEP2_DESC_2")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("UNLINK_GROUP_STEP3_DESC_1")}</p></div>
-        <div class="wizard-step field-group unibloc" data-stepid="3"><p>${tr("UNLINK_GROUP_STEP3_DESC_2")}</p></div>
+        ${inf(2, 3)}
+        ` : ''}
+        <div class="blocsteps-row wizard-step" data-expert data-stepid="${isUnlink ? 2 : 3}">
+        <div class="divWizShadeName"></div>
+        <button type="button" id="btnOpenMemory">${tr("BT_OPEN_MEMORY")}</button>
+        </div>
+        <div class="uniblocStep wizard-step" data-stepid="${isUnlink ? 2 : 3}">
+        ${it('a', isUnlink ? 2 : 3, 1)}
+        ${it('b', isUnlink ? 2 : 3, 2)}
+        </div>
+        ${isUnlink ? inf(2, 3) : inf(3, 3)}
+        <div class="blocsteps-row wizard-step" data-expert data-stepid="${isUnlink ? 3 : 4}">
+        <div class="divWizShadeName"></div>
+        <button id="${btnActionId}" type="button">${tr(isUnlink ? "BT_UNPAIR_GROUP" : "BT_PAIR_TO_GROUP")}</button>
+        </div>
+        <div class="uniblocStep wizard-step" data-stepid="${isUnlink ? 3 : 4}">
+        ${it('a', isUnlink ? 3 : 4, 1)}
+        ${it('b', isUnlink ? 3 : 4, 2)}
+        <div class="empty-state"><svg class="empty-icon"><use href=#svg-succes></use></svg></div>
+        </div>
+        </div>
+        <div class="expert-only-buttons" data-expert>
+        <button type="button" line onclick="closeOverlay(this.closest('.inst-overlay'))">${tr("BT_CANCEL_1")}</button>
+        </div>
+        <div class="button-container-overlay">
+        <button id="btnWizStop" class="wizard-step" data-stepid="1" line type="button">${tr("BT_CANCEL_1")}</button>
+        <button id="btnWizPrev" class="wizard-step" data-mstepid="${isUnlink ? '2,3' : '2,3,4'}" line type="button" onclick="ui.wizSetPrevStep(this.closest('.wizard'));">${tr("BT_GO_BACK")}</button>
+        <button id="btnWizNext" class="wizard-step" data-mstepid="${isUnlink ? '1,2' : '1,2,3'}" type="button" onclick="ui.wizSetNextStep(this.closest('.wizard'));">${tr("BT_NEXT")}</button>
+        <button id="btnWizEnd" class="wizard-step" data-stepid="${stepsCount}" type="button">${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-        ui.wizSetStep(div, 1);
+        const clearT = () => { if (this.btnTimer) { clearTimeout(this.btnTimer); this.btnTimer = null; } };
 
-        const closeWiz = () => { div.remove(); };
-        div.querySelector('#btnStopLinking').onclick = closeWiz;
-        div.querySelector('#btnOverlayUnlinkClose').onclick = closeWiz;
-        div.querySelector('#btnOpenMemory').addEventListener('click', (evt) => {
-            putJSONSync('/shadeCommand', { shadeId: shadeId, command: 'prog', repeat: 40 }, (err, shade) => {
+        div.querySelectorAll('#btnWizStop, #btnWizEnd').forEach(btn => btn.onclick = () => closeOverlay(div, clearT));
+
+        const hP = div.querySelector('.instructions-header p');
+        if (hP) hP.innerHTML += ' <span id="spanGroupName" class="groupNameSpan"></span>';
+
+        div.querySelector('#btnOpenMemory').onclick = () => {
+            const sId = isUnlink ? shadeId : ui.fromElement(div).shadeId;
+            putJSONSync('/shadeCommand', { shadeId: sId, command: 'prog', repeat: 40 }, (err) => {
                 if (err) ui.serviceError(err);
                 else {
                     let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
-                        ui.wizSetNextStep(document.getElementById('divUnlinkGroup'));
-                        prompt.remove();
+                        ui.wizSetNextStep(div);
+                        closeOverlay(prompt);
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("UNLINK_GROUP_METHOD_1")}</p><p>${tr("UNLINK_GROUP_METHOD_2")}</p>`;
+                    prompt.querySelector('.sub-message').innerHTML = isUnlink ?
+                    `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("UNLINK_GROUP_METHOD_1")}</p>` :
+                    `<p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("LINK_GROUP_MEMORY_READY_FOR_GROUP")}</p>`;
                 }
             });
-        });
-        div.querySelector('#btnUnpairFromGroup').addEventListener('click', (evt) => {
-            putJSONSync('/groupCommand', { groupId: groupId, command: 'prog', repeat: 1 }, (err, shade) => {
-                if (err) ui.serviceError(err);
-                else {
-                    let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
-                        putJSONSync('/unlinkFromGroup', { groupId: groupId, shadeId: shadeId }, (err, group) => {
-                            somfy.setLinkedShadesList(group);
-                            this.updateGroupList();
+        };
+        const btnAction = div.querySelector(`#${btnActionId}`);
+        let fnRepeat = (err, o) => {
+            clearT();
+            if (!err && mouseDown) {
+                if (o.cmd === 'Sensor') somfy.sendSetSensor(o);
+                else if (o.groupId !== undefined) somfy.sendGroupRepeat(o.groupId, 'prog', null, fnRepeat);
+                else somfy.sendCommandRepeat(o.shadeId, 'prog', null, fnRepeat);
+            }
+        };
+        if (isUnlink) {
+            btnAction.onclick = () => {
+                putJSONSync('/groupCommand', { groupId: groupId, command: 'prog', repeat: 1 }, (err) => {
+                    if (err) ui.serviceError(err);
+                    else {
+                        let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
+                            putJSONSync('/unlinkFromGroup', { groupId: groupId, shadeId: shadeId }, (err, group) => {
+                                somfy.setLinkedShadesList(group);
+                                this.updateGroupList();
+                            });
+                            closeOverlay(prompt);
+                            closeOverlay(div, clearT);
                         });
-                        prompt.remove();
-                        div.remove();
+                        prompt.querySelector('.sub-message').innerHTML = `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("PROMPT_SHADE_MOVE_DONE")}</p>`;
+                    }
+                });
+            };
+        } else {
+            btnAction.onmousedown = () => {
+                mouseDown = true;
+                somfy.sendGroupCommand(groupId, 'prog', null, fnRepeat);
+            };
+            btnAction.onmouseup = () => {
+                mouseDown = false;
+                let obj = ui.fromElement(div);
+                let prompt = ui.promptMessage(tr('PROMPT_CONFIRM_MOTOR_RESPONSE'), () => {
+                    putJSONSync('/linkToGroup', { groupId: groupId, shadeId: obj.shadeId }, (err, group) => {
+                        somfy.setLinkedShadesList(group);
+                        this.updateGroupList();
                     });
-                    prompt.querySelector('.sub-message').innerHTML = `<hr><p>${tr("PROMPT_SHADE_MOVE_CONFIRM")}</p><p>${tr("PROMPT_SHADE_MOVE_DONE")}</p>`;
-                }
-            });
-        });
-        getJSONSync(`/group?groupId=${groupId}`, (err, group) => {
-            if (err) { div.remove(); ui.serviceError(err); }
-            else {
-                let shade = group.linkedShades.find((x) => x.shadeId === shadeId);
+                    closeOverlay(prompt);
+                    closeOverlay(div, clearT);
+                });
+                prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_SHADE_GROUP_LINK_CONFIRM")}</p><p>${tr("LINK_GROUP_LINK_DONE")}</p>`;
+            };
+        }
+        const urlInit = isUnlink ? `/group?groupId=${groupId}` : `/groupOptions?groupId=${groupId}`;
+        getJSONSync(urlInit, (err, data) => {
+            if (err) {
+                ui.serviceError(err);
+                return;
+            }
+            let canShow = false;
+            const spanName = div.querySelector('#spanGroupName');
+
+            if (isUnlink) {
+                const shade = data.linkedShades.find(x => x.shadeId === shadeId);
                 if (shade) {
-                    let grpName = div.querySelector('#spanGroupName');
-                    if (grpName) grpName.innerHTML = group.name;
+                    if (spanName) spanName.innerHTML = data.name;
                     div.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = shade.name);
+                    canShow = true;
                 } else {
-                    div.remove();
-                    ui.errorMessage(tr('ERR_SHADE_NOT_FOUND_IN_GROUP'));
+                    ui.errorMessage(tr('ERR_DEVICE_NOT_FOUND_GROUP'));
                 }
+            } else {
+                if (data.availShades && data.availShades.length > 0) {
+                    if (spanName) spanName.innerHTML = data.name;
+                    let selAvail = div.querySelector('#selAvailShades');
+                    data.availShades.forEach(s => selAvail.options.add(new Option(s.name, s.shadeId)));
+                    div.querySelectorAll('.divWizShadeName').forEach(el => el.innerHTML = data.availShades[0].name);
+                    canShow = true;
+                } else {
+                    ui.errorMessage(tr('ERR_NO_DEVICE_AVAILABLE_GROUP'));
+                }
+            }
+            if (canShow) {
+                ui.wizSetStep(div, 1);
+                shOverlay(div, clearT);
             }
         });
         return div;
     }
+    linkGroupShade(groupId) { return this._gpWiz(groupId, false); }
+    unlinkGroupShade(groupId, shadeId) { return this._gpWiz(groupId, true, shadeId); }
+
     unlinkRepeater(address) {
         let prompt = ui.promptMessage(tr('PROMPT_UNLINK_REPEATER'), () => {
             putJSONSync('/unlinkRepeater', { address: address }, (err, repeaters) => {
@@ -5225,21 +5096,21 @@ class Somfy {
         });
     }
     deviationChanged(el) {
-        document.getElementById('spanDeviation').innerText = (el.value / 100).fmt('#,##0.00');
+        get('spanDeviation').innerText = (el.value / 100).fmt('#,##0.00');
     }
     rxBandwidthChanged(el) {
-        document.getElementById('spanRxBandwidth').innerText = (el.value / 100).fmt('#,##0.00');
+        get('spanRxBandwidth').innerText = (el.value / 100).fmt('#,##0.00');
     }
     frequencyChanged(el) {
-        document.getElementById('spanFrequency').innerText = (el.value / 1000).fmt('#,##0.000');
+        get('spanFrequency').innerText = (el.value / 1000).fmt('#,##0.000');
     }
     txPowerChanged(el) {
         console.log(el.value);
         let lvls = [-30, -20, -15, -10, -6, 0, 5, 7, 10, 11, 12];
-        document.getElementById('spanTxPower').innerText = lvls[el.value];
+        get('spanTxPower').innerText = lvls[el.value];
     }
     stepSizeChanged(el) {
-        document.getElementById('spanStepSize').innerText = parseInt(el.value, 10).fmt('#,##0');
+        get('spanStepSize').innerText = parseInt(el.value, 10).fmt('#,##0');
     }
     processShadeTarget(el, shadeId) {
         let positioner = document.querySelector(`.shade-positioner[data-shadeid="${shadeId}"]`);
@@ -5258,7 +5129,7 @@ class Somfy {
     openSelectRoom() {
         this.closeShadePositioners();
         console.log('Opening rooms');
-        let list = document.getElementById('divRoomSelector-list');
+        let list = get('divRoomSelector-list');
         list.style.display = 'block';
         document.body.addEventListener('click', () => {
             list.style.display = '';
@@ -5299,7 +5170,7 @@ class Somfy {
         <span class="title">${tr('POPUP_TARGET_POSITION')}</span>
         <span class="val"><span id="spanShadeTarget" class="shade-target">${currPos}</span> ${lbl}</span>
         </div>
-        <input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" onchange="somfy.processShadeTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTarget').innerHTML = this.value;" />
+        <input id="slidShadeTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currPos}" onchange="somfy.processShadeTarget(this, ${shadeId});" oninput="get('spanShadeTarget').innerHTML = this.value;" />
         </div>` : '';
 
         const tiltSlider = (tiltType > 0) ? `
@@ -5308,7 +5179,7 @@ class Somfy {
         <span class="title">${tr('POPUP_TARGET_TILT_POSITION')}</span>
         <span class="val"><span id="spanShadeTiltTarget" class="shade-tilt-target">${currTiltPos}</span> ${lbl}</span>
         </div>
-        <input id="slidShadeTiltTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" onchange="somfy.processShadeTiltTarget(this, ${shadeId});" oninput="document.getElementById('spanShadeTiltTarget').innerHTML = this.value;" />
+        <input id="slidShadeTiltTarget" name="shadeTarget" type="range" min="0" max="100" step="1" value="${currTiltPos}" onchange="somfy.processShadeTiltTarget(this, ${shadeId});" oninput="get('spanShadeTiltTarget').innerHTML = this.value;" />
         </div>` : '';
 
         let div = document.createElement('div');
@@ -5349,14 +5220,14 @@ class MQTT {
                 console.log(err);
             else {
                 console.log(settings);
-                ui.toElement(document.getElementById('divMQTT'), { mqtt: settings });
-                document.getElementById('divDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
-                document.getElementById('hrIdDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
+                ui.toElement(get('divMQTT'), { mqtt: settings });
+                get('divDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
+                get('hrIdDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
             }
         });
     }
     connectMQTT() {
-        let obj = ui.fromElement(document.getElementById('divMQTT'));
+        let obj = ui.fromElement(get('divMQTT'));
         console.log(obj);
         if (obj.mqtt.enabled) {
             if (typeof obj.mqtt.hostname !== 'string' || obj.mqtt.hostname.length === 0) {
@@ -5385,8 +5256,12 @@ class MQTT {
             }
         }
         putJSONSync('/connectmqtt', obj.mqtt, (err, response) => {
-            if (err) ui.serviceError(err);
-            console.log(response);
+            if (err) {
+                ui.serviceError(err);
+            } else {
+                ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                console.log(response);
+            }
         });
     }
 }
@@ -5399,7 +5274,7 @@ class Firmware {
         return /Android|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent);
     }
     async backup() {
-        let overlay = ui.waitMessage(document.getElementById('divContainer'));
+        let overlay = ui.waitMessage(get('divContainer'));
         return await new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
             xhr.responseType = 'blob';
@@ -5462,72 +5337,93 @@ class Firmware {
     }
     restore() {
         let div = this.createFileUploader('/restore');
-        let inst = div.querySelector('div[id=divInstText]');
-
-        const options = [
-            { id: 'cbRestoreShades', bind: 'shades', txt: 'RESTORE_SHADES_GROUPS', checked: true },
-            { id: 'cbRestoreRepeaters', bind: 'repeaters', txt: 'RESTORE_REPEATERS', checked: false },
-            { id: 'cbRestoreSystem', bind: 'settings', txt: 'RESTORE_SYSTEM_SETTINGS', checked: false },
-            { id: 'cbRestoreNetwork', bind: 'network', txt: 'RESTORE_NETWORK_SETTINGS', checked: false },
-            { id: 'cbRestoreMQTT', bind: 'mqtt', txt: 'RESTORE_MQTT_SETTINGS', checked: false },
-            { id: 'cbRestoreTransceiver', bind: 'transceiver', txt: 'RESTORE_RADIO_SETTINGS', checked: false }
+        let inst = div.querySelector('#divInstText');
+        //[id, bind, texte, checked]
+        const opts = [
+            ['cbRestoreShades', 'shades', 'RESTORE_SHADES_GROUPS', 1],
+            ['cbRestoreRepeaters', 'repeaters', 'RESTORE_REPEATERS', 0],
+            ['cbRestoreSystem', 'settings', 'RESTORE_SYSTEM_SETTINGS', 0],
+            ['cbRestoreNetwork', 'network', 'RESTORE_NETWORK_SETTINGS', 0],
+            ['cbRestoreMQTT', 'mqtt', 'RESTORE_MQTT_SETTINGS', 0],
+            ['cbRestoreTransceiver', 'transceiver', 'RESTORE_RADIO_SETTINGS', 0]
         ];
 
-        let optionsHtml = '';
-        options.forEach(opt => {
-            optionsHtml += `
-            <label class="uniRow" style="padding: 8px 0;">
-            <div class="uniLabel">${tr(opt.txt)}</div>
-            <div class="uniRight"><span class="switch"><input id="${opt.id}" type="checkbox" data-bind="${opt.bind}" ${opt.checked ? 'checked' : ''}><div></div></span></div>
-            </label>`;
-        });
-        inst.innerHTML = `
-        <div id="jsHeadRestore" class="instructions-header">
-        <div><h2>${tr('RESTORE_TITLE')}</h2><p>${tr('RESTORE_DESC')}</p></div>
-        <svg class="instructions-headerLogo"><use xlink:href="#svg-restore"></use></svg>
+        let html = opts.map(o => `
+        <label class="uniRow" style="padding:8px 0">
+        <div class="uniLabel">${tr(o[2])}</div>
+        <div class="uniRight">
+        <span class="switch">
+        <input id="${o[0]}" type="checkbox" data-bind="${o[1]}" ${o[3]?'checked':''}>
+        <div></div>
+        </span>
         </div>
-        <div class="field-group unibloc">
-        <div>${tr('RESTORE_SELECT_FILE')}</div>
-        </div>
-        <div class="warning">
-        <svg><use xlink:href="#icon-warning"></use></svg>
-        <div><b>${tr('MSG_ALERT')}</b><span>${tr('RESTORE_NETWORK_WARNING')}</span></div>
-        </div>
-        <div id="jsUniRestore" class="field-group unibloc">
-        ${optionsHtml}
-        </div>`;
+        </label>`).join('');
 
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
+        inst.innerHTML = `
+        ${overlayHeader('RESTORE_TITLE', 'RESTORE_DESC', 'svg-restore')}
+        <div class="uniblocStep"><div>${tr('RESTORE_SELECT_FILE')}</div></div>
+
+        <div id="jsUniRestore" class="unibloc">${html}</div>`;
+
+        shOverlay(div);
     }
     createFileUploader(service) {
-        let div = document.createElement('div');
-        div.setAttribute('id', 'divUploadFile');
-        div.setAttribute('class', 'inst-overlay');
+        const isRestore = service === '/restore', isMob = this.isMobile(), div = document.createElement('div');
+        div.id = 'divUploadFile';
+        div.className = 'inst-overlay';
+
+        const step = (n, content, hide = false) => hide ? '' : `
+        <div class="v-step-item">
+        <div class="v-step-left"><div class="step-counter">${n}</div><div class="v-step-line"></div></div>
+        <div class="v-step-right"><div>${content}</div></div>
+        </div>`;
 
         div.innerHTML = `
         <div class="overlay-content">
-        <div id="btnOverlayUploadClose" class="boutonOverlayClose animScale" onclick="this.closest('#divUploadFile').remove();">
-        <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-        <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-        </div>
         <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp">
         <div id="divInstText"></div>
-        <input id="fileName" type="file" name="updateFS" style="display:none;" onchange="const file = this.files[0];if (file) {document.getElementById('span-selected-file').innerText = file.name;firmware.checkBackupVersion(file);}"/>
-        <div class="field-group unibloc FileUploaderChooseFile">
-        <label for="fileName">
-        <span id="span-selected-file">${tr('CHOOSE_FILE')}</span>
-        <div id="btn-select-file" class="fileUploaderBouton"><svg><use xlink:href="#svg-upload"></use></svg></div>
+        <div class="vertical-steps-container">
+        ${step(1, `
+        <div style="font-size:14px;">${tr(service === '/updateFirmware' ? 'FIRMWARE_UPDATE_SYSTEM' : 'FIRMWARE_UPDATE_LITTLEFS')}</div>
+        <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">${tr('FIRMWARE_UPDATE_FROM_GITHUB')}<svg class="svgInTextSmall"><use href="#svg-linkOut"></use></svg></a>
+        `, isRestore)}
+        <div class="v-step-item ${isRestore ? '' : 'has-extra-content'}" style="${isRestore ? 'height:auto;margin:15px 0 0' : ''}">
+        <div class="v-step-left" style="${isRestore ? 'display:none' : ''}">
+        <div class="step-counter">2</div><div class="v-step-line"></div>
+        </div>
+        <div class="v-step-right" style="${isRestore ? 'padding-left:0' : ''}">
+        <input id="fileName" type="file" name="updateFS" style="display:none"
+        onchange="const f=this.files[0];if(f){const s=get('span-selected-file');s.innerText=f.name;s.style.opacity='1';firmware.checkBackupVersion(f)}"/>
+        <label for="fileName" class="custom-file-upload">
+        <span id="span-selected-file" class="file-name-display">${tr('CHOOSE_FILE')}</span>
+        <div class="file-icon-btn"><svg><use href="#svg-upload"></use></svg></div>
         </label>
         </div>
-        <div class="progress-bar" id="progFileUpload" style="display:none;"></div>
-        <div class="button-container-col">
-        <button id="btnBackupCfg" class="boutonOutline marginB animScale" type="button" onclick="firmware.backup();" style="display:none;">${tr('BT_BACK_UP')}</button>
+        </div>
+        <div class="v-step-item" style="${isRestore ? 'display:none' : ''}">
+        <div class="v-step-left"><div class="step-counter">3</div></div>
+        <div class="v-step-right"><div>${tr('FIRMWARE_UPDATE_VERIFY_0')} <svg class="svgInText"><use href="#svg-download"></use></svg> ${tr('FIRMWARE_UPDATE_VERIFY_1')}</div></div>
+        </div>
+        </div>
+        <div class="warning" style="${isRestore ? '' : 'display:none'}">
+        <svg><use href=#svg-warning></use></svg>
+        <div><b>${tr('MSG_ALERT')}</b><span>${tr('RESTORE_NETWORK_WARNING')}</span></div>
+        </div>
+        <div class="progress-bar" id="progFileUpload" style="display:none;margin:15px 0"></div>
+        <div class="hrDivFooter"></div>
+        <div class="button-container-overlay"><div class="footer-sticky-content">
+        <div class="uniRow backup-row" style="${isRestore ? 'display:none' : ''}">
+        <div class="uniText">
+        <span class="uniLabel">${tr('FIRMWARE_SAVE_BACKUP')}</span>
+        <span class="uniStatus">${tr(isMob ? 'FIRMWARE_SAVE_BACKUP_DESC_MOB' : 'FIRMWARE_SAVE_BACKUP_DESC')}</span>
+        </div>
+        <div id="btnBackupCfg" class="gitBackup" onclick="firmware.backup()"><svg><use href="#svg-download"></use></svg></div>
+        </div>
         <div class="button-container-row">
-        <button id="btnUploadFile" class="bouton animScale" type="button" onclick="firmware.uploadFile('${service}', document.getElementById('divUploadFile'), ui.fromElement(document.getElementById('divUploadFile')));">${tr('BT_UPLOAD_FILE')}</button>
-        <button id="btnClose" class="boutonOutline animScale" type="button" onclick="document.getElementById('divUploadFile').remove();">${tr('BT_CANCEL_1')}</button>
+        <button id="btnClose" line type="button" onclick="closeOverlay(get('divUploadFile'))">${tr('BT_CANCEL_1')}</button>
+        <button id="btnUploadFile" type="button" onclick="firmware.uploadFile('${service}',get('divUploadFile'),ui.fromElement(get('divUploadFile')))">${tr('BT_UPLOAD_FILE')}</button>
         </div>
-        </div>
+        </div></div>
         </form>
         </div>`;
 
@@ -5538,21 +5434,19 @@ class Firmware {
         reader.onload = (e) => {
             const lines = e.target.result.split('\n');
             if (lines.length > 0) {
-                const version = parseInt(lines[0].split(',')[0]);
+                const ver = parseInt(lines[0].split(',')[0]);
+                if (!isNaN(ver) && ver < 25) {
+                    let prompt = ui.promptMessage(tr('PROMPT_RESTORE_FILE_TITLE'), () => closeOverlay(prompt));
 
-                if (!isNaN(version) && version < 25) {
-                    let prompt = ui.promptMessage(tr('PROMPT_RESTORE_FILE_TITLE'), () => {
-                        prompt.remove();
-                    });
                     prompt.querySelector('.sub-message').innerHTML = `<p style="color:var(--txt-orange); font-weight:bold;"><p>${tr('PROMPT_RESTORE_FILE_DESC')}</p><p><b>${tr('PROMPT_RESTORE_FILE_DESC_1')}</b></p><p>${tr('PROMPT_RESTORE_FILE_DESC_2')}</p>`;
 
-                    const btnCancel = prompt.querySelector('.boutonOutline');
-                    if(btnCancel) {
-                        btnCancel.addEventListener('click', () => {
-                            document.getElementById('fileName').value = "";
-                            document.getElementById('span-selected-file').innerText = tr('CHOOSE_FILE');
-                            prompt.remove();
-                        });
+                    const btnCan = prompt.querySelector('button[line]');
+                    if (btnCan) {
+                        btnCan.onclick = () => {
+                            get('fileName').value = "";
+                            get('span-selected-file').innerText = tr('CHOOSE_FILE');
+                            closeOverlay(prompt);
+                        };
                     }
                 }
             }
@@ -5561,17 +5455,17 @@ class Firmware {
     }
     procMemoryStatus(mem) {
         console.log(mem);
-        let sp = document.getElementById('spanFreeMemory');
+        let sp = get('spanFreeMemory');
         if (sp) sp.innerHTML = mem.free.fmt("#,##0 ");
-        sp = document.getElementById('spanMaxMemory');
+        sp = get('spanMaxMemory');
         if (sp) sp.innerHTML = mem.max.fmt('#,##0 ');
-        sp = document.getElementById('spanMinMemory');
+        sp = get('spanMinMemory');
         if (sp) sp.innerHTML = mem.min.fmt('#,##0 ');
     }
     procFwStatus(rel) {
         const divsGlobal = document.querySelectorAll('.firmware-message');
-        const divLocal = document.getElementById('divSystemStatus');
-        const statusDesc = document.getElementById('statusDesc');
+        const divLocal = get('divSystemStatus');
+        const statusDesc = get('statusDesc');
 
         if (divsGlobal.length === 0) return;
         divsGlobal.forEach(div => {
@@ -5583,41 +5477,41 @@ class Firmware {
                 div.classList.add('procFwStatusshow');
                 div.style.cursor = 'pointer';
                 div.onclick = () => { firmware.updateGithub(); };
-                div.innerHTML = `<span>${tr('FIRMWARE_UPDATE_AVAILABLE')}</span>`;
+                div.innerHTML = `<span>${tr('FW_UPDATE_AVAILABLE')}</span>`;
             });
             if (divLocal) {
                 divLocal.className = "error";
-                document.getElementById('useStatusIcon')?.setAttribute('xlink:href', '#icon-error');
-                const st = document.getElementById('statusTitle');
-                if (st) st.innerHTML = tr('FIRMWARE_UPDATE_AVAILABLE');
-                statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
+                get('useStatusIcon')?.setAttribute('href', '#svg-error');
+                const st = get('statusTitle');
+                if (st) st.innerHTML = tr('FW_UPDATE_AVAILABLE');
+                statusDesc.innerHTML = tr('FW_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
             }
         }
         else if (rel.status === 4 && rel.error !== 0) {
             let e = errors.find(x => x.code === rel.error) || { desc: tr('ERR_UNSPECIFIED') };
-            let inst = document.getElementById('divGitInstall');
+            let inst = get('divGitInstall');
             if (inst) inst.remove();
             ui.errorMessage(e.desc);
         }
         else {
             if (divLocal) {
                 divLocal.className = "success";
-                document.getElementById('useStatusIcon')?.setAttribute('xlink:href', '#icon-info');
-                const st = document.getElementById('statusTitle');
-                if (st) st.innerHTML = tr('FIRMWARE_UPDATE_UPTODATE');
-                statusDesc.innerHTML = tr('FIRMWARE_UPDATE_ACTION_DESC');
+                get('useStatusIcon')?.setAttribute('href', '#svg-info');
+                const st = get('statusTitle');
+                if (st) st.innerHTML = tr('FW_UPDATE_UPTODATE');
+                statusDesc.innerHTML = tr('FW_UPDATE_ACTION_DESC');
             }
         }
     }
     procUpdateProgress(prog) {
         const pct = Math.round((prog.loaded / prog.total) * 100);
         general.reloadApp = true;
-        const git = document.getElementById('divGitInstall');
+        const git = get('divGitInstall');
 
         if (git) {
             if (pct >= 100 && prog.part === 100) {
                 git.remove();
-                let title = `<svg style="width:24px;height:24px;vertical-align:middle;margin-right:10px;"><use xlink:href="#icon-succes"></use></svg>${tr('GIT_RELEASE_SUCCES')}`;
+                let title = `<svg><use xlink:href="#icon-succes"></use></svg>`;
                 let infoDiv = ui.errorMessage(title);
                 infoDiv.querySelector('.sub-message').innerHTML = `${tr('GIT_RELEASE_SUCCES_1')}<br>${tr('GIT_RELEASE_SUCCES_2')}`;
 
@@ -5628,12 +5522,12 @@ class Firmware {
                 }
             } else {
                 if (prog.part === 100) {
-                    const btnCancel = document.getElementById('btnCancelUpdate');
+                    const btnCancel = get('btnCancelUpdate');
                     if (btnCancel) btnCancel.style.display = 'none';
                 }
                 const p = (prog.part === 100) ?
-                document.getElementById('progApplicationDownload') :
-                document.getElementById('progFirmwareDownload');
+                get('progApplicationDownload') :
+                get('progFirmwareDownload');
 
                 if (p) {
                     p.style.setProperty('--progress', `${pct}%`);
@@ -5644,163 +5538,162 @@ class Firmware {
     }
     async installGitRelease(div) {
         if (!this.isMobile()) {
-            console.log('Starting backup');
             try {
                 await firmware.backup();
-                console.log('Backup Complete');
-            }
-            catch (err) {
-                ui.serviceError(div, err);
-                return;
+            } catch (err) {
+                return ui.serviceError(div, err);
             }
         }
         let obj = ui.fromElement(div);
         putJSONSync(`/downloadFirmware?ver=${obj.version}`, {}, (err, ver) => {
-            if (err) {
-                ui.serviceError(err);
-            } else {
-                general.reloadApp = true;
-                div.innerHTML = `
-                <div class="instructions-content">
-                <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
-                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-                </div>
-                <div class="instructions-header">
-                <div><h2>${tr('GIT_RELEASE_TITLE')}</h2><p>${tr('GIT_RELEASE_DESC').replace('%1', ver.name)}</p></div>
-                <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
-                </div>
-                <div class="warning">
-                <svg><use xlink:href="#icon-warning"></use></svg>
-                <div><b>${tr('GIT_RELEASE_WAIT_WARNING')}</b><span>${tr('GIT_RELEASE_WAIT_WARNING_1')}</span></div>
-                </div>
-                <div class="progress-bar" id="progFirmwareDownload"></div>
-                <label for="progFirmwareDownload">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
-                <div class="progress-bar" id="progApplicationDownload"></div>
-                <label for="progApplicationDownload">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
-                <div class="button-container-col">
-                <button id="btnCancelUpdate" class="bouton animScale" type="button" onclick="firmware.cancelInstallGit(document.getElementById('divGitInstall'));">${tr('BT_CANCEL_1')}</button>
-                </div>
-                </div>`;
+            if (err) return ui.serviceError(err);
+            general.reloadApp = true;
+            const desc = tr('GIT_RELEASE_DESC').replace('%1', ver.name);
 
-                div.querySelectorAll('[data-lang]').forEach(el => {
-                    el.innerHTML = tr(el.getAttribute('data-lang'));
-                });
-            }
+            div.innerHTML = `
+            <div class="instructions-content">
+            ${overlayHeader('GIT_RELEASE_TITLE', '', 'svg-github')}
+            <div class="warning">
+            <svg><use href=#svg-warning></use></svg>
+            <div><b>${tr('GIT_RELEASE_WAIT_WARNING')}</b><span>${tr('GIT_RELEASE_WAIT_WARNING_1')}</span></div>
+            </div>
+            <div class="progress-bar" id="progFirmwareDownload"></div>
+            <label for="progFirmwareDownload">${tr('GIT_RELEASE_FIRMWARE_INSTALL_PROGRESS')}</label>
+            <div class="progress-bar" id="progApplicationDownload"></div>
+            <label for="progApplicationDownload">${tr('GIT_RELEASE_APPLICATION_INSTALL_PROGRESS')}</label>
+            <div class="button-container-col">
+            <button id="btnCancelUpdate" line type="button">${tr('BT_CANCEL_1')}</button>
+            </div>
+            </div>`;
+
+            const hP = div.querySelector('.instructions-header p');
+            if (hP) hP.innerHTML = desc;
+
+            div.querySelector('[close]').onclick = () => closeOverlay(div);
+            div.querySelector('#btnCancelUpdate').onclick = () => firmware.cancelInstallGit(div);
         });
     }
     cancelInstallGit(div) {
-        putJSONSync(`/cancelFirmware`, {}, (err, ver) => {
+        putJSONSync(`/cancelFirmware`, {}, (err) => {
             if (err) ui.serviceError(err);
-            else console.log(ver);
-            div.remove();
+            closeOverlay(div);
         });
     }
     updateGithub() {
         getJSONSync('/getReleases', (err, rel) => {
-            if (err) ui.serviceError(err);
-            else {
-                let div = document.createElement('div');
-                let chip = document.getElementById('divContainer').getAttribute('data-chipmodel');
-                div.setAttribute('id', 'divGitInstall');
-                div.setAttribute('class', 'inst-overlay');
+            if (err) return ui.serviceError(err);
+            const div = document.createElement('div'), isMob = this.isMobile();
+            const chip = (get('divContainer').getAttribute('data-chipmodel') || "").toLowerCase();
+            div.id = 'divGitInstall';
+            div.className = 'inst-overlay';
 
-                rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
+            rel.releases.sort((a, b) => a.preRelease === b.preRelease && b.draft === a.draft ? 0 : a.preRelease ? 1 : -1);
 
-                const isMob = this.isMobile();
-                const infoClass = isMob ? "warning" : "information";
-                const infoIcon = isMob ? "#icon-warning" : "#icon-info";
-                const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
-                const infoText = isMob ? tr('UPDATE_GIT_NO_AUTO_BACKUP') : tr('UPDATE_GIT_BACKUP_DOWNLOAD_UP');
+            const optsHtml = rel.releases.map(r => {
+                const name = r.name.toLowerCase();
+                if (name === 'main' || name === 'master' || (r.hwVersions.length > 0 && r.hwVersions.indexOf(chip) < 0)) return '';
+                return `<option value="${r.version.name}" data-prerelease="${r.preRelease}">${r.name}${r.preRelease ? ' - Pre' : ''}</option>`;
+            }).join('');
 
-                let optionsHtml = '';
-                for (let i = 0; i < rel.releases.length; i++) {
-                    let displayName = rel.releases[i].name;
-                    let isAlpha = displayName.toLowerCase() === 'main';
+            div.innerHTML = `
+            <div class="instructions-content">
+            ${overlayHeader('UPDATE_GIT_TITLE', 'UPDATE_GIT_DESC', 'svg-github')}
+            <div class="uniRow"><span class="label">${tr('FIRMWARE_INSTALLED')}</span><span class="labelgrey">${rel.appVersion.name}</span></div>
+            <div class="uniRow">
+            <span class="label">${tr('FIRMWARE_AVAILABLE')}</span>
+            <select id="selVersion" class="selectCompac" data-bind="version">${optsHtml}</select>
+            </div>
+            <a id="lnkGithubRelease" href="#" target="_blank" class="link">${tr('FIRMWARE_NOTE_GITHUB')}<svg class="svgInTextSmall"><use href="#svg-linkOut"></use></svg></a>
+            <div id="divPrereleaseWarning" class="error" style="display:none;"><svg><use href=#svg-error></use></svg><div><span id="spanUpdateWarning"></span></div></div>
+            <div class="hrDiv"></div>
+            <div class="warningText"><svg><use href="#svg-warning"></use></svg><span>${tr('FIRMWARE_CACHE')}</span></div>
+            <div id="notesPreview" class="release-notes-preview">
+            <div class="wifiConnectScan">
+            <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
+            </div>
+            <div class="hrDivFooter"></div>
+            <div class="button-container-overlay"><div class="footer-sticky-content">
+            <div class="uniRow">
+            <div class="uniText"><span class="uniLabel">${tr('FIRMWARE_SAVE_BACKUP')}</span><span class="uniStatus">${tr(isMob ? 'FIRMWARE_SAVE_BACKUP_DESC_MOB' : 'FIRMWARE_SAVE_BACKUP_DESC')}</span></div>
+            <div id="btnBackupCfg" class="gitBackup" onclick="firmware.backup()"><svg><use href="#svg-download"></use></svg></div>
+            </div>
+            <div class="button-container-row">
+            <button id="btnClose" line type="button" onclick="closeOverlay(get('divGitInstall'))">${tr('BT_CANCEL_1')}</button>
+            <button id="btnUpdate" type="button" class="btn-main" onclick="firmware.installGitRelease(get('divGitInstall'))">${tr('BT_UPDATE')}</button>
+            </div>
+            </div></div>
+            </div>`;
 
-                    if (isAlpha) continue;
-                    if (rel.releases[i].hwVersions.length === 0 || rel.releases[i].hwVersions.indexOf(chip) >= 0) {
-                        if (rel.releases[i].preRelease) displayName += ' - Pre';
+            shOverlay(div);
+            const sel = div.querySelector('#selVersion');
 
-                        optionsHtml += `<option style="text-align:left;color:black;"
-                        data-prerelease="${rel.releases[i].preRelease}"
-                        data-alpha="false"
-                        value="${rel.releases[i].version.name}">${displayName}</option>`;
+            const updateNotes = async () => {
+                const nDiv = div.querySelector('#notesPreview'), lnk = div.querySelector('#lnkGithubRelease');
+                if (!nDiv) return;
+
+                nDiv.innerHTML = '<div class="wifiConnectScan"><div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>';
+
+                try {
+                    const r = await firmware.getReleaseInfo(sel.value, true);
+                    if (r?.info?.body) {
+                        nDiv.innerHTML = firmware.parseMarkdown(r.info.body);
+                        if (lnk && r.info.html_url) lnk.href = r.info.html_url;
+                    } else {
+                        throw new Error("No body");
                     }
+                } catch (e) {
+                    nDiv.innerHTML = `
+                    <div class="divGitNoteError">
+                    <div class="gitNoteError">${tr('ERR_GIT_NOTE')}</div>
+                    <div class="gitNoteErrorSub">${tr('UPDATE_GIT_NOTE')}</div>
+                    </div>`;
                 }
-                div.innerHTML = `
-                <div class="overlay-content">
-                <div class="boutonOverlayClose animScale" onclick="document.getElementById('divGitInstall').remove();">
-                <svg class="closeShow-desktop"><use xlink:href="#icon-close"></use></svg>
-                <svg class="closeShow-mobile"><use xlink:href="#icon-return"></use></svg>
-                </div>
-                <div class="instructions-header">
-                <div><h2>${tr('UPDATE_GIT_TITLE')}</h2><p>${tr('UPDATE_GIT_DESC')}</p></div>
-                <svg class="instructions-headerLogo"><use xlink:href="#svg-github"></use></svg>
-                </div>
-                <div id="divPrereleaseWarning" class="error" style="display:none;"><svg><use xlink:href="#icon-error"></use></svg>
-                <div><b>${tr('MSG_ALERT')}</b><span id="spanUpdateWarning"></span></div>
-                </div>
-                <div class="field-group unibloc">
-                <label class="label" for="selVersion">${tr('UPDATE_GIT_SELECT_VERSION')}</label>
-                <select id="selVersion" class="inputAndSelect" data-bind="version" onchange="firmware.gitReleaseSelected(document.getElementById('divGitInstall'));">${optionsHtml}</select>
-                <hr>
-                <button class="boutonOutline animScale" id="divReleaseNotes" type="button" onclick="firmware.showReleaseNotes(document.getElementById('selVersion').value);">${tr('BT_RELEASE_NOTE')}</button>
-                </div>
-                <div class="${infoClass}">
-                <svg><use xlink:href="${infoIcon}"></use></svg>
-                <div><b>${infoTitle}</b><span>${infoText}</span></div>
-                </div>
-                ${isMob ? `<div class="button-container-col"><button id="btnBackupCfg" class="bouton marginB animScale" type="button" onclick="firmware.backup();">${tr('BT_BACK_UP')}</button></div>` : ''}
-                <div class="button-container-row">
-                <button id="btnUpdate" type="button" class="bouton animScale" onclick="firmware.installGitRelease(document.getElementById('divGitInstall'));">${tr('BT_UPDATE')}</button>
-                <button id="btnClose" type="button" class="boutonOutline animScale" onclick="document.getElementById('divGitInstall').remove();">${tr('BT_CANCEL_1')}</button>
-                </div>
-                </div>`;
-
-                document.getElementById('divContainer').appendChild(div);
-                window.scrollTo(0, 0);
-                this.gitReleaseSelected(div);
-            }
+            };
+            sel.addEventListener('change', () => { this.gitReleaseSelected(div); updateNotes(); });
+            this.gitReleaseSelected(div);
+            updateNotes();
         });
     }
     gitReleaseSelected(div) {
-        let obj = ui.fromElement(div);
-        let divNotes = div.querySelector('#divReleaseNotes');
-        let divPre = div.querySelector('#divPrereleaseWarning');
-        let sel = div.querySelector('#selVersion');
+        const sel = div.querySelector('#selVersion');
+        if (!sel || sel.selectedIndex === -1) return;
 
-        if (sel && sel.selectedIndex !== -1) {
-            const opt = sel.options[sel.selectedIndex];
-            const isPre = makeBool(opt.getAttribute('data-prerelease'));
+        const opt = sel.options[sel.selectedIndex];
+        const isPre = opt.getAttribute('data-prerelease') === "true";
+        const divPre = div.querySelector('#divPrereleaseWarning');
 
-            if (divPre) {
-                if (isPre) {
-                    const spanMsg = divPre.querySelector('#spanUpdateWarning');
-                    if (spanMsg) spanMsg.innerHTML = tr('UPDATE_GIT_RELEASE_BETA');
-                    divPre.style.display = 'flex';
-                } else {
-                    divPre.style.display = 'none';
-                }
+        if (divPre) {
+            if (isPre) {
+                divPre.querySelector('#spanUpdateWarning').innerHTML = tr('UPDATE_GIT_RELEASE_BETA');
+                divPre.style.display = 'flex';
+            } else {
+                divPre.style.display = 'none';
             }
         }
+        const divNotes = div.querySelector('#divReleaseNotes');
         if (divNotes) {
-            divNotes.style.display = (!obj.version || obj.version === '') ? 'none' : '';
+            const val = sel.value;
+            divNotes.style.display = (!val || val === 'main') ? 'none' : '';
         }
     }
-    async getReleaseInfo(tag) {
-        let overlay = ui.waitMessage(document.getElementById('divContainer'));
+    async getReleaseInfo(tag, silent = false) {
+        let overlay = null;
+        if (!silent) overlay = ui.waitMessage(document.getElementById('divContainer'));
         try {
-            let ret = {};
+            let ret = { resp: { ok: false }, info: null };
             ret.resp = await fetch(`https://api.github.com/repos/xkain/espsomfy-rts/releases/tags/${tag}`);
-            if (ret.resp.ok)
+            if (ret.resp.ok) {
                 ret.info = await ret.resp.json();
+            }
             return ret;
         }
         catch (err) {
-            return { err: err };
+            return { resp: { ok: false }, err: err };
         }
-        finally { overlay.remove(); }
+        finally {
+            if (overlay) overlay.remove();
+        }
     }
     formatInlineMarkdown(txt) {
         if (!txt) return '';
@@ -5811,254 +5704,136 @@ class Firmware {
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="md-link">$1</a>')
         .replace(/(?<!["=>])(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="md-link-auto">$1</a>');
     }
-    async showReleaseNotes(tagName) {
-        console.log(tagName);
-        let r = await this.getReleaseInfo(tagName);
-        console.log(r);
+    parseMarkdown(bodyText) {
         const self = this;
-
-        if (r.resp.ok) {
-            let lines = r.info.body.split('\r\n');
-            let ctx = { html: '', llvl: 0, lines: r.info.body.split('\r\n'), ndx: 0 };
-
-            ctx.toHead = function (txt) {
-                let num = txt.indexOf(' ');
-                return `<h${num}>${txt.substring(num).trim()}</h${num}>`;
-            };
-            ctx.toUL = function () {
-                this.html += '<ul class="md-list" style="padding:0; margin:0;">';
+        const ctx = {
+            lines: (bodyText || "").split(/\r?\n/),
+            ndx: 0,
+            html: '',
+            token(txt) {
+                const trimmed = txt.trim();
+                if (!trimmed) return { type: 'empty' };
+                const firstChar = txt.match(/\S/);
+                const indent = firstChar ? txt.indexOf(firstChar[0]) : 0;
+                if (trimmed.startsWith('#')) return { type: 'head', txt: trimmed, indent };
+                if (trimmed.startsWith('* ')) return { type: 'list', txt: trimmed.substring(2), indent };
+                return { type: 'text', txt: trimmed, indent };
+            },
+            renderHead(token) {
+                const level = (token.txt.match(/^#+/) || ["#"])[0].length;
+                const content = token.txt.replace(/^#+\s*/, '');
+                return `<h${level} style="margin: 10px 0 5px 0;">${self.formatInlineMarkdown(content)}</h${level}>`;
+            },
+            renderList() {
+                let listHtml = '<ul class="md-list" style="padding:0; margin:5px 0;">';
                 while (this.ndx < this.lines.length) {
-                    let txt = this.lines[this.ndx];
-                    let t = this.token(txt);
-
-                    if (t.ch === '*') {
-                        let margin = t.indent * 8;
-                        this.html += `<li style="margin-left:${margin + 20}px; text-align:left; list-style-type:disc;">${self.formatInlineMarkdown(t.txt)}</li>`;
-                        this.ndx++;
-                    } else {
-                        break;
+                    const t = this.token(this.lines[this.ndx]);
+                    if (t.type !== 'list') break;
+                    const margin = (t.indent * 8) + 20;
+                    listHtml += `<li style="margin-left:${margin}px; text-align:left; list-style-type:disc;">${self.formatInlineMarkdown(t.txt)}</li>`;
+                    this.ndx++;
+                }
+                listHtml += '</ul>';
+                return listHtml;
+            },
+            parse() {
+                while (this.ndx < this.lines.length) {
+                    const t = this.token(this.lines[this.ndx]);
+                    switch (t.type) {
+                        case 'head': this.html += this.renderHead(t); this.ndx++; break;
+                        case 'list': this.html += this.renderList(); break;
+                        case 'empty': this.html += '<div style="height:8px"></div>'; this.ndx++; break;
+                        default:
+                            const margin = (t.indent * 8) + (t.indent > 0 ? 20 : 0);
+                            this.html += `<p style="margin: 2px 0; margin-left:${margin}px; text-align:left; line-height:1.4;">${self.formatInlineMarkdown(t.txt)}</p>`;
+                            this.ndx++;
+                            break;
                     }
                 }
-                this.html += '</ul>';
-            };
-            ctx.token = function (txt) {
-                let tok = { ch: '', indent: 0, txt: '' };
-                if (!txt) return tok;
-
-                let firstCharIndex = txt.search(/\S/);
-                if (firstCharIndex !== -1) {
-                    tok.indent = firstCharIndex;
-                    let char = txt[firstCharIndex];
-                    let nextChar = txt[firstCharIndex + 1];
-
-                    if (char === '*' && nextChar === ' ') {
-                        tok.ch = '*';
-                        tok.txt = txt.substring(firstCharIndex + 2);
-                    } else if (char === '#') {
-                        tok.ch = '#';
-                        tok.txt = txt.trim();
-                    } else {
-                        tok.ch = 'text';
-                        tok.txt = txt.trim();
-                    }
-                }
-                return tok;
-            };
-            ctx.next = function () {
-                if (this.ndx >= this.lines.length) return false;
-                let tok = this.token(this.lines[this.ndx]);
-
-                switch (tok.ch) {
-                    case '#':
-                        this.html += self.formatInlineMarkdown(this.toHead(this.lines[this.ndx]));
-                        this.ndx++;
-                        break;
-                    case '*':
-                        this.toUL();
-                        break;
-                    case '':
-                        this.html += '<div style="height:8px"></div>';
-                        this.ndx++;
-                        break;
-                    case 'text':
-                    default:
-                        if (tok.txt !== '') {
-                            let formattedTxt = self.formatInlineMarkdown(tok.txt);
-                            let margin = (tok.indent * 8) + (tok.indent > 0 ? 20 : 0);
-                            this.html += `<p style="margin: 2px 0 2px ${margin}px; line-height: 1.2; text-align: left;">${formattedTxt}</p>`;
-                        }
-                        this.ndx++;
-                        break;
-                }
-                return true;
-            };
-            while (ctx.next());
-            let modalDiv = ui.infoMessage(ctx.html);
-            modalDiv.classList.add('release-notes-modal');
-        }
+            }
+        };
+        ctx.parse();
+        return ctx.html;
     }
-    updateFirmware() {
-        let div = this.createFileUploader('/updateFirmware');
-        let inst = div.querySelector('div[id=divInstText]');
+    updateManual(isApp = false) {
+        const service = isApp ? '/updateApplication' : '/updateFirmware';
+        const div = this.createFileUploader(service);
 
-        const isMob = this.isMobile();
-        const infoClass = isMob ? "warning" : "information";
-        const infoIcon = isMob ? "#icon-warning" : "#icon-info";
-        const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
-        const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_FIRMWARE_BACKUP_DOWNLOAD_FIRMWARE');
+        if (isApp) general.reloadApp = true;
+        const currentVer = isApp ? (general?.appVersion || this.appVersion) : (get('spanFwVersion').innerText || '?.?.?');
 
-        inst.innerHTML = `
-        <div id="jsHeadFirmware" class="instructions-header"><div><h2>${tr('MANUAL_UPDATE_TITLE')}</h2><p>${tr('UPDATE_FIRMWARE_DESC')}</p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg></div><div class="field-group unibloc"><div>${tr('UPDATE_FIRMWARE_UPLOAD_FIRMWARE_DESC').replace('%1', '<span class="txt-badge">SomfyController.ino.esp32.bin</span>')}</div></div><div class="${infoClass}"><svg><use xlink:href="${infoIcon}"></use></svg><div><b>${infoTitle}</b><span>${infoText}</span></div>
-        </div>`;
+        div.querySelector('#divInstText').innerHTML = `
+        ${overlayHeader('MANUAL_UPDATE_TITLE', isApp ? 'UPDATE_LITTLEFS_DESC' : 'UPDATE_FIRMWARE_DESC', 'svg-update')}
+        <div class="uniRow"><span class="uniLabel">${tr('FIRMWARE_INSTALLED')}</span><span class="labelgrey">${currentVer}</span></div>
+        <div class="warningText"><span>${tr('FIRMWARE_CACHE')}</span></div></div>
+        <div class="hrDiv"></div>`;
 
-        div.classList.add('inst-overlay');
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
+        div.className += isApp ? ' mode-app-update' : ' mode-firm-update';
+        shOverlay(div);
 
-        if (isMob) {
-            let btnBackup = document.getElementById('btnBackupCfg');
-            if (btnBackup) btnBackup.style.display = 'inline-block';
-        }
-    }
-    updateApplication() {
-        let div = this.createFileUploader('/updateApplication');
-        general.reloadApp = true;
-        let inst = div.querySelector('div[id=divInstText]');
-
-        const isMob = this.isMobile();
-        const infoClass = isMob ? "warning" : "information";
-        const infoIcon = isMob ? "#icon-warning" : "#icon-info";
-        const infoTitle = isMob ? tr('MSG_WARNING') : tr('MSG_INFO');
-        const infoText = isMob ? tr('NO_AUTO_BACKUP') : tr('UPDATE_LITTLEFS_BACKUP_DOWNLOAD');
-
-        inst.innerHTML = `
-        <div id="jsHeadLittlefs" class="instructions-header"><div><h2>${tr('MANUAL_UPDATE_TITLE')}</h2><p>${tr('UPDATE_LITTLEFS_DESC')}</p></div><svg class="instructions-headerLogo"><use xlink:href="#svg-update"></use></svg></div><div class="field-group unibloc"><div>${tr('UPDATE_LITTLEFS_select').replace('%1', '<span class="instructionsTxt-badge">SomfyController.littlefs.bin</span>')}</div></div><div class="${infoClass}"><svg><use xlink:href="${infoIcon}"></use></svg><div><b>${infoTitle}</b><span>${infoText}</span></div>
-        </div>`;
-
-        document.getElementById('divContainer').appendChild(div);
-        window.scrollTo(0, 0);
-
-        if (isMob) {
-            let btnBackup = document.getElementById('btnBackupCfg');
-            if (btnBackup) btnBackup.style.display = 'inline-block';
+        const btnB = div.querySelector('#btnBackupCfg');
+        if (btnB) {
+            btnB.style.display = 'flex';
+            btnB.onclick = () => firmware.backup();
         }
     }
     async uploadFile(service, el, data) {
-        let field = el.querySelector('input[type="file"]');
-        let filename = field.value;
-        console.log(filename);
-        let formData = new FormData();
-        formData.append('file', field.files[0]);
-        const title = tr('MSG_ALERT');
-        switch (service) {
-            case '/updateApplication':
-                if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_LITTLEFS_SELECTED');
-                    return;
-                }
-                else if (filename.indexOf('.littlefs') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_LITTLEFS');
-                    return;
-                }
-                if (!this.isMobile()) {
-                    console.log('Starting backup');
-                    try {
-                        await firmware.backup();
-                        console.log('Backup Complete');
-                    }
-                    catch (err) {
-                        ui.serviceError(el, err);
-                        return;
-                    }
-                }
-                break;
-            case '/updateFirmware':
-                if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_FIRMWARE_SELECTED');
-                    return;
-                }
-                else if (filename.indexOf('.ino.') === -1 || !filename.endsWith('.bin')) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_FIRMWARE');
-                    return;
-                }
-                if (!this.isMobile()) {
-                    console.log('Starting backup');
-                    try {
-                        await firmware.backup();
-                        console.log('Backup Complete');
-                    }
-                    catch(err) {
-                        ui.serviceError(el, err);
-                        return;
-                    }
-                }
-                break;
-            case '/restore':
-                if (typeof filename !== 'string' || filename.length === 0) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_FILE_BACKUP_SELECTED');
-                    return;
-                }
-                else if (field.files[0].size > 20480) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_BACKUP_TOO_LARGE').replace('%s', field.files[0].size.fmt("#,##0"));
-                    return;
-                }
-                else if (!filename.endsWith('.backup')) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_FILE_BACKUP');
-                    return;
-                }
-                if (!data.shades && !data.settings && !data.network && !data.transceiver && !data.repeaters && !data.mqtt) {
-                    ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_NO_RESTORE_OPTION');
-                    return;
-                }
-                console.log(data);
-                formData.append('data', JSON.stringify(data));
-                console.log(formData.get('data'));
-                //return;
-                break;
+        let field = el.querySelector('input[type="file"]'),
+        filename = field.value,
+        file = field.files[0],
+        title = tr('MSG_ALERT'),
+        err = null;
+
+        if (!filename) err = (service === '/restore') ? 'ERR_NO_FILE_BACKUP_SELECTED' : (service === '/updateApplication' ? 'ERR_NO_FILE_LITTLEFS_SELECTED' : 'ERR_NO_FILE_FIRMWARE_SELECTED');
+        else if (service === '/updateApplication' && (!filename.includes('.littlefs') || !filename.endsWith('.bin'))) err = 'ERR_INVALID_FILE_LITTLEFS';
+        else if (service === '/updateFirmware' && (!filename.includes('.ino.') || !filename.endsWith('.bin'))) err = 'ERR_INVALID_FILE_FIRMWARE';
+        else if (service === '/restore') {
+            if (file.size > 20480) {
+                ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr('ERR_BACKUP_TOO_LARGE').replace('%s', file.size.fmt("#,##0"));
+                return;
+            }
+            if (!filename.endsWith('.backup')) err = 'ERR_INVALID_FILE_BACKUP';
+            else if (!['shades', 'settings', 'network', 'transceiver', 'repeaters', 'mqtt'].some(k => data[k])) err = 'ERR_NO_RESTORE_OPTION';
         }
-        let btnUpload = el.querySelector('button[id="btnUploadFile"]');
-        let btnCancel = el.querySelector('button[id="btnClose"]');
-        let btnBackup = el.querySelector('button[id="btnBackupCfg"]');
-        btnBackup.style.display = 'none';
-        btnUpload.style.display = 'none';
+        if (err) {
+            ui.errorMessage(title).querySelector('.sub-message').innerHTML = tr(err);
+            return;
+        }
+        if (service !== '/restore' && !this.isMobile()) {
+            try { await firmware.backup(); }
+            catch (e) { return ui.serviceError(el, e); }
+        }
+        let formData = new FormData();
+        formData.append('file', file);
+        if (service === '/restore') formData.append('data', JSON.stringify(data));
+
+        ['btnBackupCfg', 'btnUploadFile'].forEach(id => { let b = el.querySelector('#' + id); if (b) b.style.display = 'none'; });
         field.disabled = true;
-        let btnSelectFile = el.querySelector('div[id="btn-select-file"]');
-        let prog = el.querySelector('div[id="progFileUpload"]');
+        let steps = el.querySelector('.vertical-steps-container');
+        if (steps) steps.style.display = 'none';
+        let prog = el.querySelector('#progFileUpload'),
+        btnCancel = el.querySelector('#btnClose');
         prog.style.display = '';
-        btnSelectFile.style.visibility = 'hidden';
+
         let xhr = new XMLHttpRequest();
-        //xhr.open('POST', service, true);
-        xhr.open('POST', baseUrl.length > 0 ? `${baseUrl}${service}` : service, true);
-        xhr.upload.onprogress = function (evt) {
+        xhr.open('POST', baseUrl ? `${baseUrl}${service}` : service, true);
+
+        xhr.upload.onprogress = (evt) => {
             let pct = evt.total ? Math.round((evt.loaded / evt.total) * 100) : 0;
             prog.style.setProperty('--progress', `${pct}%`);
             prog.setAttribute('data-progress', `${pct}%`);
-            console.log(evt);
         };
-        xhr.onerror = function (err) {
-            console.log(err);
-            ui.serviceError(el, err);
-        };
-        xhr.onload = function () {
-            console.log('File upload load called');
-            btnCancel.innerText = tr('BT_CLOSE');
-            switch (service) {
-                case '/restore':
-                    (async () => {
-                        await somfy.init();
-                        if (document.getElementById('divUploadFile')) document.getElementById('divUploadFile').remove();
-                    })();
-                        break;
-                case '/updateApplication':
 
-                    break;
+        xhr.onload = async () => {
+            btnCancel.innerText = tr('BT_CLOSE');
+            if (service === '/restore') {
+                await somfy.init();
+                closeOverlay(get('divUploadFile'));
             }
         };
+        xhr.onerror = () => ui.serviceError(el, 'Upload Failed');
+        btnCancel.onclick = () => { xhr.abort(); closeOverlay(el); };
         xhr.send(formData);
-        btnCancel.addEventListener('click', (e) => {
-            console.log('Cancel clicked');
-            xhr.abort();
-        });
     }
 }
 var firmware = new Firmware();

@@ -258,14 +258,14 @@ void GitUpdater::loop() {
       }
   }
   else if(this->status == GIT_AWAITING_UPDATE) {
-    Serial.println("Starting update process.........");
+    Serial.println("Starting update process....");
     this->status = GIT_UPDATING;
     this->beginUpdate(this->targetRelease);
     this->status = GIT_STATUS_READY;
     this->emitUpdateCheck();
   }
   else if(this->status == GIT_UPDATE_CANCELLING) {
-    Serial.println("Cancelling update process..........");
+    Serial.println("Cancelling update process....");
     if(!this->lockFS) {
       this->status = GIT_UPDATE_CANCELLED;
       this->cancelled = true;
@@ -284,7 +284,7 @@ void GitUpdater::checkForUpdate() {
     GitRepo repo;
     this->updateAvailable = false;
     this->error = repo.getReleases(2);
-    if(this->error == 0) { // Get 2 releases so we can filter our pre-releases
+    if(this->error == 0) { // Get 2 releases so we can filter pre-releases
       this->setCurrentRelease(repo);
     }
     else {

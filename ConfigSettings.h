@@ -3,7 +3,7 @@
 #ifndef configsettings_h
 #define configsettings_h
 #include "WResp.h"
-#define FW_VERSION "v2.5.1"
+#define FW_VERSION "v2.5.2"
 enum class conn_types_t : byte {
     unset = 0x00,
     wifi = 0x01,
@@ -84,7 +84,6 @@ class WifiSettings: BaseSettings {
     bool save();
     bool load();
     void print();
-    
 };
 class EthernetSettings: BaseSettings {
   public:
@@ -164,9 +163,6 @@ class MQTTSettings: BaseSettings {
     void toJSON(JsonResponse &json);
     bool fromJSON(JsonObject &obj);
 };
-
-
-
 class ConfigSettings: BaseSettings {
   public:
     static void printAvailHeap();

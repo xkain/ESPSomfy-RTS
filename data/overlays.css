@@ -77,6 +77,23 @@ i.icss-anim:after {
 [class*="-hover"].icss-reverse:hover {
     animation-direction: reverse;
 }
+@keyframes slideUpFooter {
+    to {
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+/*Slide button*/
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 div.wait-overlay {
     width: 100%;
     height: 100%;
@@ -86,29 +103,20 @@ div.wait-overlay {
     align-items: center;
     top: 0;
     left: 0;
-    background: var(--wait-overlay);
     z-index: 1000;
     cursor: no-drop;
     animation: fadeInBlur 0.4s ease-out forwards;
 }
 @keyframes fadeInBlur {
     from {
+        opacity: 0;
         backdrop-filter: blur(0px);
-        -webkit-backdrop-filter: blur(0px);
-        background: rgba(0, 0, 0, 0);
+        transform: scale(0.95);
     }
     to {
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
-        background: var(--wait-overlay);
-    }
-}
-@keyframes fadeInOnly {
-    from {
-        background: rgba(0, 0, 0, 0);
-    }
-    to {
-        background: var(--wait-overlay);
+        opacity: 1;
+        backdrop-filter: blur(5px);
+        transform: scale(1);
     }
 }
 div.wait-overlay > .lds-roller {
@@ -142,7 +150,6 @@ div.wait-overlay > .lds-roller {
     top: 63px;
     left: 63px;
 }
-
 .lds-roller div:nth-child(2) {
     animation-delay: -0.072s;
 }
@@ -150,7 +157,6 @@ div.wait-overlay > .lds-roller {
     top: 68px;
     left: 56px;
 }
-
 .lds-roller div:nth-child(3) {
     animation-delay: -0.108s;
 }
@@ -158,7 +164,6 @@ div.wait-overlay > .lds-roller {
     top: 71px;
     left: 48px;
 }
-
 .lds-roller div:nth-child(4) {
     animation-delay: -0.144s;
 }
@@ -166,7 +171,6 @@ div.wait-overlay > .lds-roller {
     top: 72px;
     left: 40px;
 }
-
 .lds-roller div:nth-child(5) {
     animation-delay: -0.18s;
 }
@@ -174,7 +178,6 @@ div.wait-overlay > .lds-roller {
     top: 71px;
     left: 32px;
 }
-
 .lds-roller div:nth-child(6) {
     animation-delay: -0.216s;
 }
@@ -182,7 +185,6 @@ div.wait-overlay > .lds-roller {
     top: 68px;
     left: 24px;
 }
-
 .lds-roller div:nth-child(7) {
     animation-delay: -0.252s;
 }
@@ -190,7 +192,6 @@ div.wait-overlay > .lds-roller {
     top: 63px;
     left: 17px;
 }
-
 .lds-roller div:nth-child(8) {
     animation-delay: -0.288s;
 }
@@ -202,6 +203,80 @@ div.wait-overlay > .lds-roller {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+}
+/* Pulse hard*/
+@keyframes ui-pulse-focus {
+    0% { box-shadow: 0 0 0 0 var(--pulse-color, var(--accent-color)); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+}
+.ui-pulse {
+    animation: ui-pulse-focus 2s infinite;
+    transition: all 0.3s ease-in-out;
+}
+/* Pulse soft */
+@keyframes soft-pulse {
+    0% { box-shadow: 0 0 0 0 var(--pulse-color, var(--accent-color)); }
+    70% { box-shadow: 0 0 0 12px rgba(33, 150, 243, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+}
+/*sucess*/
+@keyframes toastIn {
+    0% {
+        transform: translate(-50%, -100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+@keyframes toastPulse {
+    0%, 100% { transform: translate(-50%, 0) scale(1); }
+    50% { transform: translate(-50%, 0) scale(1.02); }
+}
+@keyframes toastOut {
+    0% {
+        transform: translate(-50%, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -100px) scale(0.98);
+        opacity: 0;
+    }
+}
+.success-toast {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    background: #f0f0f0;
+    color: #000000;
+    border: 1px solid var(--accent-sucess);
+    padding: 9px 21px;
+    border-radius: 50px;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    pointer-events: none;
+    animation: toastIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards,
+    toastPulse 1.5s ease-in-out 0.5s infinite;
+}
+    .success-content {
+        display: flex;
+        align-items: center;
+        color: var(--txt-color);
+        gap: 10px;
+    }
+    .success-content svg {
+        width: 20px;
+        height: 20px;
+        color: var(--accent-sucess);
+    }
+    .success-toast.hide {
+        animation: toastOut 0.3s ease-in forwards;
+    }
 .socketAttempts{
     position:absolute;
     width:100%;
@@ -223,9 +298,58 @@ div.wait-overlay > .lds-roller {
     padding: 20px;
     overflow-y: auto;
     color: var(--color);
-    background-color: var(--wait-overlay);
+    background: var(--wait-overlay);
     font-size: 13px;
-    animation: fadeInBlur 0.4s ease-out forwards;
+    animation: fadeInBlur 0.2s ease-out forwards;
+}
+/*expert mode + button close*/
+.overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin: 0px -16px 2px auto;
+    height: 40px;
+    z-index: 10;
+}
+.expert-mode-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+.expert-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+[close] {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+[close]:hover {
+    opacity: 0.6;
+}
+[close] svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+}
+.overlay-exit {
+    animation: none !important;
+    opacity: 0 !important;
+    transform: scale(0.9) !important;
+    transition: all 0.2s ease-out !important;
+    pointer-events: none;
 }
 .info-message .info-text {
     text-align:left;
@@ -241,9 +365,8 @@ div.wait-overlay > .lds-roller {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--wait-overlay);
     z-index: 2000;
-    animation: fadeInBlur 0.4s ease-out forwards;
+    animation: fadeInBlur 0.2s ease-out forwards;
 }
 .error-content,
 .message-content,
@@ -251,10 +374,9 @@ div.wait-overlay > .lds-roller {
 .instructions-content {
     position: relative;
     width: 90%;
-    padding: 30px;
+    padding: 5px 30px 30px 30px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
     color: var(--color);
     background: var(--unibloc-color);
     border-radius: 25px;
@@ -265,7 +387,7 @@ div.wait-overlay > .lds-roller {
     max-width: 550px;
     text-align: center;
     gap: 20px;
-
+    padding:30px;
 }
 .release-notes-modal .message-content {
     max-height: 85vh;
@@ -277,10 +399,9 @@ div.wait-overlay > .lds-roller {
     flex-grow: 1;
     padding-right: 10px;
 }
-
-.overlay-content {
+.overlay-content,
+.instructions-content {
     max-width: 600px;
-    gap: 20px;
 }
 .socket-error .inner-error {
     background: var(--unibloc-color);
@@ -291,10 +412,6 @@ div.wait-overlay > .lds-roller {
     border-radius: 25px;
     align-content: center;
     border: 1px solid var(--border);
-}
-.instructions-content {
-    max-width: 600px;
-    gap: 10px;
 }
 .instructions .sub-message,
 .prompt-message .sub-message {
@@ -331,17 +448,19 @@ div.error-message,
     display:inline-block;
 }
 .instructions-header {
-    background: #333;
-    color: white;
+    position: relative;
+    justify-content: center;
     width: 100%;
+    min-height: 100px;
+    overflow: hidden;
     padding: 25px;
     border-radius: 20px;
     margin-bottom: 30px;
+    background: linear-gradient(#494949,#333) padding-box, linear-gradient(#000,#434343) border-box;
+    border: 1px solid #0000;
+    box-shadow: 0 6px 5px 0px var(--shadow);
+    color: white;
     text-align: left;
-    position: relative;
-    justify-content: center;
-    overflow: hidden;
-    min-height: 100px;
 }
     .instructions-header h2 {
         margin: 0;
@@ -349,10 +468,10 @@ div.error-message,
         font-weight: bold;
     }
     .instructions-header p {
+        max-width: 85%;
         margin: 5px 0 0 0;
         opacity: 0.8;
         font-size: 14px;
-        max-width: 80%;
     }
     .instructions-header h2,
     .instructions-header p {
@@ -405,8 +524,7 @@ div.error-message,
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 12px;
         margin-right: 12px;
         flex-shrink: 0;
         margin-top: 2px;
@@ -424,39 +542,210 @@ div.error-message,
     font-size: 35px !important;
     color: var(--accent-color) !important;
 }
-.uniblocLinkGroupSelect select {
-    font-size:25px !important;
-    color: var(--accent-color) !important;
-}
-.uniblocLinkGroupSelect label {text-align:center;}
-.uniblocLinkGroupSelect option {font-size:14px;}
-
 .wizard-step p {
     font-size:14px;
     margin:0;
 }
-.wizard[data-stepid="1"] .wizard-step:not([data-stepid="1"]) { display: none; }
-.wizard[data-stepid="2"] .wizard-step:not([data-stepid="2"]) { display: none; }
-.wizard[data-stepid="3"] .wizard-step:not([data-stepid="3"]) { display: none; }
-.wizard[data-stepid="4"] .wizard-step:not([data-stepid="4"]) { display: none; }
-.wizard[data-stepid="5"] .wizard-step:not([data-stepid="5"]) { display: none; }
-.wizard[data-stepid="6"] .wizard-step:not([data-stepid="6"]) { display: none; }
-.wizard[data-stepid="7"] .wizard-step:not([data-stepid="7"]) { display: none; }
+/* expert mode */
+.is-expert .stepper-wrapper,
+.is-expert .step-title-container,
+.is-expert .uniblocStep,
+.is-expert .information,
+.is-expert .empty-state,
+.is-expert .button-container-overlay,
+.is-expert .divWizShadeName:not([data-expert]) {
+    display: none !important;
+}
+.expert-only-buttons { display: none; }
+.is-expert .expert-only-buttons {
+    display: flex !important;
+    justify-content: center;
+    margin-top: 20px;
+}
+.is-expert [data-expert] {
+    display: flex !important;
+}
+.is-expert .LinkGroupSelect,
+.is-expert #btnSendPairing,
+.is-expert #btnSendUnpairing,
+.is-expert #btnWizMarkSuc,
+.is-expert #btnPairShadeSuc,
+.is-expert #btnSendProg,
+.is-expert #btnOpenMemory,
+.is-expert #btnPairToGroup,
+.is-expert #btnUnpairFromGroup {
+    animation: none;
+}
+/*etape circle*/
+.stepper-wrapper {
+    --steps: 4;
+    --step-width: calc(100% / var(--steps));
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0 10px 0;
+    position: relative;
+    width: 100%;
+}
+.stepper-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: calc(var(--step-width) / 2);
+    right: calc(var(--step-width) / 2);
+    height: 3px;
+    background: #444;
+    z-index: 0;
+}
+.stepper-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: calc(var(--step-width) / 2);
+    height: 3px;
+    background: #2196F3;
+    z-index: 0;
+    transition: width 0.4s ease;
+    width: 0%;
+}
+.wizard[data-stepid="1"] .stepper-wrapper::after { width: 0%; }
+.wizard[data-stepid="2"] .stepper-wrapper::after { width: calc(1 * var(--step-width)); }
+.wizard[data-stepid="3"] .stepper-wrapper::after { width: calc(2 * var(--step-width)); }
+.wizard[data-stepid="4"] .stepper-wrapper::after { width: calc(3 * var(--step-width)); }
+.wizard[data-stepid="5"] .stepper-wrapper::after { width: calc(4 * var(--step-width)); }
 
-#divLinkGroup[data-stepid="4"] #btnNextStep { display: none !important; }
-#divUnlinkGroup[data-stepid="3"] #btnNextStep { display: none !important; }
-
-.divWizShadeName {
+.stepper-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+.step-counter {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #444;
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border: 4px solid var(--unibloc-color);
+    z-index: 2;
+    position: relative;
+    margin-bottom: 3px;
+}
+.step-name {
+    font-size: 10px;
+    color: #888;
+    margin-top: 8px;
+    text-transform: uppercase;
+}
+/*États Actifs*/
+.wizard[data-stepid="1"] .stepper-item[data-stepid="1"] .step-counter { background: var(--accent-color); color: white; }
+.wizard[data-stepid="2"] .stepper-item[data-stepid="1"] .step-counter,
+.wizard[data-stepid="2"] .stepper-item[data-stepid="2"] .step-counter { background: var(--accent-color); color: white; }
+.wizard[data-stepid="3"] .stepper-item[data-stepid="1"] .step-counter,
+.wizard[data-stepid="3"] .stepper-item[data-stepid="2"] .step-counter,
+.wizard[data-stepid="3"] .stepper-item[data-stepid="3"] .step-counter { background: var(--accent-color); color: white; }
+.wizard[data-stepid="4"] .stepper-item .step-counter { background: var(--accent-color); color: white; }
+/*titre step*/
+.step-title-container {
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 24px;
+}
+.step-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color);
+    animation: fadeInBlur 0.3s ease-in-out;
+}
+/*content step*/
+.blocsteps {
+    min-height: 365px;
+    flex-grow: 1;
+}
+.blocGroupsteps {
+    min-height: 405px;
+    flex-grow: 1;
+}
+.LinkGroupSelect {
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.blocsteps-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 15px;
+    background: var(--unibloc-color);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.blocsteps-row .divWizShadeName {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color);
     text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    color:var(--accent-color);
+    flex: 1;
+    margin-right: 20px;
+}
+.LinkGroupSelect,
+#btnSendPairing,
+#btnSendUnpairing,
+#btnWizMarkSuc,
+#btnPairShadeSuc,
+#btnSendProg,
+#btnOpenMemory,
+#btnPairToGroup,
+#btnUnpairFromGroup {
+    border-radius: 15px;
+    font-size: 14px;
+    min-width: 160px;
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
+    animation: soft-pulse 2s infinite;
+}
+#btnSendProg,
+#btnOpenMemory,
+#btnPairToGroup,
+#btnUnpairFromGroup {
+    width: 40%;
+}
+#btnPairShadeSuc,
+#btnSendProg,
+.is-expert #btnOpenMemory,
+.is-expert #btnPairToGroup,
+.is-expert #btnUnpairFromGroup {
+    width: 100%;
 }
 .groupNameSpan {
     font-weight:bold;
     font-size: 17px;
     vertical-align: middle;
     line-height: 1;
+}
+.instructions-content .empty-state {
+    padding:0;
+}
+#divRollingCode button[line] {
+    border: 2px solid #398a1b;
+    color: #398a1b;
+}
+#divRollingCode button[line]:hover {
+    background: #398a1b;
+    color: white;
+}
+#divGitInstall .unibloc [line] {
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: var(--color);
 }
 .procFwSvg {
     width:16px;
@@ -477,14 +766,17 @@ div.error-message,
     cursor: pointer;
     z-index: 10000;
 }
-.fw-sidebar-button {
+button[line].fw-sidebar-button {
     border: 2px solid var(--txtwarning-color);
     color: var(--txtwarning-color);
-    transition: all 0.2s ease;
+    background: transparent;
 }
-.fw-sidebar-button:hover {
-    background-color: var(--txtwarning-color);
+button[line].fw-sidebar-button:hover,
+.fw-mobile-banner:hover {
+    background: var(--txtwarning-color);
     color: #fff;
+    border-color: var(--txtwarning-color);
+    transition: all 0.3s ease-out !important;
 }
 .fw-mobile-banner{
     display: none !important;
@@ -493,7 +785,7 @@ div.error-message,
     position: relative;
     font-size: 8pt;
     font-weight: bold;
-    background-color: #fcfcfc;
+    background: #fcfcfc;
     color: var(--txtwarning-color);
     padding: 2px 12px;
     border-radius: 25px;
@@ -501,11 +793,10 @@ div.error-message,
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     width: fit-content;
     margin: auto;
-    margin-top: auto;
-    margin-top: auto;
     margin-top: 4px;
     border: 1px solid var(--txtwarning-color);
 }
+
 #divSidebarUpdate.procFwStatusshow {display: flex !important;}
 #divFirmwareUpdate {display: none !important;}
 
@@ -517,23 +808,183 @@ div.error-message,
     padding: 8px 17px;
     width: 100%;
     margin-bottom: 10px;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     border-radius: 25px;
 }
-.firmwarblocupdate {
+/*github page*/
+.labelgrey {
+    font-size: 14px;
+    color: #888;
+    font-family: monospace;
+}
+.selectCompac {
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    font-weight: bold;
+    font-family: monospace;
+    cursor: pointer;
+    text-align: right;
+    outline: none;
+}
+.selectCompac:hover {
+    filter: brightness(1.3);
+}
+#divGitInstall .warningText{
+    margin-top: -10px;
+}
+.warningText svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+.release-notes-preview {
+    padding: 5px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 6px;
+}
+.divGitNoteError {
+    text-align:center;
+    padding:15px;
+    line-height:1.4;
+}
+    .gitNoteError {
+        font-weight:bold;
+    }
+    .gitNoteErrorSub {
+        font-size: 0.9em;
+        color: var(--soustxt-color);
+    }
+#divGitInstall .hrDivFooter {
+margin: 0 -30px 15px -30px;
+}
+.v-step-container {
     display: flex;
     flex-direction: column;
-    padding: 9px;
-    margin: 15px 0 0;
-    background-color: var(--unibloc-color);
-    border-radius: 25px;
+    margin: 25px 0;
+    padding-left: 5px;
 }
-.closeShow-mobile {
-    display: none !important;
+.v-step-item {
+    display: flex;
+    position: relative;
+    height: 80px;
+}
+.v-step-item:last-child {
+    height: 40px;
+}
+.v-step-left {
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+}
+#divUploadFile .step-counter {
+background: var(--accent-color);
+color: white;
+display: flex;
+margin: 0;
+}
+.v-step-line {
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    background: var(--hr-soft);
+    z-index: 1;
+}
+.v-step-right {
+    flex: 1;
+    padding-left: 20px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    min-width: 0;
+}
+.custom-file-upload {
+    width:100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 7px 5px 15px !important;
+}
+
+.custom-file-upload:hover {
+    background: rgba(207, 207, 207, 0.1);
+    border-color: var(--accent-color);
+}
+.file-name-display {
+    font-size: 13px;
+    color: var(--color);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.6;
+    padding-right: 10px;
+}
+.file-icon-btn {
+    background: var(--accent-color);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+    color: white;
+}
+.file-icon-btn svg {
+    width: 20px;
+    height: 20px;
+}
+.custom-file-upload:active .file-icon-btn {
+    transform: scale(0.9);
+}
+#divGitInstall .button-container-overlay,
+#divUploadFile .button-container-overlay {
+margin: 0 auto 0;
+}
+/*footer*/
+.footer-sticky-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.gitBackup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--borderShadeCtl);
+    color: #fcfcfc;
+    transition: filter 0.2s;
+    flex-shrink: 0;
+}
+.gitBackup svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--accent-color);
+}
+#btnBackupCfg {
+cursor: pointer;
+}
+#btnBackupCfg:hover {
+    filter: brightness(0.9);
 }
 /*Mardown*/
  .md-code-inline {
-    background-color: rgba(120, 120, 120, 0.2);
+    background: rgba(120, 120, 120, 0.2);
     padding: 2px 4px;
     border-radius: 4px;
     font-family: monospace;
@@ -563,14 +1014,13 @@ div.error-message,
     line-height: 1.4;
     display: list-item;
 }
-/***************************
-* Accueil Rooms, Shades Card and Groupes*/
+/*Accueil Rooms, Shades Card and Groupes*/
 .room-nav-container {
     display: none;
     position: relative;
     align-items: center;
     width: 100%;
-    background-color: var(--barreRoomBg);
+    background: var(--barreRoomBg);
     overflow: hidden;
     margin-bottom: 30px;
 }
@@ -598,7 +1048,7 @@ div.error-message,
 .room-pill {
     flex: 0 0 auto !important;
     padding: 8px 18px;
-    background-color: var(--room-pill);
+    background: var(--room-pill);
     border-radius: 20px;
     color: var(--color);
     font-size: 0.9em;
@@ -607,7 +1057,7 @@ div.error-message,
     user-select: none;
 }
 .room-pill.active {
-    background-color: var(--accent-color);
+    background: var(--accent-color);
     color: white;
 }
 .empty-state-container {
@@ -631,19 +1081,82 @@ div.error-message,
     font-size: 1.1em;
     margin: 0;
 }
+/*drag&drop*/
+.room-draggable,
+.group-draggable,
+.shade-draggable,
+.somfyRepeater,
+.drag-ghost {
+    height: 38px;
+    padding: 12px 15px;
+    background: var(--unibloc-color);
+    border-radius: 25px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+}
+.room-draggable,
+.group-draggable,
+.shade-draggable,
+.somfyRepeater {
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+}
+.room-draggable.dragging,
+.group-draggable.dragging,
+.shade-draggable.dragging {
+    border: 1px solid var(--accent-color);
+    z-index: 1000;
+}
+.room-draggable.drag-orig,
+.group-draggable.drag-orig,
+.shade-draggable.drag-orig {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+.drag-ghost {
+    position: fixed !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 1px solid var(--accent-color);
+    opacity: 0.9;
+    margin: 0 !important;
+}
+.drag-handle {
+    width: 40px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    cursor: grab;
+    pointer-events: auto;
+}
+    .drag-handle svg{
+        color: var(--bg-switch-ch-color);
+        transition: all 0.2s ease-in-out;
+    }
+    .drag-handle:hover svg {
+        color: var(--accent-color);
+        transform: scale(1.5);
+    }
 .somfyRoom,
 .somfyRepeater,
 .somfyGroup,
-.somfyShade,
-.somfyLinkedRemote,
-.linked-shade {
+.somfyShade {
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 100%;
     padding: 12px 15px;
     gap: 12px;
-    box-sizing: border-box;
     border-radius: 25px;
     margin-bottom: 8px;
 }
@@ -661,8 +1174,51 @@ div.error-message,
     line-height: 1.1;
 }
 .somfyShade[data-roomid="0"] .cfg-room,
-.somfyGroup[data-roomid="0"] .cfg-room {
+.somfyGroup[data-roomid="0"] .cfg-room,
+.drag-ghost[data-roomid="0"] .cfg-room {
     display:none;
+}
+.LinkedRemoteList,
+.LinkedList {
+    background: var(--unibloc-color);
+    border-radius: 25px;
+    padding: 15px 20px;
+    margin-top: 15px;
+}
+.linkedRheader {
+    color: var(--soustxt-color);
+    margin-bottom: 10px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-top: -15px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--background-color);
+}
+.linkedScrollArea {
+    overflow-y: auto;
+    max-height: 200px;
+    padding-right: 5px;
+}
+.somfyLinkedRemote {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+}
+.linkedWrap {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+    .linkedWrap svg {
+        color: var(--buttonMy);
+    }
+.linkedContent {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.svgDelete {
+    cursor: pointer;
 }
 .idRemoteAddress {
     display: flex;
@@ -675,7 +1231,7 @@ div.error-message,
 .somfyRepeater .idRemoteAddress {
     flex-grow: 1;
 }
-.somfyLinkedRemote
+/*somfyLinkedRemote*/
 .addr-group {
     margin-left: 0;
     flex: 1;
@@ -712,8 +1268,6 @@ div.error-message,
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
     transition: opacity 0.2s;
 }
 .divEditDelete-svg:hover {
@@ -743,7 +1297,7 @@ div.error-message,
     align-items: stretch;
     flex-direction: row;
     flex-wrap: nowrap;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
     margin: 25px 0;
     border-radius: 25px;
     overflow: hidden;
@@ -757,18 +1311,18 @@ div.error-message,
 }
 .shadectl-side-handle {
     width: 16px;
-    background-color: var(--side-handle);
+    background: var(--side-handle);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
     align-self: stretch;
-    transition: background-color 0.2s ease, width 0.2s ease;
+    transition: background 0.2s ease, width 0.2s ease;
     cursor: pointer;
 }
 .shadectl-side-handle:hover {
-    background-color: var(--side-handleHov);
+    background: var(--side-handleHov);
 }
 .shadectl-side-handle:hover .handle-icon {
     transform: translateX(1px) scale(1.1);
@@ -838,7 +1392,6 @@ div.error-message,
     .indicator-sun { color: darkorange; }
     .indicator-wind svg,
     .indicator-sun svg { width:18px; height:18px; }
-
 
     .somfyShadeCtl[data-sunny="false"] .indicator-sun,
     .somfyShadeCtl:not([data-sunny]) .indicator-sun,
@@ -933,7 +1486,7 @@ div.error-message,
     margin: 19px auto;
     border-radius: 25px;
     border: 1px solid var(--borderShadeCtl);
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
 }
 .somfyShadeCtl .shade-icon {
     display: flex;
@@ -959,6 +1512,8 @@ div.error-message,
 .somfyGroupCtl .groupctl-name,
 .somfyShadeCtl .shadectl-name {
     font-size: 1.37em;
+    text-overflow: ellipsis;
+    overflow: hidden;
     color: var(--color);
     display: block;
     white-space: nowrap;
@@ -991,12 +1546,11 @@ div.error-message,
     align-items: center;
     gap: 4px;
 }
-/***************************
- * Popup openSetMyPosition and openSetPosition*/
+/*Popup openSetMyPosition and openSetPosition*/
 .shade-positioner {
     position: absolute;
     width: 100%;
-    background-color: #fcfcfc;
+    background: #fcfcfc;
     color: gray;
     padding: 7px;
     z-index: 100;
@@ -1010,7 +1564,7 @@ div.error-message,
     width: calc(100% - 16px);
     height: 100%;
     z-index: 100;
-    background-color: var(--unibloc-color);
+    background: var(--unibloc-color);
 }
 .shade-positioner-inner {
     display: flex;
@@ -1054,7 +1608,6 @@ div.error-message,
     margin-top:0px;
     margin-bottom:0px;
 }
-
 @keyframes slideFromLeft {
     0% {
         opacity: 0;
@@ -1086,8 +1639,65 @@ div.error-message,
 .popup-slide-out {
     animation: slideToLeft 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
 }
-/***************************
-* wifi*/
+/*leboncoin*/
+.divLbc-step {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px 0;
+    transition: all 0.3s ease;
+}
+.lbc-icon-wrapper {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+}
+.svgLbc-step {
+    width:20px;
+    height:20px;
+    fill: #666;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+}
+.lbcLabel-step {
+    font-size: 0.95em;
+    color: #888;
+    transition: all 0.3s ease;
+}
+.divInfoLine {
+    padding: 15px;
+    line-height: 1.5;
+}
+.InfoLine {
+    border-left: 3px solid var(--accent-color);
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+}
+.InfoLine p {
+    font-size: 0.9em;
+    margin: 0;
+}
+#lbc-steps-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 5px;
+}
+#lbc-success-msg {
+    margin-top: 20px;
+    text-align: center;
+    display: none;
+    color: #4CAF50;
+    font-weight: bold;
+    animation: fadeIn 0.5s;
+}
+#lbc-success-msg .svgInTextSmall {
+    color:#4CAF50;
+    vertical-align: middle;
+    margin-right:5px;
+}
+/* wifi*/
 .wifiConnectScan {
     display:flex;
     justify-content:center;
@@ -1107,8 +1717,7 @@ div.error-message,
 .strength .signal {
     width:24px; height: 24px;
 }
-/***************************
-* Ethernet*/
+/* Ethernet*/
 .blocEthBoardSettings {
     display: flex;
     justify-content: center;
@@ -1156,23 +1765,19 @@ div.eth-setting-line label {
     background:#ccc;
     cursor:not-allowed;
 }
-/***************************
-* Update*/
+/* Update*/
 #selVersion.inputAndSelect {
     font-size: 15px;
 }
-#divGitInstall .uniStatus {
-    margin: 5px 0 30px 0;
-}
-#divGitInstall .unibloc .boutonOutline {
+#divGitInstall .unibloc .boutonLine {
     text-align: left;
     border: none;
     padding: 10px 0;
 }
-#divGitInstall .unibloc .boutonOutline:hover {
+#divGitInstall .unibloc .boutonLine:hover {
     text-align: left;
     border: none;
-    background-color: transparent;
+    background: transparent;
     color: var(--color);
 }
 #jsHeadFirmware .instructions-headerLogo,
@@ -1182,14 +1787,15 @@ div.eth-setting-line label {
     transform: rotate(-25deg);
 }
 #btnUpdateApplication use,
-#jsHeadLittlefs {fill: #f8a525 !important;}
-
-#jsHeadFirmware,
-#btnUpdateFirmware use {fill: #f00101 !important;}
-
-/***************************
-* Restore*/
-#jsHeadRestore .instructions-headerLogo {
+.mode-app-update .instructions-header svg use {
+    fill: #f8a525 !important;
+}
+#btnUpdateFirmware use,
+.mode-firm-update .instructions-header svg use {
+    fill: #f00101 !important;
+}
+/* Restore*/
+.instructions-header:has(use[*|href="#svg-restore"]) .instructions-headerLogo {
     right: -13px;
     bottom: -20px;
     transform: rotate(65deg);
@@ -1197,46 +1803,13 @@ div.eth-setting-line label {
 #jsUniRestore .uniLabel {
     margin: 2px 0;
 }
-.FileUploaderChooseFile label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    width: 100%;
-}
-.FileUploaderChooseFile span {
-    flex: 1;
-    border-bottom: solid 2px var(--accent-color);
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 10px; color: var(--soustxt-color);
-    min-height: 20px;
-}
-.fileUploaderBouton {
-    width: 40px;
-    height: 40px;
-    background-color: var(--accent-color);
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.fileUploaderBouton svg {
-    width: 24px;
-    height: 24px;
-    color: white;
-}
-/***************************
-* Netwook*/
+/* Netwook*/
 #jsHeadLan .instructions-headerLogo {
     right: -13px;
     bottom: -16px;
     transform: rotate(15deg);
 }
-/***************************
-* scanFrequency*/
+/* scanFrequency*/
 .scanfreqRssiLeft,
 .scanfreqRssiRight {
     display: flex;
@@ -1321,7 +1894,7 @@ div.eth-setting-line label {
 }
 @media screen and (max-width: 1024px) {
     #divShadeControls {
-    justify-content: center;
+        justify-content: center;
     }
     .somfyShadeCtl {
         width: 100%;
@@ -1331,6 +1904,17 @@ div.eth-setting-line label {
     .inst-overlay {
         max-height: 100vh;
         padding: 0 !important;
+        animation: fadeInBlur 0.2s ease-out;
+    }
+    .overlay-header {
+        margin: -16px -10px 0 auto;
+    }
+    .expert-label {
+        display: none;
+    }
+    .header-controls {
+        gap: 8px;
+        margin: -13px 0 4px auto;
     }
     .overlay-content,
     .instructions-content  {
@@ -1340,37 +1924,19 @@ div.eth-setting-line label {
         border-radius: 0;
         border: none;
         min-height: 100vh;
-        padding: 20px;
         flex-grow: 1;
-        gap: 10px;
+    }
+    .instructions-content  {
+        padding: 20px 30px 30px 30px;
     }
     .overlay-content {
-        max-width: max-content;
+        padding-top: 20px;
     }
     #divFirmwareUpdate.procFwStatusshow {
         display: flex !important;
     }
     #divSidebarUpdate {
         display: none !important;
-    }
-    .closeShow-desktop {
-        display: none !important;
-    }
-    .closeShow-mobile {
-        display: flex !important;
-    }
-    .boutonOverlayClose {
-        left: 0;
-        right: auto;
-        position: relative;
-        width: 30px;
-        height: 30px;
-        top: 0;
-    }
-    .boutonOverlayClose svg {
-        width: 28px;
-        height: 28px;
-        fill: currentColor;
     }
     #divShadeControls {
         display: flex;
@@ -1385,9 +1951,39 @@ div.eth-setting-line label {
     .somfyShadeCtl .shadectl-buttons {
         gap: 2px;
     }
+    .button-container-overlay,
+    .expert-only-buttons,
+    .footer-overlay {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        visibility: hidden;
+        transform: translateY(100%);
+        background: var(--unibloc-color);
+        padding: 15px 20px;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        margin: 0;
+        border-top: 1px solid var(--help);
+        animation: slideUpFooter 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.1s forwards;
+    }
+    .wizard .instructions-content {
+        padding-bottom: 100px !important;
+    }
+    .release-notes-preview {
+        max-height: 50%;
+    }
+    .hrDivFooter {
+        display: none;
+    }
 }
 @media screen and (max-width: 550px) {
     .somfyShadeCtl {
         width: 100%;
+    }
+    .idRemoteAddress {
+        display: none !important;
     }
 }
