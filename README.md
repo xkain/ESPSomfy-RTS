@@ -8,12 +8,12 @@
   <p align="center">
     Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS 433 MHz protocol.
     <br />
-    <a href="https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software"><strong>Explore original docs »</strong></a>
+    <a href="https://github.com/xkain/ESPSomfy-RTS/wiki"><strong>Explore dococumentation »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/rstrouse/ESPSomfy-RTS/issues">Report Bug</a>
+    <a href="https://github.com/xkain/ESPSomfy-RTS/issues">Report Bug</a>
     &middot;
-    <a href="https://github.com/rstrouse/ESPSomfy-RTS/pulls">Request Feature</a>
+    <a href="https://github.com/xkain/ESPSomfy-RTS/pulls">Request Feature</a>
   </p>
 </div>
 <br />
@@ -45,7 +45,7 @@ Being French (and therefore a big fan of bread and cheese), I found during my ve
 
 While keeping the **rock-solid foundations** of the original project, I have completely redesigned the user experience to be **truly responsive**: the interface is just as pleasant to use on mobile and tablet as it is on PC, and navigation is finally crystal clear for non-English speakers.
 
-This project aims to make managing your Somfy RTS devices as beautiful as it is functional.
+This project aims to make managing your RTS 433 MHZ devices as beautiful as it is functional.
 
 <br />
 
@@ -72,37 +72,14 @@ If you are migrating from **rstrouse/ESPSomfy-RTS** or upgrading from an older v
 This fork remains 100% compatible with the official ESPSomfy-RTS-HA integration. If you are already using the integration, simply update your ESP32 with this firmware. Your entities, names, and dashboards in Home Assistant will continue to work without any modification.
 
 
-## Roadmap
-- [x] Add Multi-language Support
-    - [x] English
-    - [x] French
-    - [x] German
-- [x] New visual identity
-- [x] Fully responsive interface (mobile, tablet, and desktop)
-- [x] Add integrated Dark/Light mode with customizable accent colors
-- [x] All checkboxes replaced with modern switches
-- [x] All icons replaced with high-quality SVGs
-    - [ ] Performance optimization
-- [x] Virtual Remote completely redesigned
-- [x] Integrated WebSocket refactor by [y-streibel-uiris](https://github.com/y-streibel-uiris) to support secure HTTPS connections from [#624](https://github.com/rstrouse/ESPSomfy-RTS/pull/624)
-- [x] Passwords hidden by default with a "toggle eye" button
-- [x] Add Safety confirmation step to prevent accidental network lockouts
-- [x] Display MAC address in system info
-- [x] Control buttons are disabled until the device shade configuration is finalized
-- [x] Add a welcome/onboarding page to guide new users
-- [x] Add new GPIO Selector for easier radio assignment
-- [x] Add stepped sliders (1, 10, 100) for precise frequency tuning
-- [x] Add tooltips for better understanding of frequency settings
-- [x] Add visual graph for frequency scanning feedback
-- [x] Better integration of SetMyPosition and openSetMyPosition popups
-- [x] Add Factory Reset feature
-- [x] Add visual indicator (internal blue LED) for hard reset during boot
-    - [x] Support for ESP32 boards with LED on GPIO 02 (e.g., DevKit v1, D1 Mini)
-      * *Note: No support for S2, S3, and C3 models; GPIO 02 is kept free*
-- [x] Add device and connection uptime tracking
-- [x] Display detailed device information
-- [ ] Add Automations (scheduling shade opening/closing by time or day)
- 
+## Project ESPSomfy-RTS Roadmap
+
+Want to know what's coming next, check current release progress, or see completed features? We use GitHub Projects to maintain a live, up-to-date roadmap.
+
+[![ESPSomfy-RTS Roadmap](https://img.shields.io/badge/View_Live-Roadmap_🗣️-238636?style=for-the-badge&logo=github)](https://github.com/users/xkain/projects/2)
+
+> 💡 **Click the badge above** to track real-time development, active milestones (`v2.5.3`, `v3.0.0`), and submit features or bug fixes directly into our workflow columns.
+
 <br />
 
 ## 🛠️ Troubleshooting & Factory Reset
@@ -182,7 +159,7 @@ Since this is a fork, you can rely on the extensive original documentation for t
 * 📖 **[Configuring the Software](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software)**
 * ⚙️ **[Installing the Firmware](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Installing-the-Firmware)**
 * 🔄 **[How to Update ESPSomfy RTS](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Updating-ESPSomfy-RTS)**
-* 🔌 **[Integrations](https://github.com/rstrouse/ESPSomfy-RTS/wiki/Integrations)**
+* 🔌 **[Integrations](https://github.com/xkain/ESPSomfy-RTS/wiki/Intégrations)**
 
 
 
