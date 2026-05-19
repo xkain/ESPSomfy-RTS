@@ -83,7 +83,7 @@
     "FW_RESTORE": "Restore System",
     "FW_RESTORE_DESC": "Opens the restore options page",
     "FW_CREDITS_SPC": "Historical Author",
-    "FW_CREDITS_SPC_DESC": "A huge thank you to the original author for this project, without whom none of this would exist"
+    "FW_CREDITS_SPC_DESC": "A huge thank you to the original author for this project, without whom none of this would exist",
 "PAGE": "CONNECTION",
     "CONNECTION_WIFI": "Wi-Fi",
     "CONNECTION_WIFI_DESC": "Use the wireless connection via Wi-Fi network",
