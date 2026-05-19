@@ -5511,7 +5511,7 @@ class Firmware {
         if (git) {
             if (pct >= 100 && prog.part === 100) {
                 git.remove();
-                let title = `<svg><use xlink:href="#icon-succes"></use></svg>`;
+                let title = `<svg><use xlink:href="#svg-succes"></use></svg>`;
                 let infoDiv = ui.errorMessage(title);
                 infoDiv.querySelector('.sub-message').innerHTML = `${tr('GIT_RELEASE_SUCCES_1')}<br>${tr('GIT_RELEASE_SUCCES_2')}`;
 

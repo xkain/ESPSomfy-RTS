@@ -653,7 +653,7 @@ bool WifiSettings::load() {
   pref.getString("passphrase", this->passphrase, sizeof(this->passphrase));
   this->ssid[sizeof(this->ssid) - 1] = '\0';
   this->passphrase[sizeof(this->passphrase) - 1] = '\0';
-  this->roaming = pref.getBool("roaming", true);
+  this->roaming = pref.getBool("roaming", false);
   this->hidden = pref.getBool("hidden", false);
   pref.end();
   return true;

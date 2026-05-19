@@ -4935,7 +4935,7 @@ void transceiver_config_t::load() {
     this->txPower = pref.getChar("txPower", this->txPower);
     this->rxBandwidth = pref.getFloat("rxBandwidth", this->rxBandwidth);
     this->proto = static_cast<radio_proto>(pref.getChar("proto", static_cast<uint8_t>(this->proto)));
-    this->radioBoardType = pref.getUChar("radioBoardType", 1);
+    this->radioBoardType = pref.getUChar("radioBoardType", 0);
     this->removeNVSKey("internalCCMode");
     this->removeNVSKey("modulationMode");
     this->removeNVSKey("channel");
