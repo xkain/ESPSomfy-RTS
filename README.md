@@ -8,7 +8,7 @@
   <p align="center">
     Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS 433 MHz protocol.
     <br />
-    <a href="https://github.com/xkain/ESPSomfy-RTS/wiki"><strong>Explore dococumentation »</strong></a>
+    <a href="https://github.com/xkain/ESPSomfy-RTS/wiki"><strong>Explore documentation »</strong></a>
     <br />
     <br />
     <a href="https://github.com/xkain/ESPSomfy-RTS/issues">Report Bug</a>
@@ -169,21 +169,31 @@ Special thanks to [rstrouse](https://github.com/rstrouse) for the incredible wor
 
 ---
 
-## 📦 Boîtiers Prêts à l'Emploi (Plug & Play) 
 
-Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **unités entièrement assemblées et testées**. Ces boîtiers sont prêts à être alimentés et configurés pour piloter vos équipements RTS 433 MHz.
 
-🛒 **Disponible sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)**
+## 📦 Boîtiers Prêts à l'Emploi (Plug & Play)
+
+Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **unités entièrement assemblées, flashées et testées individuellement** avant envoi. Ces boîtiers sont prêts à être alimentés pour piloter immédiatement vos équipements Somfy RTS 433 MHz.
+
+🛒 **Disponibles à l'achat sur [Leboncoin](https://www.leboncoin.fr/profile/77a39e2a-ddb5-44c8-828a-954652c46ee7)**
+
+
+
+
 
 > [!IMPORTANT]
-> **Note sur le Firmware & Configuration**
+> **💡 Note sur la configuration et l'assistant intégré**
+> 
+> **L'assistant de préconfiguration automatique a déjà été exécuté par mes soins sur votre boîtier avant son expédition.** Votre appareil est donc configuré et prêt à l'emploi dès la première mise sous tension :
+> * Interface entièrement en **Français**.
+> * Fuseau horaire local configuré (**Europe/Paris**).
+> * Module radio **activé** et **GPIO spécifiques** à votre modèle déjà assignés.
 >
-> Pour vous faciliter l'installation, le firmware a été légèrement pré-configuré : fuseau horaire (Paris), GPIO adaptés au boîtier et radio activée. Chaque exemplaire est testé individuellement avant l'envoi.
+>Pour retrouver toutes les caractéristiques et détails, une page dédiée aux **[boîtiers](https://github.com/xkain/ESPSomfy-RTS/wiki/BO%C3%8ETIERS-LEBONCOIN)** est disponible.
 >
-> Si par cas suite à une mise à jour vos équipements ne répondent plus, vérifiez que l'assignantion des GPIO dans l'onglet Radio est bien sur **CC1101 - ESP32 - D1**
+> ⚠️ **En cas de perte de configuration :** Si après une mise à jour majeure ou une réinitialisation d'usine (*Factory Reset*) vos équipements ne répondent plus, pas de panique ! L'assistant reste disponible dans l'interface web.
 
 
-  
 <br><br>
 
 <p align="center">
