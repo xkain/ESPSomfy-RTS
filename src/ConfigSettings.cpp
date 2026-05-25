@@ -149,13 +149,6 @@ double BaseSettings::parseValueDouble(JsonObject &obj, const char *prop, double 
   if(obj.containsKey(prop)) return obj[prop];
   return defVal;
 }
-
-
-
-
-
-
-
 bool ConfigSettings::begin() {
   uint32_t chipId = 0;
   esp_chip_info_t ci;

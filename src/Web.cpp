@@ -150,6 +150,7 @@ void Web::handleLang(WebServer &server) {
     if (settings.language == 0) filename = "/locale/en.json.gz";
     else if (settings.language == 1) filename = "/locale/fr.json.gz";
     else if (settings.language == 2) filename = "/locale/de.json.gz";
+    else if (settings.language == 3) filename = "/locale/es.json.gz";
 
     if (LittleFS.exists(filename)) {
         File file = LittleFS.open(filename, "r");
@@ -188,7 +189,7 @@ void Web::handleSetLang(WebServer &server) {
     if(lang == "en") settings.language = 0;
     else if(lang == "fr") settings.language = 1;
     else if(lang == "de") settings.language = 2;
-    //else if(lang == "es") settings.language = 3;
+    else if(lang == "es") settings.language = 3;
 
     settings.save();
     server.send(200, _encoding_json, "{\"status\":\"ok\"}");
@@ -288,6 +289,7 @@ void Web::handleStreamFile(WebServer &server, const char *filename, const char *
   //Serial.printf("[DEBUG] RAM Avant: Free:%d | MaxBlock:%d\n", ESP.getFreeHeap(), ESP.getMaxAllocHeap());
   // ------------------------------
 
+  
   Serial.print("Loading file ");
   Serial.println(filename);
   File file = LittleFS.open(filename, "r");
@@ -1263,6 +1265,10 @@ void Web::begin() {
   server.on("/main.css", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/main.css.gz", "text/css"); });
   server.on("/overlays.css", []() {  webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/overlays.css.gz", "text/css"); });
   server.on("/favicon.svg", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/favicon.svg.gz", "image/svg+xml"); });
+
+  server.on("/editionWifi.webp", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/editionWifi.webp", "image/webp"); });
+  server.on("/editionEthernet.webp", []() { webServer.sendCacheHeaders(604800); webServer.handleStreamFile(server, "/editionEthernet.webp", "image/webp"); });
+
   server.onNotFound([]() { webServer.handleNotFound(server); });
   server.on("/controller", []() { webServer.handleController(server); });
   server.on("/rooms", []() { webServer.handleGetRooms(server); });

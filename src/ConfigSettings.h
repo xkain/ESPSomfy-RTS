@@ -3,7 +3,7 @@
 #ifndef configsettings_h
 #define configsettings_h
 #include "WResp.h"
-#define FW_VERSION "v2.5.3"
+#define FW_VERSION "v2.5.4"
 enum class conn_types_t : byte {
     unset = 0x00,
     wifi = 0x01,
