@@ -105,41 +105,30 @@ This fork remains 100% compatible with the official ESPSomfy-RTS-HA integration.
  
 <br />
 
-## Troubleshooting & Factory Reset
+## 🛠️ Troubleshooting & Factory Reset
 
-If you lose access to the web interface (due to a network misconfiguration or forgotten password), or if the device behaves erratically due to corrupted settings, you can perform a Factory Reset to restore the device to "out-of-the-box" state.
+Si vous perdez l'accès à l'interface web (erreur de configuration réseau ou mot de passe oublié) , une procédure de réinitialisation manuelle est disponible via des cycles d'alimentation (**Power Cycles**).
 
->[!CAUTION]
->This process is a Full Wipe. It is designed to recover the device from any state, including corrupted configuration files. All your settings will be lost.
+> [!IMPORTANT]
+> La procédure dépend de votre version de firmware. Un système à deux paliers a été introduit en **v2.5.1** pour permettre de réinitialiser le réseau sans perdre l'ensemble de vos configuration (ce qui est le cas si vous etes sur la version **v2.5.0**).
 
-### What happens during a Factory Reset?
-* **Restored:** All settings (Wi-Fi, MQTT, Rooms, Shades) are permanently deleted. The device returns to its "out-of-the-box" state.
-* **Firmware:** The firmware version remains the same (e.g., if you are on v2.5.0, it stays on v2.5.0).
-* **Access:** After the reset, the device will restart in **Access Point mode** (SSID: `ESPSomfyRTS `) at http://192.168.4.1.
+### Résumé des procédures
 
-### 🔌 How to perform the Factory Reset
+* **Version v2.5.1+ :**
+    * **3 Cycles :** Réinitialise la configuration Wi-Fi et désactive les paramètres sécurité.
+    * **6 Cycles :** Factory Reset complet (**Full Wipe**).
+* **Version v2.5.0 :**
+    * **4 Cycles :** Factory Reset complet (**Full Wipe**).
 
-<table>
-  <tr>
-    <td width="60%" valign="top">
-      <ol>
-        <li><strong>Unplug and replug</strong> the power supply <strong>4 times</strong> in a row.</li>
-        <li>On the <strong>4th boot</strong>, the system enters reset mode.</li>
-        <li><strong>Visual Indicator:</strong> If you have a <em>Standard ESP32</em>, the <strong>blue LED</strong> will flash very rapidly to confirm the process.</li>
-        <li>Wait for the device to restart.</li>
-      </ol>
-      <p><i>Note: After the reset, look for the Wi-Fi SSID: <code>ESPSomfyRTS</code> to reconfigure your device.</i></p>
-    </td>
-    <td width="40%" align="center" valign="middle">
-        <img src="images/hard-reset.GIF" alt="Hard Reset Process" width="100%">
-      <br />
-      <em>Reset sequence animation</em>
-    </td>
-  </tr>
-</table>
-  
+### 📖 Documentation complète
+Pour consulter les instructions détaillées, les schémas de cycles, veuillez consulter la page dédiée :
+
+👉 **[Consulter la page Factory Reset](Lien_vers_ta_nouvelle_page.md)**
+
+---
+
 > [!TIP]
-> Use this as a last resort if the "Restore" button in the interface is no longer accessible.
+> Utilisez toujours ces procédures en dernier recours. Si l'interface est encore accessible, privilégiez le bouton **Restore** dans les paramètres système.
 
 
 ---
@@ -211,17 +200,10 @@ Si vous ne souhaitez pas fabriquer le matériel vous-même, je propose des **uni
 > [!IMPORTANT]
 > **Note sur le Firmware & Configuration**
 >
-> Les boîtiers sont livrés **prêts à l'emploi** avec la version **v2.4.8**.
+> Les boîtiers sont livrés **prêts à l'emploi** avec la version **v2.5.0**.
 > Pour vous faciliter l'installation, le firmware a été légèrement pré-configuré : fuseau horaire (Paris), GPIO adaptés au boîtier et radio activée. Chaque exemplaire est testé individuellement avant l'envoi.
 
-### 🚀 Passage à la v2.5.0
 
-Une mise à jour vers la **v2.5.0** vous sera proposée. Elle apporte une interface plus moderne et des fonctionnalités enrichies. Vous restez libre de l'installer ou non.
-
-**Faut-il mettre à jour ?**
-
-* **OUI :** Si vous souhaitez profiter des dernières options et de la nouvelle interface visuelle.
-* **NON :** Si votre configuration actuelle vous donne entière satisfaction. Si vous utilisez principalement **Home Assistant**, par exemple, l'interface web est secondaire : la v2.4.8 reste parfaitement fonctionnelle et pertinente pour cet usage.
   
 <br><br>
 
