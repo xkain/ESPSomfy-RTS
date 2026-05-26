@@ -9,6 +9,7 @@
     Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS 433 MHz protocol.
     <br />
     <a href="https://github.com/xkain/ESPSomfy-RTS/README_fr.md"><strong>README complet en français 🇫🇷 »</strong></a>
+    <br />
     <a href="https://github.com/xkain/ESPSomfy-RTS/wiki"><strong>Explore documentation »</strong></a>
     <br />
     <br />
