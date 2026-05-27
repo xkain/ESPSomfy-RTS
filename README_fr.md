@@ -1,9 +1,7 @@
+<img src="images/banniereSomfyRTS.png" alt="ESPSomfy-RTS-HA Banner" width="100%">
+<br />
+<br />
 <div align="center">
-  <a href="https://github.com/xkain/ESPSomfy-RTS">
-    <img src="images/logo.svg" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">ESPSomfy-RTS</h3>
 
   <p align="center">
     Contrôlez et gérez facilement vos volets roulants, portails, portes de garage ou tout autre appareil utilisant le protocole RTS 433 MHz.

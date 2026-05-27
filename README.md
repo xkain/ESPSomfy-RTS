@@ -1,9 +1,7 @@
+<img src="images/banniereSomfyRTS.png" alt="ESPSomfy-RTS-HA Banner" width="100%">
+<br />
+<br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.svg" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">ESPSomfy-RTS </h3>
 
   <p align="center">
     Easily control and monitor your roller shutters, gates, garage doors, or any other device using the RTS 433 MHz protocol.
