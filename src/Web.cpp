@@ -150,6 +150,7 @@ void Web::handleLang(WebServer &server) {
     if (settings.language == 0) filename = "/locale/en.json.gz";
     else if (settings.language == 1) filename = "/locale/fr.json.gz";
     else if (settings.language == 2) filename = "/locale/de.json.gz";
+    else if (settings.language == 3) filename = "/locale/sp.json.gz";
 
     if (LittleFS.exists(filename)) {
         File file = LittleFS.open(filename, "r");
@@ -188,7 +189,7 @@ void Web::handleSetLang(WebServer &server) {
     if(lang == "en") settings.language = 0;
     else if(lang == "fr") settings.language = 1;
     else if(lang == "de") settings.language = 2;
-    //else if(lang == "es") settings.language = 3;
+    else if(lang == "sp") settings.language = 3;
 
     settings.save();
     server.send(200, _encoding_json, "{\"status\":\"ok\"}");

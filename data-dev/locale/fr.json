@@ -20,6 +20,7 @@
     "GENERAL_OPT_EN": "Anglais",
     "GENERAL_OPT_FR": "Français",
     "GENERAL_OPT_DE": "Allemand",
+    "GENERAL_OPT_SP": "Espagnol",
     "GENERAL_NTP_SERVER": "Serveur NTP",
     "GENERAL_PH_NTP_SERVER": "Entrer votre serveur NTP",
     "GENERAL_UPNP": "Diffusion uPnP (SSDP)",
