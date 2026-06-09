@@ -85,7 +85,7 @@ jobs:
             chip: ESP32
             addr_bootloader: "0x1000"
             fwname: SomfyController.ino.esp32wrover.bin
-            obname: SomfyController.onboard.esp32wrover.bin # 👈 Corrigé ici (était esp32.bin)
+            obname: SomfyController.onboard.esp32wrover.bin
           - env: esp32c3
             name: ESP32C3
             chip: ESP32-C3
@@ -98,12 +98,22 @@ jobs:
             addr_bootloader: "0x1000"
             fwname: SomfyController.ino.esp32s2.bin
             obname: SomfyController.onboard.esp32s2.bin
-          - env: esp32s3
-            name: ESP32S3
+
+          # VERSION ESP32-S3 (4MB - Universelle)
+          - env: esp32s3_4mb
+            name: ESP32S3_4MB
             chip: ESP32-S3
             addr_bootloader: "0x0"
-            fwname: SomfyController.ino.esp32s3.bin
-            obname: SomfyController.onboard.esp32s3.bin
+            fwname: SomfyController.ino.esp32s3_4mb.bin
+            obname: SomfyController.onboard.esp32s3_4mb.bin
+
+          # VERSION ESP32-S3 (8MB - Spécifique)
+          - env: esp32s3_8mb
+            name: ESP32S3_8MB
+            chip: ESP32-S3
+            addr_bootloader: "0x0"
+            fwname: SomfyController.ino.esp32s3_8mb.bin
+            obname: SomfyController.onboard.esp32s3_8mb.bin
 
     steps:
       - name: Get Release info
