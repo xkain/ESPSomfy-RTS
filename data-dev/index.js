@@ -1,9 +1,8 @@
 //var hst = '192.168.4.1';
-
-
 var hst = '192.168.1.13';
 //var hst = '192.168.1.49';
 //var hst = '192.168.2.232';
+
 var _rooms = [];
 let LANG = {};
 var baseUrl = window.location.protocol === 'file:' ? `http://${hst}` : '';
@@ -17,7 +16,6 @@ const closeOverlay = (div, callback) => {
     div.classList.add('overlay-exit');
     setTimeout(() => div.remove(), 300);
 };
-
 if (typeof ui !== 'undefined' && ui.waitMessage) {
     waitLoad = ui.waitMessage(document.body);
 }
@@ -885,6 +883,23 @@ function shOverlay(div, onClose) {
     get('divContainer').appendChild(div);
     window.scrollTo(0, 0);
 }
+function toggleTooltip(el) {
+    const tooltip = el.querySelector('.tooltip-text');
+    const isVisible = tooltip.style.display === 'block';
+
+    document.querySelectorAll('.tooltip-text').forEach(t => t.style.display = 'none');
+    tooltip.style.display = isVisible ? 'none' : 'block';
+
+    if (!isVisible) {
+        setTimeout(() => {
+            window.addEventListener('click', function closeMenu() {
+                tooltip.style.display = 'none';
+                window.removeEventListener('click', closeMenu);
+            }, { once: true });
+        }, 10);
+    }
+}
+
 async function reopenSocket() {
     if (tConnect) clearTimeout(tConnect);
     tConnect = null;
@@ -1262,7 +1277,8 @@ class UIBinder {
         }
         let div = document.createElement('div');
         div.className = 'prompt-message modal-overlay';
-        div.innerHTML = `<div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div><div class="button-container-row"><button id="btnYes" type="button">${tr('BT_YES')}</button><button line type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button></div></div>`;
+        div.innerHTML = `<div class="message-content"><div class="prompt-text">${msg}</div><div class="sub-message"></div>
+        <div class="button-container-row"><button line type="button" onclick="ui.clearErrors();">${tr('BT_NO')}</button><button id="btnYes" type="button">${tr('BT_YES')}</button></div></div>`;
         el.appendChild(div);
 
         div.querySelector('#btnYes').onclick = () => {
@@ -1664,7 +1680,7 @@ class Security {
 var security = new Security();
 class General {
     initialized = false;
-    appVersion = 'v2.5.4';
+    appVersion = 'v2.5.5';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -2074,6 +2090,7 @@ class General {
 
         div.innerHTML = `
         <div class="instructions-content">
+        <div class="overlay-scroll-content">
         ${overlayHeader('Configuration Boîtier', 'Assistant de configuration automatique pour votre boitier', 'svg-leboncoin')}
         <div>
         <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a> sur Leboncoin, si ce n'est pas votre cas fermez cette page</span></div></div>
@@ -2092,11 +2109,13 @@ class General {
         <div id="lbc-success-msg"><svg class="svgInTextSmall"><use href="#svg-success"></use></svg> Configuration appliquée avec succès !</div>
         </div>
         </div>
+        </div>
         <div class="hrDivFooter"></div>
-        <div class="button-container-overlay"><div class="footer-sticky-content"><div class="button-container-row">
+        <div class="button-container-overlay">
         <button id="btnCloseLBC" line type="button" onclick="closeOverlay(get('divLBCConfig'))">${tr('BT_CLOSE')}</button>
-        <button id="btnConfirmLBC" type="button" class="btn-main" onclick="general.confirmLBCConfig()">Démarrer</button>
-        </div></div></div>
+        <button id="btnConfirmLBC" type="button" onclick="general.confirmLBCConfig()">Démarrer</button>
+        </div>
+        </div>
         </div>`;
 
         shOverlay(div);
@@ -2158,6 +2177,54 @@ class General {
             } catch (e) {
                 if (btn) { btn.style.display = 'block'; btn.textContent = "Réessayer"; }
             }
+    }
+    showHAOverlay() {
+        const div = document.createElement('div');
+        div.id = 'divHAConfig';
+        div.className = 'inst-overlay';
+
+        div.innerHTML = `
+        <div class="instructions-content">
+        <div class="overlay-scroll-content">
+        ${overlayHeader(tr('HACS'), tr('HACS_DESC'), 'svg-homeAssistant')}
+        <p><strong>${tr('HACS_PURPOSE_TITLE')}</strong></p>
+        <p>${tr('HACS_PURPOSE_TEXT_1')}</p>
+        <p>${tr('HACS_PURPOSE_TEXT_2')}</p>
+        <p class="ha-section-title"><strong>${tr('HACS_INSTALL_TITLE')}</strong></p>
+        <ol class="ha-install-list">
+        <li>${tr('HACS_INSTALL_STEP_1')}</li>
+        <li>${tr('HACS_INSTALL_STEP_2')}</li>
+        <li>${tr('HACS_INSTALL_STEP_3')}</li>
+        <li>${tr('HACS_INSTALL_STEP_4')}</li>
+        </ol>
+        <div class="warning ha-warning-note">
+        <svg><use href="#svg-warning"></use></svg>
+        <div>
+        <span>
+        ${tr('HACS_REQ_START')}
+        <a href="https://www.home-assistant.io" target="_blank" style="color: inherit; text-decoration: underline;"><strong>Home Assistant</strong></a>
+        ${tr('HACS_REQ_MID')}
+        <a href="https://hacs.xyz" target="_blank" style="color: inherit; text-decoration: underline;"><strong>HACS</strong></a> ${tr('HACS_REQ_END')}
+        </span>
+        </div>
+        </div>
+        <div class="ha-badge-container">
+        <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced&category=integration" target="_blank" class="ha-badge-button">
+        <span class="ha-badge-text-main">Open HACS repository on</span>
+        <span class="ha-badge-pill"><span class="ha-badge-text-pill">MY</span><svg width="18" height="18"><use href="#svg-homeAssistant"></use></svg></span>
+        </a>
+        <p class="ha-github-link-container">
+        ${tr('HACS_OR_VISIT')} <a href="https://github.com/xkain/ESPSomfy-RTS-enhanced" target="_blank" class="linkSoft">dépôt GitHub</a>
+        </p>
+        </div>
+        </div>
+        <div class="hrDivFooter"></div>
+         <div class="button-container-overlay">
+        <button id="btnCloseHA" type="button" onclick="closeOverlay(get('divHAConfig'))">${tr('BT_CLOSE')}</button>
+        </div>
+        </div>`;
+
+        shOverlay(div);
     }
 }
 var general = new General();
@@ -2613,9 +2680,10 @@ class Wifi {
             let clkVal = clk ? clk.val : 0;
 
             let div = document.createElement('div');
-            div.className = 'inst-overlay ethoverlay';
+            div.className = 'inst-overlay';
             div.innerHTML = `
             <div class="instructions-content">
+            <div class="overlay-scroll-content">
             ${overlayHeader('ETH_SETTINGS_TITLE', 'ETH_SETTINGS_DESC', 'svg-ethernet')}
             <div class="unibloc"><p>${tr("ETH_SETTINGS_WARNING_DESC_1")}</p></div>
             <div class="blocEthBoardSettings">
@@ -2635,18 +2703,13 @@ class Wifi {
             <div><b>${tr('MSG_DANGER')}</b> <span>${tr("ETH_SETTINGS_WARNING_DESC_2")}</span></div>
             </label>
             </div>
-
-
-
+            </div>
             <div class="hrDivFooter"></div>
-            <div class="button-container-overlay"><div class="footer-sticky-content"><div class="button-container-row">
-
+            <div class="button-container-overlay">
             <button id="btnCancel" line type="button">${tr("BT_CANCEL_1")}</button>
             <button id="btnSaveEthernet" style="background:#ccc;cursor:not-allowed" type="button" disabled>${tr("BT_SAVE")}</button>
-            </div></div></div>
-
-
-
+            </div>
+            </div>
             </div>`;
 
             shOverlay(div);
@@ -2764,15 +2827,17 @@ class Somfy {
     ];
     radioBoardTypes = [
         { val: 0, label: 'DEFAULT', showGPIO: false },
-        { val: 1, label: 'CC1101 – ESP32-D1', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 } },
-        { val: 2, label: 'CC1101 – WT32-ETH01', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 4, TXPin: 2, RXPin: 35 } },
-        { val: 3, label: 'CC1101 – Olimex ESP32-PoE/EVB', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 13, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 36 } },
-        { val: 4, label: 'CC1101 – LilyGO T-Internet POE', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 35 } },
-        { val: 5, label: 'CC1101 – wESP POE', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 39 } },
-        { val: 6, label: 'CC1101 – ESP-PoE-32', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
-        { val: 7, label: 'CC1101 – ESP32s3 Mini', showGPIO: false, chips: ['s3'], pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
+        { val: 1, label: 'ESP32-D1 mini', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 23, MISOPin: 19, TXPin: 21, RXPin: 22 } },
+        { val: 2, label: 'WT32-ETH01', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 4, TXPin: 2, RXPin: 35 } },
+        { val: 3, label: 'Olimex ESP32-PoE/EVB', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 13, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 36 } },
+        { val: 4, label: 'LilyGO T-Internet POE', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 12, MOSIPin: 15, MISOPin: 16, TXPin: 4, RXPin: 35 } },
+        { val: 5, label: 'wESP POE', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 18, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 39 } },
+        { val: 6, label: 'ESP-PoE-32', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
+        { val: 7, label: 'ESP32s3 Mini', showGPIO: false, chips: ['s3'], pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
+        { val: 8, label: 'XIAO-ESP32-C3', showGPIO: false, chips: ['c3'], pins: { SCKPin: 8, CSNPin: 6, MOSIPin: 10, MISOPin: 9, TXPin: 3, RXPin: 4 } },
         { val: 255, label: 'MANUAL_SETTINGS', showGPIO: true }
     ];
+
     init() {
         if (this.initialized) return;
         this.initialized = true;
@@ -2819,8 +2884,12 @@ class Somfy {
             if (t.chips && !t.chips.includes(cm)) {
                 return;
             }
+            let labelKey = t.label;
+            if (t.val === 0 && labelKey === 'DEFAULT') {
+                labelKey = `BOARD_DEFAULT_${cm.toUpperCase()}`;
+            }
 
-            const labelText = tr(t.label);
+            const labelText = tr(labelKey);
             sel.options.add(new Option(labelText, t.val));
         });
     }
@@ -2842,7 +2911,7 @@ class Somfy {
 
         if (target) {
             const labels = ['SCLK:', 'CSN:', 'MOSI:', 'MISO:', 'TX:', 'RX:'];
-            let html = `<div class="gpioRadio-container"><div class="help-container" onclick="somfy.toggleTooltip(this)"><svg class="help-svg"><use href=#icon-question></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i><br><br></div></div>`;
+            let html = `<div class="gpioRadio-container"><div class="help-container" onclick="toggleTooltip(this)"><svg class="help-svg"><use href=#icon-question></use></svg><div class="tooltip-text"><b>${tr('RADIO_TOOLTIP_GPIO_0')}</b><br><br>${tr('RADIO_TOOLTIP_GPIO_1')}<br>${tr('RADIO_TOOLTIP_GPIO_2')}<br><br><i>${tr('RADIO_TOOLTIP_GPIO_3')}</i><br><br></div></div>`;
 
             pk.forEach((k, i) => {
                 const v = target[k], selP = get(`selTrans${k}`), inpP = get(`inputTrans${k}`);
@@ -3097,7 +3166,8 @@ class Somfy {
             div.className = 'inst-overlay';
             div.innerHTML = `
             <div class="instructions-content">
-            ${overlayHeader('SCANFREQ_TITLE', 'SCANFREQ_DESC', 'svg-tabRadio')}
+            <div class="overlay-scroll-content">
+            ${overlayHeader('SCANFREQ_TITLE', 'SCANFREQ_DESC', 'icon-tabRadio')}
             <div class="unibloc"><div>${tr("SCANFREQ_SCAN_DESC")}</div></div>
             <div class="unibloc">
             <div class="uniRow">
@@ -3125,6 +3195,7 @@ class Somfy {
             <div class="success"><svg><use href=#svg-succes></use></svg><div><b>${tr('SCANFREQ_RSSI_EXCELLENT')}</b> <span>${tr('SCANFREQ_RSSI_EXCELLENT_DESC')}</span></div></div>
             <div class="warning"><svg><use href=#svg-warning></use></svg><div><b>${tr('SCANFREQ_RSSI_WEAK')}</b> <span>${tr('SCANFREQ_RSSI_WEAK_DESC')}</span></div></div>
             <div class="error"><svg><use href=#svg-error></use></svg><div><b>${tr('SCANFREQ_RSSI_NOISE')}</b> <span>${tr('SCANFREQ_RSSI_NOISE_DESC')}</span></div></div>
+            </div>
             </div>
             </div>
             </div>`;
@@ -3281,20 +3352,6 @@ class Somfy {
 
         slider.value = newVal;
         slider.dispatchEvent(new Event('input'));
-    }
-    toggleTooltip(el) {
-        const tooltip = el.querySelector('.tooltip-text');
-        const isVisible = tooltip.style.display === 'block';
-        document.querySelectorAll('.tooltip-text').forEach(t => t.style.display = 'none');
-        tooltip.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) {
-            setTimeout(() => {
-                window.addEventListener('click', function closeMenu() {
-                    tooltip.style.display = 'none';
-                    window.removeEventListener('click', closeMenu);
-                }, { once: true });
-            }, 10);
-        }
     }
     checkEmptyState() {
         const getEl = id => get(id);
@@ -4333,7 +4390,7 @@ class Somfy {
             if (isNew) {
                 Object.assign(shade, {
                     name: '', shadeType: 4, roomId: 0, downTime: 10000, upTime: 10000,
-                    tiltTime: 7000, tiltType: 0, flipCommands: 0, flipPosition: 0, paired: 0
+                    tiltTime: 7000, tiltType: 0, flipCommands: 0, flipPosition: 0, paired: 0, sunSensor: 0, simMy: 0, repeats: 0
                 });
             }
             if (!isNew) {
@@ -4777,6 +4834,7 @@ class Somfy {
 
             div.innerHTML = `
             <div class="instructions-content">
+            <div class="overlay-scroll-content">
             ${overlayHeader("ROLLING_CODE_TITLE", "ROLLING_CODE_DESC", "svg-warning")}
             <div class="error">
             <svg><use href=#svg-warning></use></svg>
@@ -4787,11 +4845,10 @@ class Somfy {
             <label class="label" for="fldNewRollingCode">${tr("BT_ROLLING_CODE")}</label>
             <input id="fldNewRollingCode" class="inputAndSelect" min="0" max="65535" name="newRollingCode" type="number" value="${shade.lastRollingCode}">
             </div>
+            </div>
+            <div class="hrDivFooter"></div>
             <div class="button-container-overlay">
-            <button id="btnChangeRollingCode" class="bouton-Danger" type="button"
-            onclick="somfy.setRollingCode(${shadeId}, parseInt(get('fldNewRollingCode').value, 10));">
-            ${tr("BT_SET_ROLLING_CODE")}
-            </button>
+            <button id="btnChangeRollingCode" class="bouton-Danger" type="button" onclick="somfy.setRollingCode(${shadeId}, parseInt(get('fldNewRollingCode').value, 10));">${tr("BT_SET_ROLLING_CODE")}</button>
             <button id="btnCancel" line type="button">${tr("BT_CANCEL_1")} </button>
             </div>
             </div>`;
@@ -4858,6 +4915,7 @@ class Somfy {
 
         div.innerHTML = `
         <div class="instructions-content">
+        <div class="overlay-scroll-content">
         ${overlayHeader(isUnpair ? "UNPAIR_TITLE" : "PAIR_TITLE", tr(descKey), isG ? "svg-simpleGarage" : "svg-simpleShutter", 1)}
         ${wizardStepper(stepTitles)}
         <div class="blocsteps">
@@ -4878,6 +4936,8 @@ class Somfy {
         <div class="uniblocStep wizard-step" data-stepid="3">${it('a', 3, 1)}</div>
         <div class="empty-state wizard-step" data-stepid="3"><svg class="empty-icon"><use href=#svg-succes></use></svg></div>
         </div>
+        </div>
+        <div class="hrDivFooter"></div>
         <div class="expert-only-buttons" data-expert>
         <button type="button" line onclick="closeOverlay(this.closest('.inst-overlay'))">${tr("BT_CANCEL_1")}</button>
         </div>
@@ -5040,14 +5100,18 @@ class Somfy {
 
         div.innerHTML = `
         <div class="instructions-content">
+        <div class="overlay-scroll-content">
         ${overlayHeader("PAIR_TITLE", "LINK_REMOTE_DESC", "svg-remote")}
         <div class="uniblocStep">${tr("LINK_REMOTE_DESC_1")}</div>
         <div class="information">
         <svg><use href=#svg-info></use></svg>
         <div><b>${tr("MSG_NOTE")}</b><span>${tr("LINK_REMOTE_DESC_2")}</span></div>
         </div>
+        </div>
+        <div class="hrDivFooter"></div>
         <div class="button-container-overlay">
         <button id="btnStopLink" line type="button">${tr("BT_CANCEL_1")}</button>
+        </div>
         </div>
         </div>`;
 
@@ -5064,23 +5128,30 @@ class Somfy {
 
         div.innerHTML = `
         <div class="instructions-content">
+
+        <div class="overlay-scroll-content">
         ${overlayHeader("REPEAT_REMOTE_TITLE", "REPEAT_REMOTE_DESC", "svg-repeater")}
         <div class="warning">
         <svg><use href=#svg-warning></use></svg>
-        <div><b>${tr("MSG_ALERT")}</b><span>${tr("REPEAT_REMOTE_DESC_4")}<br><br>   ${tr("REPEAT_REMOTE_DESC_3")} </span></div>
+        <div>
+        <b>${tr("MSG_ALERT")}</b>
+        <span>${tr("REPEAT_REMOTE_DESC_4")}<br><br>${tr("REPEAT_REMOTE_DESC_3")}</span>
+        </div>
         </div>
         <div class="uniblocStep">
         <div class="step-item"><div class="step-number">a</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_1")}</div></div>
         <div class="step-item"><div class="step-number">b</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_2")}</div></div>
         <div class="step-item"><div class="step-number">c</div><div class="step-text">${tr("REPEAT_REMOTE_DESC_5")}</div></div>
         </div>
+        </div>
+        <div class="hrDivFooter"></div>
         <div class="button-container-overlay">
-        <button id="btnStopLinking" type="button" line class="marginB" >${tr("BT_CANCEL_1")}</button>
+        <button id="btnStopLinking" type="button" line>${tr("BT_CANCEL_1")}</button>
         </div>
         </div>`;
 
-        shOverlay(div);
         div.querySelector('#btnStopLinking').onclick = () => closeOverlay(div);
+        shOverlay(div);
 
         return div;
     }
@@ -5120,6 +5191,7 @@ class Somfy {
 
         div.innerHTML = `
         <div class="instructions-content">
+        <div class="overlay-scroll-content">
         ${overlayHeader(titleKey, tr(descKey), "svg-simpleShutter", 1)}
         ${wizardStepper(stepTitles)}
         <div class="blocGroupsteps">
@@ -5156,6 +5228,8 @@ class Somfy {
         <div class="empty-state"><svg class="empty-icon"><use href=#svg-succes></use></svg></div>
         </div>
         </div>
+        </div>
+        <div class="hrDivFooter"></div>
         <div class="expert-only-buttons" data-expert>
         <button type="button" line onclick="closeOverlay(this.closest('.inst-overlay'))">${tr("BT_CANCEL_1")}</button>
         </div>
@@ -5563,7 +5637,6 @@ class Firmware {
         inst.innerHTML = `
         ${overlayHeader('RESTORE_TITLE', 'RESTORE_DESC', 'svg-restore')}
         <div class="uniblocStep"><div>${tr('RESTORE_SELECT_FILE')}</div></div>
-
         <div id="jsUniRestore" class="unibloc">${html}</div>`;
 
         shOverlay(div);
@@ -5580,7 +5653,8 @@ class Firmware {
         </div>`;
 
         div.innerHTML = `
-        <div class="overlay-content">
+        <div class="instructions-content">
+        <div class="overlay-scroll-content">
         <form method="POST" action="#" enctype="multipart/form-data" id="frmUploadApp">
         <div id="divInstText"></div>
         <div class="vertical-steps-container">
@@ -5611,6 +5685,7 @@ class Firmware {
         <div><b>${tr('MSG_ALERT')}</b><span>${tr('RESTORE_NETWORK_WARNING')}</span></div>
         </div>
         <div class="progress-bar" id="progFileUpload" style="display:none;margin:15px 0"></div>
+        </div>
         <div class="hrDivFooter"></div>
         <div class="button-container-overlay"><div class="footer-sticky-content">
         <div class="uniRow backup-row" style="${isRestore ? 'display:none' : ''}">
@@ -5680,14 +5755,10 @@ class Firmware {
                 div.onclick = () => { firmware.updateGithub(); };
                 div.innerHTML = `<span>${tr('FW_UPDATE_AVAILABLE')}</span>`;
             });
-            // --- ON MODIFIE UNIQUEMENT CETTE PARTIE ---
-            // --- DANS LE BLOC : if (rel.available && rel.status === 0 ...) ---
             if (divLocal) {
                 divLocal.className = "error";
                 get('useStatusIcon')?.setAttribute('href', '#svg-error');
                 const st = get('statusTitle');
-
-                // Récupération rapide des majeurs
                 const currentMajor = this.getMainVersion(rel.appVersion?.name || get('spanFwVersion')?.innerText);
                 const targetMajor = this.getMainVersion(rel.latest?.name);
                 const isBlocked = (currentMajor < 3 && targetMajor >= 3) || (currentMajor >= 3 && targetMajor < 3);
@@ -5697,11 +5768,9 @@ class Firmware {
                 ? tr('FW_UPDATE_USB_DESC').replace('%1', rel.latest.name)
                 : tr('FW_UPDATE_ACTION_DESC2').replace('%1', rel.latest.name);
 
-                // RENDRE LE BANDEAU CLIQUABLE UNIQUEMENT QUAND UNE MAJ EST DISPONIBLE
                 divLocal.style.cursor = 'pointer';
                 divLocal.onclick = () => { firmware.updateGithub(); };
             }
-            // ------------------------------------------
         }
         else if (rel.status === 4 && rel.error !== 0) {
             let e = errors.find(x => x.code === rel.error) || { desc: tr('ERR_UNSPECIFIED') };
@@ -5709,7 +5778,6 @@ class Firmware {
             if (inst) inst.remove();
             ui.errorMessage(e.desc);
         }
-        // --- DANS LE BLOC ELSE (L'appareil est à jour) ---
         else {
             if (divLocal) {
                 divLocal.className = "success";
@@ -5718,7 +5786,6 @@ class Firmware {
                 if (st) st.innerHTML = tr('FW_UPDATE_UPTODATE');
                 statusDesc.innerHTML = tr('FW_UPDATE_ACTION_DESC');
 
-                // NETTOYAGE : On retire le clic et le curseur si pas de mise à jour
                 divLocal.style.cursor = '';
                 divLocal.onclick = null;
             }
@@ -5757,8 +5824,6 @@ class Firmware {
             }
         }
     }
-
-
     // Extrait juste le premier nombre après le 'v' (ex: "v2.5.2" -> 2, "v3.0.0" -> 3, "3.1.2" -> 3)
     getMainVersion(verStr) {
         if (!verStr) return 0;
@@ -5776,7 +5841,6 @@ class Firmware {
             ui.errorMessage(tr('MSG_ALERT')).querySelector('.sub-message').innerHTML = tr('ERR_GIT_PARTITION_BLOCKED');
             return;
         }
-
         if (!this.isMobile()) {
             try { await firmware.backup(); }
             catch (err) { return ui.serviceError(div, err); }
@@ -5788,6 +5852,7 @@ class Firmware {
 
             div.innerHTML = `
             <div class="instructions-content">
+
             ${overlayHeader('GIT_RELEASE_TITLE', '', 'svg-github')}
             <div class="warning">
             <svg><use href=#svg-warning></use></svg>
@@ -5833,6 +5898,7 @@ class Firmware {
 
             div.innerHTML = `
             <div class="instructions-content">
+            <div class="overlay-static-content">
             ${overlayHeader('UPDATE_GIT_TITLE', 'UPDATE_GIT_DESC', 'svg-github')}
             <div class="uniRow"><span class="label">${tr('FIRMWARE_INSTALLED')}</span><span class="labelgrey">${rel.appVersion.name}</span></div>
             <div class="uniRow">
@@ -5843,13 +5909,15 @@ class Firmware {
             <div id="divPrereleaseWarning" class="error" style="display:none;"><svg><use href=#svg-error></use></svg><div><span id="spanUpdateWarning"></span></div></div>
             <div class="hrDiv"></div>
             <div class="warningText"><svg><use href="#svg-warning"></use></svg><span>${tr('FIRMWARE_CACHE')}</span></div>
+
             <div id="notesPreview" class="release-notes-preview">
             <div class="wifiConnectScan">
             <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
             </div>
             </div>
             <div class="hrDivFooter"></div>
-            <div class="button-container-overlay"><div class="footer-sticky-content">
+            </div> <div class="button-container-overlay">
+            <div class="footer-sticky-content">
             <div class="uniRow">
             <div class="uniText"><span class="uniLabel">${tr('FIRMWARE_SAVE_BACKUP')}</span><span class="uniStatus">${tr(isMob ? 'FIRMWARE_SAVE_BACKUP_DESC_MOB' : 'FIRMWARE_SAVE_BACKUP_DESC')}</span></div>
             <div id="btnBackupCfg" class="gitBackup" onclick="firmware.backup()"><svg><use href="#svg-download"></use></svg></div>
@@ -5858,7 +5926,8 @@ class Firmware {
             <button id="btnClose" line type="button" onclick="closeOverlay(get('divGitInstall'))">${tr('BT_CANCEL_1')}</button>
             <button id="btnUpdate" type="button" class="btn-main" onclick="firmware.installGitRelease(get('divGitInstall'))">${tr('BT_UPDATE')}</button>
             </div>
-            </div></div>
+            </div>
+            </div>
             </div>`;
 
             shOverlay(div);
@@ -5897,19 +5966,15 @@ class Firmware {
 
         const opt = sel.options[sel.selectedIndex];
         const isPre = opt.getAttribute('data-prerelease') === "true";
-
         const divPre = div.querySelector('#divPrereleaseWarning');
         const spanWarning = div.querySelector('#spanUpdateWarning');
         const btnUpdate = div.querySelector('#btnUpdate');
-
-        // Extraction des numéros majeurs (2 ou 3)
         const currentMajor = this.getMainVersion(div.getAttribute('data-currentver'));
         const targetMajor = this.getMainVersion(sel.value);
 
         let isBlocked = false;
         let blockMessage = '';
 
-        // Détection du franchissement de la frontière v3
         if (currentMajor < 3 && targetMajor >= 3) {
             isBlocked = true;
             blockMessage = tr('UPDATE_GIT_UPDATE_V3_BLOCKED');
@@ -5920,14 +5985,10 @@ class Firmware {
         }
 
         if (isBlocked) {
-            // 1. On affiche l'alerte explicative rouge en haut
             if (spanWarning) spanWarning.innerHTML = blockMessage;
             if (divPre) divPre.style.display = 'flex';
-
-            // 2. Le CSS gère tout le reste automatiquement dès que disabled = true
             if (btnUpdate) btnUpdate.disabled = true;
         } else {
-            // On restaure l'état normal si l'on revient sur une version compatible
             if (btnUpdate) btnUpdate.disabled = false;
             if (divPre) {
                 if (isPre) {
@@ -5938,40 +5999,12 @@ class Firmware {
                 }
             }
         }
-
         const divNotes = div.querySelector('#divReleaseNotes');
         if (divNotes) {
             const val = sel.value;
             divNotes.style.display = (!val || val === 'main') ? 'none' : '';
         }
     }
-
-
-    /*
-    gitReleaseSelected(div) {
-        const sel = div.querySelector('#selVersion');
-        if (!sel || sel.selectedIndex === -1) return;
-
-        const opt = sel.options[sel.selectedIndex];
-        const isPre = opt.getAttribute('data-prerelease') === "true";
-        const divPre = div.querySelector('#divPrereleaseWarning');
-
-        if (divPre) {
-            if (isPre) {
-                divPre.querySelector('#spanUpdateWarning').innerHTML = tr('UPDATE_GIT_RELEASE_BETA');
-                divPre.style.display = 'flex';
-            } else {
-                divPre.style.display = 'none';
-            }
-        }
-        const divNotes = div.querySelector('#divReleaseNotes');
-        if (divNotes) {
-            const val = sel.value;
-            divNotes.style.display = (!val || val === 'main') ? 'none' : '';
-        }
-    }
-
-    */
     async getReleaseInfo(tag, silent = false) {
         let overlay = null;
         if (!silent) overlay = ui.waitMessage(document.getElementById('divContainer'));

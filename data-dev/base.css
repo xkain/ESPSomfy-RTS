@@ -109,6 +109,12 @@ html, body {
 }
 svg, svg * {pointer-events: none;}
 
+
+.linkSoft {
+    color: var(--color);
+    text-decoration: underline;
+    font-weight: bold;
+}
 .link {
     font-size: 12px;
     color: var(--accent-color);
@@ -256,7 +262,7 @@ select.inputAndSelect {
     width: 100%;
     appearance: none;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 15px;
     color: var(--color);
     border: 1px solid #555;
     background: transparent;
@@ -384,7 +390,7 @@ input[type=text] {
     background-color: transparent;
     border: 1px solid #555;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 15px;
 }
 input[type="password"].pin-digit {
     margin: 0 0.3rem;
@@ -633,7 +639,6 @@ input[type="number"] {
 .manual-safety-block .switch:has(input:not(:checked)) {
     animation: soft-pulse 2s infinite ease-in-out;
 }
-
 .safety-label {
     display: flex;
     align-items: center;
@@ -731,10 +736,6 @@ fieldset {
     position: relative;
     width: 100%;
     display: flex;
-}
-
-.button-container-overlay {
-    margin: 0 auto 0;
 }
 .button-container-row,
 .button-container-overlay,

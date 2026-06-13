@@ -15,12 +15,12 @@
       if(l)document.documentElement.lang=l;
     })();
     </script>
-    <link rel="stylesheet" href="base.css?v=2.5.4c">
-    <link rel="stylesheet" href="main.css?v=2.5.4c">
-    <link rel="stylesheet" href="overlays.css?v=2.5.4c">
+    <link rel="stylesheet" href="base.css?v=2.5.5c">
+    <link rel="stylesheet" href="main.css?v=2.5.5c">
+    <link rel="stylesheet" href="overlays.css?v=2.5.5c">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <script src="index.js?v=2.5.4c"></script>
+    <script src="index.js?v=2.5.5c"></script>
 </head>
 <body>
     <header class="top-bar">
@@ -150,15 +150,27 @@
                 <div id="divSystemSettings">
                     <div class="subtab-container"><span class="selected" data-grpid="divSystemOptions" tr="SUB_OPTION"></span><span data-grpid="divSecurityOptions" tr="SUB_SECURITY"></span><span data-grpid="divFirmware" tr="FIRMWARE"></span></div>
                     <div id="divSystemOptions" class="subtab-content">
-                        <div id="divBtnLBC" class="divButton">
-                            <button  onclick="general.showLBCOverlay()" class="buttonUpdate" type="button">
-                                <svg class="svgLbc"><use xlink:href="#svg-leboncoin"></use></svg>
-                                <div class="devButtonUpdate">
-                                    <div>Boîtier Leboncoin</div>
-                                    <div class="uniStatus">Assistant de préconfiguration automatique</div>
-                                </div>
-                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
-                            </button>
+                        <div class="button-container-pair">
+                            <div id="divBtnLBC" class="unibloc">
+                                <button  onclick="general.showLBCOverlay()" class="buttonUpdate" type="button">
+                                    <svg class="svgLbc"><use xlink:href="#svg-leboncoin"></use></svg>
+                                    <div class="devButtonUpdate">
+                                        <div>Boîtier Leboncoin</div>
+                                        <div class="uniStatus">Assistant de préconfiguration automatique</div>
+                                    </div>
+                                    <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                                </button>
+                            </div>
+                            <div id="divBtnHA" class="unibloc">
+                                <button  onclick="general.showHAOverlay()" class="buttonUpdate" type="button">
+                                    <svg class="svgHA"><use xlink:href="#svg-homeAssistant"></use></svg>
+                                    <div class="devButtonUpdate">
+                                        <div>Home Assistant</div>
+                                        <div class="uniStatus">Intégration Home Assistant</div>
+                                    </div>
+                                    <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="unibloc">
                             <div>
@@ -406,6 +418,7 @@
                                 <span class="buttonUpdateCache" tr="FW_REFRESH_CACHE"></span>
                             </button>
                         </div>
+
                         <div class="unibloc credits-list">
                             <label class="uniRow" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/wiki', '_blank')">
                                 <div class="uniText">
@@ -417,10 +430,27 @@
                             <hr>
                             <label class="uniRow" onclick="window.open('https://github.com/xkain/ESPSomfy-RTS/issues/new?template=BUG-REPORT.yaml', '_blank')">
                                 <div class="uniText">
-                                    <div class="uniLabel" tr="FW_CREDITS_BUG"></div>
+                                    <div class="uniLabel" style="display: flex; align-items: center;">
+                                        <span tr="FW_CREDITS_BUG"></span>
+
+
+
+
+
+
+
+                                        <div class="help-container" onclick="event.stopPropagation(); toggleTooltip(this);">
+                                            <svg class="help-svg" style="width: 26px; height: 22px; color: var(--accent-color, #007acc);"><use href="#icon-question"></use></svg>
+                                            <div class="tooltip-text">
+                                                <span tr="FW_CREDITS_BUG_TOOLTIP_0"></span><br><br>
+                                                <span tr="FW_CREDITS_BUG_TOOLTIP_1"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="uniStatus" tr="FW_CREDITS_BUG_DESC"></div>
                                 </div>
-                                <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
+                                <svg class="btnArrowRight"><use href="#svg-arrowRight"></use></svg>
                             </label>
                         </div>
                         <div class="button-container-row">
@@ -683,13 +713,13 @@
                                 <div class="unibloc">
                                     <div>
                                         <label class="label" for="fldSsid" tr="CONNECTION_WIFI_SSID"></label>
-                                        <input id="fldSsid" class="inputAndSelect" name="ssid" type="text" data-bind="wifi.ssid" length=32 tr="CONNECTION_WIFI_ENTER_SSID" placeholder="Entrer votre SSID">
+                                        <input id="fldSsid" class="inputAndSelect" name="ssid" type="text" data-bind="wifi.ssid" autocomplete="new-password" length=32 tr="CONNECTION_WIFI_ENTER_SSID" placeholder="Entrer votre SSID">
                                     </div>
                                     <hr>
                                     <div>
                                         <label class="label" for="fldPassphrase" tr="SECURITY_PASSWORD"></label>
                                         <div class="LoginPassword-input password-container">
-                                            <input id="fldPassphrase" class="inputAndSelect" name="passphrase" type="password" data-bind="wifi.passphrase" length=32 tr="SECURITY_PASSWORD_PLH" placeholder="Entrer votre Mot de passe">
+                                            <input id="fldPassphrase" class="inputAndSelect" name="passphrase" type="password" data-bind="wifi.passphrase" autocomplete="new-password" length=32 tr="SECURITY_PASSWORD_PLH" placeholder="Entrer votre Mot de passe">
                                             <div class="password-eye" onclick="security.toggleFieldPassword('fldPassphrase', this)">
                                                 <svg class="pwd-icon pwd-iconeye"><use id="wifiEyeIcon" href="#svg-eyeOff"></use></svg>
                                             </div>
@@ -1594,7 +1624,7 @@
                             <div>
                                 <div class="blocRadioHeader">
                                     <div class="blocRadioHeaderTitle">
-                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                        <div class="help-container" onclick="toggleTooltip(this)">
                                             <svg class="help-svg">
                                                 <use href=#icon-question></use>
                                             </svg>
@@ -1634,7 +1664,7 @@
                             <div>
                                 <div class="blocRadioHeader">
                                     <div class="blocRadioHeaderTitle">
-                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                        <div class="help-container" onclick="toggleTooltip(this)">
                                             <svg class="help-svg">
                                                 <use href=#icon-question></use>
                                             </svg>
@@ -1670,7 +1700,7 @@
                             <div>
                                 <div class="blocRadioHeader">
                                     <div class="blocRadioHeaderTitle">
-                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                        <div class="help-container" onclick="toggleTooltip(this)">
                                             <svg class="help-svg">
                                                 <use href=#icon-question></use>
                                             </svg>
@@ -1705,7 +1735,7 @@
                             <div>
                                 <div class="blocRadioHeader">
                                     <div class="blocRadioHeaderTitle">
-                                        <div class="help-container" onclick="somfy.toggleTooltip(this)">
+                                        <div class="help-container" onclick="toggleTooltip(this)">
                                             <svg class="help-svg"><use href=#icon-question></use></svg>
                                             <div class="tooltip-text" tr="RADIO_TX_POWER_HELP"></div>
                                         </div>
@@ -1885,6 +1915,10 @@
             <path d="M0 0h24v24H0z" fill="none" />
             <path fill="currentColor" d="M18 14.49V9c0-1-1.01-2.01-2-2V3h-2v4h-4V3H8v2.48l9.51 9.5zm-1.76 1.77L7.2 7.2l-.01.01L3.98 4L2.71 5.25l3.36 3.36C6.04 8.74 6 8.87 6 9v5.48L9.5 18v3h5v-3l.48-.48L19.45 22l1.26-1.28z" />
         </symbol>
+        <symbol id="svg-homeAssistant" viewBox="0 0 24 24">
+            <path id="path1" d="m0 14 12-9 12 9-6.3 9.69-11.6-3e-3z" fill="#fff"/>
+            <path id="path2" d="M22.939 10.627L13.061.749a1.505 1.505 0 0 0-2.121 0l-9.879 9.878C.478 11.21 0 12.363 0 13.187v9c0 .826.675 1.5 1.5 1.5h9.227l-4.063-4.062a2 2 0 0 1-.664.113c-1.13 0-2.05-.92-2.05-2.05s.92-2.05 2.05-2.05s2.05.92 2.05 2.05c0 .233-.041.456-.113.665l3.163 3.163V9.928a2.05 2.05 0 0 1-1.15-1.84c0-1.13.92-2.05 2.05-2.05s2.05.92 2.05 2.05a2.05 2.05 0 0 1-1.15 1.84v8.127l3.146-3.146A2.05 2.05 0 0 1 18 12.239c1.13 0 2.05.92 2.05 2.05s-.92 2.05-2.05 2.05a2 2 0 0 1-.709-.13L12.9 20.602v3.088h9.6c.825 0 1.5-.675 1.5-1.5v-9c0-.825-.477-1.977-1.061-2.561z" fill="#18bcf2"/>
+        <symbol>
   <!--Connexion -->
         <symbol id="svg-user" viewBox="0 0 20 20">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>

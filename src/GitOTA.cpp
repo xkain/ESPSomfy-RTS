@@ -13,8 +13,6 @@
 #include "Network.h"
 
 
-
-
 extern ConfigSettings settings;
 extern SocketEmitter sockEmit;
 extern SomfyShadeController somfy;

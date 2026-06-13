@@ -168,9 +168,16 @@ bool ConfigSettings::begin() {
         strcpy(this->chipModel, ""); // Ou "32" selon vos préférences d'affichage
       }
       break;
-    case esp_chip_model_t::CHIP_ESP32S3:
-      strcpy(this->chipModel, "s3");
+    case esp_chip_model_t::CHIP_ESP32S3: {
+      // Distinction indispensable pour savoir quelle version de firmware est attendue
+      uint32_t flash_size = spi_flash_get_chip_size();
+      if (flash_size >= 8 * 1024 * 1024) {
+        strcpy(this->chipModel, "s3_8mb");
+      } else {
+        strcpy(this->chipModel, "s3_4mb");
+      }
       break;
+    }
     case esp_chip_model_t::CHIP_ESP32S2:
       strcpy(this->chipModel, "s2");
       break;
@@ -597,13 +604,17 @@ void SecuritySettings::print() {
   Serial.print(" Username:[");
   Serial.print(this->username);
   Serial.print("] Password:[");
-  Serial.print(this->password);
+  size_t passLen = strlen(this->password);
+  for (size_t i = 0; i < passLen; i++) {
+    Serial.print('*');
+  }
   Serial.print("] Pin:[");
-  Serial.print(this->pin);
+  if (strlen(this->pin) > 0) {
+    Serial.print("****");
+  }
   Serial.print("] Permissions:");
   Serial.println(this->permissions);
 }
-
 WifiSettings::WifiSettings() {}
 bool WifiSettings::begin() {
   this->load();
@@ -673,8 +684,11 @@ void WifiSettings::print() {
   Serial.print(" SSID: [");
   Serial.print(this->ssid);
   Serial.print("] PassPhrase: [");
-  Serial.print(this->passphrase);
-  Serial.println("]");  
+  size_t passLen = strlen(this->passphrase);
+  for (size_t i = 0; i < passLen; i++) {
+    Serial.print('*');
+  }
+  Serial.println("]");
 }
 void WifiSettings::printNetworks() {
   int n = WiFi.scanNetworks(false, false);
