@@ -70,12 +70,25 @@ Si vous migrez depuis **rstrouse/ESPSomfy-RTS** ou si vous mettez à niveau une 
 
 ## Home Assistant
 
-Ce fork reste 100% compatible avec l'intégration officielle ESPSomfy-RTS-HA. Si vous utilisez déjà l'intégration, mettez simplement à jour votre ESP32 avec ce firmware. Vos entités, noms et tableaux de bord dans Home Assistant continueront de fonctionner sans aucune modification.
+Ce projet reste **compatible** avec l'intégration officielle `ESPSomfy-RTS-HA` de rstrouse. Si vous l'utilisez déjà, vos entités, appareils et automatismes continueront de fonctionner normalement (veillez à ce que vos entités aient le même nom (id) bien évidement). Seul détail, vous n'aurez pas les notes de version du firmware affichées lors des mises à jour depuis Home Assistant (voir la **[documentation](https://github.com/xkain/ESPSomfy-RTS/wiki/Int%C3%A9grations#home-assistant)** pour tous les détails).
+
+Pour tirer le meilleur parti de ce firmware, utilisez **[ESPSomfy-RTS Enhanced](https://github.com/xkain/ESPSomfy-RTS-enhanced)**, la version dédiée et améliorée de l'intégration :
+
+* **Installation :** Disponible directement dans le store de **HACS** (*Home Assistant Community Store*) ou en cliquant sur le bouton ci-dessous :
+
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced">
+  <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.">
+</a>
+
+
 
 
 ## Feuille de route du projet ESPSomfy-RTS
 
 Vous voulez savoir ce qui arrive ensuite, suivre l'avancement de la version en cours ou voir les fonctionnalités terminées ? J'utilise GitHub Projects pour maintenir une feuille de route en direct et à jour.
+
+
+
 
 [![ESPSomfy-RTS Roadmap](https://img.shields.io/badge/Voir_en_Direct-Feuille_de_route_🗣️-238636?style=for-the-badge&logo=github)](https://github.com/users/xkain/projects/2)
 

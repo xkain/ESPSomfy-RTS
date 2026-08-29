@@ -76,7 +76,15 @@ If you are migrating from **rstrouse/ESPSomfy-RTS** or upgrading from an older v
 
 ## Home Assistant
 
-This fork remains 100% compatible with the official ESPSomfy-RTS-HA integration. If you are already using the integration, simply update your ESP32 with this firmware. Your entities, names, and dashboards in Home Assistant will continue to work without any modification.
+This project remains **compatible** with rstrouse's official `ESPSomfy-RTS-HA` integration. If you are already using it, your entities, devices, and automations will continue to work normally (just make sure your entities keep the same ID, of course). The only minor detail is that release notes for firmware updates won't be displayed directly in Home Assistant (see the **[documentation](https://github.com/xkain/ESPSomfy-RTS/wiki/Int%C3%A9grations#home-assistant)** for full details).
+
+To get the most out of this firmware, use **[ESPSomfy-RTS Enhanced](https://github.com/xkain/ESPSomfy-RTS-enhanced)**, the dedicated and improved integration:
+
+* **Installation:** Available directly in the **HACS** (*Home Assistant Community Store*) store or by clicking the button below:
+
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced">
+  <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.">
+</a>
 
 
 ## Project ESPSomfy-RTS Roadmap
