@@ -82,23 +82,50 @@ function finishLoad(callback) {
     }
     if (callback) callback();
 }
+var uptimeTrackers = {};
+var uptimeTicker = null;
 function displayUptime(totalSeconds, className) {
+    if (isNaN(totalSeconds)) return;
+    uptimeTrackers[className] = { base: parseInt(totalSeconds, 10), at: Date.now() };
+    renderUptime(className);
+    if (!uptimeTicker) {
+        uptimeTicker = setInterval(() => {
+            if (document.hidden) return;
+            for (const k in uptimeTrackers) renderUptime(k);
+        }, 1000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) for (const k in uptimeTrackers) renderUptime(k);
+        });
+    }
+}
+function renderUptime(className) {
+    const t = uptimeTrackers[className];
+    if (!t) return;
     const elements = document.querySelectorAll('.' + className);
-    if (elements.length === 0 || isNaN(totalSeconds)) return;
+    if (elements.length === 0) return;
 
-    let seconds = parseInt(totalSeconds, 10);
-    let days = Math.floor(seconds / (24 * 3600));
-    seconds %= (24 * 3600);
-    let hours = Math.floor(seconds / 3600);
+    let seconds = t.base + Math.floor((Date.now() - t.at) / 1000);
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    const hours = Math.floor(seconds / 3600);
     seconds %= 3600;
-    let minutes = Math.floor(seconds / 60);
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
 
     const fH = hours.toString().padStart(2, '0');
     const fM = minutes.toString().padStart(2, '0');
-    const timeString = `${days}${tr('DAY')} ${fH}${tr('HOUR')} ${fM}${tr('MIN')}`;
+    const fS = seconds.toString().padStart(2, '0');
+    const timeString = `${days}${tr('DAY')} ${fH}${tr('HOUR')} ${fM}${tr('MIN')} ${fS}${tr('SEC')}`;
 
     elements.forEach(el => {
         el.textContent = timeString;
+    });
+}
+function refreshUptime() {
+    getJSONSync('/loginContext', (err, ctx) => {
+        if (err || !ctx) return;
+        displayUptime(ctx.uptime || 0, 'uptime-display');
+        displayUptime(ctx.netUptime || 0, 'net-display');
     });
 }
 var errors = [
@@ -377,7 +404,7 @@ function getJSONSync(url, cb) {
             cb(xhr.response, null);
         }
         else {
-            console.log({ get: url, obj:xhr.response });
+            console.log({ get: url });
             cb(null, xhr.response);
         }
         if (typeof overlay !== 'undefined') overlay.remove();
@@ -432,7 +459,7 @@ function postJSONSync(url, data, cb) {
     let overlay = ui.waitMessage(get('divContainer'));
     try {
         let xhr = new XMLHttpRequest();
-        console.log({ post: url, data: data });
+        console.log({ post: url });
         let fd = new FormData();
         for (let name in data) {
             fd.append(name, data[name]);
@@ -472,7 +499,7 @@ function postJSONSync(url, data, cb) {
 }
 function putJSON(url, data, cb) {
     let xhr = new XMLHttpRequest();
-    console.log({ put: url, data: data });
+    console.log({ put: url });
     xhr.open('PUT', baseUrl.length > 0 ? `${baseUrl}${url}` : url, true);
     xhr.responseType = 'json';
     xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
@@ -507,7 +534,7 @@ function putJSONSync(url, data, cb) {
     let overlay = ui.waitMessage(get('divContainer'));
     try {
         let xhr = new XMLHttpRequest();
-        console.log({ put: url, data: data });
+        console.log({ put: url });
         //xhr.open('PUT', url, true);
         xhr.open('PUT', baseUrl.length > 0 ? `${baseUrl}${url}` : url, true);
         xhr.responseType = 'json';
@@ -604,7 +631,6 @@ async function initSockets() {
                             somfy.procShadeState(msg);
                             break;
                         case 'shadeCommand':
-                            console.log(msg);
                             break;
                         case 'roomRemoved':
                             somfy.procRoomRemoved(msg);
@@ -622,15 +648,12 @@ async function initSockets() {
                         case 'wifiStrength':
                             wifi.procWifiStrength(msg);
                             break;
-                        case 'packetPulses':
-                            console.log(msg);
-                            break;
                         case 'frequencyScan':
                             somfy.procFrequencyScan(msg);
                             break;
                     }
                 } catch (err) {
-                    console.log({ eventName: eventName, data: data, err: err });
+                    console.error({ eventName: eventName, data: data, err: err });
                 }
             }
         };
@@ -655,6 +678,7 @@ async function initSockets() {
             else {
                 (async () => {
                     ui.clearErrors();
+                    refreshUptime();
                     await general.loadGeneral();
                     await wifi.loadNetwork();
                     await somfy.loadSomfy();
@@ -1448,7 +1472,6 @@ class UIBinder {
             }
             const pin = digits.map(d => d.value).join('');
             if (pin.length === 4) {
-                console.log("PIN complet détecté :", pin);
                 if (typeof security !== 'undefined') {
                     security.login();
                 } else if (typeof general !== 'undefined' && typeof general.login === 'function') {
@@ -1573,8 +1596,8 @@ class Security {
                     if (err) return ui.serviceError(err), res();
 
                     // Uptime & Info CPU
-                    if (ctx.uptime) displayUptime(ctx.uptime, 'uptime-display');
-                    if (ctx.netUptime) displayUptime(ctx.netUptime, 'net-display');
+                    displayUptime(ctx.uptime || 0, 'uptime-display');
+                    displayUptime(ctx.netUptime || 0, 'net-display');
                     if (ctx.cpuFreq) get('info-cpu').textContent = `${ctx.cores > 1 ? 'Dual' : 'Single'}-Core @ ${ctx.cpuFreq} ${tr('MHZ')}`;
                     // Flash & FileSystem (Regroupé)
                     if (ctx.flashSize) {
@@ -1631,7 +1654,6 @@ class Security {
         let msg = pnl.querySelector('#spanLoginMessage');
         msg.innerHTML = '';
         let sec = ui.fromElement(pnl).login;
-        console.log(sec);
         let pin = '';
         switch (sec.type) {
             case 1:
@@ -1680,7 +1702,7 @@ class Security {
 var security = new Security();
 class General {
     initialized = false;
-    appVersion = 'v2.5.6';
+    appVersion = 'v2.5.7';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -1717,17 +1739,6 @@ class General {
         const val = sel.value;
         localStorage.setItem('themeMode', val);
         this.applyTheme(val);
-    }
-    getCookie(cname) {
-        let n = cname + '=';
-        let cookies = document.cookie.split(';');
-        console.log(cookies);
-        for (let i = 0; i < cookies.length; i++) {
-            let c = cookies[i];
-            while (c.charAt(0) === ' ') c = c.substring(0);
-            if (c.indexOf(n) === 0) return c.substring(n.length, c.length);
-        }
-        return '';
     }
     reload() {
         let addMetaTag = (name, content) => {
@@ -2093,7 +2104,7 @@ class General {
         <div class="overlay-scroll-content">
         ${overlayHeader('Configuration Boîtier', 'Assistant de configuration automatique pour votre boitier', 'svg-leboncoin')}
         <div>
-        <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a> sur Leboncoin, si ce n'est pas votre cas fermez cette page</span></div></div>
+        <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a>, si ce n'est pas votre cas fermez cette page</span></div></div>
         <div class="divInfoLine"><div class="InfoLine"><p>Par défaut, le firmware adopte des réglages universels et sécurisés. Cet assistant applique les paramètres régionaux et injecte la configuration matérielle de votre modèle.</p></div>
         <p class="uppercaseText">1. Sélectionnez votre boîtier :</p>
         <div class="button-container-row lbc-cards-container lbc-responsive-container">
@@ -2195,7 +2206,6 @@ class General {
         <li>${tr('HACS_INSTALL_STEP_1')}</li>
         <li>${tr('HACS_INSTALL_STEP_2')}</li>
         <li>${tr('HACS_INSTALL_STEP_3')}</li>
-        <li>${tr('HACS_INSTALL_STEP_4')}</li>
         </ol>
         <div class="warning ha-warning-note">
         <svg><use href="#svg-warning"></use></svg>
@@ -2426,7 +2436,6 @@ class Wifi {
     loadNetwork() {
         let pnl = get('divNetAdapter');
         getJSONSync('/networksettings', (err, settings) => {
-            console.log(settings);
             if (err) {
                 ui.serviceError(err);
             }
@@ -2835,6 +2844,7 @@ class Somfy {
         { val: 6, label: 'ESP-PoE-32', showGPIO: false, chips: ['esp32'], pins: { SCKPin: 14, CSNPin: 5, MOSIPin: 13, MISOPin: 32, TXPin: 4, RXPin: 35 } },
         { val: 7, label: 'ESP32s3 Mini', showGPIO: false, chips: ['s3'], pins: { SCKPin: 7, CSNPin: 6, MOSIPin: 9, MISOPin: 8, TXPin: 3, RXPin: 4 } },
         { val: 8, label: 'XIAO-ESP32-C3', showGPIO: false, chips: ['c3'], pins: { SCKPin: 8, CSNPin: 6, MOSIPin: 10, MISOPin: 9, TXPin: 3, RXPin: 4 } },
+        { val: 9, label: 'ESP32c3 SuperMini', showGPIO: false, chips: ['c3'], pins: { SCKPin: 4, CSNPin: 7, MOSIPin: 6, MISOPin: 5, TXPin: 21, RXPin: 20 } },
         { val: 255, label: 'MANUAL_SETTINGS', showGPIO: true }
     ];
 
@@ -3559,7 +3569,6 @@ class Somfy {
         let divCfg = '';
         let divCtl = '';
         shades.sort((a, b) => { return a.sortOrder - b.sortOrder });
-        console.log(shades);
         let roomId = document.querySelector('.room-pill.active') ? parseInt(document.querySelector('.room-pill.active').getAttribute('data-roomid'), 10) : 0;
         let vrList = get('selVRMotor');
         // First get the optiongroup for the shades.
@@ -3649,13 +3658,9 @@ class Somfy {
         let btns = shadeControls.querySelectorAll('div.cmd-button');
         for (let i = 0; i < btns.length; i++) {
             btns[i].addEventListener('mouseup', (event) => {
-                console.log(this);
-                console.log(event);
-                console.log('mouseup');
                 let cmd = event.currentTarget.getAttribute('data-cmd');
                 let shadeId = parseInt(event.currentTarget.getAttribute('data-shadeid'), 10);
                 if (this.btnTimer) {
-                    console.log({ timer: true, isOn: event.currentTarget.getAttribute('data-on'), cmd: cmd });
                     clearTimeout(this.btnTimer);
                     this.btnTimer = null;
                     if (new Date().getTime() - this.btnDown > 2000) event.preventDefault();
@@ -3677,9 +3682,6 @@ class Somfy {
                     clearTimeout(this.btnTimer);
                     this.btnTimer = null;
                 }
-                console.log(this);
-                console.log(event);
-                console.log('mousedown');
                 let elShade = event.currentTarget.closest('div.somfyShadeCtl');
                 let cmd = event.currentTarget.getAttribute('data-cmd');
                 let shadeId = parseInt(event.currentTarget.getAttribute('data-shadeid'), 10);
@@ -3707,29 +3709,26 @@ class Somfy {
                     clearTimeout(this.btnTimer);
                     this.btnTimer = null;
                 }
-                console.log(this);
-                console.log(event);
-                console.log('touchstart');
                 let elShade = event.currentTarget.closest('div.somfyShadeCtl');
                 let cmd = event.currentTarget.getAttribute('data-cmd');
                 let shadeId = parseInt(event.currentTarget.getAttribute('data-shadeid'), 10);
                 let el = event.currentTarget.closest('.somfyShadeCtl');
                 this.btnDown = new Date().getTime();
-                if (parseInt(el.getAttribute('data-direction'), 10) === 0) {
-                    if (cmd === 'my') {
+                if (cmd === 'my') {
+                    if (parseInt(el.getAttribute('data-direction'), 10) === 0) {
                         this.btnTimer = setTimeout(() => {
                             // Open up the set My Position dialog.  We will allow the user to change the position to match
                             // the desired position.
                             this.openSetMyPosition(shadeId);
                         }, 2000);
                     }
-                    else {
-                        if (makeBool(elShade.getAttribute('data-tilt'))) {
-                            this.btnTimer = setTimeout(() => {
-                                this.sendTiltCommand(shadeId, cmd);
-                            }, 2000);
-                        }
-                    }
+                }
+                else if (cmd === 'light') return;
+                else if (cmd === 'sunflag') return;
+                else if (makeBool(elShade.getAttribute('data-tilt'))) {
+                    this.btnTimer = setTimeout(() => {
+                        this.sendTiltCommand(shadeId, cmd);
+                    }, 2000);
                 }
             }, true);
         }
@@ -3915,8 +3914,6 @@ class Somfy {
         let btns = groupControls.querySelectorAll('div.cmd-button');
         for (let i = 0; i < btns.length; i++) {
             btns[i].addEventListener('click', (event) => {
-                console.log(this);
-                console.log(event);
                 let groupId = parseInt(event.currentTarget.getAttribute('data-groupid'), 10);
                 let cmd = event.currentTarget.getAttribute('data-cmd');
                 if (cmd === 'sunflag') {
@@ -3950,7 +3947,6 @@ class Somfy {
     closeShadePositioners() {
         let ctls = document.querySelectorAll('.shade-positioner');
         for (let i = 0; i < ctls.length; i++) {
-            console.log('Closing shade positioner');
             ctls[i].remove();
         }
     }

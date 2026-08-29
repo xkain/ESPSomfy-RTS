@@ -33,7 +33,7 @@ def _dst_dir():
 # ──────────────────────────────────────────────
 
 def minify_html(text: str) -> str:
-    text = re.sub(r"", "", text, flags=re.DOTALL)
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
     text = re.sub(r">\s+<", "> <", text)
     text = re.sub(r"\s{2,}", " ", text)
     return text.strip()
@@ -65,7 +65,7 @@ def minify_json(text: str) -> str:
         return text
 
 def minify_svg(text: str) -> str:
-    text = re.sub(r"", "", text, flags=re.DOTALL)
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
     return re.sub(r">\s+<", "><", text).strip()
 
 MINIFIERS = {
@@ -111,8 +111,9 @@ def process_file(src_path: str, dst_path: str):
 
         minifier = MINIFIERS.get(ext)
         if minifier:
-            content = minifier(content)
-            action = "minify+gzip"
+            minified = minifier(content)
+            action = "minify+gzip" if minified != content else "gzip"
+            content = minified
         else:
             action = "gzip"
 

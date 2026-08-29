@@ -2145,6 +2145,7 @@ div.eth-setting-line label {
         -webkit-overflow-scrolling: touch;
     }
 }
+}
 @media (max-width: 600px) {
     .lbc-responsive-container {
         flex-direction: column !important;
