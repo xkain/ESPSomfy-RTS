@@ -1,7 +1,7 @@
 [![GitHub Release](https://img.shields.io/github/release/xkain/ESPSomfy-RTS.svg?style=for-the-badge)](https://github.com/xkain/ESPSomfy-RTS/releases) [![GitHub Activity](https://img.shields.io/github/last-commit/xkain/ESPSomfy-RTS?style=for-the-badge)](https://github.com/xkain/ESPSomfy-RTS/commits/main) [![PlatformIO](https://img.shields.io/badge/PlatformIO-Compatible-orange?style=for-the-badge&logo=platformio&logoColor=white)](https://platformio.org) [![License](https://img.shields.io/github/license/xkain/ESPSomfy-RTS.svg?style=for-the-badge)](LICENSE) [![Project Maintenance](https://img.shields.io/badge/maintainer-xkain-blue.svg?style=for-the-badge)](https://github.com/xkain) [![GitHub stars](https://img.shields.io/github/stars/xkain/ESPSomfy-RTS?style=for-the-badge&logo=github&color=blue)](https://github.com/xkain/ESPSomfy-RTS/stargazers)
 <div align="center">
 
-  <img src="images/banniereSomfyRTS.png" alt="ESPSomfy-RTS Banner" width="100%">
+  <img src="images/banniereESPSomfy-RTS.png" alt="ESPSomfy-RTS Banner" width="100%">
 
   <br />
  

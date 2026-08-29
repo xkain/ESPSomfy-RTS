@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <img src="images/banniereSomfyRTS.png" alt="ESPSomfy-RTS Banner" width="100%">
+  <img src="images/banniereESPSomfy-RTS.png" alt="ESPSomfy-RTS Banner" width="100%">
 
   <br />
  
@@ -80,7 +80,7 @@ This project remains **compatible** with rstrouse's official `ESPSomfy-RTS-HA` i
 
 To get the most out of this firmware, use **[ESPSomfy-RTS Enhanced](https://github.com/xkain/ESPSomfy-RTS-enhanced)**, the dedicated and improved integration:
 
-* **Installation:** Available directly in the **HACS** (*Home Assistant Community Store*) store or by clicking the button below:
+* **Installation:** Available directly in the **HACS** store or by clicking the button below:
 
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced">
   <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.">
