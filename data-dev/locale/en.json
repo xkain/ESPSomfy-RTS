@@ -480,6 +480,8 @@
     "SAVESECURITY_PIN_CONFIRM": "Have you saved your PIN code in a secure location?",
     "SAVESECURITY_PASSWORD_WARNING": "Please keep your password in a safe place and do not forget it. The only way to recover a lost password is to fully reload the initialization firmware, which will erase your entire configuration.",
     "SAVESECURITY_PASSWORD_CONFIRM": "Have you saved your username and password in a secure location?",
+    "SAVESECURITY_NONE_WARNING": "ESPSomfy-RTS will become accessible without authentication to any device on your local network, including the settings, the backup and the remote addresses.",
+    "SAVESECURITY_NONE_CONFIRM": "Do you really want to disable security?",
 "PAGE": "INSTALL GIT RELEASE",
     "GIT_RELEASE_TITLE": "Updating system...",
     "GIT_RELEASE_DESC": "Please wait while the version %1 is being downloaded and installed",
@@ -683,5 +685,6 @@
     "ERR_GIT_CONNECT": "Git Download: Download Connection Error.",
     "ERR_GIT_DL_TIMEOUT": "Git Download: Timeout Error.",
     "ERR_GIT_NOTE": "Unable to load release notes.",
-    "ERR_GIT_PARTITION_BLOCKED": "Action cancelled: Major partition table incompatibility."
+    "ERR_GIT_PARTITION_BLOCKED": "Action cancelled: Major partition table incompatibility.",
+    "ERR_LANG_CHANGE": "Unable to change the language."
 }

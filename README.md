@@ -61,7 +61,13 @@ This project aims to make managing your RTS 433 MHZ devices as beautiful as it i
 If you are migrating from **rstrouse/ESPSomfy-RTS** or upgrading from an older version of this fork, please read the following:
 
 #### From rstrouse to this Fork (v2.5.0+)
-* **Data Compatibility:** You can restore a `.backup` file from the original project. Your shades, groups, and remote addresses will be successfully migrated.
+
+> [!WARNING]
+> **Do not move from v2.4.6/v2.4.7 to this fork through the Firmware page of
+> rstrouse's interface.** That route is not supported. Use a full install
+> ("onboard") instead, which rewrites both the application and the filesystem.
+
+* **Data Compatibility:** You can restore a `.backup` file from the original project. Your devices, groups, and remote addresses will be successfully migrated.
 * **⚠️ Radio Settings (Action Required):** Due to the new GPIO Selector in v2.5.0, radio pin assignments are **not** automatically restored from older backup files. 
 * **Warning Message:** You will see a compatibility alert during the restore process. After the import, you **must** manually verify and re-assign your GPIO pins in the **Radio tab**.
 

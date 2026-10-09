@@ -480,6 +480,8 @@
     "SAVESECURITY_PIN_CONFIRM": "Haben Sie Ihren PIN-Code an einem sicheren Ort gespeichert?",
     "SAVESECURITY_PASSWORD_WARNING": "Bitte bewahren Sie Ihr Passwort an einem sicheren Ort auf und vergessen Sie es nicht. Die einzige Möglichkeit, ein verlorenes Passwort wiederherzustellen, besteht darin, die Initialisierungs-Firmware vollständig neu zu laden, wodurch Ihre gesamte Konfiguration gelöscht wird.",
     "SAVESECURITY_PASSWORD_CONFIRM": "Haben Sie Ihren Benutzernamen und Ihr Passwort an einem sicheren Ort gespeichert?",
+    "SAVESECURITY_NONE_WARNING": "ESPSomfy-RTS wird ohne Authentifizierung für jedes Gerät in Ihrem lokalen Netzwerk zugänglich, einschließlich der Einstellungen, der Sicherung und der Fernbedienungsadressen.",
+    "SAVESECURITY_NONE_CONFIRM": "Möchten Sie die Sicherheit wirklich deaktivieren?",
 "PAGE": "INSTALL GIT RELEASE",
     "GIT_RELEASE_TITLE": "System wird aktualisiert...",
     "GIT_RELEASE_DESC": "Bitte warten Sie, während die Version %1 heruntergeladen und installiert wird.",
@@ -683,5 +685,6 @@
     "ERR_GIT_CONNECT": "Git-Download: Verbindungsfehler beim Download.",
     "ERR_GIT_DL_TIMEOUT": "Git-Download: Zeitüberschreitung.",
     "ERR_GIT_NOTE": "Versionshinweise konnten nicht geladen werden.",
-    "ERR_GIT_PARTITION_BLOCKED": "Aktion abgebrochen: Schwerwiegende Inkompatibilität der Partitionstabelle."
+    "ERR_GIT_PARTITION_BLOCKED": "Aktion abgebrochen: Schwerwiegende Inkompatibilität der Partitionstabelle.",
+    "ERR_LANG_CHANGE": "Die Sprache konnte nicht geändert werden."
 }

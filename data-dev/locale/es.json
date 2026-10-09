@@ -480,6 +480,8 @@
     "SAVESECURITY_PIN_CONFIRM": "¿Has guardado tu código PIN en un lugar seguro?",
     "SAVESECURITY_PASSWORD_WARNING": "Por favor, guarda tu contraseña en un lugar seguro y no la olvides. La única forma de recuperar una contraseña perdida es recargar completamente el firmware de inicialización, lo que borrará toda tu configuración.",
     "SAVESECURITY_PASSWORD_CONFIRM": "¿Has guardado tu nombre de usuario y contraseña en un lugar seguro?",
+    "SAVESECURITY_NONE_WARNING": "ESPSomfy-RTS será accesible sin autenticación para cualquier dispositivo de tu red local, incluidas la configuración, la copia de seguridad y las direcciones del mando.",
+    "SAVESECURITY_NONE_CONFIRM": "¿Realmente quieres desactivar la seguridad?",
 "PAGE": "INSTALL GIT RELEASE",
     "GIT_RELEASE_TITLE": "Actualizando el sistema...",
     "GIT_RELEASE_DESC": "Por favor, espera mientras se descarga e instala la versión %1",
@@ -683,5 +685,6 @@
     "ERR_GIT_CONNECT": "Descarga Git: Error de conexión de descarga.",
     "ERR_GIT_DL_TIMEOUT": "Descarga Git: Error de tiempo de espera.",
     "ERR_GIT_NOTE": "No se pueden cargar las notas de la versión.",
-    "ERR_GIT_PARTITION_BLOCKED": "Acción cancelada: Incompatibilidad importante en la tabla de particiones."
+    "ERR_GIT_PARTITION_BLOCKED": "Acción cancelada: Incompatibilidad importante en la tabla de particiones.",
+    "ERR_LANG_CHANGE": "No se ha podido cambiar el idioma."
 }

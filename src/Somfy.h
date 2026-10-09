@@ -239,7 +239,10 @@ class SomfyRemote {
     uint8_t repeats = 1;
     virtual bool isLastCommand(somfy_commands cmd);
     char *getRemotePrefId() {return m_remotePrefId;}
-    virtual void toJSON(JsonResponse &json);
+    // `secrets` : voir SomfyShade::toJSON (Somfy.cpp). A false, l'adresse de telecommande et le code
+    // tournant sortent a 0 et la liste des telecommandes liees sort vide. Le defaut reste true, donc
+    // tout appelant non modifie garde le comportement d'origine.
+    virtual void toJSON(JsonResponse &json, bool secrets = true);
     virtual void setRemoteAddress(uint32_t address);
     virtual uint32_t getRemoteAddress();
     virtual uint16_t getNextRollingCode();
@@ -306,7 +309,7 @@ class SomfyShade : public SomfyRemote {
     int8_t validateJSON(JsonObject &obj);
     void toJSONRef(JsonResponse &json);
     int8_t fromJSON(JsonObject &obj);
-    void toJSON(JsonResponse &json) override;
+    void toJSON(JsonResponse &json, bool secrets = true) override;
     
     char name[21] = "";
     void setShadeId(uint8_t id) { shadeId = id; }
@@ -558,7 +561,7 @@ class SomfyShadeController {
     SomfyGroup groups[SOMFY_MAX_GROUPS];
     bool linkRepeater(uint32_t address);
     bool unlinkRepeater(uint32_t address);
-    void toJSONShades(JsonResponse &json);
+    void toJSONShades(JsonResponse &json, bool secrets = true);
     void toJSONRooms(JsonResponse &json);
     void toJSONGroups(JsonResponse &json);
     void toJSONRepeaters(JsonResponse &json);

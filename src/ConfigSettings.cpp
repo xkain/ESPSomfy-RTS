@@ -134,6 +134,13 @@ bool BaseSettings::parseValueString(JsonObject &obj, const char *prop, char *pde
   if(obj.containsKey(prop)) strlcpy(pdest, obj[prop], size);
   return true;
 }
+bool BaseSettings::parseSecretString(JsonObject &obj, const char *prop, char *pdest, size_t size) {
+  if(obj.containsKey(prop)) {
+    const char *val = obj[prop] | "";
+    if(strlen(val) > 0) strlcpy(pdest, val, size);
+  }
+  return true;
+}
 bool BaseSettings::parseIPAddress(JsonObject &obj, const char *prop, IPAddress *pdest) {
   if(obj.containsKey(prop)) {
     char buff[16];
@@ -376,7 +383,8 @@ void MQTTSettings::toJSON(JsonResponse &json) {
   json.addElem("hostname", this->hostname);
   json.addElem("port", (uint32_t)this->port);
   json.addElem("username", this->username);
-  json.addElem("password", this->password);
+  // Meme principe que SecuritySettings (cf. son toJSON) : seule la presence sort.
+  json.addElem("hasPassword", strlen(this->password) > 0);
   json.addElem("rootTopic", this->rootTopic);
   json.addElem("discoTopic", this->discoTopic);
 }
@@ -388,7 +396,7 @@ bool MQTTSettings::toJSON(JsonObject &obj) {
   obj["hostname"] = this->hostname;
   obj["port"] = this->port;
   obj["username"] = this->username;
-  obj["password"] = this->password;
+  obj["hasPassword"] = strlen(this->password) > 0;
   obj["rootTopic"] = this->rootTopic;
   obj["discoTopic"] = this->discoTopic;
   return true;
@@ -400,7 +408,10 @@ bool MQTTSettings::fromJSON(JsonObject &obj) {
   this->parseValueString(obj, "protocol", this->protocol, sizeof(this->protocol));
   this->parseValueString(obj, "hostname", this->hostname, sizeof(this->hostname));
   this->parseValueString(obj, "username", this->username, sizeof(this->username));
-  this->parseValueString(obj, "password", this->password, sizeof(this->password));
+  // Conservatrice : toJSON() ne renvoie plus que hasPassword, donc l'interface poste un champ vide
+  // tant que l'utilisateur ne retape pas le mot de passe. /connectmqtt passe par ici (cf. Web.cpp),
+  // une lecture litterale effacerait donc le mot de passe du courtier a chaque enregistrement.
+  this->parseSecretString(obj, "password", this->password, sizeof(this->password));
   this->parseValueString(obj, "rootTopic", this->rootTopic, sizeof(this->rootTopic));
   this->parseValueString(obj, "discoTopic", this->discoTopic, sizeof(this->discoTopic));
   if(obj.containsKey("port")) this->port = obj["port"];
@@ -580,24 +591,29 @@ bool SecuritySettings::begin() {
 bool SecuritySettings::fromJSON(JsonObject &obj) {
   if(obj.containsKey("type")) this->type = static_cast<security_types>(obj["type"].as<uint8_t>());
   this->parseValueString(obj, "username", this->username, sizeof(this->username));
-  this->parseValueString(obj, "password", this->password, sizeof(this->password));
-  this->parseValueString(obj, "pin", this->pin, sizeof(this->pin));
+  this->parseSecretString(obj, "password", this->password, sizeof(this->password));
+  this->parseSecretString(obj, "pin", this->pin, sizeof(this->pin));
   if(obj.containsKey("permissions")) this->permissions = obj["permissions"];
   return true;
 }
+// Le mot de passe et le PIN ne sortent PLUS d'ici, sous aucune forme. C'est l'objet du signalement :
+// /getSecurity les rendait en clair, et le simple fait de proteger la route ne suffit pas -- le
+// secret traverserait encore le reseau en HTTP non chiffre a chaque ouverture des reglages, pour
+// l'interface legitime. On n'expose donc que leur PRESENCE, ce dont l'interface a besoin pour
+// afficher "defini" sans jamais connaitre la valeur. Pour les effacer, on passe le type a None.
 bool SecuritySettings::toJSON(JsonObject &obj) {
   obj["type"] = static_cast<uint8_t>(this->type);
   obj["username"] = this->username;
-  obj["password"] = this->password;
-  obj["pin"] = this->pin;
+  obj["hasPassword"] = strlen(this->password) > 0;
+  obj["hasPin"] = strlen(this->pin) > 0;
   obj["permissions"] = this->permissions;
   return true;  
 }
 void SecuritySettings::toJSON(JsonResponse &json) {
   json.addElem("type", static_cast<uint8_t>(this->type));
   json.addElem("username", this->username);
-  json.addElem("password", this->password);
-  json.addElem("pin", this->pin);
+  json.addElem("hasPassword", strlen(this->password) > 0);
+  json.addElem("hasPin", strlen(this->pin) > 0);
   json.addElem("permissions", this->permissions);
 }
 
@@ -646,21 +662,29 @@ bool WifiSettings::begin() {
 }
 bool WifiSettings::fromJSON(JsonObject &obj) {
   this->parseValueString(obj, "ssid", this->ssid, sizeof(this->ssid));
-  this->parseValueString(obj, "passphrase", this->passphrase, sizeof(this->passphrase));
+  // Conservatrice, pour la meme raison que MQTT : /setNetwork passe par ici avec la totalite du
+  // panneau Connexion, dont un champ passphrase vide. Une lecture litterale effacerait les
+  // identifiants WiFi des qu'on enregistre un autre reglage de cette page.
+  //
+  // Un reseau OUVERT reste configurable : /connectwifi n'emprunte PAS ce chemin, il affecte ssid et
+  // passphrase directement (SETCHARPROP), donc la boite de dialogue de connexion garde le pouvoir
+  // de poser une passphrase vide.
+  this->parseSecretString(obj, "passphrase", this->passphrase, sizeof(this->passphrase));
   if(obj.containsKey("roaming")) this->roaming = obj["roaming"];
   if(obj.containsKey("hidden")) this->hidden = obj["hidden"];
   return true;
 }
 bool WifiSettings::toJSON(JsonObject &obj) {
   obj["ssid"] = this->ssid;
-  obj["passphrase"] = this->passphrase;
+  // Meme principe que SecuritySettings (cf. son toJSON) : seule la presence sort.
+  obj["hasPassphrase"] = strlen(this->passphrase) > 0;
   obj["roaming"] = this->roaming;
   obj["hidden"] = this->hidden;
   return true;
 }
 void WifiSettings::toJSON(JsonResponse &json) {
   json.addElem("ssid", this->ssid);
-  json.addElem("passphrase", this->passphrase);
+  json.addElem("hasPassphrase", strlen(this->passphrase) > 0);
   json.addElem("roaming", this->roaming);
   json.addElem("hidden", this->hidden);
 }

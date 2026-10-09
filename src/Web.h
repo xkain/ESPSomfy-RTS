@@ -43,6 +43,7 @@ public:
   bool createAPIToken(const char *payload, char *token);
   bool createAPIPinToken(const IPAddress ipAddress, const char *pin, char *token);
   bool createAPIPasswordToken(const IPAddress ipAddress, const char *username, const char *password, char *token);
+  bool checkAuth(WebServer &server, bool cfg = false);
   bool isAuthenticated(WebServer &server, bool cfg = false);
 
   //void chunkRoomsResponse(WebServer &server, const char *elem = nullptr);

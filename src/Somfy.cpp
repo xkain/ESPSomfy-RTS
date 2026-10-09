@@ -3325,15 +3325,24 @@ void SomfyShade::toJSONRef(JsonResponse &json) {
   //SomfyRemote::toJSON(json);
 }
 
-void SomfyShade::toJSON(JsonResponse &json) {
+// `secrets` a false retire du flux l'adresse de telecommande, le code tournant et la liste des
+// telecommandes liees. C'est le couple adresse/code qui permet de forger une trame RTS valide et donc
+// de piloter l'equipement par radio, sans jamais parler au boitier : il ne doit pas sortir sous la
+// seule autorisation "Control". La route elle-meme reste au niveau Control -- ce sont les SECRETS qui
+// montent d'un cran, pas l'acces -- sinon le mode "config seule", ou le garde passe sans cle, les
+// servirait a quiconque est sur le reseau local.
+//
+// Les champs sont EMIS malgre tout, a 0 et en liste vide : les retirer changerait la forme du JSON et
+// casserait les clients qui lisent ces cles sans les tester.
+void SomfyShade::toJSON(JsonResponse &json, bool secrets) {
   json.addElem("shadeId", this->getShadeId());
   json.addElem("roomId", this->roomId);
   json.addElem("name", this->name);
-  json.addElem("remoteAddress", (uint32_t)this->m_remoteAddress);
+  json.addElem("remoteAddress", (uint32_t)(secrets ? this->m_remoteAddress : 0));
   json.addElem("upTime", (uint32_t)this->upTime);
   json.addElem("downTime", (uint32_t)this->downTime);
   json.addElem("paired", this->paired);
-  json.addElem("lastRollingCode", (uint32_t)this->lastRollingCode);
+  json.addElem("lastRollingCode", (uint32_t)(secrets ? this->lastRollingCode : 0));
   json.addElem("position", this->transformPosition(this->currentPos));
   json.addElem("tiltType", static_cast<uint8_t>(this->tiltType));
   json.addElem("tiltPosition", this->transformPosition(this->currentTiltPos));
@@ -3363,6 +3372,7 @@ void SomfyShade::toJSON(JsonResponse &json) {
   json.addElem("simMy", this->simMy());
   json.beginArray("linkedRemotes");
   for(uint8_t i = 0; i < SOMFY_MAX_LINKED_REMOTES; i++) {
+    if(!secrets) break;  // chaque entree EST une adresse de telecommande
     SomfyLinkedRemote &lremote = this->linkedRemotes[i];
     if(lremote.getRemoteAddress() != 0) {
       json.beginObject();
@@ -3542,9 +3552,9 @@ bool SomfyGroup::toJSON(JsonObject &obj) {
 }
 */
 
-void SomfyRemote::toJSON(JsonResponse &json) {
-  json.addElem("remoteAddress", (uint32_t)this->getRemoteAddress());
-  json.addElem("lastRollingCode", (uint32_t)this->lastRollingCode);
+void SomfyRemote::toJSON(JsonResponse &json, bool secrets) {
+  json.addElem("remoteAddress", (uint32_t)(secrets ? this->getRemoteAddress() : 0));
+  json.addElem("lastRollingCode", (uint32_t)(secrets ? this->lastRollingCode : 0));
 }
 /*
 bool SomfyRemote::toJSON(JsonObject &obj) {
@@ -4128,12 +4138,12 @@ void SomfyShadeController::toJSONRooms(JsonResponse &json) {
     }
   }
 }
-void SomfyShadeController::toJSONShades(JsonResponse &json) {
+void SomfyShadeController::toJSONShades(JsonResponse &json, bool secrets) {
   for(uint8_t i = 0; i < SOMFY_MAX_SHADES; i++) {
     SomfyShade &shade = this->shades[i];
     if(shade.getShadeId() != 255) {
       json.beginObject();
-      shade.toJSON(json);
+      shade.toJSON(json, secrets);
       json.endObject();
     }
   }

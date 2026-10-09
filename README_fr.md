@@ -56,6 +56,12 @@ Ce projet vise à rendre la gestion de vos appareils RTS 433 MHZ aussi belle que
 Si vous migrez depuis **rstrouse/ESPSomfy-RTS** ou si vous mettez à niveau une ancienne version de ce fork, veuillez lire ce qui suit :
 
 #### De rstrouse à ce Fork (v2.5.0+)
+
+> [!WARNING]
+> **Ne passez pas de la v2.4.6/v2.4.7 à ce fork par la page Firmware de l'interface
+> rstrouse.** Cette voie n'est pas prise en charge. Faites une installation complète
+> (« onboard »), qui réécrit l'application **et** le système de fichiers.
+
 * **Compatibilité des données :** Vous pouvez restaurer un fichier `.backup` du projet original. Vos volets, groupes et adresses de télécommandes seront migrés avec succès.
 * **⚠️ Paramètres Radio (Action requise) :** En raison du nouveau sélecteur de GPIO dans la v2.5.0, les assignations des broches radio ne sont **pas** restaurées automatiquement à partir des anciens fichiers de sauvegarde. 
 * **Message d'avertissement :** Vous verrez une alerte de compatibilité pendant le processus de restauration. Après l'importation, vous **devez** vérifier et réassigner manuellement vos broches GPIO dans l'onglet **Radio**.
