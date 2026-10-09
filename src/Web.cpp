@@ -13,6 +13,7 @@
 #include "Web.h"
 #include "MQTT.h"
 #include "GitOTA.h"
+#include "Sockets.h"
 #include "Network.h"
 
 extern ConfigSettings settings;
@@ -37,8 +38,110 @@ static const char _encoding_html[] = "text/html";
 static const char _encoding_json[] = "application/json";
 
 
-WebServer apiServer(8081);
-WebServer server(80);
+// Politique d'acces appliquee a CHAQUE route enregistree sur les deux serveurs HTTP.
+//  Public  : joignable sans identifiants -- ressources de l'interface, login, langue.
+//  Control : etat et commandes des equipements ; ouvert quand la securite est en "config seule".
+//  Config  : tout le reste -- reglages, securite, firmware, sauvegarde, redemarrage...
+//
+// TOUTE route absente des deux listes est Config, donc protegee. C'est la seule polarite tenable :
+// l'ancien code reposait sur un appel explicite a isAuthenticated() dans chaque handler, et comme
+// cet appel n'a jamais ete ecrit nulle part, l'API entiere etait ouverte. Avec un defaut ferme, une
+// route ajoutee demain est protegee sans que personne n'ait a y penser.
+//
+// /discovery est Control et NON Public : elle sert la configuration complete, chaque equipement
+// passant par SomfyShade::toJSON() qui inclut remoteAddress ET lastRollingCode -- exactement le
+// couple necessaire pour forger une trame RTS valide et piloter les equipements par radio, en
+// contournant integralement le PIN. Le couple lui-meme est en outre masque sauf authentification
+// de niveau Config (cf. SomfyShade::toJSON), car en mode "config seule" cette route repond sans
+// cle : l'authentification seule n'y protege donc rien, le masquage si.
+// ControlRead : lecture au niveau Control, ECRITURE au niveau Config. /room, /shade et /group
+// servent les deux sur la meme URI -- un GET lit un element, un PUT/POST appelle fromJSON() puis
+// save(), c'est-a-dire une reecriture complete de la configuration de l'element (adresse de
+// telecommande et code tournant compris). Les classer Control a plat aurait laisse ces ecritures
+// ouvertes a tout le reseau local en mode "config seule" : la lecture et l'ecriture doivent donc
+// etre dissociees, exactement comme le fait la ligne 3.x.
+enum class route_access : uint8_t { Public, Control, ControlRead, Config };
+static route_access routeAccess(const char *uri) {
+  static const char *pub[] = { "/", "/login", "/loginContext", "/lang", "/upnp.xml",
+    "/index.js", "/base.css", "/main.css", "/overlays.css", "/favicon.svg", "/editionWifi.webp", "/editionEthernet.webp" };
+  // /modulesettings est ici et non en Config : le tableau de bord en a besoin pour s'afficher
+  // (version, modele de puce, et l'attribut data-chipmodel dont depend la table de broches), et son
+  // contenu n'a rien de sensible -- nom d'hote, modele, langue, couleur d'accent, NTP.
+  // /setLang ECRIT la langue de l'appareil : rien de sensible, mais pas une route anonyme pour
+  // autant, d'ou Control et non Public.
+  static const char *ctl[] = { "/controller", "/rooms", "/shades", "/groups", "/discovery",
+    "/shadeCommand", "/groupCommand", "/tiltCommand", "/repeatCommand", "/setPositions", "/setSensor",
+    "/modulesettings", "/setLang" };
+  static const char *ctlRead[] = { "/room", "/shade", "/group" };
+  for(uint8_t i = 0; i < sizeof(pub) / sizeof(pub[0]); i++) if(strcmp(uri, pub[i]) == 0) return route_access::Public;
+  for(uint8_t i = 0; i < sizeof(ctl) / sizeof(ctl[0]); i++) if(strcmp(uri, ctl[i]) == 0) return route_access::Control;
+  for(uint8_t i = 0; i < sizeof(ctlRead) / sizeof(ctlRead[0]); i++) if(strcmp(uri, ctlRead[i]) == 0) return route_access::ControlRead;
+  return route_access::Config;
+}
+// Niveau effectif d'une requete : seul ControlRead depend de la methode.
+static bool routeNeedsConfig(route_access access, HTTPMethod method) {
+  if(access == route_access::Config) return true;
+  if(access == route_access::ControlRead) return method != HTTP_GET;
+  return false;
+}
+// WebServer qui applique la politique ci-dessus a chaque handler qu'il enregistre.
+//
+// ATTENTION : WebServer::on() n'est PAS virtuelle. Ce masquage ne fonctionne que parce que les deux
+// instances ci-dessous sont declarees de type SecuredWebServer et que TOUS les enregistrements de
+// routes vivent dans ce fichier. Declarer un jour `extern WebServer server;` dans un en-tete, ou
+// enregistrer une route via une reference WebServer&, desactiverait silencieusement le garde sans
+// la moindre erreur de compilation. Si ce besoin apparait, passer par une methode nommee
+// explicitement (onSecured) plutot que par un masquage.
+class SecuredWebServer : public WebServer {
+  public:
+    SecuredWebServer(uint16_t port) : WebServer(port) {}
+    void on(const char *uri, THandlerFunction fn) { WebServer::on(uri, guard(uri, fn)); }
+    void on(const char *uri, HTTPMethod method, THandlerFunction fn) { WebServer::on(uri, method, guard(uri, fn)); }
+    void on(const char *uri, HTTPMethod method, THandlerFunction fn, THandlerFunction ufn) {
+      WebServer::on(uri, method, guard(uri, fn), guardUpload(uri, ufn));
+    }
+  private:
+    THandlerFunction guard(const char *uri, THandlerFunction fn) {
+      route_access access = routeAccess(uri);
+      if(access == route_access::Public) return fn;
+      return [this, access, fn]() {
+        // Les preflight CORS passent : ils ne portent ni identifiants ni donnees, et les refuser
+        // empecherait le navigateur d'emettre la vraie requete, authentifiee celle-la.
+        if(this->method() != HTTP_OPTIONS && !webServer.checkAuth(*this, routeNeedsConfig(access, this->method()))) {
+          this->send(401, _encoding_text, F("Unauthorized API Key"));
+          return;
+        }
+        fn();
+      };
+    }
+    // Le callback d'upload tourne PENDANT la reception du corps, avant le handler principal : il
+    // doit n'ecrire nulle part pour un client non authentifie. On le saute donc, et le handler
+    // principal repond le 401.
+    //
+    // On memorise le verdict au premier fragment au lieu de le recalculer a chaque appel : ce
+    // callback est invoque pour START puis pour CHAQUE fragment du corps, et checkAuth() fait un
+    // HMAC complet (allocation mbedtls) a chaque fois. Sur un televersement de firmware de 1,5 Mo
+    // cela represente des centaines d'allocations dans le chemin chaud, sur l'appareil dont le tas
+    // est deja le goulot connu.
+    THandlerFunction guardUpload(const char *uri, THandlerFunction ufn) {
+      route_access access = routeAccess(uri);
+      if(access == route_access::Public) return ufn;
+      // Un seul verdict partage par route, et non par requete : c'est volontaire et sans risque ici,
+      // le serveur est synchrone et ne traite qu'une requete a la fois (handleClient() depuis la
+      // boucle Arduino). Il est reevalue a chaque UPLOAD_FILE_START, c'est-a-dire au premier appel de
+      // chaque televersement -- l'API WebServer garantit cet ordre START / WRITE... / END.
+      auto authed = std::make_shared<int8_t>(-1);  // -1 = pas encore evalue, 0 = refuse, 1 = admis
+      return [this, access, ufn, authed]() {
+        HTTPUpload &up = this->upload();
+        if(up.status == UPLOAD_FILE_START || *authed < 0)
+          *authed = webServer.checkAuth(*this, routeNeedsConfig(access, this->method())) ? 1 : 0;
+        if(*authed == 1) ufn();
+      };
+    }
+};
+
+SecuredWebServer apiServer(8081);
+SecuredWebServer server(80);
 void Web::startup() {
   Serial.println("Launching web server...");
 
@@ -82,27 +185,129 @@ void Web::handleDeserializationError(WebServer &server, DeserializationError &er
       break;
     }
 }
-bool Web::isAuthenticated(WebServer &server, bool cfg) {
-  Serial.println("Checking authentication");
+// Rend le verdict SANS repondre. Deux appelants en ont besoin sous cette forme : le garde de
+// SecuredWebServer, qui emet lui-meme son 401, et les handlers qui s'en servent pour decider s'ils
+// peuvent inclure des secrets dans une reponse qu'ils vont envoyer de toute facon (cf. l'argument
+// `secrets` de SomfyShade::toJSON). Une variante qui repondrait elle-meme enverrait, dans ce second
+// cas, un 401 suivi de la vraie reponse -- deux reponses pour une seule requete.
+bool Web::checkAuth(WebServer &server, bool cfg) {
   if(settings.Security.type == security_types::None) return true;
-  else if(!cfg && (settings.Security.permissions & static_cast<uint8_t>(security_permissions::ConfigOnly)) == 0x01) return true;
-  else if(server.hasHeader("apikey")) {
-    // Api key was supplied.
-    Serial.println("Checking API Key...");
-    char token[65];
-    memset(token, 0x00, sizeof(token));
-    this->createAPIToken(server.client().remoteIP(), token);
-    // Compare the tokens.
-    if(String(token) != server.header("apikey")) return false;
-    server.sendHeader("apikey", token);
+  if(!cfg && (settings.Security.permissions & static_cast<uint8_t>(security_permissions::ConfigOnly)) == 0x01) return true;
+  if(!server.hasHeader("apikey")) return false;
+  char token[65];
+  memset(token, 0x00, sizeof(token));
+  // Resultat de createAPIToken() verifie et jeton vide refuse : le calcul peut echouer proprement
+  // quand le tas ne permet plus d'allouer le contexte HMAC, et laisse alors `token` vide. Sans ces
+  // deux gardes, la comparaison opposerait une chaine vide a l'en-tete recu -- or l'interface
+  // envoie litteralement `apikey:` (vide) tant qu'aucune session n'est ouverte. Une penurie de
+  // memoire ouvrirait donc l'API a tout client non authentifie, exactement au moment ou l'appareil
+  // est le plus fragile.
+  if(!this->createAPIToken(server.client().remoteIP(), token)) return false;
+  if(token[0] == '\0') return false;
+  String supplied = server.header("apikey");
+  if(supplied.length() != strlen(token)) return false;
+  uint8_t diff = 0;
+  for(size_t i = 0; i < supplied.length(); i++) diff |= (uint8_t)supplied[i] ^ (uint8_t)token[i];
+  return diff == 0;
+}
+// Variante qui repond le 401 elle-meme, pour un handler qui veut sortir immediatement.
+bool Web::isAuthenticated(WebServer &server, bool cfg) {
+  if(this->checkAuth(server, cfg)) return true;
+  server.send(401, _encoding_text, F("Unauthorized API Key"));
+  return false;
+}
+// ANTI FORCE BRUTE SUR /login.
+//
+// Sans cela, un PIN a 4 chiffres se parcourt entierement en 10 000 requetes, sans aucune limite de
+// debit : le controle d'acces ajoute par ailleurs ne vaut alors que le temps de ce parcours.
+// Verrouillage PAR ADRESSE IP, quota d'essais libres puis doublement du repli, plafonne.
+//
+// POURQUOI PAR IP ET PAS GLOBALEMENT : un compteur global permettrait a n'importe qui sur le reseau
+// d'enfermer le proprietaire dehors en echouant volontairement. Le defaut connu de l'approche par IP
+// -- un attaquant qui change d'adresse repart a zero -- est le moindre mal, et il ne supprime pas le
+// cout: il faut une adresse nouvelle a chaque palier.
+//
+// DECROISSANCE. Sans oubli, un utilisateur revenu le lendemain repartirait avec le compteur au plus
+// haut. Apres LOGIN_DECAY_MS sans tentative et hors verrouillage, le compteur est remis a zero.
+//
+// EVICTION, et son compromis assume. Le tableau est borne ; a saturation on recycle d'abord un
+// emplacement libre, puis le plus ancien NON verrouille, et seulement en dernier recours celui dont
+// le verrou expire le plus tot. Ce dernier cas offre a un attaquant capable de faire varier son
+// adresse un moyen de raccourcir son propre repli -- mais il faut saturer les 8 emplacements en
+// permanence, et l'alternative (refuser toute nouvelle IP quand le tableau est plein) retablirait
+// exactement le deni de service qu'on vient de supprimer. Ne jamais enfermer le proprietaire dehors
+// prime.
+//
+// CONCURRENCE : aucun verrou necessaire. handleClient() des deux serveurs est appele depuis la
+// boucle Arduino (cf. SomfyController.ino), donc depuis une tache unique.
+#define LOGIN_FREE_ATTEMPTS 3
+#define LOGIN_LOCKOUT_BASE_SECONDS 15
+#define LOGIN_LOCKOUT_MAX_SECONDS 900
+#define LOGIN_TRACK_SLOTS 8
+#define LOGIN_DECAY_MS 900000UL
+
+struct login_tracker_t {
+  bool used = false;
+  uint32_t ip = 0;
+  uint16_t fails = 0;
+  uint32_t lockUntil = 0;   // echelle millis()
+  uint32_t lastSeen = 0;
+};
+static login_tracker_t g_loginTrackers[LOGIN_TRACK_SLOTS];
+
+// Comparaison en difference signee : millis() repasse a zero tous les ~49 jours, et un
+// `millis() < lockUntil` naif verrouillerait alors pour la duree entiere du cycle.
+static bool loginIsLocked(const login_tracker_t &t) {
+  return t.lockUntil != 0 && (int32_t)(t.lockUntil - millis()) > 0;
+}
+static login_tracker_t *loginTrackerFor(const IPAddress &addr) {
+  uint32_t ip = (uint32_t)addr;
+  uint32_t now = millis();
+  for(uint8_t i = 0; i < LOGIN_TRACK_SLOTS; i++) {
+    if(g_loginTrackers[i].used && g_loginTrackers[i].ip == ip) {
+      login_tracker_t &t = g_loginTrackers[i];
+      // Le silence prolonge efface l'ardoise, mais JAMAIS un verrou en cours -- sans quoi il
+      // suffirait d'attendre pour l'annuler.
+      if(!loginIsLocked(t) && (uint32_t)(now - t.lastSeen) >= LOGIN_DECAY_MS) {
+        t.fails = 0;
+        t.lockUntil = 0;
+      }
+      t.lastSeen = now;
+      return &t;
+    }
   }
-  else {
-    // Send a 401
-    Serial.println("Not authenticated...");
-    server.send(401, "Unauthorized API Key");
-    return false;
+  login_tracker_t *pick = nullptr;
+  for(uint8_t i = 0; i < LOGIN_TRACK_SLOTS; i++) {
+    if(!g_loginTrackers[i].used) { pick = &g_loginTrackers[i]; break; }
   }
-  return true;
+  if(!pick) {
+    for(uint8_t i = 0; i < LOGIN_TRACK_SLOTS; i++) {
+      if(loginIsLocked(g_loginTrackers[i])) continue;
+      if(!pick || (uint32_t)(now - g_loginTrackers[i].lastSeen) > (uint32_t)(now - pick->lastSeen))
+        pick = &g_loginTrackers[i];
+    }
+  }
+  if(!pick) {
+    pick = &g_loginTrackers[0];
+    for(uint8_t i = 1; i < LOGIN_TRACK_SLOTS; i++) {
+      if((int32_t)(g_loginTrackers[i].lockUntil - pick->lockUntil) < 0) pick = &g_loginTrackers[i];
+    }
+  }
+  pick->used = true;
+  pick->ip = ip;
+  pick->fails = 0;
+  pick->lockUntil = 0;
+  pick->lastSeen = now;
+  return pick;
+}
+// Duree du verrou apres `fails` echecs : doublement a chaque echec au-dela du quota libre, plafonne.
+static uint32_t loginLockoutSeconds(uint16_t fails) {
+  uint16_t over = (fails > LOGIN_FREE_ATTEMPTS) ? (uint16_t)(fails - LOGIN_FREE_ATTEMPTS - 1) : 0;
+  // Decalage borne AVANT application : au-dela de 16 il deborderait l'entier bien avant que le
+  // plafond n'ait l'occasion d'agir.
+  if(over > 16) over = 16;
+  uint32_t secs = (uint32_t)LOGIN_LOCKOUT_BASE_SECONDS << over;
+  return (secs > LOGIN_LOCKOUT_MAX_SECONDS) ? LOGIN_LOCKOUT_MAX_SECONDS : secs;
 }
 void sendJsonError(const char* detail = "") {
   String msg = F("JSON Err: ");
@@ -123,14 +328,14 @@ bool Web::createAPIToken(const char *payload, char *token) {
     mbedtls_md_hmac_starts(&ctx, (const unsigned char *)settings.serverId, strlen(settings.serverId));
     mbedtls_md_hmac_update(&ctx, (const unsigned char *)payload, strlen(payload)); 
     mbedtls_md_hmac_finish(&ctx, hmacResult);
-    Serial.print("Hash: ");
+    // Ni le jeton ni le PIN ne sont tracés : la liaison série est lisible par quiconque ouvre le
+    // boîtier, et le jeton vaut la session.
     token[0] = '\0';
     for(int i = 0; i < sizeof(hmacResult); i++){
         char str[3];
         sprintf(str, "%02x", (int)hmacResult[i]);
         strcat(token, str);
     }
-    Serial.println(token);
     return true;
 }
 bool Web::createAPIToken(const IPAddress ipAddress, char *token) {
@@ -244,10 +449,20 @@ void Web::handleLogin(WebServer &server) {
       if(server.hasArg("password")) strlcpy(password, server.arg("password").c_str(), sizeof(password));
       if(server.hasArg("pin")) strlcpy(pin, server.arg("pin").c_str(), sizeof(pin));
     }
+    // Anti force brute : verrouillage actif POUR CETTE ADRESSE, on refuse sans meme comparer les
+    // identifiants. L'emplacement est resolu ici une seule fois, et reutilise plus bas.
+    login_tracker_t *tracker = loginTrackerFor(server.client().remoteIP());
+    if(loginIsLocked(*tracker)) {
+      uint32_t retryAfter = (uint32_t)((tracker->lockUntil - millis() + 999) / 1000);
+      obj["success"] = false;
+      obj["msg"] = "Too many attempts. Please wait.";
+      obj["retryAfter"] = retryAfter;
+      serializeJson(doc, g_content);
+      server.send(429, _encoding_json, g_content);
+      return;
+    }
     // At this point we should have all the data we need to login.
     if(settings.Security.type == security_types::PinEntry) {
-      Serial.print("Validating pin ");
-      Serial.println(pin);
       if(strlen(pin) == 0 || strcmp(pin, settings.Security.pin) != 0) {
         obj["success"] = false;
         obj["msg"] = "Invalid Pin Entry";
@@ -268,6 +483,26 @@ void Web::handleLogin(WebServer &server) {
         obj["msg"] = "Login successful";
         obj["apiKey"] = token;
       }
+    }
+    if(obj["success"] == true) {
+      tracker->fails = 0;
+      tracker->lockUntil = 0;
+    }
+    else {
+      if(tracker->fails < 1000) tracker->fails++;
+      if(tracker->fails > LOGIN_FREE_ATTEMPTS) {
+        // Au-dela du quota libre : verrouillage de CETTE adresse, double a chaque nouvel echec.
+        uint32_t secs = loginLockoutSeconds(tracker->fails);
+        tracker->lockUntil = millis() + (secs * 1000UL);
+        obj["retryAfter"] = secs;
+        serializeJson(doc, g_content);
+        server.send(429, _encoding_json, g_content);
+        return;
+      }
+      // Encore dans le quota d'essais libres : on indique ou on en est, pour que l'interface puisse
+      // avertir plutot que de laisser l'utilisateur decouvrir le verrou.
+      obj["attempt"] = tracker->fails;
+      obj["maxAttempts"] = LOGIN_FREE_ATTEMPTS;
     }
     serializeJson(doc, g_content);
     server.send(200, _encoding_json, g_content);
@@ -336,7 +571,13 @@ void Web::handleController(WebServer &server) {
     somfy.toJSONRooms(resp);
     resp.endArray();
     resp.beginArray("shades");
-    somfy.toJSONShades(resp);
+    // Secrets radio au niveau CONFIG seulement, sur les six routes de niveau Control qui servent des
+    // equipements (/controller, /shades, /shade, /discovery, /setPositions, /setSensor). La route
+    // reste Control : ce sont les SECRETS qui montent d'un cran, pas l'acces -- sinon le mode
+    // "config seule", ou le garde passe sans cle, servirait le couple adresse/code tournant a
+    // quiconque est sur le reseau local. checkAuth() et non isAuthenticated() : il ne faut PAS
+    // repondre ici, la vraie reponse part juste apres.
+    somfy.toJSONShades(resp, webServer.checkAuth(server, true));
     resp.endArray();
     resp.beginArray("groups");
     somfy.toJSONGroups(resp);
@@ -357,6 +598,20 @@ void Web::handleLoginContext(WebServer &server) {
     resp.beginObject();
     resp.addElem("type", static_cast<uint8_t>(settings.Security.type));
     resp.addElem("permissions", settings.Security.permissions);
+    // VERDICT DU FIRMWARE sur la cle presentee AVEC cette requete. C'est ce qui permet au
+    // navigateur de restaurer une session -- cle conservee dans le sessionStorage de l'onglet --
+    // sans jamais decider lui-meme qu'il est authentifie. Une cle perimee (PIN change depuis un
+    // autre appareil, adresse IP du client changee, secret regenere) est refusee ici et l'ecran de
+    // connexion reapparait, au lieu de laisser l'interface se croire connectee puis collectionner
+    // les 401.
+    //
+    // Verifiee au niveau CONFIGURATION : en mode "config seule" une verification de niveau
+    // controle passe sans aucune cle (cf. checkAuth), elle ne dirait donc rien de la validite de
+    // celle qui a ete presentee. Et false d'office sans securite, ou `checkAuth` repond vrai pour
+    // tout le monde : sans PIN il n'y a pas de session, et tout le code client teste
+    // `type === 0 || authenticated`.
+    resp.addElem("authenticated",
+      settings.Security.type == security_types::None ? false : webServer.checkAuth(server, true));
     resp.addElem("serverId", settings.serverId);
     resp.addElem("version", settings.fwVersion.name);
     resp.addElem("model", "ESPSomfyRTS");
@@ -421,7 +676,7 @@ void Web::handleGetShades(WebServer &server) {
       JsonResponse resp;
       resp.beginResponse(&server, g_content, sizeof(g_content));
       resp.beginArray();
-      somfy.toJSONShades(resp);
+      somfy.toJSONShades(resp, webServer.checkAuth(server, true));
       resp.endArray();
       resp.endResponse();
       server.client().stop();
@@ -783,7 +1038,7 @@ void Web::handleShade(WebServer &server) {
         JsonResponse resp;
         resp.beginResponse(&server, g_content, sizeof(g_content));
         resp.beginObject();
-        shade->toJSON(resp);
+        shade->toJSON(resp, webServer.checkAuth(server, true));
         resp.endObject();
         resp.endResponse();
       }
@@ -814,7 +1069,7 @@ void Web::handleShade(WebServer &server) {
               JsonResponse resp;
               resp.beginResponse(&server, g_content, sizeof(g_content));
               resp.beginObject();
-              shade->toJSON(resp);
+              shade->toJSON(resp, webServer.checkAuth(server, true));
               resp.endObject();
               resp.endResponse();
             }
@@ -920,7 +1175,7 @@ void Web::handleDiscovery(WebServer &server) {
     somfy.toJSONRooms(resp);
     resp.endArray();
     resp.beginArray("shades");
-    somfy.toJSONShades(resp);
+    somfy.toJSONShades(resp, webServer.checkAuth(server, true));
     resp.endArray();
     resp.beginArray("groups");
     somfy.toJSONGroups(resp);
@@ -989,7 +1244,7 @@ void Web::handleSetPositions(WebServer &server) {
       JsonResponse resp;
       resp.beginResponse(&server, g_content, sizeof(g_content));
       resp.beginObject();
-      shade->toJSON(resp);
+      shade->toJSON(resp, webServer.checkAuth(server, true));
       resp.endObject();
       resp.endResponse();
     }
@@ -1042,7 +1297,7 @@ void Web::handleSetSensor(WebServer &server) {
       JsonResponse resp;
       resp.beginResponse(&server, g_content, sizeof(g_content));
       resp.beginObject();
-      shade->toJSON(resp);
+      shade->toJSON(resp, webServer.checkAuth(server, true));
       resp.endObject();
       resp.endResponse();
     }
@@ -2295,6 +2550,10 @@ void Web::begin() {
       JsonObject obj = doc.as<JsonObject>();
       settings.Security.fromJSON(obj);
       settings.Security.save();
+      // Le jeton derive du PIN/mot de passe : les sockets deja ouvertes tiennent desormais une cle
+      // fausse, et resteraient pourtant abonnees a l'etat complet des equipements. On les coupe, le
+      // client se reconnectera avec la nouvelle cle (celle renvoyee juste en dessous).
+      sockRevokeAllClients();
 
       doc.clear();
       obj = doc.to<JsonObject>();
@@ -2454,8 +2713,16 @@ void Web::begin() {
             if(objWifi.containsKey("ssid") && objWifi["ssid"].as<String>().compareTo(settings.WIFI.ssid) != 0) {
               if(WiFi.softAPgetStationNum() == 0) reboot = true;
             }
-            if(objWifi.containsKey("passphrase") && objWifi["passphrase"].as<String>().compareTo(settings.WIFI.passphrase) != 0) {
-              if(WiFi.softAPgetStationNum() == 0) reboot = true;
+            // Une passphrase VIDE signifie "inchangee" (cf. WifiSettings::fromJSON) : l'interface ne
+            // recoit plus la vraie valeur et poste donc un champ vide a chaque enregistrement de
+            // cette page. Sans ce test de longueur, la comparaison -- qui a lieu AVANT fromJSON,
+            // donc contre la valeur encore stockee -- conclurait a un changement et redemarrerait le
+            // boitier a chaque sauvegarde reseau, alors que rien n'a bouge.
+            if(objWifi.containsKey("passphrase")) {
+              String phr = objWifi["passphrase"].as<String>();
+              if(phr.length() > 0 && phr.compareTo(settings.WIFI.passphrase) != 0) {
+                if(WiFi.softAPgetStationNum() == 0) reboot = true;
+              }
             }
           }
           settings.WIFI.fromJSON(objWifi);

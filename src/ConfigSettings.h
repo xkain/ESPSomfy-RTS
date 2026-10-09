@@ -47,6 +47,10 @@ class BaseSettings {
     void toJSON(JsonResponse &json);
     bool parseIPAddress(JsonObject &obj, const char *prop, IPAddress *);
     bool parseValueString(JsonObject &obj, const char *prop, char *dest, size_t size);
+    // Pour un champ que toJSON() ne renvoie PLUS en clair : une chaine vide signifie "inchange",
+    // pas "effacer". Sans cela, l'interface -- qui ne recoit plus le secret et poste donc un champ
+    // vide -- effacerait le mot de passe des qu'on modifie autre chose dans le meme formulaire.
+    bool parseSecretString(JsonObject &obj, const char *prop, char *dest, size_t size);
     int parseValueInt(JsonObject &obj, const char *prop, int defVal);
     double parseValueDouble(JsonObject &obj, const char *prop, double defVal);
     bool saveFile(const char* filename);
@@ -136,7 +140,13 @@ class SecuritySettings: BaseSettings {
     char username[33] = "";
     char password[33] = "";
     char pin[5] = "";
-    uint8_t permissions = 0;
+    // Defaut "config seule" (ConfigOnly) et NON securite complete. Determinant pour les clients
+    // tiers : en securite complete, l'etat et les commandes exigent la cle, ce qui coupe net une
+    // integration Home Assistant qui ne la presente pas. En "config seule" seuls les reglages sont
+    // proteges -- c'est ce que l'utilisateur veut dire quand il pose un PIN sans rien regler d'autre.
+    // Ne s'applique qu'aux appareils n'ayant jamais enregistre de securite : load() conserve la
+    // valeur stockee quand la cle existe en NVS, donc personne ne voit son reglage change.
+    uint8_t permissions = static_cast<uint8_t>(security_permissions::ConfigOnly);
     bool begin();
     bool save();
     bool load();

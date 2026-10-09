@@ -7,18 +7,99 @@
 #include "Somfy.h"
 #include "Network.h"
 #include "GitOTA.h"
+#include "Web.h"
 
 extern ConfigSettings settings;
 extern Network net;
 extern SomfyShadeController somfy;
 extern SocketEmitter sockEmit;
 extern GitUpdater git;
+extern Web webServer;  // createAPIToken() pour la poignee de main authentifiee, cf. plus bas
 
 
 WebSocketsServer sockServer = WebSocketsServer(8080);
 
 #define MAX_SOCK_RESPONSE 2048
 static char g_response[MAX_SOCK_RESPONSE];
+
+// AUTHENTIFICATION DE LA POIGNEE DE MAIN.
+//
+// Sans elle, le serveur n'authentifie RIEN sur ce canal : sur WStype_CONNECTED il enchaine
+// directement delayInit() -> initClients() -> somfy.emitState(num), c'est-a-dire l'etat complet de
+// chaque equipement, remoteAddress comprise. Un client peut de plus emettre "join:0" pour rejoindre
+// ROOM_EMIT_FRAME et recevoir alors TOUTES les trames RF captees, decodees, avec adresse et code
+// tournant. Le modele d'authentification HTTP est donc integralement contournable par le port 8080,
+// y compris avec la securite "complete" activee.
+//
+// MEME NIVEAU QUE /controller ET /shades (checkAuth avec cfg=false), pas plus strict : ces deux
+// routes exposent les memes champs. L'objectif est de fermer le contournement, pas de durcir au-dela
+// du reste de l'API.
+//
+// LE JETON ARRIVE PAR L'URL de la poignee de main ("/?apikey=<jeton>") : WStype_CONNECTED recoit
+// cUrl en charge utile, chaine de requete comprise. Aucun en-tete personnalise n'est possible ici,
+// l'API WebSocket du navigateur n'en accepte pas. Le jeton etant deja transmis en clair dans un
+// en-tete HTTP a chaque requete de l'interface, l'exposer dans l'URL de ce meme transport ne change
+// pas le modele de menace.
+//
+// DECONNEXION DIFFEREE. On ne coupe pas la connexion depuis le callback : celui-ci est appele par
+// WebSocketsServerCore::handleHeader(), qui continue d'utiliser `client` apres le retour. On marque
+// l'emplacement et SocketEmitter::loop() fait le disconnect() au tour suivant. Entre-temps
+// l'emplacement ne recoit rien -- il n'est pas inscrit dans newClients (pas de delayInit) et ne peut
+// pas rejoindre de salle (cf. WStype_TEXT).
+//
+// PAS DE SECTION CRITIQUE sur ces deux masques, contrairement a ce qu'exigerait un serveur HTTP
+// asynchrone : ici handleClient() et sockServer.loop() sont tous deux appeles depuis la boucle
+// Arduino (cf. SomfyController.ino), donc depuis la MEME tache. Un seul ecrivain, aucune course.
+//
+// COMPATIBILITE CLIENTS TIERS. Ce controle ne mord QUE si la securite complete est active : a
+// Security.type == None (defaut d'usine) comme en mode "config seule", la poignee de main passe sans
+// cle, exactement comme avant. Un client non-navigateur qui s'authentifie deja en HTTP doit, lui,
+// ajouter "?apikey=<jeton>" a l'URL de sa socket lorsque la securite complete est active.
+static uint16_t g_authedClients = 0;      // bit par emplacement : poignee de main validee
+static uint16_t g_pendingDisconnect = 0;  // bit par emplacement : a couper au prochain loop()
+
+bool sockClientAuthorized(uint8_t num) {
+  if(num >= WEBSOCKETS_SERVER_CLIENT_MAX) return false;
+  return (g_authedClients & (1u << num)) != 0;
+}
+void sockRevokeAllClients() {
+  g_pendingDisconnect |= g_authedClients;
+  g_authedClients = 0;
+}
+// Extrait la valeur du parametre "apikey" de l'URL de poignee de main et la compare au jeton attendu
+// pour l'IP du client. Meme calcul deterministe que Web::checkAuth() (HMAC secret+identifiants+IP),
+// donc aucune session a memoriser.
+static bool socketHandshakeAuthorized(uint8_t num, const uint8_t *payload, size_t length) {
+  // Securite desactivee, ou mode "config seule" : la socket ne transporte que de l'etat et du
+  // controle, pas de la configuration -- rien a verifier, cf. Web::checkAuth(server, false).
+  if(settings.Security.type == security_types::None) return true;
+  if((settings.Security.permissions & static_cast<uint8_t>(security_permissions::ConfigOnly)) == 0x01) return true;
+  if(!payload || length == 0) return false;
+
+  // payload n'est pas garanti termine par un NUL : on borne explicitement.
+  String url((const char *)payload, length);
+  int at = url.indexOf("apikey=");
+  if(at < 0) return false;
+  // Refuse "xapikey=" : le caractere qui precede doit ouvrir un parametre.
+  if(at > 0 && url.charAt(at - 1) != '?' && url.charAt(at - 1) != '&') return false;
+  int from = at + 7;
+  int end = url.indexOf('&', from);
+  // PAS de decodage pourcent : le jeton est 64 caracteres hexadecimaux (cf. createAPIToken), donc
+  // encodeURIComponent cote client n'echappe jamais rien. Si le format du jeton changeait un jour,
+  // il faudrait decoder ici -- sans quoi la comparaison echouerait en silence.
+  String key = (end < 0) ? url.substring(from) : url.substring(from, end);
+
+  char expected[65];
+  memset(expected, 0x00, sizeof(expected));
+  // Echec de calcul et jeton vide refuses explicitement, pour la meme raison que Web::checkAuth() :
+  // une URL terminee par "?apikey=" fournit une cle de longueur nulle, qui serait jugee egale a un
+  // `expected` reste vide apres un echec d'allocation HMAC. La socket diffuse l'etat complet des
+  // equipements, adresse de telecommande comprise -- c'est precisement le canal qu'il ne faut pas
+  // ouvrir par defaut de memoire.
+  if(!webServer.createAPIToken(sockServer.remoteIP(num), expected)) return false;
+  if(expected[0] == '\0') return false;
+  return key.length() == strlen(expected) && key.equals(expected);
+}
 
 bool room_t::isJoined(uint8_t num) {
   for(uint8_t i = 0; i < sizeof(this->clients); i++) { 
@@ -83,6 +164,17 @@ void SocketEmitter::begin() {
   //settings.printAvailHeap();
 }
 void SocketEmitter::loop() {
+  // Deconnexions differees des poignees de main refusees (cf. l'en-tete de ce fichier) : on les
+  // traite ici, depuis la tache proprietaire de sockServer, et AVANT initClients() pour qu'un
+  // emplacement refuse ne puisse rien recevoir.
+  if(g_pendingDisconnect) {
+    for(uint8_t num = 0; num < WEBSOCKETS_SERVER_CLIENT_MAX; num++) {
+      if(g_pendingDisconnect & (1u << num)) {
+        g_pendingDisconnect &= ~(1u << num);
+        sockServer.disconnect(num);
+      }
+    }
+  }
   this->initClients();
   sockServer.loop();  
 }
@@ -151,10 +243,22 @@ void SocketEmitter::wsEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t
             for(uint8_t i = 0; i < SOCK_MAX_ROOMS; i++) {
               sockEmit.rooms[i].leave(num);
             }
+            if(num < WEBSOCKETS_SERVER_CLIENT_MAX) {
+              g_authedClients &= ~(1u << num);
+              g_pendingDisconnect &= ~(1u << num);
+            }
             break;
         case WStype_CONNECTED:
             {
                 IPAddress ip = sockServer.remoteIP(num);
+                // Poignee de main refusee : ni "Connected", ni delayInit -- donc aucun etat emis. La
+                // coupure est differee a SocketEmitter::loop() (cf. l'en-tete de ce fichier).
+                if(!socketHandshakeAuthorized(num, payload, length)) {
+                  Serial.printf("Socket [%u] rejected from %d.%d.%d.%d: missing or invalid apikey\n", num, ip[0], ip[1], ip[2], ip[3]);
+                  if(num < WEBSOCKETS_SERVER_CLIENT_MAX) g_pendingDisconnect |= (1u << num);
+                  break;
+                }
+                if(num < WEBSOCKETS_SERVER_CLIENT_MAX) g_authedClients |= (1u << num);
                 Serial.printf("Socket [%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
                 // Send all the current shade settings to the client.
                 sockServer.sendTXT(num, "Connected");
@@ -163,6 +267,10 @@ void SocketEmitter::wsEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t
             }
             break;
         case WStype_TEXT:
+            // ROOM_EMIT_FRAME diffuse TOUTES les trames RF decodees, adresse et code tournant
+            // compris : un emplacement dont la poignee de main a ete refusee ne doit pas pouvoir la
+            // rejoindre pendant le tour de boucle qui precede sa coupure.
+            if(!sockClientAuthorized(num)) break;
             if(strncmp((char *)payload, "join:", 5) == 0) {
               // In this instance the client wants to join a room.  Let's do some
               // work to get the ordinal of the room that the client wants to join.

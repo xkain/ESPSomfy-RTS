@@ -374,7 +374,12 @@ function getJSON(url, cb) {
             err.htmlError = status;
             err.service = `GET ${url}`;
             if (typeof err.desc === 'undefined') err.desc = xhr.statusText || httpStatusText[xhr.status || 500];
-            cb(xhr.response, null);
+            // `err` et NON `xhr.response` : avec responseType='json', un corps qui n'est pas du JSON
+            // -- le "Unauthorized API Key" en text/plain d'un 401, par exemple -- rend `xhr.response`
+            // NUL. Le rappel recevait donc cb(null, null), tous les appelants prenaient leur branche
+            // de succes avec des donnees nulles, et plantaient sur le premier champ lu. Defaut
+            // present depuis l'origine, mais inatteignable tant qu'aucune route ne repondait 401.
+            cb(err, null);
         }
         else {
             cb(null, xhr.response);
@@ -401,7 +406,12 @@ function getJSONSync(url, cb) {
             err.htmlError = status;
             err.service = `GET ${url}`;
             if (typeof err.desc === 'undefined') err.desc = xhr.statusText || httpStatusText[xhr.status || 500];
-            cb(xhr.response, null);
+            // `err` et NON `xhr.response` : avec responseType='json', un corps qui n'est pas du JSON
+            // -- le "Unauthorized API Key" en text/plain d'un 401, par exemple -- rend `xhr.response`
+            // NUL. Le rappel recevait donc cb(null, null), tous les appelants prenaient leur branche
+            // de succes avec des donnees nulles, et plantaient sur le premier champ lu. Defaut
+            // present depuis l'origine, mais inatteignable tant qu'aucune route ne repondait 401.
+            cb(err, null);
         }
         else {
             console.log({ get: url });
@@ -590,7 +600,12 @@ async function initSockets() {
     try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const port = window.location.protocol === 'https:' ? '' : ':8080';
-        socket = new WebSocket(`${protocol}//${host}${port}/`);
+        // Le jeton part dans l'URL : l'API WebSocket du navigateur n'accepte aucun en-tete
+        // personnalise, et le firmware lit donc "apikey" dans la chaine de requete de la poignee de
+        // main (cf. socketHandshakeAuthorized, src/Sockets.cpp). Sans securite ou en "config seule",
+        // le firmware ne regarde rien et le parametre est simplement ignore.
+        const sockQuery = security.apiKey ? `?apikey=${encodeURIComponent(security.apiKey)}` : '';
+        socket = new WebSocket(`${protocol}//${host}${port}/${sockQuery}`);
         socket.onmessage = (evt) => {
             if (evt.data.startsWith('42')) {
                 let ndx = evt.data.indexOf(',');
@@ -679,10 +694,19 @@ async function initSockets() {
                 (async () => {
                     ui.clearErrors();
                     refreshUptime();
+                    // Les reglages reseau et MQTT sont desormais des routes de niveau Config : les
+                    // precharger sans jeton afficherait une erreur 401 a chaque (re)connexion de la
+                    // socket en mode "config seule", alors que l'utilisateur n'a rien demande. On ne
+                    // charge ici que ce que la politique autorise a cet instant ; toggleConfig()
+                    // reclame de toute facon une authentification avant d'ouvrir la configuration, et
+                    // c'est lui qui declenchera leur chargement.
+                    const configAccessible = security.type === 0 || security.authenticated;
                     await general.loadGeneral();
-                    await wifi.loadNetwork();
                     await somfy.loadSomfy();
-                    await mqtt.loadMQTT();
+                    if (configAccessible) {
+                        await wifi.loadNetwork();
+                        await mqtt.loadMQTT();
+                    }
                     if (ui.isConfigOpen()) socket.send('join:0');
                 })();
             }
@@ -1514,7 +1538,10 @@ class UIBinder {
         somfy.checkEmptyState();
         document.querySelector('#btnConfig use').setAttribute('href', '#svg-tabSettings');
         if (sockIsOpen) socket.send('leave:0');
-        general.setSecurityConfig({ type: 0, username: '', password: '', pin: '', permissions: 0 });
+        // permissions 0x01 (config seule) et non 0 : c'est le defaut cote firmware aussi (cf.
+        // SecuritySettings::permissions). Poser un PIN sans toucher a la case ne doit pas basculer en
+        // securite complete a l'insu de l'utilisateur -- c'est ce mode qui coupe les clients tiers.
+        general.setSecurityConfig({ type: 0, username: '', hasPassword: false, hasPin: false, permissions: 0x01 });
     }
     toggleConfig() {
         if (this.isConfigOpen())
@@ -1562,18 +1589,56 @@ class UIBinder {
     }
 }
 var ui = new UIBinder();
+// Emplacement de la cle de session. sessionStorage et NON localStorage : la cle survit aux
+// rechargements de page de CET onglet -- et il y en a beaucoup, un changement de langue comme une
+// mise a jour se terminant par un window.location.reload() -- mais disparait a la fermeture de
+// l'onglet. C'est la duree de vie attendue sur un appareil protege par un PIN : une session, pas une
+// confiance permanente accordee au navigateur.
+// Ce que ce stockage n'aggrave PAS : la cle est deja lisible par le JavaScript de la page, elle
+// voyage en clair dans un en-tete `apikey` a chaque requete sur du HTTP local sans TLS, et elle est
+// de toute facon deterministe -- HMAC(secret, PIN + IP), cf. Web::createAPIToken. La garder dans
+// l'onglet ne cree aucune exposition nouvelle ; elle evite en revanche une resaisie du PIN a chaque
+// rechargement, laquelle pousse surtout a choisir un code trivial.
+const SECURITY_SESSION_KEY = 'espsomfy.apiKey';
 class Security {
     type = 0;
     authenticated = false;
     apiKey = '';
     permissions = 0;
+    // Les trois acces sont enveloppes : l'API leve (SecurityError) quand le stockage est desactive
+    // par la configuration du navigateur. Un echec ici ne doit jamais empecher de se connecter --
+    // on retombe simplement sur le comportement d'avant, une session en memoire perdue au
+    // rechargement.
+    _restoreSessionKey() {
+        try {
+            const k = window.sessionStorage.getItem(SECURITY_SESSION_KEY);
+            if (k) this.apiKey = k;
+        } catch (err) { console.debug('sessionStorage indisponible, la session ne survivra pas aux rechargements'); }
+    }
+    _persistSessionKey() {
+        try {
+            if (this.apiKey) window.sessionStorage.setItem(SECURITY_SESSION_KEY, this.apiKey);
+            else window.sessionStorage.removeItem(SECURITY_SESSION_KEY);
+        } catch (err) { /* stockage indisponible : sans effet, cf. _restoreSessionKey */ }
+    }
+    _clearSessionKey() {
+        try { window.sessionStorage.removeItem(SECURITY_SESSION_KEY); } catch (err) { /* idem */ }
+    }
     async init() {
+        // AVANT loadContext : c'est cette cle que la requete /loginContext presente, et c'est son
+        // verdict `authenticated` qui decidera si la session est reprise ou si l'ecran de connexion
+        // reapparait. C'est aussi avant tout initSockets(), dont la poignee de main porte la cle en
+        // parametre de requete.
+        this._restoreSessionKey();
         let fld = get('divUnauthenticated').querySelector('.pin-digit[data-bind="security.pin.d0"]');
         get('divUnauthenticated').querySelector('.pin-digit[data-bind="login.pin.d3"]').addEventListener('digitentered', (evt) => {
             security.login();
         });
         await this.loadContext();
-        if (this.type === 0 || (this.permissions & 0x01) === 0x01) { // No login required or only the config is protected.
+        // `this.authenticated` ajoute : en securite complete, une session reprise depuis le
+        // sessionStorage est deja valide, l'interface ne doit pas rester derriere l'ecran de
+        // connexion.
+        if (this.type === 0 || this.authenticated || (this.permissions & 0x01) === 0x01) { // No login required, session restored, or only the config is protected.
             if (typeof socket === 'undefined' || !socket) (async () => { await initSockets(); })();
             //ui.setMode(mode);
             get('divUnauthenticated').style.display = 'none';
@@ -1615,11 +1680,23 @@ class Security {
 
                     this.type = ctx.type;
                     this.permissions = ctx.permissions;
+                    // Verdict du FIRMWARE sur la cle qui vient d'etre presentee avec cette requete
+                    // (champ `authenticated` de /loginContext), pas une deduction du navigateur.
+                    // C'est ce qui rend la reprise de session sure. Le cas type === 0 reste `false`
+                    // a dessein : sans securite il n'y a pas de session, et tout le reste du code
+                    // teste `security.type === 0 || security.authenticated`.
+                    this.authenticated = (ctx.type !== 0) && !!ctx.authenticated;
+                    // Cle refusee : on ne la garde pas d'un rechargement a l'autre, sinon chaque
+                    // chargement de page repart avec une cle morte et redeclenche un cycle de 401.
+                    if (ctx.type !== 0 && !this.authenticated) {
+                        this.apiKey = '';
+                        this._clearSessionKey();
+                    }
 
                     const cont = get('divContainer');
                     if (cont) cont.setAttribute('data-securitytype', ctx.type);
                     // Gestion du Login
-                    if (ctx.type !== 0) {
+                    if (ctx.type !== 0 && !this.authenticated) {
                         btn.style.display = '';
                         const fld = ctx.type === 1 ? qs('.pin-digit[data-bind="login.pin.d0"]') : qs('#fldLoginUsername');
                         const targetDiv = ctx.type === 1 ? pin : pwd;
@@ -1677,6 +1754,7 @@ class Security {
                     get('divAuthenticated').style.display = '';
                     get('divContainer').setAttribute('data-auth', true);
                     this.apiKey = log.apiKey;
+                    this._persistSessionKey();
                     this.authenticated = true;
                     let evt = new CustomEvent('afterlogin', { detail: { authenticated: true } });
                     get('divContainer').dispatchEvent(evt);
@@ -1982,19 +2060,29 @@ class General {
         }
     }
     setSecurityConfig(security) {
+        // /getSecurity ne renvoie PLUS ni le mot de passe ni le PIN, seulement leur presence
+        // (hasPassword / hasPin) : le secret ne traverse plus le reseau, meme pour l'interface
+        // legitime, meme authentifiee. Les champs restent donc vides a l'affichage, et un champ laisse
+        // vide a l'enregistrement signifie "inchange" cote firmware (cf. parseSecretString).
+        this._hasPassword = makeBool(security.hasPassword);
+        this._hasPin = makeBool(security.hasPin);
         let obj = {
             security: {
-                type: security.type, username: security.username, password: security.password,
+                type: security.type, username: security.username, password: '',
                 permissions: { configOnly: makeBool(security.permissions & 0x01) },
-                pin: {
-                    d0: security.pin[0],
-                    d1: security.pin[1],
-                    d2: security.pin[2],
-                    d3: security.pin[3]
-                }
+                pin: { d0: '', d1: '', d2: '', d3: '' }
             }
         };
         ui.toElement(get('divSecurityOptions'), obj);
+        // Dire a l'utilisateur que le secret existe bien, puisque le champ vide ne peut plus le
+        // montrer -- sans quoi il croirait l'avoir perdu.
+        const pnl = get('divSecurityOptions');
+        const fldPwd = pnl.querySelector('#fldPassword');
+        // Marqueur non linguistique volontairement : introduire une cle de traduction ici
+        // obligerait a toucher aux fichiers de locale, dont fr.json est la source de verite tenue par
+        // le mainteneur. Des points suffisent a dire "un mot de passe existe, laisse vide pour le
+        // garder" sans rien traduire.
+        if (fldPwd && this._hasPassword) fldPwd.placeholder = '••••••••';
         this.onSecurityTypeChanged();
     }
     rebootDevice() {
@@ -2012,8 +2100,22 @@ class General {
         if (sel) sel.disabled = true;
         localStorage.setItem('selectedLang', lang);
 
-        fetch(baseUrl + '/setLang?lang=' + lang)
-        .then(r => r.json())
+        // /setLang est une route de niveau CONTROLE : sans en-tete `apikey` le firmware repond 401,
+        // avec un corps text/plain que le .json() d'origine tentait de parser -- d'ou le
+        // « JSON.parse: unexpected character » et un changement de langue qui echouait en silence
+        // des que la securite etait active. Cet appel etait le seul `fetch` brut vers l'appareil
+        // (hormis /lang, qui est public) : tous les autres passent par les aides xhr, qui posent la
+        // cle. On la pose donc ici aussi, et on traite le refus au lieu de le laisser remonter en
+        // SyntaxError.
+        fetch(baseUrl + '/setLang?lang=' + lang, {
+            headers: { apikey: (typeof security !== 'undefined' ? security.apiKey : '') || '' }
+        })
+        .then(r => r.text().then(txt => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} ${r.statusText || ''}`.trim());
+            if (!txt) return {};
+            try { return JSON.parse(txt); }
+            catch (e) { throw new Error(`reponse illisible de /setLang: ${txt.slice(0, 80)}`); }
+        }))
         .then(resp => {
             if (resp.status === "ok") {
                 if (reload) {
@@ -2027,8 +2129,14 @@ class General {
             }
         })
         .catch(err => {
+            // L'echec etait jusqu'ici invisible : seule la console le signalait, le selecteur
+            // revenait a son etat precedent et l'utilisateur ne savait pas pourquoi. Le detail
+            // technique reste en console ; a l'ecran, un libelle traduit. On n'injecte pas
+            // err.message dans le HTML du message : il peut porter un extrait du corps de la
+            // reponse.
             console.error("Erreur lors du changement de langue:", err);
             if (sel) sel.disabled = false;
+            if (typeof ui !== 'undefined') ui.errorMessage(tr('ERR_LANG_CHANGE'));
         });
     }
     onModeThemeChanged() {
@@ -2070,18 +2178,64 @@ class General {
         };
         let confirmText = '';
         if (s.type === 1) {
-            if (pin.length !== 4) return this.secError('ERR_PIN_INVALID', 'ERR_PIN_INVALID_DESC');
+            // Un PIN vide est legitime quand il en existe deja un : les champs ne sont plus
+            // pre-remplis (le firmware ne les renvoie pas), donc exiger 4 chiffres interdirait de
+            // modifier la seule case "config seule" sans retaper le code.
+            if (pin.length === 0 && this._hasPin) { /* inchange */ }
+            else if (pin.length !== 4) return this.secError('ERR_PIN_INVALID', 'ERR_PIN_INVALID_DESC');
             confirmText = `<p>${tr('SAVESECURITY_PIN_WARNING')}</p><p>${tr('SAVESECURITY_PIN_CONFIRM')}</p>`;
         }
         else if (s.type === 2) {
             if (!s.username) return this.secError('ERR_USERNAME_MISSING', 'ERR_USERNAME_MISSING_DESC');
+            // Idem : les deux champs vides signifient "mot de passe inchange", a condition qu'il en
+            // existe un. Sans mot de passe enregistre, un couple vide reste une erreur.
+            if (!s.password && !s.repeatpassword && !this._hasPassword)
+                return this.secError('ERR_PASSWORD_MISMATCH', 'ERR_PASSWORD_MISMATCH_DESC');
             if (s.password !== s.repeatpassword) return this.secError('ERR_PASSWORD_MISMATCH', 'ERR_PASSWORD_MISMATCH_DESC');
             confirmText = `<p>${tr('SAVESECURITY_PASSWORD_WARNING')}</p><p>${tr('SAVESECURITY_PASSWORD_CONFIRM')}</p>`;
         }
+        else {
+            // Desactivation. C'est le cas qui merite le plus d'avertissement -- il ouvre l'interface
+            // ET l'API a tout le reseau local -- et c'etait le seul des trois a n'afficher qu'un
+            // titre, sans un mot d'explication.
+            //
+            // trp() et non tr() directement : tr() renvoie le NOM de la cle quand elle manque (cf. sa
+            // definition en tete de fichier). Tant que ces deux cles ne sont pas traduites ailleurs
+            // que dans fr.json, un utilisateur en anglais verrait s'afficher "SAVESECURITY_NONE_WARNING"
+            // en toutes lettres. On prefere ne rien montrer plutot que de montrer ca.
+            const trp = (k) => { const t = tr(k); return t === k ? '' : `<p>${t}</p>`; };
+            confirmText = trp('SAVESECURITY_NONE_WARNING') + trp('SAVESECURITY_NONE_CONFIRM');
+        }
         const prompt = ui.promptMessage(tr('PROMPT_SECURITY_CONFIRM'), () => {
-            putJSONSync('/saveSecurity', data, (e) => {
+            putJSONSync('/saveSecurity', data, (e, resp) => {
                 prompt.remove();
-                if (e) ui.serviceError(e);
+                if (e) return ui.serviceError(e);
+                // Adopter l'etat renvoye par le firmware. Sans cela l'objet `security` du client
+                // reste a type=0 apres l'activation d'un PIN : tout ce qui decide d'apres lui -- le
+                // prechargement des reglages a la reconnexion de la socket, l'ouverture du panneau de
+                // configuration -- croit la securite desactivee, interroge des routes devenues
+                // protegees et se prend un 401.
+                //
+                // La cle est adoptee aussi : /saveSecurity en renvoie une valide, et l'utilisateur
+                // vient de prouver qu'il connait le secret en le saisissant. Le lui redemander
+                // immediatement apres n'ajouterait rien, et le ferait sortir du panneau ouvert.
+                if (resp) {
+                    security.type = resp.type;
+                    security.permissions = resp.permissions;
+                    if (resp.apiKey) {
+                        security.apiKey = resp.apiKey;
+                        security.authenticated = resp.type !== 0;
+                    }
+                    if (resp.type === 0) { security.authenticated = false; security.apiKey = ''; }
+                    // Repercuter dans le sessionStorage : sans cela un changement de secret
+                    // laisserait l'ancienne cle en place, et le prochain rechargement de l'onglet
+                    // repartirait avec une cle morte. _persistSessionKey efface quand la cle est
+                    // vide, ce qui couvre aussi la desactivation de la securite.
+                    security._persistSessionKey();
+                    general._hasPassword = makeBool(resp.hasPassword);
+                    general._hasPin = makeBool(resp.hasPin);
+                }
+                ui.successMessage(tr('MSG_SAVE_SUCCESS'));
             });
         });
         prompt.querySelector('.sub-message').innerHTML = confirmText;
@@ -2450,6 +2604,12 @@ class Wifi {
                 get('cbHardwired').checked = settings.connType >= 2;
                 get('cbFallbackWireless').checked = settings.connType === 3;
                 ui.toElement(pnl, settings);
+                // /networksettings ne renvoie plus la passphrase, seulement hasPassphrase : meme
+                // procede que pour la securite et MQTT. Vide = inchange cote firmware, SAUF via la
+                // boite de dialogue de connexion (/connectwifi), qui garde le pouvoir de poser une
+                // passphrase vide pour un reseau ouvert.
+                const fldPhr = get('fldPassphrase');
+                if (fldPhr && settings.wifi && makeBool(settings.wifi.hasPassphrase)) fldPhr.placeholder = '••••••••';
 
                 const inputPwr = get('inputETHPWRPin');
                 if (inputPwr && settings.ethernet && settings.ethernet.PWRPin !== undefined) {
@@ -5532,6 +5692,11 @@ class MQTT {
             else {
                 console.log(settings);
                 ui.toElement(get('divMQTT'), { mqtt: settings });
+                // /mqttsettings ne renvoie plus le mot de passe, seulement hasPassword : le champ
+                // reste vide et un champ vide signifie "inchange" cote firmware. On signale malgre
+                // tout qu'un mot de passe existe (cf. setSecurityConfig pour le meme procede).
+                const fldMq = get('fldMqttPassword');
+                if (fldMq && makeBool(settings.hasPassword)) fldMq.placeholder = '••••••••';
                 get('divDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
                 get('hrIdDiscoveryTopic').style.display = settings.pubDisco ? '' : 'none';
             }
@@ -5648,6 +5813,9 @@ class Firmware {
                 reject({ htmlError: status, service: 'GET /backup' });
             };
             xhr.open('GET', baseUrl.length > 0 ? `${baseUrl}/backup` : '/backup', true);
+            // /backup est une route Config : sans cet en-tete, telecharger une sauvegarde echouait en
+            // 401 des qu'une securite etait active. Les deux seuls XHR du fichier a l'avoir oublie.
+            xhr.setRequestHeader('apikey', security.apiKey);
             xhr.send();
         });
     }
@@ -6186,6 +6354,8 @@ class Firmware {
 
         let xhr = new XMLHttpRequest();
         xhr.open('POST', baseUrl ? `${baseUrl}${service}` : service, true);
+        // Idem : televersement (restauration, pack de langue, firmware) sur des routes Config.
+        xhr.setRequestHeader('apikey', security.apiKey);
 
         xhr.upload.onprogress = (evt) => {
             let pct = evt.total ? Math.round((evt.loaded / evt.total) * 100) : 0;
