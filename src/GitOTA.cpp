@@ -93,6 +93,10 @@ void GitRelease::toJSON(JsonResponse &json) {
   json.endObject();
 }
 #define ERR_CLIENT_OFFSET -50
+#define ERR_DOWNLOAD_HTTP -40
+#define ERR_DOWNLOAD_BUFFER -41
+#define ERR_DOWNLOAD_CONNECTION -42
+#define ERR_DOWNLOAD_TIMEOUT -43
 
 int16_t GitRepo::getReleases(uint8_t num) {
   WiFiClientSecure sclient;
@@ -221,8 +225,17 @@ int16_t GitRepo::getReleases(uint8_t num) {
         return httpCode;
       }
     }
+    else {
+      https.end();
+      sclient.stop();
+      return ERR_DOWNLOAD_HTTP;
+    }
     https.end();
     sclient.stop();
+    if(ndx == 0) return ERR_DOWNLOAD_TIMEOUT;
+  }
+  else {
+    return ERR_DOWNLOAD_CONNECTION;
   }
   settings.printAvailHeap();
   return 0;
@@ -244,9 +257,6 @@ void GitRepo::toJSON(JsonResponse &json) {
   json.endArray();
 }
 #define UPDATE_ERR_OFFSET 20
-#define ERR_DOWNLOAD_HTTP -40
-#define ERR_DOWNLOAD_BUFFER -41
-#define ERR_DOWNLOAD_CONNECTION -42
 
 void GitUpdater::loop() {
   if(!net.connected()) return;
@@ -564,7 +574,7 @@ int8_t GitUpdater::downloadFile() {
                 https.end();
                 free(buff);
                 Serial.println("Stream timeout!!!");
-                return -43;
+                return ERR_DOWNLOAD_TIMEOUT;
               }
               sockEmit.loop();
               webServer.loop();
