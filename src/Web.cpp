@@ -1436,7 +1436,13 @@ void Web::begin() {
     webServer.sendCORSHeaders(server);
     if(server.method() == HTTP_OPTIONS) { server.send(200, "OK"); return; }
     GitRepo repo;
-    repo.getReleases();
+    int16_t err = repo.getReleases();
+    if(err != 0) {
+      char body[96];
+      snprintf(body, sizeof(body), "{\"status\":\"ERROR\",\"code\":%d,\"desc\":\"GitHub unreachable\"}", err);
+      server.send(500, _encoding_json, body);
+      return;
+    }
     git.setCurrentRelease(repo);
     JsonResponse resp;
     resp.beginResponse(&server, g_content, sizeof(g_content));

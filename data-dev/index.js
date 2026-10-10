@@ -6114,7 +6114,7 @@ class Firmware {
             <span class="label">${tr('FIRMWARE_AVAILABLE')}</span>
             <select id="selVersion" class="selectCompac" data-bind="version">${optsHtml}</select>
             </div>
-            <a id="lnkGithubRelease" href="#" target="_blank" class="link">${tr('FIRMWARE_NOTE_GITHUB')}<svg class="svgInTextSmall"><use href="#svg-linkOut"></use></svg></a>
+            <a id="lnkGithubRelease" href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">${tr('FIRMWARE_NOTE_GITHUB')}<svg class="svgInTextSmall"><use href="#svg-linkOut"></use></svg></a>
             <div id="divPrereleaseWarning" class="error" style="display:none;"><svg><use href=#svg-error></use></svg><div><span id="spanUpdateWarning"></span></div></div>
             <div class="hrDiv"></div>
             <div class="warningText"><svg><use href="#svg-warning"></use></svg><span>${tr('FIRMWARE_CACHE')}</span></div>
@@ -6146,7 +6146,18 @@ class Firmware {
                 const nDiv = div.querySelector('#notesPreview'), lnk = div.querySelector('#lnkGithubRelease');
                 if (!nDiv) return;
 
+                if (!sel || !sel.value) {
+                    nDiv.innerHTML = `
+                    <div class="divGitNoteError">
+                    <div class="gitNoteError">${tr('ERR_GIT_NOTE')}</div>
+                    <div class="gitNoteErrorSub">${tr('UPDATE_GIT_NOTE')}</div>
+                    </div>`;
+                    return;
+                }
+
                 nDiv.innerHTML = '<div class="wifiConnectScan"><div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>';
+
+                if (lnk) lnk.href = `https://github.com/xkain/ESPSomfy-RTS/releases/tag/${encodeURIComponent(sel.value)}`;
 
                 try {
                     const r = await firmware.getReleaseInfo(sel.value, true);
