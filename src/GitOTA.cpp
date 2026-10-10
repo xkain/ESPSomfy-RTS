@@ -128,10 +128,14 @@ int16_t GitRepo::getReleases(uint8_t num) {
         bool inValue = false;
         bool awaitValue = false;
         bool inAss = false;
+        uint16_t timeouts = 0;
+        // A stream that stops after the headers used to spin here without feeding the watchdog,
+        // which reset the device after 15s - including from the daily background check.
         while(https.connected() && (len > 0 || len == -1) && ndx < count) {
           size_t size = stream->available();
+          esp_task_wdt_reset();
           if(size) {
-            esp_task_wdt_reset();
+            timeouts = 0;
             int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
             //Serial.write(buff, c);
             if(len > 0) len -= c;
@@ -216,7 +220,14 @@ int16_t GitRepo::getReleases(uint8_t num) {
             }
             delay(1);
           }
-          //else break;
+          else {
+            if(++timeouts >= 100) {  // 100 x 50ms
+              https.end();
+              sclient.stop();
+              return ERR_DOWNLOAD_TIMEOUT;
+            }
+            delay(50);
+          }
         }
       }
       else {
