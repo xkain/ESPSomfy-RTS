@@ -3284,7 +3284,7 @@ class Somfy {
 
             if (valid) {
                 const cm = (get('divContainer').getAttribute('data-chipmodel') || "").toLowerCase(),
-                pm = this.pinMaps.find(x => x.name === cm) || { maxPins: 39 };
+                pm = this.pinMaps.find(x => x.name && cm.includes(x.name.toLowerCase())) || { maxPins: 39 };
 
                 try {
                     for (const k of pk) {
@@ -3354,10 +3354,10 @@ class Somfy {
         let currentVal = (typeof opt !== 'undefined') ? opt : parseInt(sel.value, 10);
         while (sel.firstChild) sel.removeChild(sel.firstChild);
 
-        let cm = get('divContainer').getAttribute('data-chipmodel');
-        let pm = this.pinMaps.find(x => x.name === cm);
+        let cm = (get('divContainer').getAttribute('data-chipmodel') || '').toLowerCase();
+        let pm = this.pinMaps.find(x => x.name && cm.includes(x.name.toLowerCase()));
         if (!pm) {
-            pm = { name: '', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] };
+            pm = this.pinMaps.find(x => x.name === '');
         }
 
         for (let i = 0; i <= pm.maxPins; i++) {
