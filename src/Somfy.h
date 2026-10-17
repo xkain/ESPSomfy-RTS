@@ -269,13 +269,13 @@ class SomfyLinkedRemote : public SomfyRemote {
 class SomfyShade : public SomfyRemote {
   protected:
     uint8_t shadeId = 255;
-    uint64_t moveStart = 0;
-    uint64_t tiltStart = 0;
-    uint64_t noSunStart = 0;
-    uint64_t sunStart = 0;
-    uint64_t windStart = 0;
-    uint64_t windLast = 0;
-    uint64_t noWindStart = 0;
+    uint32_t moveStart = 0;
+    uint32_t tiltStart = 0;
+    uint32_t noSunStart = 0;
+    uint32_t sunStart = 0;
+    uint32_t windStart = 0;
+    uint32_t windLast = 0;
+    uint32_t noWindStart = 0;
     bool noSunDone = true;
     bool sunDone = true;
     bool windDone = true;

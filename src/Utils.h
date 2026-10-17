@@ -68,8 +68,16 @@ static void _rtrim(char *str) {
 [[maybe_unused]] static void _trim(char *str) { _ltrim(str); _rtrim(str); }
 struct rebootDelay_t {
   bool reboot = false;
-  int rebootTime = 0;
+  uint32_t rebootTime = 0;
   bool closed = false;
+
+  void trigger(uint32_t delayMs = 500) {
+    reboot = true;
+    rebootTime = millis() + delayMs;
+  }
+  bool expired() const {
+    return reboot && ((int32_t)(millis() - rebootTime) >= 0);
+  }
 };
 [[maybe_unused]] static bool toBoolean(const char *str, bool def) {
   if(!str) return def;

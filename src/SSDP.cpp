@@ -435,7 +435,7 @@ void SSDPClass::_sendNotify() {
     if(i == 0 && (strlen(dev->deviceType) == 0 || !dev->isActive)) Serial.printf("The device type is empty: %s\n", dev->isActive ? "true" : "false");
     if(strlen(dev->deviceType) > 0 && dev->isActive) {
       unsigned long elapsed = (millis() - dev->lastNotified);
-      if(!dev->lastNotified || (elapsed * 5) > (this->_interval * 1000)) {
+      if(!dev->lastNotified || elapsed >= (this->_interval * 200UL)) {
         #ifdef DEBUG_SSDP
         DEBUG_SSDP.print(dev->deviceType);
         DEBUG_SSDP.print(" Time since last notified: ");
@@ -639,7 +639,7 @@ void SSDPClass::_sendQueuedResponses() {
   for(uint8_t i = 0; i < SSDP_QUEUE_SIZE; i++) {
     if(this->sendQueue[i].waiting) {
       ssdp_response_t *q = &this->sendQueue[i];
-      if(q->sendTime < millis()) {
+      if((int32_t)(millis() - q->sendTime) >= 0) {
           // Send the response and delete the pointer.
           #ifdef DEBUG_SSDP
             DEBUG_SSDP.print("Sending SSDP queued response ");

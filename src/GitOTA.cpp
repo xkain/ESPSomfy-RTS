@@ -273,8 +273,8 @@ void GitUpdater::loop() {
   if(!net.connected()) return;
   if(this->status == GIT_STATUS_READY) {
     if(settings.checkForUpdate &&
-      (millis() > net.connectTime + 60000) && // Wait a minute before checking after connection.
-      (this->lastCheck + 86400000 < millis() || this->lastCheck == 0) && !rebootDelay.reboot) { // 1 day
+      (millis() - net.connectTime >= 60*1000UL) && // Wait a minute before checking after connection.
+      (this->lastCheck == 0 || millis() - this->lastCheck >= 24*60*60*1000UL) && !rebootDelay.reboot) { // 1 day
         this->checkForUpdate();
       }
   }
@@ -479,8 +479,7 @@ bool GitUpdater::beginUpdate(const char *version) {
       somfy.commit();
     }
 
-    rebootDelay.reboot = true;
-    rebootDelay.rebootTime = millis() + 500;
+    rebootDelay.trigger(500);
   }
 
   this->status = GIT_UPDATE_COMPLETE;
@@ -501,8 +500,7 @@ bool GitUpdater::recoverFilesystem() {
     somfy.commit();
   }
   this->status = GIT_UPDATE_COMPLETE;
-  rebootDelay.reboot = true;
-  rebootDelay.rebootTime = millis() + 500;
+  rebootDelay.trigger(500);
   return true;
 }
 bool GitUpdater::endUpdate() { return true; }

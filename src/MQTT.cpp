@@ -112,11 +112,24 @@ void MQTTClass::receive(const char *topic, byte* payload, uint32_t length) {
 bool MQTTClass::connect() {
   esp_task_wdt_reset();
   if(mqttClient.connected()) return true;
-  if(!settings.MQTT.enabled || this->suspended || (this->lastConnect + 10000 > millis())) return false;
+  // NOTA (Seguridad frente al desbordamiento / rollover de millis):
+  // El uso previo '(this->lastConnect + 10000 > millis())' era inseguro:
+  //   1) Si lastConnect es uint64_t: a los ~49.7 dias (ej. lastConnect = 4.294.960.000 ms),
+  //      lastConnect + 10.000 = 4.294.970.000. Al hacer rollover millis() a 1.000 ms,
+  //      4.294.970.000ULL > 1.000ULL es TRUE. Como millis() (32 bits) nunca podra superar
+  //      4.294.967.295, la condicion se mantendria TRUE eternamente (deadlock permanente).
+  //   2) Si ambos fueran uint32_t: 4.294.960.000 + 10.000 desborda en 32 bits a 2.704.
+  //      Al milisegundo siguiente (millis = 4.294.960.001), 2.704 > 4.294.960.001 es FALSO,
+  //      fallando la espera de 10 s y saturando de peticiones al broker.
+  // La solucion matematica robusta es la resta modular sin signo en 32 bits:
+  //      (millis() - this->lastConnect < 10000)
+  //      Ejemplo tras rollover: (2.709U - 4.294.960.000U) = 10.005U ms exactos.  
+  if(!settings.MQTT.enabled || this->suspended || (this->lastConnect != 0 && (millis() - this->lastConnect < 10000))) return false;  
 
   uint64_t mac = ESP.getEfuseMac();
   snprintf(this->clientId, sizeof(this->clientId), "client-%08x%08x", (uint32_t)((mac >> 32) & 0xFFFFFFFF), (uint32_t)(mac & 0xFFFFFFFF));
 
+  this->lastConnect = millis();
   mqttClient.setServer(settings.MQTT.hostname, settings.MQTT.port);
   if(mqttClient.connect(this->clientId, settings.MQTT.username, settings.MQTT.password, makeTopic("status"), 0, true, "offline")) {
     this->publish("status", "online", true);

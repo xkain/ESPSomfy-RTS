@@ -1382,8 +1382,7 @@ void Web::handleReboot(WebServer &server) {
   HTTPMethod method = server.method();
   if (method == HTTP_POST || method == HTTP_PUT) {
     Serial.println("Rebooting ESP...");
-    rebootDelay.reboot = true;
-    rebootDelay.rebootTime = millis() + 500;
+    rebootDelay.trigger(500);
     server.send(200, "application/json", "{\"status\":\"OK\",\"desc\":\"Successfully started reboot\"}");
   }
   else {
@@ -1523,8 +1522,7 @@ void Web::begin() {
       }
       ShadeConfigFile::restore(&somfy, "/shades.tmp", opts);
       Serial.println("Rebooting ESP for restored settings...");
-      rebootDelay.reboot = true;
-      rebootDelay.rebootTime = millis() + 1000;
+      rebootDelay.trigger(1000);
     }
     }, []() {
       esp_task_wdt_reset();
@@ -2433,8 +2431,7 @@ void Web::begin() {
       server.send(500, _encoding_json, "{\"status\":\"ERROR\",\"desc\":\"Error updating firmware: \"}");
     else
       server.send(200, _encoding_json, "{\"status\":\"SUCCESS\",\"desc\":\"Successfully updated firmware\"}");
-    rebootDelay.reboot = true;
-    rebootDelay.rebootTime = millis() + 500;
+    rebootDelay.trigger(500);
     }, []() {
       HTTPUpload& upload = server.upload();
       if (upload.status == UPLOAD_FILE_START) {
@@ -2508,8 +2505,7 @@ void Web::begin() {
       server.send(500, _encoding_json, "{\"status\":\"ERROR\",\"desc\":\"Error updating application: \"}");
     else
       server.send(200, _encoding_json, "{\"status\":\"SUCCESS\",\"desc\":\"Successfully updated application\"}");
-    rebootDelay.reboot = true;
-    rebootDelay.rebootTime = millis() + 500;
+    rebootDelay.trigger(500);
     }, []() {
       HTTPUpload& upload = server.upload();
       if (upload.status == UPLOAD_FILE_START) {
@@ -2790,8 +2786,7 @@ void Web::begin() {
         }
         if (reboot) {
           Serial.println("Rebooting ESP for new Network settings...");
-          rebootDelay.reboot = true;
-          rebootDelay.rebootTime = millis() + 1000;
+          rebootDelay.trigger(1000);
         }
         server.send(200, "application/json", "{\"status\":\"OK\",\"desc\":\"Successfully set Network Settings\"}");
       }
@@ -2857,8 +2852,7 @@ void Web::begin() {
           server.send(201, _encoding_json, "{\"status\":\"OK\",\"desc\":\"Successfully set server connection\"}");
           if (reboot) {
             Serial.println("Rebooting ESP for new WiFi settings...");
-            rebootDelay.reboot = true;
-            rebootDelay.rebootTime = millis() + 1000;
+            rebootDelay.trigger(1000);
           }
         }
       }
