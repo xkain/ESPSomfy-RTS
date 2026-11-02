@@ -68,7 +68,7 @@ static void _rtrim(char *str) {
 [[maybe_unused]] static void _trim(char *str) { _ltrim(str); _rtrim(str); }
 struct rebootDelay_t {
   bool reboot = false;
-  int rebootTime = 0;
+  uint32_t rebootTime = 0;
   bool closed = false;
 };
 [[maybe_unused]] static bool toBoolean(const char *str, bool def) {

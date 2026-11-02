@@ -273,8 +273,8 @@ void GitUpdater::loop() {
   if(!net.connected()) return;
   if(this->status == GIT_STATUS_READY) {
     if(settings.checkForUpdate &&
-      (millis() > net.connectTime + 60000) && // Wait a minute before checking after connection.
-      (this->lastCheck + 86400000 < millis() || this->lastCheck == 0) && !rebootDelay.reboot) { // 1 day
+      (millis() - net.connectTime >= 60000) && // Wait a minute before checking after connection.
+      (this->lastCheck == 0 || millis() - this->lastCheck >= 86400000) && !rebootDelay.reboot) { // 1 day
         this->checkForUpdate();
       }
   }
