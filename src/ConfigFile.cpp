@@ -7,7 +7,8 @@
 
 extern Preferences pref;
 
-#define SHADE_HDR_VER 25
+// 26 = 25 + accent color: v2.5.1 to v2.6.1 wrote the color while still declaring 25.
+#define SHADE_HDR_VER 26
 #define SHADE_HDR_SIZE 76
 #define SHADE_REC_SIZE 276
 #define GROUP_REC_SIZE 200
@@ -584,14 +585,15 @@ bool ShadeConfigFile::restoreFile(SomfyShadeController *s, const char *filename,
     // First read out the data.
     this->readSettingsRecord();
   }
-  else {
-    this->file.seek(this->file.position() + this->header.settingsRecordSize, SeekSet);
+  else if(this->header.settingsRecordSize > 0) {
+    // Skip to the end of line: the size declared by v2.5.1 to v2.6.1 is 14 bytes short.
+    this->seekChar(CFG_REC_END);
   }
   if(opts.network || opts.mqtt) {
     this->readNetRecord(opts);
   }
-  else {
-    this->file.seek(this->file.position() + this->header.netRecordSize, SeekSet);
+  else if(this->header.netRecordSize > 0) {
+    this->seekChar(CFG_REC_END);
   }
   if(opts.shades) s->commit();
   if(opts.transceiver)
@@ -716,7 +718,10 @@ bool ShadeConfigFile::readSettingsRecord() {
     this->readVarString(settings.hostname, sizeof(settings.hostname));
     this->readVarString(settings.NTP.ntpServer, sizeof(settings.NTP.ntpServer));
     this->readVarString(settings.NTP.posixZone, sizeof(settings.NTP.posixZone));
-    if(this->header.version >= 26) {
+    // Version 25 files from v2.5.1+ carry the color too: recognize it by its quote,
+    // a boolean (ssdpBroadcast) is never quoted.
+    if(this->header.version >= 26 ||
+       (this->header.version == 25 && this->file.peek() == CFG_TOK_QUOTE)) {
       this->readVarString(settings.accentColor, sizeof(settings.accentColor));
     } else {
       strncpy(settings.accentColor, "#1a5fb4", sizeof(settings.accentColor));
