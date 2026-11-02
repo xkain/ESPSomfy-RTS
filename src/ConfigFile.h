@@ -53,6 +53,9 @@ class ConfigFile {
     bool writeUInt32(const uint32_t val, const char tok = CFG_VALUE_SEP);
     bool writeBool(const bool val, const char tok = CFG_VALUE_SEP);
     bool writeFloat(const float val, const uint8_t prec, const char tok = CFG_VALUE_SEP);
+    // Consumes up to the separator ending the current value. The default of 2 quotes suits
+    // unquoted values (readString): the first comma ends them.
+    bool drainToSeparator(uint8_t quotes = 2);
     bool readString(char *buff, size_t len);
     bool readVarString(char *buff, size_t len);
     bool skipValue(size_t len);

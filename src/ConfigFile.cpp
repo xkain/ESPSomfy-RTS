@@ -101,11 +101,26 @@ bool ConfigFile::seekRecordByIndex(uint16_t ndx) {
   return true;
 }
 */
+// A reader that returns without consuming the separator shifts every following field of the
+// record. writeString() pads each value to exactly len-1 bytes, so a full buffer is the
+// normal case, not a malformed one: when it fills up, drain to the separator.
+bool ConfigFile::drainToSeparator(uint8_t quotes) {
+  if(!this->file) return false;
+  uint8_t extra;
+  while(this->file.read(&extra, 1) == 1) {
+    if(extra == CFG_TOK_QUOTE) { quotes++; continue; }
+    if(extra == CFG_REC_END) return true;
+    // Same end rule as skipValue(): 0 quotes for unquoted values, 2 once a quoted one is closed.
+    if(extra == CFG_VALUE_SEP && (quotes >= 2 || quotes == 0)) return true;
+  }
+  return false;
+}
 bool ConfigFile::readString(char *buff, size_t len) {
   if(!this->file) return false;
+  if(len == 0) return false;
   memset(buff, 0x00, len);
   uint16_t i = 0;
-  while(i < len) {
+  while(i < len - 1) {
     uint8_t val;
     if(this->file.read(&val, 1) == 1) {
       switch(val) {
@@ -115,12 +130,14 @@ bool ConfigFile::readString(char *buff, size_t len) {
           return true;
       }
       buff[i++] = val;
-      if(i == len) {
+      if(i == len - 1) {
         _rtrim(buff);
+        // Full buffer: the separator has not been read yet.
+        this->drainToSeparator();
         return true;
       }
     }
-    else 
+    else
       return false;
   }
   _rtrim(buff);
@@ -147,10 +164,15 @@ bool ConfigFile::skipValue(size_t len) {
     }
     else return false;
   }
+  // Limit reached before the separator: leave the stream where a reader would have.
+  this->drainToSeparator(quotes);
   return true;
 }
+// On disk a value is quote + N chars + quote + separator, so the separator sits at byte N+3
+// while the loop reads at most len bytes: both exits below must drain to it.
 bool ConfigFile::readVarString(char *buff, size_t len) {
   if(!this->file) return false;
+  if(len == 0) return false;
   memset(buff, 0x00, len);
   uint8_t quotes = 0;
   uint16_t i = 0;
@@ -173,15 +195,17 @@ bool ConfigFile::readVarString(char *buff, size_t len) {
           continue;
       }
       buff[i++] = val;
-      if(i == len) {
+      if(i == len - 1) {
         _rtrim(buff);
+        this->drainToSeparator(quotes);
         return true;
       }
     }
-    else 
+    else
       return false;
   }
   _rtrim(buff);
+  this->drainToSeparator(quotes);
   return true;
 }
 
@@ -722,11 +746,7 @@ bool ShadeConfigFile::readSettingsRecord() {
     // a boolean (ssdpBroadcast) is never quoted.
     if(this->header.version >= 26 ||
        (this->header.version == 25 && this->file.peek() == CFG_TOK_QUOTE)) {
-      // readVarString counts the quotes in its limit: read into a larger buffer so the
-      // closing quote and the separator are consumed too.
-      char color[16];
-      this->readVarString(color, sizeof(color));
-      strlcpy(settings.accentColor, color, sizeof(settings.accentColor));
+      this->readVarString(settings.accentColor, sizeof(settings.accentColor));
     } else {
       strncpy(settings.accentColor, "#1a5fb4", sizeof(settings.accentColor));
     }
