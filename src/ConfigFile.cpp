@@ -564,8 +564,9 @@ bool ShadeConfigFile::restoreFile(SomfyShadeController *s, const char *filename,
   }
   else {
     Serial.println("Shade data ignored");
-    // FF past the shades and groups.
-    this->file.seek(this->file.position()
+    // FF past the rooms, shades and groups.
+    uint32_t roomBytes = this->header.version >= 19 ? this->header.roomRecords * this->header.roomRecordSize : 0;
+    this->file.seek(this->file.position() + roomBytes
       + (this->header.shadeRecords * this->header.shadeRecordSize)
       + (this->header.groupRecords * this->header.groupRecordSize), SeekSet);  // Start at the beginning of the file after the header.
   }
@@ -711,7 +712,6 @@ bool ShadeConfigFile::readTransRecord(transceiver_config_t &cfg) {
 }
 bool ShadeConfigFile::readSettingsRecord() {
   if(this->header.settingsRecordSize > 0) {
-    uint32_t startPos = this->file.position();
     Serial.println("Reading settings from file...");
     char ver[24];
     this->readVarString(ver, sizeof(ver));
@@ -722,7 +722,11 @@ bool ShadeConfigFile::readSettingsRecord() {
     // a boolean (ssdpBroadcast) is never quoted.
     if(this->header.version >= 26 ||
        (this->header.version == 25 && this->file.peek() == CFG_TOK_QUOTE)) {
-      this->readVarString(settings.accentColor, sizeof(settings.accentColor));
+      // readVarString counts the quotes in its limit: read into a larger buffer so the
+      // closing quote and the separator are consumed too.
+      char color[16];
+      this->readVarString(color, sizeof(color));
+      strlcpy(settings.accentColor, color, sizeof(settings.accentColor));
     } else {
       strncpy(settings.accentColor, "#1a5fb4", sizeof(settings.accentColor));
     }
@@ -733,7 +737,10 @@ bool ShadeConfigFile::readSettingsRecord() {
     } else {
       settings.language = 0; // English by default for earlier versions
     }
-    if(this->file.position() != startPos + this->header.settingsRecordSize) {
+    // The declared size is short in v2.5.1 to v2.6.1 files: only drain when the end of
+    // line has not been read yet, or the next record is swallowed.
+    this->file.seek(this->file.position() - 1, SeekSet);
+    if(this->readChar('\0') != CFG_REC_END) {
       Serial.println("Reading to end of settings record");
       this->seekChar(CFG_REC_END);
     }
