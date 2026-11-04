@@ -10,7 +10,7 @@ Only the latest release receives security updates. Please verify that the vulner
 
 Submit your report privately via GitHub:
 1. Go to the **Security** tab of the repository.
-2. Click **Report a vulnerability** (or use private vulnerability reporting).
+2. Click **Report a vulnerability**.
 
 This report will only be visible to project maintainers. To help us handle it efficiently, please include:
 
