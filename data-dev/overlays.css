@@ -1783,6 +1783,7 @@ cursor: pointer;
     text-transform: uppercase;
     margin-right: 14px;
     padding-top: 1px;
+    white-space: nowrap;
 }
 .ha-badge-pill {
     display: inline-flex;
@@ -1812,6 +1813,11 @@ cursor: pointer;
 }
 .ha-github-link { color: var(--accent-color); }
 .ha-github-link:hover { filter: brightness(1.3); }
+@media (max-width: 400px) {
+    .ha-badge-button { padding: 0 6px 0 14px; }
+    .ha-badge-text-main { font-size: 12px; letter-spacing: 0.4px; margin-right: 10px; }
+    .ha-badge-pill { padding: 0 8px; }
+}
 /* wifi*/
 .wifiConnectScan {
     display:flex;

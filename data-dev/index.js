@@ -2401,34 +2401,34 @@ class General {
         div.innerHTML = `
         <div class="instructions-content">
         <div class="overlay-scroll-content">
-        ${overlayHeader(tr('HACS'), tr('HACS_DESC'), 'svg-homeAssistant')}
-        <p><strong>${tr('HACS_PURPOSE_TITLE')}</strong></p>
-        <p>${tr('HACS_PURPOSE_TEXT_1')}</p>
-        <p>${tr('HACS_PURPOSE_TEXT_2')}</p>
-        <p class="ha-section-title"><strong>${tr('HACS_INSTALL_TITLE')}</strong></p>
+        ${overlayHeader(tr('MARKETP'), tr('MARKETP_DESC'), 'svg-homeAssistant')}
+        <p><strong>${tr('MARKETP_PURPOSE_TITLE')}</strong></p>
+        <p>${tr('MARKETP_PURPOSE_TEXT_1')}</p>
+        <p>${tr('MARKETP_PURPOSE_TEXT_2')}</p>
+        <p class="ha-section-title"><strong>${tr('MARKETP_INSTALL_TITLE')}</strong></p>
         <ol class="ha-install-list">
-        <li>${tr('HACS_INSTALL_STEP_1')}</li>
-        <li>${tr('HACS_INSTALL_STEP_2')}</li>
-        <li>${tr('HACS_INSTALL_STEP_3')}</li>
+        <li>${tr('MARKETP_INSTALL_STEP_1')}</li>
+        <li>${tr('MARKETP_INSTALL_STEP_2')}</li>
+        <li>${tr('MARKETP_INSTALL_STEP_3')}</li>
         </ol>
         <div class="warning ha-warning-note">
         <svg><use href="#svg-warning"></use></svg>
         <div>
         <span>
-        ${tr('HACS_REQ_START')}
+        ${tr('MARKETP_REQ_START')}
         <a href="https://www.home-assistant.io" target="_blank" style="color: inherit; text-decoration: underline;"><strong>Home Assistant</strong></a>
-        ${tr('HACS_REQ_MID')}
-        <a href="https://hacs.xyz" target="_blank" style="color: inherit; text-decoration: underline;"><strong>HACS</strong></a> ${tr('HACS_REQ_END')}
+        ${tr('MARKETP_REQ_MID')}
+        <a href="https://hacs.xyz" target="_blank" style="color: inherit; text-decoration: underline;"><strong>HACS</strong></a>${tr('MARKETP_REQ_END')}
         </span>
         </div>
         </div>
         <div class="ha-badge-container">
         <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced&category=integration" target="_blank" class="ha-badge-button">
-        <span class="ha-badge-text-main">Open HACS repository on</span>
+        <span class="ha-badge-text-main">Open in Marketplace on</span>
         <span class="ha-badge-pill"><span class="ha-badge-text-pill">MY</span><svg width="18" height="18"><use href="#svg-homeAssistant"></use></svg></span>
         </a>
         <p class="ha-github-link-container">
-        ${tr('HACS_OR_VISIT')} <a href="https://github.com/xkain/ESPSomfy-RTS-enhanced" target="_blank" class="linkSoft">dépôt GitHub</a>
+        ${tr('MARKETP_OR_VISIT')} <a href="https://github.com/xkain/ESPSomfy-RTS-enhanced" target="_blank" class="linkSoft">dépôt GitHub</a>
         </p>
         </div>
         </div>

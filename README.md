@@ -102,10 +102,10 @@ Two integrations work with this firmware.
 
 **[ESPSomfy-RTS Enhanced](https://github.com/xkain/ESPSomfy-RTS-enhanced)** is the version dedicated to this fork: it can authenticate against a device protected by a PIN, it shows the firmware release notes at update time, and it exposes the sensors specific to this line.
 
-* **Installation:** straight from the **HACS** store (*Home Assistant Community Store*), or by clicking the button below.
+* **Installation:** from the Home Assistant **Marketplace** (*Settings → Marketplace*, built in since Home Assistant 2026.11), or by clicking the button below. On an older version of Home Assistant, it installs the same way through **HACS** (*Home Assistant Community Store*), which the Marketplace has taken over from.
 
 <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=xkain&repository=ESPSomfy-RTS-enhanced">
-  <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.">
+  <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open the repository in the Marketplace.">
 </a>
 
 #### rstrouse's ESPSomfy-RTS-HA — compatible, with two caveats
