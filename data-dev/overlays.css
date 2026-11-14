@@ -1741,6 +1741,84 @@ cursor: pointer;
     vertical-align: middle;
     margin-right:5px;
 }
+.divLbc-step.is-done .svgLbc-step {
+    color: #4CAF50;
+    opacity: 1;
+}
+.divLbc-step.is-done .lbcLabel-step {
+    color: var(--color);
+    font-weight: bold;
+}
+.ethsw-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+}
+.ethsw-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+.ethsw-num {
+    flex: 0 0 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-color);
+    color: #fff;
+    font-weight: bold;
+    font-size: 13px;
+}
+.ethsw-step b {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+.ethsw-step p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--soustxt-color);
+}
+.ethsw-step p.ethsw-more { margin-top: 8px; }
+.ethsw-addr {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+.ethsw-addr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--inputNumber);
+    font-size: 13px;
+}
+.ethsw-addr-row span { color: var(--soustxt-color); }
+.ethsw-addr-row code {
+    font-weight: bold;
+    color: var(--color);
+    font-size: 13px;
+}
+.ethsw-link {
+    color: var(--accent-color);
+    font-weight: bold;
+    text-decoration: none;
+}
+#lbc-error-msg {
+    margin-top: 20px;
+    text-align: center;
+    display: none;
+    color: var(--txtwarning-color);
+    font-weight: bold;
+}
 /* HomeAssistant page */
 .ha-overlay-content { padding: 10px 15px; }
 
@@ -2032,6 +2110,9 @@ div.eth-setting-line label {
         z-index: 99999;
         box-sizing: border-box;
         padding: 0;
+    }
+    .modal-overlay {
+        z-index: 100000;
     }
     .instructions-content {
         display: flex;

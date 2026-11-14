@@ -238,6 +238,8 @@ bool ConfigSettings::load() {
   pref.getString("accentColor", this->accentColor, sizeof(this->accentColor));
   this->language = pref.getUChar("language", 0);
   this->swShowGpio = pref.getBool("swShowGpio", false);
+  this->boxEdition = pref.getUChar("boxEdition", 0);
+  if(this->boxEdition > 2) this->boxEdition = 0;
   this->connType = static_cast<conn_types_t>(pref.getChar("connType", 0x00));
   //Serial.printf("Preference GFG Free Entries: %d\n", pref.freeEntries());
   pref.end();
@@ -274,6 +276,7 @@ bool ConfigSettings::save() {
   pref.putString("accentColor", this->accentColor);
   pref.putUChar("language", this->language);
   pref.putBool("swShowGpio", this->swShowGpio);
+  pref.putUChar("boxEdition", this->boxEdition);
   pref.end();
   return true;
 }
@@ -287,6 +290,7 @@ bool ConfigSettings::toJSON(JsonObject &obj) {
 
   obj["accentColor"] = this->accentColor;
   obj["swShowGpio"] = this->swShowGpio;
+  obj["boxEdition"] = this->boxEdition;
   return true;
 }
 void ConfigSettings::toJSON(JsonResponse &json) {
@@ -298,6 +302,7 @@ void ConfigSettings::toJSON(JsonResponse &json) {
   json.addElem("checkForUpdate", this->checkForUpdate);
   json.addElem("accentColor", this->accentColor);
   json.addElem("swShowGpio", this->swShowGpio);
+  json.addElem("boxEdition", this->boxEdition);
 }
 
 bool ConfigSettings::requiresAuth() { return this->Security.type != security_types::None; }
@@ -310,6 +315,7 @@ bool ConfigSettings::fromJSON(JsonObject &obj) {
     if(obj.containsKey("checkForUpdate")) this->checkForUpdate = obj["checkForUpdate"];
     if(obj.containsKey("accentColor")) this->parseValueString(obj, "accentColor",this->accentColor, sizeof(this->accentColor));
     if(obj.containsKey("swShowGpio")) this->swShowGpio = obj["swShowGpio"];
+    if(obj.containsKey("boxEdition") && obj["boxEdition"].as<uint8_t>() <= 2) this->boxEdition = obj["boxEdition"].as<uint8_t>();
     return true;
 }
 void ConfigSettings::print() {

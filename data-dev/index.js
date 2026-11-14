@@ -1989,6 +1989,8 @@ class General {
             console.log("Settings received:", settings);
 
             get('spanFwVersion').innerText = settings.fwVersion;
+            somfy.boxEdition = parseInt(settings.boxEdition, 10) || 0;
+            somfy.updateRadioBoxPreset();
             get('spanHwVersion').innerText = settings.chipModel.length > 0 ? '-' + settings.chipModel : '';
             get('divContainer').setAttribute('data-chipmodel', settings.chipModel);
 
@@ -2073,10 +2075,10 @@ class General {
 
         dd.value = 'UTC0';
     }
-    setGeneral() {
+    setGeneral(extra) {
         let valid = true;
         let pnl = get('divSystemSettings');
-        let obj = ui.fromElement(pnl).general;
+        let obj = Object.assign(ui.fromElement(pnl).general, extra);
         const msg = tr('ERR_HOSTNAME');
         if (typeof obj.hostname === 'undefined' || !obj.hostname || obj.hostname === '') {
             ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_INVALID_HOSTNAME');
@@ -2094,16 +2096,18 @@ class General {
             ui.errorMessage(msg).querySelector('.sub-message').innerHTML = tr('ERR_NTP_LENGTH');
             valid = false;
         }
-        if (valid) {
+        if (!valid) return Promise.resolve(false);
+        return new Promise(resolve => {
             putJSONSync('/setgeneral', obj, (err, response) => {
                 if (err) {
                     ui.serviceError(err);
-                } else {
-                    ui.successMessage(tr('MSG_SAVE_SUCCESS'));
-                    console.log(response);
+                    return resolve(false);
                 }
+                ui.successMessage(tr('MSG_SAVE_SUCCESS'));
+                console.log(response);
+                resolve(true);
             });
-        }
+        });
     }
     setSecurityConfig(security) {
         // /getSecurity NO LONGER returns the password or the PIN, only whether they exist
@@ -2293,27 +2297,26 @@ class General {
 
         const steps = [
             ['tz', 'Réglage du fuseau horaire Europe/Paris'],
-            ['lang', 'Passage de l\'interface en Français'],
             ['gpio', 'Assignation des GPIO spécifiques au boîtier'],
             ['radio', 'Activation de la radio']
         ];
 
         let stepsHtml = '';
         for (const [id, text] of steps) {
-            stepsHtml += `<div id="lbc-step-${id}" class="divLbc-step"><div class="lbc-icon-wrapper"><svg id="svg-step-${id}" class="svgLbc-step"><use href="#svg-succes"></use></svg></div><span class="lbcLabel-step">${text}</span></div>`;
+            stepsHtml += `<div id="lbc-step-${id}" class="divLbc-step"><div class="lbc-icon-wrapper"><svg class="svgLbc-step"><use href="#svg-succes"></use></svg></div><span class="lbcLabel-step">${text}</span></div>`;
         }
 
         div.innerHTML = `
         <div class="instructions-content">
         <div class="overlay-scroll-content">
-        ${overlayHeader('Configuration Boîtier', 'Assistant de configuration automatique pour votre boitier', 'svg-leboncoin')}
+        ${overlayHeader('Configuration Boîtier', 'Assistant de configuration automatique pour votre boîtier', 'svg-leboncoin')}
         <div>
         <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a>, si ce n'est pas votre cas fermez cette page</span></div></div>
         <div class="divInfoLine"><div class="InfoLine"><p>Par défaut, le firmware adopte des réglages universels et sécurisés. Cet assistant applique les paramètres régionaux et injecte la configuration matérielle de votre modèle.</p></div>
         <p class="uppercaseText">1. Sélectionnez votre boîtier :</p>
         <div class="button-container-row lbc-cards-container lbc-responsive-container">
         <div class="unibloc chooseWifiEth lbc-responsive-card">
-        <label for="radBoxWifi" class="unibutton"><span>Wi-Fi</span><div class="box-image-container"><img src="editionWifi.webp" alt="Modèle Wi-Fi" /></div><div class="uniStatus">ESP32 D1 Mini + CC1101</div><div class="uniRight" style="margin-top: auto;"><input type="radio" id="radBoxWifi" name="lbcBoxType" value="1" checked></div></label>
+        <label for="radBoxWifi" class="unibutton"><span>Wi-Fi</span><div class="box-image-container"><img src="editionWifi.webp" alt="Modèle Wi-Fi" /></div><div class="uniStatus">ESP32 D1 Mini + CC1101</div><div class="uniRight" style="margin-top: auto;"><input type="radio" id="radBoxWifi" name="lbcBoxType" value="1"></div></label>
         </div>
         <div class="unibloc chooseWifiEth lbc-responsive-card">
         <label for="radBoxEth" class="unibutton"><span>Ethernet & Wi-Fi</span><div class="box-image-container"><img src="editionEthernet.webp" alt="Modèle Ethernet" /></div><div class="uniStatus">ESP32 WT32-ETH01 + CC1101</div><div class="uniRight" style="margin-top: auto;"><input type="radio" id="radBoxEth" name="lbcBoxType" value="2"></div></label>
@@ -2322,76 +2325,54 @@ class General {
         <p class="uppercaseText">2. Actions prévues :</p>
         <div id="lbc-steps-list">${stepsHtml}</div>
         <div id="lbc-success-msg"><svg class="svgInTextSmall"><use href="#svg-success"></use></svg> Configuration appliquée avec succès !</div>
+        <div id="lbc-error-msg">La configuration n'a pas pu être enregistrée sur votre boîtier. Vous pouvez réessayer.</div>
         </div>
         </div>
         </div>
         <div class="hrDivFooter"></div>
         <div class="button-container-overlay">
         <button id="btnCloseLBC" line type="button" onclick="closeOverlay(get('divLBCConfig'))">${tr('BT_CLOSE')}</button>
-        <button id="btnConfirmLBC" type="button" onclick="general.confirmLBCConfig()">Démarrer</button>
+        <button id="btnConfirmLBC" type="button" disabled onclick="general.confirmLBCConfig()">Démarrer</button>
         </div>
         </div>
         </div>`;
 
+        div.querySelectorAll('input[name="lbcBoxType"]').forEach(r => r.addEventListener('change', () => get('btnConfirmLBC').disabled = false));
         shOverlay(div);
     }
     confirmLBCConfig() {
-        ui.promptMessage(get('divContainer'), `Êtes-vous sûr d'avoir choisi le bon boîtier ?`, () => {
-            this.onLBCChanged('1');
-        });
+        ui.promptMessage(get('divContainer'), `Êtes-vous sûr d'avoir choisi le bon boîtier ?`, () => this.runLBCConfig());
     }
-    async onLBCChanged(val) {
-        if (val !== "1") return;
+    async runLBCConfig() {
+        const box = document.querySelector('input[name="lbcBoxType"]:checked')?.value;
+        if (!box) return;
         const btn = get('btnConfirmLBC'), cls = get('btnCloseLBC');
-        if (btn) btn.style.display = 'none';
-        if (cls) cls.style.display = 'none';
-
-        const selectedBoxType = document.querySelector('input[name="lbcBoxType"]:checked')?.value || "1";
-        const validateStep = (id) => {
-            const row = get(`lbc-step-${id}`), svg = get(`svg-step-${id}`), lbl = row?.querySelector('.lbcLabel-step');
-            if (svg) {
-                svg.style.cssText = "color:#4CAF50;opacity:1;transform:scale(1.1)";
-                setTimeout(() => svg.style.transform = "scale(1)", 200);
-            }
-            if (lbl) lbl.style.cssText = "color:var(--text-color);font-weight:bold";
+        const markStep = (id, done) => get(`lbc-step-${id}`)?.classList.toggle('is-done', done);
+        const fail = () => {
+            get('lbc-error-msg').style.display = 'block';
+            btn.textContent = 'Réessayer';
+            btn.style.display = cls.style.display = '';
         };
-            try {
-                // Step 1: time zone
-                const tz = get('selTimeZone');
-                if (tz) { tz.value = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; tz.dispatchEvent(new Event('change')); }
-                validateStep('tz');
-                await new Promise(r => setTimeout(r, 500));
+        btn.style.display = cls.style.display = 'none';
+        get('lbc-error-msg').style.display = 'none';
+        ['tz', 'gpio', 'radio'].forEach(id => markStep(id, false));
 
-                // Step 2: language
-                this.onLanguageChanged('fr', false);
-                validateStep('lang');
-                await new Promise(r => setTimeout(r, 500));
+        const tz = get('selTimeZone');
+        if (tz) { tz.value = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; tz.dispatchEvent(new Event('change')); }
+        if (!await this.setGeneral({ boxEdition: box === "2" ? 2 : 1 })) return fail();
+        markStep('tz', true);
 
-                // Step 3: GPIO assignment, driven by the enclosure that was picked
-                const sb = get('selRadioBoardType');
-                if (sb) {
-                    sb.value = selectedBoxType;
-                    sb.dispatchEvent(new Event('change'));
-                }
-                validateStep('gpio');
-                await new Promise(r => setTimeout(r, 500));
+        const sb = get('selRadioBoardType');
+        sb.value = box;
+        sb.dispatchEvent(new Event('change'));
+        const cb = get('cbEnableRadio');
+        if (!cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
+        if (!await somfy.saveRadio()) return fail();
+        markStep('gpio', true);
+        markStep('radio', true);
 
-                // Step 4: enable the radio and save everything
-                const cb = get('cbEnableRadio');
-                if (cb && !cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
-
-                if (typeof this.setGeneral === 'function') this.setGeneral();
-                await new Promise(r => setTimeout(r, 800));
-
-                if (typeof somfy !== 'undefined' && typeof somfy.saveRadio === 'function') somfy.saveRadio();
-                validateStep('radio');
-
-                get('lbc-success-msg').style.display = 'block';
-                setTimeout(() => window.location.reload(true), 1500);
-
-            } catch (e) {
-                if (btn) { btn.style.display = 'block'; btn.textContent = "Réessayer"; }
-            }
+        get('lbc-success-msg').style.display = 'block';
+        setTimeout(() => window.location.reload(), 1500);
     }
     showHAOverlay() {
         const div = document.createElement('div');
@@ -2443,11 +2424,28 @@ class General {
 }
 var general = new General();
 
+function initMultiClickToggle(triggerSelector, action, requiredClicks = 3) {
+    let clickCount = 0, clickTimeout;
+    document.querySelectorAll(triggerSelector).forEach(trigger => trigger.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        clickCount++;
+        clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => { clickCount = 0; }, 2000);
+        if (clickCount >= requiredClicks) {
+            clickCount = 0;
+            action();
+        }
+    }));
+}
+
 class Wifi {
     initialized = false;
     ethBoardTypes = [];
     ethClockModes = [];
     ethPhyTypes = [];
+    savedNet = { ssid: '', ip: '', connType: 0, boardType: 0 };
+    ethBoxManual = false;
+    ethBoxPrev = null;
 
     init() {
         this.ethBoardTypes = [
@@ -2504,6 +2502,10 @@ class Wifi {
         });
         this.onETHBoardTypeChanged(get('selETHBoardType'));
         this.initialized = true;
+        initMultiClickToggle('#divEthBoxTile .ethbox-title', () => {
+            this.ethBoxManual = true;
+            this.useEthernetClicked();
+        }, 5);
 
         const inputPwr = get('inputETHPWRPin');
         if (inputPwr) {
@@ -2674,6 +2676,13 @@ class Wifi {
                 get('divETHSettings').style.display = settings.ethernet.boardType === 0 ? '' : 'none';
                 get('divStaticIP').style.display = settings.ip.dhcp ? 'none' : '';
                 get('spanCurrentIP').innerHTML = settings.ip.ip;
+                this.savedNet = {
+                    ssid: (settings.wifi && settings.wifi.ssid) || '',
+                    ip: (settings.ip && settings.ip.ip) || '',
+                    connType: parseInt(settings.connType, 10),
+                    boardType: settings.ethernet ? parseInt(settings.ethernet.boardType, 10) : 0
+                };
+                this.ethBoxPrev = null;
                 this.updateStatusBadge(settings);
                 this.syncRadiosWithCheckbox();
                 this.useEthernetClicked();
@@ -2722,6 +2731,47 @@ class Wifi {
         get('divFallbackWireless').style.display = useEthernet ? '' : 'none';
         get('divRoaming').style.display = useEthernet ? 'none' : '';
         get('divHiddenSSID').style.display = useEthernet ? 'none' : '';
+        this.updateEthBoxTile();
+    }
+    updateEthBoxTile() {
+        const tile = get('divEthBoxTile'), host = get('divNetOptions');
+        if (!tile || !host) return;
+        const ethChoice = get('radConnEthernet').closest('.chooseWifiEth');
+        if (ethChoice) ethChoice.style.display = typeof somfy !== 'undefined' && somfy.boxEdition === 1 && !get('cbHardwired').checked ? 'none' : '';
+        const isBox = typeof somfy !== 'undefined' && somfy.boxEdition === 2;
+        const show = get('cbHardwired').checked && isBox && !this.ethBoxManual;
+        tile.style.display = show ? '' : 'none';
+        host.classList.toggle('ethbox-host', show);
+        if (!show) return;
+        ['divFallbackWireless', 'divTypeCardMode', 'divEthernetMode'].forEach(id => get(id).style.display = 'none');
+
+        const sn = this.savedNet;
+        const applied = parseInt(get('selETHBoardType').value, 10) === 1 && get('cbFallbackWireless').checked;
+        let state = 'ready';
+        if (!sn.ssid) state = 'locked';
+        else if (applied) state = (sn.connType === 3 && sn.boardType === 1) ? 'active' : 'done';
+
+        tile.classList.toggle('is-locked', state === 'locked');
+        tile.classList.toggle('is-ok', state === 'done' || state === 'active');
+        tile.querySelectorAll('[data-show]').forEach(el => el.style.display = el.dataset.show === state ? '' : 'none');
+        tile.querySelectorAll('.ethbox-bullet').forEach(u => u.setAttribute('href', state === 'done' || state === 'active' ? '#svg-succes' : '#svg-arrowRight'));
+    }
+    applyEthBox() {
+        const sel = get('selETHBoardType'), cb = get('cbFallbackWireless');
+        this.ethBoxPrev = { boardType: sel.value, fallback: cb.checked };
+        sel.value = 1;
+        this.onETHBoardTypeChanged(sel);
+        cb.checked = true;
+        this.updateEthBoxTile();
+    }
+    undoEthBox() {
+        if (!this.ethBoxPrev) return;
+        const sel = get('selETHBoardType');
+        sel.value = this.ethBoxPrev.boardType;
+        this.onETHBoardTypeChanged(sel);
+        get('cbFallbackWireless').checked = this.ethBoxPrev.fallback;
+        this.ethBoxPrev = null;
+        this.updateEthBoxTile();
     }
     hiddenSSIDClicked() {
         let hidden = get('cbHiddenSSID').checked;
@@ -2884,6 +2934,10 @@ class Wifi {
         }
         obj.connType = eth.hardwired ? (eth.wirelessFallback ? 3 : 2) : 1;
 
+        const boxSwitch = typeof somfy !== 'undefined' && somfy.boxEdition === 2 && !this.ethBoxManual
+            && this.savedNet.connType < 2 && obj.connType === 3 && eth.boardType === 1;
+        if (boxSwitch) return this.showEthSwitchConfirm(obj);
+
         if (obj.connType >= 2) {
             const [board, phy, clk] = [
                 this.ethBoardTypes.find(e => eth.boardType === e.val),
@@ -2946,6 +3000,39 @@ class Wifi {
             this.sendNetworkSettings(obj);
         }
     }
+    showEthSwitchConfirm(obj) {
+        const host = (get('fldHostname')?.value || 'espsomfyrts').trim();
+        const url = `http://${host.toLowerCase()}.local`;
+        const step = (n, title, body) => `<div class="ethsw-step"><span class="ethsw-num">${n}</span><div><b>${title}</b>${body}</div></div>`;
+        const row = (label, value) => `<div class="ethsw-addr-row"><span>${label}</span>${value}</div>`;
+        const div = document.createElement('div');
+        div.className = 'inst-overlay';
+        div.innerHTML = `
+        <div class="instructions-content">
+        <div class="overlay-scroll-content">
+        ${overlayHeader('Passer en Ethernet', 'Votre appareil va redémarrer sur sa connexion Ethernet', 'svg-ethernet')}
+        <div class="unibloc"><div class="ethsw-steps">
+        ${step(1, 'Branchez le câble Ethernet', `<p>Reliez l'appareil à votre box ou à votre réseau avant de continuer.</p>`)}
+        <hr>
+        ${step(2, "L'adresse de l'appareil va changer", `<p>La connexion Ethernet n'est pas la même que la connexion Wi-Fi : votre box lui donne une autre adresse IP. Cette page ne répondra plus après le redémarrage.</p>
+        <div class="ethsw-addr">${row('Adresse Wi-Fi (actuelle)', `<code>${this.savedNet.ip || '-'}</code>`)}${row('Adresse Ethernet', '<code>donnée par votre box</code>')}</div>`)}
+        <hr>
+        ${step(3, "Retrouvez l'interface", `<p>Le passage du Wi-Fi à l'Ethernet peut prendre un peu de temps : l'appareil redémarre, puis votre box lui attribue sa nouvelle adresse. Patientez un moment, puis ouvrez l'adresse ci-dessous, qui suit le nom d'hôte de l'appareil :</p>
+        <div class="ethsw-addr">${row("Nom d'hôte", `<a class="ethsw-link" href="${url}" target="_blank">${url}</a>`)}</div>
+        <p class="ethsw-more">Si elle ne s'ouvre pas, allez dans l'interface de votre box internet et cherchez <strong>${host}</strong> dans la liste des appareils connectés : la box indique sa nouvelle adresse IP.</p>`)}
+        </div></div>
+        <div class="information marginT"><svg><use href=#svg-info></use></svg><div><b>Câble débranché ?</b><span>L'appareil repasse tout seul sur votre Wi-Fi, là aussi après un court délai : il redevient joignable à son adresse Wi-Fi.</span></div></div>
+        </div>
+        <div class="hrDivFooter"></div>
+        <div class="button-container-overlay">
+        <button line type="button" class="ethsw-cancel">${tr('BT_CANCEL_1')}</button>
+        <button type="button" class="ethsw-go">Passer en Ethernet</button>
+        </div>
+        </div>`;
+        shOverlay(div);
+        div.querySelector('.ethsw-cancel').onclick = () => closeOverlay(div);
+        div.querySelector('.ethsw-go').onclick = () => { this.sendNetworkSettings(obj); closeOverlay(div); };
+    }
     sendNetworkSettings(obj) {
         putJSONSync('/setNetwork', obj, (err, response) => {
             if (err) {
@@ -2953,6 +3040,11 @@ class Wifi {
             } else {
                 ui.successMessage(tr('MSG_SAVE_SUCCESS'));
                 console.log("Network settings updated:", response);
+                this.savedNet.connType = obj.connType;
+                if (obj.ethernet) this.savedNet.boardType = obj.ethernet.boardType;
+                if (obj.wifi && obj.wifi.ssid) this.savedNet.ssid = obj.wifi.ssid;
+                this.ethBoxPrev = null;
+                this.updateEthBoxTile();
             }
         });
     }
@@ -3022,6 +3114,8 @@ class Wifi {
 var wifi = new Wifi();
 class Somfy {
     initialized = false;
+    boxEdition = 0;
+    radioBoxManual = false;
     frames = [];
     isScanClosing = false;
     scanObserver = null;
@@ -3070,6 +3164,10 @@ class Somfy {
         // displayed.
         if (this.pinsInitialized) return;
         this.pinsInitialized = true;
+        initMultiClickToggle('#divRadioBoxPreset', () => {
+            this.radioBoxManual = true;
+            this.updateRadioBoxPreset();
+        }, 5);
 
         const sel = get('selRadioBoardType');
 
@@ -3092,6 +3190,17 @@ class Somfy {
         this.loadRadioBoardTypes(get('selRadioBoardType'));
         this.loadRadioBoardTypes(sel);
         this.onRadioBoardTypeChanged(sel);
+    }
+    updateRadioBoxPreset() {
+        const lbl = get('divRadioBoxPreset'), sel = get('divRadioBoardSel');
+        if (!lbl || !sel) return;
+        const box = { 1: ['Édition Wi-Fi', 'editionWifi.webp'], 2: ['Édition Ethernet & Wi-Fi', 'editionEthernet.webp'] }[this.boxEdition];
+        const show = !!box && !this.radioBoxManual;
+        lbl.style.display = show ? '' : 'none';
+        sel.style.display = show ? 'none' : '';
+        if (!show) return;
+        get('spanRadioBoxPreset').textContent = box[0];
+        get('imgRadioBoxPreset').src = box[1];
     }
     loadRadioBoardTypes(sel) {
         while (sel.firstChild) sel.removeChild(sel.firstChild);
@@ -3184,6 +3293,7 @@ class Somfy {
 
                 if (somfy.transceiver && somfy.transceiver.config) {
                     if (selBoard) selBoard.value = somfy.transceiver.config.radioBoardType || 0;
+                    this.updateRadioBoxPreset();
                     this.onRadioBoardTypeChanged(selBoard, true);
                 }
 
@@ -3246,7 +3356,8 @@ class Somfy {
         t.config.radioBoardType = bv;
 
         if (isM && !get('cbManualSafety')?.checked) {
-            return ui.errorMessage(d, tr('ERR_RADIO_SAFETY_REQUIRED'));
+            ui.errorMessage(d, tr('ERR_RADIO_SAFETY_REQUIRED'));
+            return Promise.resolve(false);
         }
 
         pk.forEach(k => {
@@ -3304,11 +3415,14 @@ class Somfy {
                 }
             }
 
-            if (!valid) return;
+            if (!valid) return Promise.resolve(false);
 
-            const proceedSave = () => {
+            const proceedSave = () => new Promise(resolve => {
                 putJSONSync('/saveRadio', t, (err, res) => {
-                    if (err) return ui.serviceError(err);
+                    if (err) {
+                        ui.serviceError(err);
+                        return resolve(false);
+                    }
 
                     ui.successMessage(tr('MSG_SAVE_SUCCESS'));
                     get('btnSaveRadio').classList.remove('disabled');
@@ -3324,16 +3438,18 @@ class Somfy {
                                 get('divRadioEnableColor').classList.toggle('radioOn', !!init);
                             }
                             get('divRadioEnableStatus').textContent = tr(cb.checked === init ? (cb.checked ? 'RADIO_ENABLED' : 'RADIO_DISABLED') : 'RADIO_SAVE_REQUIRED');
+                    resolve(true);
                 });
-            };
+            });
             if (isM) {
-                let prompt = ui.promptMessage(get('divContainer'), tr('PROMPT_RADIO_MANUAL_TITLE'), () => {
-                    proceedSave();
+                return new Promise(resolve => {
+                    let prompt = ui.promptMessage(get('divContainer'), tr('PROMPT_RADIO_MANUAL_TITLE'), () => {
+                        proceedSave().then(resolve);
+                    });
+                    prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_RADIO_MANUAL_WARNING")}</p>`;
                 });
-                prompt.querySelector('.sub-message').innerHTML = `<p>${tr("PROMPT_RADIO_MANUAL_WARNING")}</p>`;
-            } else {
-                proceedSave();
             }
+            return proceedSave();
     }
     pinMaps = [
         { name: 'esp32', maxPins: 39, inputs: [0, 1, 6, 7, 8, 9, 10, 11, 37, 38], outputs: [3, 6, 7, 8, 9, 10, 11, 34, 35, 36, 37, 38, 39] },

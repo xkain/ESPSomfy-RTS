@@ -188,6 +188,7 @@ class ConfigSettings: BaseSettings {
     bool ssdpBroadcast = true;
     bool checkForUpdate = true;
     bool swShowGpio = false;
+    uint8_t boxEdition = 0;
     uint8_t status;
     uint8_t language = 0;
     IPSettings IP;

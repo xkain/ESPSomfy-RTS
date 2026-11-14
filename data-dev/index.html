@@ -15,12 +15,12 @@
       if(l)document.documentElement.lang=l;
     })();
     </script>
-    <link rel="stylesheet" href="base.css?v=2.6.2a">
-    <link rel="stylesheet" href="main.css?v=2.6.2a">
-    <link rel="stylesheet" href="overlays.css?v=2.6.2a">
+    <link rel="stylesheet" href="base.css?v=2.6.3e">
+    <link rel="stylesheet" href="main.css?v=2.6.3e">
+    <link rel="stylesheet" href="overlays.css?v=2.6.3e">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <script src="index.js?v=2.6.2a"></script>
+    <script src="index.js?v=2.6.3e"></script>
 </head>
 <body>
     <header class="top-bar">
@@ -565,7 +565,42 @@
                             </div>
                             <input id="cbHardwired" name="hardwired" type="checkbox" data-bind="ethernet.hardwired" style="display:none;">
                         </div>
-                        <div class="unibloc">
+                        <div id="divNetOptions" class="unibloc">
+                            <div id="divEthBoxTile" class="ethbox-tile" style="display:none;">
+                                <div class="ethbox-head">
+                                    <img src="editionEthernet.webp" alt="" loading="lazy">
+                                    <div class="ethbox-headtxt">
+                                        <span class="ethbox-chip" data-show="ready">Une action de votre part</span>
+                                        <span class="ethbox-chip" data-show="locked">Wi-Fi requis</span>
+                                        <span class="ethbox-chip" data-show="done">Prêt à enregistrer</span>
+                                        <span class="ethbox-chip" data-show="active">Activé</span>
+                                        <div class="ethbox-title">Édition Ethernet&nbsp;&amp;&nbsp;Wi&#8209;Fi</div>
+                                        <div class="ethbox-model">WT32-ETH01 + CC1101</div>
+                                    </div>
+                                </div>
+                                <div class="ethbox-body">
+                                    <div class="ethbox-lead" data-show="ready">Pour passer en Ethernet, appuyez sur le bouton ci-dessous. Il fait les réglages à votre place :</div>
+                                    <div class="ethbox-lead" data-show="locked">Ce bouton fera les réglages Ethernet à votre place :</div>
+                                    <div class="ethbox-lead" data-show="done">Les réglages sont faits :</div>
+                                    <div class="ethbox-lead" data-show="active">Votre appareil est réglé pour l'Ethernet :</div>
+                                    <div class="ethbox-does">
+                                        <div><svg><use class="ethbox-bullet" href="#svg-arrowRight"></use></svg><span>il choisit la carte réseau de votre appareil (WT32-ETH01) ;</span></div>
+                                        <div><svg><use class="ethbox-bullet" href="#svg-arrowRight"></use></svg><span>il active le secours Wi-Fi : si le câble est débranché, l'appareil repasse sur votre Wi-Fi au lieu de devenir injoignable.</span></div>
+                                    </div>
+                                    <div class="ethbox-why">
+                                        <svg><use href="#svg-warning"></use></svg>
+                                        <span><b>Pourquoi ce bouton ?</b> Votre appareil a été préconfiguré avant l'envoi. Un mauvais choix de carte peut rendre l'interface inaccessible, voire <b>endommager définitivement l'appareil</b>.</span>
+                                    </div>
+                                    <div class="ethbox-lock" data-show="locked">
+                                        <svg><use href="#svg-warning"></use></svg>
+                                        <span>Connectez d'abord l'appareil à votre Wi-Fi. C'est lui qui prend le relais si le câble est débranché : sans lui, l'appareil n'aurait aucun secours.</span>
+                                    </div>
+                                    <button type="button" class="ethbox-lock-btn" data-show="locked" onclick="wifi.setConnectionType(false);">Configurer le Wi-Fi</button>
+                                    <button type="button" class="ethbox-cta" data-show="ready" onclick="wifi.applyEthBox();">Configurer l'Ethernet automatiquement<svg><use href="#svg-arrowRight"></use></svg></button>
+                                    <div class="ethbox-badge" data-show="done"><svg><use href="#svg-succes"></use></svg>Appuyez maintenant sur Enregistrer</div>
+                                    <span class="ethbox-undo" data-show="done" onclick="wifi.undoEthBox();">Annuler</span>
+                                </div>
+                            </div>
                             <div id="divHiddenSSID">
                                 <label class="uniRow">
                                     <div class="uniText">
@@ -1499,7 +1534,14 @@
                             </div>
                         </div>
                         <div class="unibloc">
-                            <div>
+                            <div id="divRadioBoxPreset" class="radiobox-preset" style="display:none;">
+                                <img id="imgRadioBoxPreset" src="editionEthernet.webp" alt="" loading="lazy">
+                                <div class="uniText">
+                                    <div class="uniLabel">GPIO préconfigurées</div>
+                                    <div class="uniStatus">Pour votre appareil <span id="spanRadioBoxPreset">Édition Ethernet &amp; Wi-Fi</span></div>
+                                </div>
+                            </div>
+                            <div id="divRadioBoardSel">
                                 <label class="label" tr="RADIO_GPIO_ASSIGN"></label>
                                 <select id="selRadioBoardType" class="inputAndSelect"></select>
                             </div>

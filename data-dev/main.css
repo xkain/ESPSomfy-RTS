@@ -655,6 +655,207 @@ div.wifiSignal {
     background: color-mix(in srgb, var(--accent-color) 30%, var(--unibloc-color));
     border: 1px solid var(--accent-color);
 }
+.unibloc.ethbox-host {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.ethbox-tile {
+    display: flex;
+    flex-direction: column;
+    border-radius: 25px;
+    overflow: hidden;
+    text-align: left;
+    border: 1px solid var(--accent-color);
+    background: var(--unibloc-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.ethbox-head {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 20px 12px;
+    background: var(--accent-colorUniDark);
+    border-bottom: 1px solid var(--hr-soft);
+}
+.ethbox-head img {
+    width: 84px;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: block;
+}
+.ethbox-headtxt {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.ethbox-chip {
+    align-self: flex-start;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 3px 8px;
+    border-radius: 99px;
+    background: var(--accent-color);
+    color: #fff;
+}
+.ethbox-title {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1.25;
+    user-select: none;
+}
+.ethbox-model {
+    font-size: 12px;
+    color: var(--soustxt-color);
+}
+.ethbox-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 20px 18px;
+}
+.ethbox-lead {
+    font-size: 13px;
+    line-height: 1.45;
+}
+.ethbox-does {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+.ethbox-does div,
+.ethbox-why,
+.ethbox-lock {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+.ethbox-does svg,
+.ethbox-why svg,
+.ethbox-lock svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    fill: currentColor;
+}
+.ethbox-does svg { color: var(--accent-color); }
+.ethbox-why {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--soustxt-color);
+}
+.ethbox-why svg,
+.ethbox-lock svg { color: var(--txtwarning-color); }
+.ethbox-why b { color: var(--color); }
+.ethbox-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: auto;
+    margin: 4px 0 0;
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-color);
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    animation: ethbox-pulse 2.4s ease-in-out infinite;
+}
+.ethbox-cta:hover { background: var(--accent-colorDark); }
+.ethbox-cta svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+@keyframes ethbox-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-color) 45%, transparent); }
+    50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-color) 0%, transparent); }
+}
+.ethbox-lock {
+    font-size: 12.5px;
+    line-height: 1.45;
+    padding: 10px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--txtwarning-color) 12%, var(--unibloc-color));
+}
+.ethbox-lock-btn {
+    align-self: flex-start;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    background: transparent;
+}
+.ethbox-badge {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--accent-sucess);
+}
+.ethbox-badge svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+.ethbox-undo {
+    align-self: flex-start;
+    font-size: 12px;
+    color: var(--accent-color);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.ethbox-tile.is-locked { border-color: var(--border); }
+.ethbox-tile.is-locked .ethbox-head { background: var(--fond-color); }
+.ethbox-tile.is-locked .ethbox-head img { filter: grayscale(1); opacity: .55; }
+.ethbox-tile.is-locked .ethbox-chip { background: var(--soustxt-color); }
+.ethbox-tile.is-locked .ethbox-does svg { color: var(--soustxt-color); }
+.ethbox-tile.is-ok { border-color: var(--accent-sucess); }
+.ethbox-tile.is-ok .ethbox-head { background: color-mix(in srgb, var(--accent-sucess) 15%, var(--unibloc-color)); }
+.ethbox-tile.is-ok .ethbox-chip { background: var(--accent-sucess); }
+.ethbox-tile.is-ok .ethbox-does svg { color: var(--accent-sucess); }
+.radiobox-preset {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+    user-select: none;
+}
+.radiobox-preset img {
+    width: 56px;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+@media (max-width: 400px) {
+    .ethbox-head { gap: 10px; padding: 12px 16px 10px; }
+    .ethbox-head img { width: 72px; }
+    .ethbox-body { padding: 12px 16px 16px; }
+    .ethbox-chip { font-size: 10px; letter-spacing: .02em; padding: 3px 7px; }
+    .ethbox-title { font-size: 15px; }
+}
 /*Page Shade, Groupe and Repeater*/
 .empty-state {
     text-align: center;
