@@ -4670,6 +4670,14 @@ class Somfy {
 
         if (!st.light && g('cbHasLight')) g('cbHasLight').checked = false;
         if (!st.sun && g('cbHasSunsensor')) g('cbHasSunsensor').checked = false;
+        this.syncRepeatOptions(g('somfyShade'));
+    }
+    syncRepeatOptions(form) {
+        const sel = form?.querySelector('select[data-bind="repeats"]'),
+        is80 = form?.querySelector('select[data-bind="bitLength"]')?.value === '80';
+        if (!sel) return;
+        sel.options[0].hidden = sel.options[0].disabled = is80;
+        if (is80 && sel.value === '0') sel.value = '1';
     }
     onShadeBitLengthChanged(el) {
         get('somfyShade').setAttribute('data-bitlength', el.value);
@@ -4733,7 +4741,7 @@ class Somfy {
             if (isNew) {
                 Object.assign(shade, {
                     name: '', shadeType: 4, roomId: 0, downTime: 10000, upTime: 10000,
-                    tiltTime: 7000, tiltType: 0, flipCommands: 0, flipPosition: 0, paired: 0, sunSensor: 0, simMy: 0, repeats: 0
+                    tiltTime: 7000, tiltType: 0, flipCommands: 0, flipPosition: 0, paired: 0, sunSensor: 0, simMy: 0, repeats: 1
                 });
             }
             if (!isNew) {
@@ -4819,6 +4827,7 @@ class Somfy {
             g('spanGroupId').innerText = isNew ? '*' : groupId;
 
             ui.toElement(elGroup, group);
+            this.syncRepeatOptions(elGroup);
             this.showEditGroup(true);
         });
     }

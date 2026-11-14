@@ -1315,7 +1315,7 @@
                                 <hr>
                                 <div>
                                     <label class="label" for="selGroupBitLength" tr="BIT"></label>
-                                    <select id="selGroupBitLength" class="inputAndSelect" name="bitLength" data-bind="bitLength" data-datatype="int">
+                                    <select id="selGroupBitLength" class="inputAndSelect" name="bitLength" data-bind="bitLength" data-datatype="int" onchange="somfy.syncRepeatOptions(get('somfyGroup'));">
                                         <option value="56" tr="56BIT"></option>
                                         <option value="80" tr="80BIT"></option>
                                     </select>

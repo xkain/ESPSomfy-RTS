@@ -709,7 +709,7 @@ void SomfyRoom::clear() {
 void SomfyGroup::clear() {
   this->setGroupId(255);
   this->setRemoteAddress(0);
-  this->repeats = 0;
+  this->repeats = 1;
   this->roomId = 0;
   this->name[0] = 0x00;
   memset(&this->linkedShades, 0x00, sizeof(this->linkedShades));
@@ -4088,6 +4088,7 @@ void SomfyRemote::repeatFrame(uint8_t repeat) {
   //somfy.processFrame(this->lastFrame, true);
 }
 void SomfyShadeController::sendFrame(somfy_frame_t &frame, uint8_t repeat) {
+  if(frame.bitLength == 80 && repeat == 0) repeat = 1;
   somfy.transceiver.beginTransmit();
   byte frm[10];
   frame.encodeFrame(frm);
