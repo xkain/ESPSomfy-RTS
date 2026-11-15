@@ -754,6 +754,7 @@ bool ShadeConfigFile::readSettingsRecord() {
     if(this->header.version >= 20) settings.checkForUpdate = this->readBool(true);
     if(this->header.version >= 25) {
       settings.language = this->readUInt8(0);
+      settings.langAsked = true;
     } else {
       settings.language = 0; // English by default for earlier versions
     }

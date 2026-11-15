@@ -2018,6 +2018,10 @@ class General {
                     langSelect.onchange = (e) => {
                         this.onLanguageChanged(e.target.value);
                     };
+                    if (settings.langAsked === false && !this.firstLangShown) {
+                        this.firstLangShown = true;
+                        this.showFirstLangOverlay(selectedLang);
+                    }
                 }
             });
             if (settings.accentColor) {
@@ -2185,6 +2189,51 @@ class General {
             if (sel) sel.disabled = false;
             if (typeof ui !== 'undefined') ui.errorMessage(tr('ERR_LANG_CHANGE'));
         });
+    }
+    showFirstLangOverlay(current) {
+        const texts = {
+            en: { name: 'English', desc: 'Language of the interface', label: 'Choose your language:', info: 'You can change it later in the settings.', btn: 'Continue' },
+            fr: { name: 'Français', desc: "Langue de l'interface", label: 'Choisissez votre langue :', info: 'Vous pourrez la changer plus tard dans les réglages.', btn: 'Continuer' },
+            de: { name: 'Deutsch', desc: 'Sprache der Oberfläche', label: 'Wählen Sie Ihre Sprache:', info: 'Sie können sie später in den Einstellungen ändern.', btn: 'Weiter' },
+            es: { name: 'Español', desc: 'Idioma de la interfaz', label: 'Elija su idioma:', info: 'Podrá cambiarlo más tarde en los ajustes.', btn: 'Continuar' }
+        };
+        const langs = Object.keys(texts);
+        const browser = (navigator.language || '').slice(0, 2).toLowerCase();
+        let sel = langs.includes(browser) ? browser : (langs.includes(current) ? current : 'en');
+        const div = document.createElement('div');
+        div.id = 'divFirstLang';
+        div.className = 'inst-overlay';
+        const rows = langs.map(l => `<div class="unibloc chooseWifiEth"><label for="radLang_${l}" class="unibutton"><div class="devButtonUpdate uniText"><div>${texts[l].name}</div><div class="uniStatus">${tr('GENERAL_OPT_' + l.toUpperCase())}</div></div><div class="uniRight"><input type="radio" id="radLang_${l}" name="firstLang" value="${l}"${l === sel ? ' checked' : ''}></div></label></div>`).join('');
+        div.innerHTML = `
+        <div class="instructions-content">
+        <div class="overlay-scroll-content">
+        ${overlayHeader('Language · Langue · Sprache · Idioma', texts[sel].desc, 'svg-language')}
+        <div>
+        <div class="divInfoLine"><div class="InfoLine"><p id="firstLangInfo">${texts[sel].info}</p></div></div>
+        <p class="uppercaseText" id="firstLangLabel">${texts[sel].label}</p>
+        <div class="button-container-col">${rows}</div>
+        </div>
+        </div>
+        <div class="hrDivFooter"></div>
+        <div class="button-container-overlay">
+        <button type="button" id="btnFirstLang">${texts[sel].btn}</button>
+        </div>
+        </div>`;
+        const refresh = () => {
+            sel = div.querySelector('input[name="firstLang"]:checked').value;
+            div.querySelector('.instructions-header p').textContent = texts[sel].desc;
+            get('firstLangInfo').textContent = texts[sel].info;
+            get('firstLangLabel').textContent = texts[sel].label;
+            get('btnFirstLang').textContent = texts[sel].btn;
+        };
+        div.querySelectorAll('input[name="firstLang"]').forEach(r => r.addEventListener('change', refresh));
+        const keep = () => this.onLanguageChanged(current, false);
+        shOverlay(div, keep);
+        get('btnFirstLang').onclick = () => {
+            get('btnFirstLang').disabled = true;
+            if (sel === current) closeOverlay(div, keep);
+            else this.onLanguageChanged(sel, true);
+        };
     }
     onModeThemeChanged() {
         const sel = get('selThemeMode');

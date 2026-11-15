@@ -189,6 +189,7 @@ class ConfigSettings: BaseSettings {
     bool checkForUpdate = true;
     bool swShowGpio = false;
     uint8_t boxEdition = 0;
+    bool langAsked = false;
     uint8_t status;
     uint8_t language = 0;
     IPSettings IP;
