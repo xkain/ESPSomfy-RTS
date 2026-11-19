@@ -123,6 +123,43 @@ div.wait-overlay > .lds-roller {
     z-index:1000;
     opacity:1;
 }
+div.wait-overlay.net-switch {
+    flex-direction: column;
+    gap: 24px;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+.net-switch-hint {
+    background: var(--unibloc-color);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: 24px;
+    max-width: 460px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    cursor: default;
+}
+.net-switch-hint h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+.net-switch-hint p {
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: .85;
+}
+.net-switch-hint p.net-switch-note {
+    margin: 12px 0 0;
+    font-size: 12px;
+    opacity: .6;
+}
+.net-switch-hint button {
+    width: 100%;
+    margin: 0;
+    text-transform: none;
+}
 .lds-roller {
     display: inline-block;
     position: relative;

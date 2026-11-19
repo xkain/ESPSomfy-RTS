@@ -281,6 +281,9 @@ void SocketEmitter::wsEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t
               Serial.printf("Client %u leaving room %u\n", num, roomNum);
               if(roomNum < SOCK_MAX_ROOMS) sockEmit.rooms[roomNum].leave(num);
             }
+            else if(length == 4 && memcmp(payload, "ping", 4) == 0) {
+              sockServer.sendTXT(num, "pong");
+            }
             else {
               Serial.printf("Socket [%u] text: %s\n", num, payload);
             }
