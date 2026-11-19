@@ -591,17 +591,41 @@ var sockIsOpen = false;
 var connecting = false;
 var connects = 0;
 var connectFailed = 0;
+var sockLostAt = 0;
+var sockLastRx = 0;
+var sockPingAt = 0;
+var sockPongOk = false;
+var sockWatch = null;
+function checkSocket() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    const now = Date.now();
+    if (sockPingAt) {
+        if (now - sockPingAt < 10000) return;
+        sockPingAt = 0;
+        if (sockPongOk) dropSocket();
+        return;
+    }
+    if (now - sockLastRx >= 20000) {
+        sockPingAt = now;
+        socket.send('ping');
+    }
+}
+function dropSocket() {
+    const s = socket, onclose = s.onclose;
+    s.onclose = null;
+    s.onmessage = null;
+    try { s.close(); } catch (e) { }
+    if (onclose) onclose({ wasClean: false, reason: 'timeout' });
+}
 async function initSockets() {
+    if (!sockWatch) sockWatch = setInterval(checkSocket, 5000);
     if (connecting) return;
     console.log('Connecting to socket...');
     connecting = true;
     if (tConnect) clearTimeout(tConnect);
     tConnect = null;
-    let wms = document.getElementsByClassName('socket-wait');
-    for (let i = 0; i < wms.length; i++) {
-        wms[i].remove();
-    }
-    ui.waitMessage(get('divContainer')).classList.add('socket-wait');
+    if (document.getElementsByClassName('socket-wait').length === 0)
+        ui.waitMessage(get('divContainer')).classList.add('socket-wait');
     let host = window.location.protocol === 'file:' ? hst : window.location.hostname;
     try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -613,6 +637,12 @@ async function initSockets() {
         const sockQuery = security.apiKey ? `?apikey=${encodeURIComponent(security.apiKey)}` : '';
         socket = new WebSocket(`${protocol}//${host}${port}/${sockQuery}`);
         socket.onmessage = (evt) => {
+            sockLastRx = Date.now();
+            sockPingAt = 0;
+            if (evt.data === 'pong') {
+                sockPongOk = true;
+                return;
+            }
             if (evt.data.startsWith('42')) {
                 let ndx = evt.data.indexOf(',');
                 let eventName = evt.data.substring(3, ndx);
@@ -686,6 +716,11 @@ async function initSockets() {
             connecting = false;
             connects++;
             connectFailed = 0;
+            sockLostAt = 0;
+            sockLastRx = Date.now();
+            sockPingAt = 0;
+            sockPongOk = false;
+            socket.send('ping');
             let wms = document.getElementsByClassName('socket-wait');
             for (let i = 0; i < wms.length; i++) {
                 wms[i].remove();
@@ -719,8 +754,13 @@ async function initSockets() {
         socket.onclose = (evt) => {
             wifi.procWifiStrength({ ssid: '', channel: -1, strength: -100 });
             wifi.procEthernet({ connected: false, speed: 0, fullduplex: false });
-            if (document.getElementsByClassName('socket-wait').length === 0)
-                ui.waitMessage(get('divContainer')).classList.add('socket-wait');
+            if (connects > 0 && !sockLostAt) sockLostAt = Date.now();
+            let wait = document.querySelector('.socket-wait');
+            if (!wait) {
+                wait = ui.waitMessage(get('divContainer'));
+                wait.classList.add('socket-wait');
+            }
+            ui.netSwitchHint(wait);
             if (evt.wasClean) {
                 console.log({ msg: 'close-clean', evt: evt });
                 connectFailed = 0;
@@ -1260,6 +1300,26 @@ class UIBinder {
         el.appendChild(div);
         return div;
     }
+    netSwitchHint(overlay) {
+        if (!sockLostAt || !overlay.isConnected || overlay.querySelector('.net-switch-hint')) return;
+        const left = sockLostAt + 15000 - Date.now();
+        if (left > 0) {
+            setTimeout(() => this.netSwitchHint(overlay), left);
+            return;
+        }
+        if (general.connType !== 3 || !general.hostname || !/^\d+\.\d+\.\d+\.\d+$/.test(window.location.hostname)) return;
+        const k = wifi.activeLink === 'wifi' ? 'WIFI2ETH' : 'ETH2WIFI';
+        const url = `http://${general.hostname.toLowerCase()}.local`;
+        const div = document.createElement('div');
+        div.className = 'net-switch-hint';
+        div.innerHTML = `<h3>${tr('NETSWITCH_' + k + '_TITLE')}</h3><p>${tr('NETSWITCH_' + k + '_TEXT')}</p>`
+            + `<button type="button">${tr('NETSWITCH_OPEN').replace('{URL}', url)}</button>`
+            + `<p class="net-switch-note">${tr('NETSWITCH_NOTE')}</p>`;
+        div.querySelector('button').onclick = () => { window.location.href = url; };
+        overlay.classList.add('net-switch');
+        overlay.appendChild(div);
+        this.clearErrors();
+    }
     serviceError(el, err) {
         let title = 'Service Error'
         if (arguments.length === 1) {
@@ -1313,7 +1373,7 @@ class UIBinder {
         div.classList.add('error-message');
         div.classList.add('socket-error');
         div.classList.add('modal-overlay');
-        el.appendChild(div);
+        if (!document.querySelector('.net-switch-hint')) el.appendChild(div);
         return div;
     }
     errorMessage(el, msg) {
@@ -1325,7 +1385,7 @@ class UIBinder {
         let div = document.createElement('div');
         div.innerHTML = `<div class="error-content"><div class="inner-error">${msg}</div><div class="sub-message"></div><button type="button" onclick="ui.clearErrors();">Close</button></div>`;
         div.classList.add('error-message', 'modal-overlay');
-        el.appendChild(div);
+        if (!document.querySelector('.net-switch-hint')) el.appendChild(div);
         return div;
     }
     promptMessage(el, msg, onYes) {
@@ -1826,7 +1886,7 @@ class Security {
 var security = new Security();
 class General {
     initialized = false;
-    appVersion = 'v2.6.3';
+    appVersion = 'v2.6.4';
     reloadApp = false;
     init() {
         if (this.initialized) return;
@@ -1990,6 +2050,8 @@ class General {
 
             get('spanFwVersion').innerText = settings.fwVersion;
             somfy.boxEdition = parseInt(settings.boxEdition, 10) || 0;
+            this.hostname = settings.hostname || '';
+            this.connType = parseInt(settings.connType, 10) || 0;
             somfy.updateRadioBoxPreset();
             get('spanHwVersion').innerText = settings.chipModel.length > 0 ? '-' + settings.chipModel : '';
             get('divContainer').setAttribute('data-chipmodel', settings.chipModel);
@@ -2740,25 +2802,17 @@ class Wifi {
         });
     }
     updateStatusBadge(settings) {
-        const options = document.querySelectorAll('.opt-badge');
-        if (!options.length) return;
         const connType = parseInt(settings.connType);
-        let activeType = "wifi";
-        if (connType >= 2) {
-            const boardType = (settings.ethernet && settings.ethernet.boardType !== undefined) ? parseInt(settings.ethernet.boardType) : 0;
-            const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined) ? parseInt(settings.ethernet.PWRPin) : -1;
-            if (boardType === 1) {
-                activeType = "lan";
-            }
-            else if (pwrPin !== -1) {
-                activeType = "poe";
-            }
-            else {
-                activeType = "lan";
-            }
-        }
-        options.forEach(opt => {
-            opt.classList.toggle('active', opt.getAttribute('data-conn') === activeType);
+        const boardType = (settings.ethernet && settings.ethernet.boardType !== undefined) ? parseInt(settings.ethernet.boardType) : 0;
+        const pwrPin = (settings.ethernet && settings.ethernet.PWRPin !== undefined) ? parseInt(settings.ethernet.PWRPin) : -1;
+        this.wiredBadge = (boardType !== 1 && pwrPin !== -1) ? 'poe' : 'lan';
+        if (connType !== 3 || !this.activeLink) this.activeLink = connType >= 2 ? 'wired' : 'wifi';
+        this.renderStatusBadge();
+    }
+    renderStatusBadge() {
+        const type = this.activeLink === 'wired' ? (this.wiredBadge || 'lan') : 'wifi';
+        document.querySelectorAll('.opt-badge').forEach(opt => {
+            opt.classList.toggle('active', opt.getAttribute('data-conn') === type);
         });
     }
     setConnectionType(isEthernet) {
@@ -3131,6 +3185,10 @@ class Wifi {
         if (elSSID) elSSID.innerHTML = !ssid || ssid === '' ? '-------------' : ssid;
         if (elChan) elChan.innerHTML = isNaN(strength.channel) || strength.channel < 0 ? '--' : strength.channel;
         if (elStrength) elStrength.innerHTML = isNaN(sVal) || sVal <= -100 ? '----' : sVal;
+        if (ssid && sVal > -100) {
+            this.activeLink = 'wifi';
+            this.renderStatusBadge();
+        }
 
         let level = (isNaN(sVal) || sVal >= 0 || sVal <= -100) ? -1 : this.calcWaveStrength(sVal);
         if (level >= 3) level = 3;
@@ -3158,6 +3216,10 @@ class Wifi {
         spanStatus.innerHTML = ethernet.connected ? 'Connected' : 'Disconnected';
         spanStatus.style.color = ethernet.connected ? 'var(--accent-sucess)' : '';
         spanSpeed.innerHTML = !ethernet.connected ? '--------' : `${ethernet.speed} Mbps ${ethernet.fullduplex ? 'Full-duplex' : 'Half-duplex'}`;
+        if (ethernet.connected) {
+            this.activeLink = 'wired';
+            this.renderStatusBadge();
+        }
     }
 }
 var wifi = new Wifi();
