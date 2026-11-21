@@ -364,42 +364,11 @@
     font-size: 13px;
     color: var(--soustxt-color);
 }
-#divLBCWelcome, #divBtnLBC {
+#divBtnLBC {
 display: none !important;
 }
-html[lang="fr"] #divLBCWelcome,
 html[lang="fr"] #divBtnLBC {
     display: flex !important;
-}
-.lbcWelcomelink {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid var(--hr-soft);
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-.lbcWelcomelink div {
-    display: flex;
-    align-items: center;
-    font-size: 0.85em;
-    color: var(--label-grey);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: all 0.2s;
-    padding: 5px 15px;
-    border-radius: 20px;
-}
-.lbcWelcomelink:hover div{
-    opacity: 1;
-    background: rgba(var(--accent-color-rgb), 0.1);
-    color: var(--accent-color);
-}
-.lbcWelcomelink svg {
-    width: 18px;
-    height: 18px;
-    margin-right: 10px;
-    fill: currentColor;
 }
 .welcomeBottom-desc {
     font-size: 0.8em;

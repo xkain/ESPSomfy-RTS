@@ -1856,6 +1856,87 @@ cursor: pointer;
     color: var(--txtwarning-color);
     font-weight: bold;
 }
+.lbc-done-card {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    background: rgba(76,175,80,.12);
+    border: 1px solid rgba(76,175,80,.45);
+}
+.lbc-done-card > svg {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    fill: #4CAF50;
+}
+.lbc-done-card div > b:first-child {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+.lbc-done-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.lbc-done-card.is-partial {
+    background: rgba(var(--accent-color-rgb), .08);
+    border-color: rgba(var(--accent-color-rgb), .4);
+}
+.lbc-done-card.is-partial > svg {
+    fill: var(--accent-color);
+}
+.lbc-when {
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 0 0 18px;
+}
+#lbc-steps-list .divLbc-step {
+    width: 100%;
+}
+.lbc-step-state {
+    margin-left: auto;
+    padding-left: 10px;
+    font-size: 11.5px;
+    color: var(--soustxt-color);
+    white-space: nowrap;
+}
+.divLbc-step.is-todo .lbc-step-state {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+.lbc-rerun {
+    margin-top: 14px;
+    font-size: 12.5px;
+}
+.lbc-rerun summary {
+    cursor: pointer;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+.lbc-rerun[open] summary {
+    margin-bottom: 12px;
+}
+.lbc-status-done {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #2e7d32;
+    font-weight: bold;
+}
+.lbc-status-done svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    fill: currentColor;
+}
+.lbc-status-todo {
+    color: var(--accent-color);
+    font-weight: bold;
+}
 /* HomeAssistant page */
 .ha-overlay-content { padding: 10px 15px; }
 

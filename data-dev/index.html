@@ -15,12 +15,12 @@
       if(l)document.documentElement.lang=l;
     })();
     </script>
-    <link rel="stylesheet" href="base.css?v=2.6.3f">
-    <link rel="stylesheet" href="main.css?v=2.6.3f">
-    <link rel="stylesheet" href="overlays.css?v=2.6.3f">
+    <link rel="stylesheet" href="base.css?v=2.6.4c">
+    <link rel="stylesheet" href="main.css?v=2.6.4c">
+    <link rel="stylesheet" href="overlays.css?v=2.6.4c">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-    <script src="index.js?v=2.6.3f"></script>
+    <script src="index.js?v=2.6.4c"></script>
 </head>
 <body>
     <header class="top-bar">
@@ -156,7 +156,7 @@
                                     <svg class="svgLbc"><use xlink:href="#svg-leboncoin"></use></svg>
                                     <div class="devButtonUpdate">
                                         <div>Boîtier acheté en ligne</div>
-                                        <div class="uniStatus">Assistant de configuration automatique</div>
+                                        <div id="divLBCStatus" class="uniStatus">Assistant de configuration automatique</div>
                                     </div>
                                     <svg class="btnArrowRight"><use href=#svg-arrowRight></use></svg>
                                 </button>
@@ -1879,12 +1879,6 @@
                                 <h1 tr="WELCOME_ADD_SHADE_TITLE"></h1>
                                 <p tr="WELCOME_ADD_SHADE_DESC"></p>
                             </div>
-                        </div>
-                    </div>
-                    <div id="divLBCWelcome" class="lbcWelcomelink">
-                        <div onclick="general.showLBCOverlay();">
-                            <svg><use href="#svg-leboncoin"></use></svg>
-                            <span>Vous avez acheté un boîtier ? <b>Cliquez ici pour l'auto-configuration.</b></span>
                         </div>
                     </div>
                 </div>

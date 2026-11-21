@@ -944,6 +944,7 @@ function stepDeviceGpio(pinKey, direction, prefix, boardSelectId, isManualCallba
 
     return newValue;
 }
+const LBC_TZ = 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00';
 function overlayHeader(title, desc, icon = 'svg-simpleShutter', showExpert = false) {
     const expertSwitch = showExpert ? `<div class="expert-mode-container"><span class="expert-label">${tr("BT_EXPERT_MODE")}</span><span class="switch expert-switch"><input id="cbExpertMode" type="checkbox" ${ui.isExpertMode ? 'checked' : ''} onchange="ui.toggleExpertMode(this.closest('.inst-overlay'));" onclick="event.stopPropagation();"><div></div></span></div>` : '';
 
@@ -2069,6 +2070,10 @@ class General {
             loadLang(() => {
 
                 ui.toElement(pnl, { general: settings });
+                this.updateLBCButton();
+                let lbcBack = false;
+                try { lbcBack = sessionStorage.getItem('lbcReturn') === '1'; sessionStorage.removeItem('lbcReturn'); } catch (e) { }
+                if (lbcBack && (security.type === 0 || security.authenticated)) ui.showSystemConfig();
 
                 const langSelect = get('langSelect');
                 if (langSelect) {
@@ -2401,54 +2406,85 @@ class General {
     secError(title, desc) {
         ui.errorMessage(tr(title)).querySelector('.sub-message').innerHTML = tr(desc);
     }
+    lbcState() {
+        const ed = somfy.boxEdition;
+        const ok = {
+            tz: get('selTimeZone')?.value === LBC_TZ,
+            gpio: ed > 0 && parseInt(get('selRadioBoardType')?.value, 10) === ed,
+            radio: !!get('cbEnableRadio')?.checked
+        };
+        return { ed, ok, state: !ed ? 'new' : (ok.tz && ok.gpio && ok.radio ? 'done' : 'partial') };
+    }
+    updateLBCButton() {
+        const el = get('divLBCStatus');
+        if (!el) return;
+        const { state } = this.lbcState();
+        el.classList.toggle('lbc-status-done', state === 'done');
+        el.classList.toggle('lbc-status-todo', state === 'partial');
+        el.innerHTML = state === 'done' ? '<svg><use href="#svg-succes"></use></svg>Déjà configuré, rien à faire'
+            : state === 'partial' ? 'Un réglage est à refaire' : 'Assistant de configuration automatique';
+    }
     showLBCOverlay() {
+        const { ed, ok, state } = this.lbcState();
+        const edName = { 1: 'Édition Wi-Fi', 2: 'Édition Ethernet & Wi-Fi' }[ed];
+        const board = { 1: 'ESP32 D1 Mini', 2: 'WT32-ETH01' }[ed];
         const div = document.createElement('div');
         div.id = 'divLBCConfig';
         div.className = 'inst-overlay';
 
         const steps = [
-            ['tz', 'Réglage du fuseau horaire Europe/Paris'],
-            ['gpio', 'Assignation des GPIO spécifiques au boîtier'],
-            ['radio', 'Activation de la radio']
+            ['tz', 'Fuseau horaire Europe/Paris', 'Europe/Paris'],
+            ['gpio', 'GPIO du boîtier', board],
+            ['radio', 'Radio activée', 'Activée']
         ];
-
         let stepsHtml = '';
-        for (const [id, text] of steps) {
-            stepsHtml += `<div id="lbc-step-${id}" class="divLbc-step"><div class="lbc-icon-wrapper"><svg class="svgLbc-step"><use href="#svg-succes"></use></svg></div><span class="lbcLabel-step">${text}</span></div>`;
+        for (const [id, text, val] of steps) {
+            const cls = state === 'new' ? '' : ok[id] ? ' is-done' : ' is-todo';
+            const right = state === 'new' ? '' : ok[id] ? val : 'À refaire';
+            stepsHtml += `<div id="lbc-step-${id}" class="divLbc-step${cls}"><div class="lbc-icon-wrapper"><svg class="svgLbc-step"><use href="#svg-succes"></use></svg></div><span class="lbcLabel-step">${text}</span><span class="lbc-step-state">${right}</span></div>`;
         }
+        const card = (v, name, img, chip) => `<div class="unibloc chooseWifiEth lbc-responsive-card"><label class="unibutton"><span>${name}</span><div class="box-image-container"><img src="${img}" alt="${name}" /></div><div class="uniStatus">${chip}</div><div class="uniRight" style="margin-top: auto;"><input type="radio" name="lbcBoxType" value="${v}"${v == ed ? ' checked' : ''}></div></label></div>`;
+        const cards = `<div class="button-container-row lbc-cards-container lbc-responsive-container">${card(1, 'Wi-Fi', 'editionWifi.webp', 'ESP32 D1 Mini + CC1101')}${card(2, 'Ethernet & Wi-Fi', 'editionEthernet.webp', 'ESP32 WT32-ETH01 + CC1101')}</div>`;
+
+        const banner = state === 'done'
+            ? `<div id="lbc-done-card" class="lbc-done-card"><svg><use href="#svg-succes"></use></svg><div><b>Votre boîtier est déjà configuré</b><p>Il est configuré pour l'<b>${edName}</b>. <b>Vous n'avez rien à faire</b> : relancer l'assistant ne changerait rien.</p></div></div>`
+            : state === 'partial'
+            ? `<div id="lbc-done-card" class="lbc-done-card is-partial"><svg><use href="#svg-info"></use></svg><div><b>Un réglage a changé depuis la configuration</b><p>Votre boîtier a été configuré pour l'<b>${edName}</b>, mais la ligne marquée <b>À refaire</b> ne correspond plus. Relancez l'assistant pour la rétablir.</p></div></div>`
+            : `<div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a>, si ce n'est pas votre cas fermez cette page</span></div></div>`;
+
+        const body = state === 'new'
+            ? `<p class="lbc-when"><b>Un boîtier neuf est déjà configuré avant l'envoi.</b> Cet assistant ne sert qu'après un <a href="https://github.com/xkain/ESPSomfy-RTS/wiki/Factory-Reset" target="_blank" class="link">Factory Reset</a>.</p>
+        <p class="uppercaseText">1. Sélectionnez votre boîtier :</p>${cards}
+        <p class="uppercaseText">2. Actions prévues :</p><div id="lbc-steps-list">${stepsHtml}</div>`
+            : `<p class="uppercaseText">État actuel de votre boîtier :</p><div id="lbc-steps-list">${stepsHtml}</div>
+        ${state === 'done' ? `<details id="lbc-rerun" class="lbc-rerun"><summary>Relancer l'assistant quand même</summary><p class="uppercaseText">Sélectionnez votre boîtier :</p>${cards}</details>` : `<p class="uppercaseText">Sélectionnez votre boîtier :</p>${cards}`}`;
 
         div.innerHTML = `
         <div class="instructions-content">
         <div class="overlay-scroll-content">
-        ${overlayHeader('Configuration Boîtier', 'Assistant de configuration automatique pour votre boîtier', 'svg-leboncoin')}
+        ${overlayHeader('Configuration Boîtier', 'Cet assistant applique la configuration propre à votre boîtier (brochage GPIO), simplifie les pages Réseau et Radio, règle le fuseau horaire et active la radio.', 'svg-leboncoin')}
         <div>
-        <div class="warning"><svg><use href=#svg-warning></use></svg><div><span>Cet assistant est uniquement réservé aux personnes ayant acheté l'un de <a href="https://github.com/xkain/ESPSomfy-RTS/releases" target="_blank" class="link">mes boîtiers</a>, si ce n'est pas votre cas fermez cette page</span></div></div>
-        <div class="divInfoLine"><div class="InfoLine"><p>Par défaut, le firmware adopte des réglages universels et sécurisés. Cet assistant applique les paramètres régionaux et injecte la configuration matérielle de votre modèle.</p></div>
-        <p class="uppercaseText">1. Sélectionnez votre boîtier :</p>
-        <div class="button-container-row lbc-cards-container lbc-responsive-container">
-        <div class="unibloc chooseWifiEth lbc-responsive-card">
-        <label for="radBoxWifi" class="unibutton"><span>Wi-Fi</span><div class="box-image-container"><img src="editionWifi.webp" alt="Modèle Wi-Fi" /></div><div class="uniStatus">ESP32 D1 Mini + CC1101</div><div class="uniRight" style="margin-top: auto;"><input type="radio" id="radBoxWifi" name="lbcBoxType" value="1"></div></label>
-        </div>
-        <div class="unibloc chooseWifiEth lbc-responsive-card">
-        <label for="radBoxEth" class="unibutton"><span>Ethernet & Wi-Fi</span><div class="box-image-container"><img src="editionEthernet.webp" alt="Modèle Ethernet" /></div><div class="uniStatus">ESP32 WT32-ETH01 + CC1101</div><div class="uniRight" style="margin-top: auto;"><input type="radio" id="radBoxEth" name="lbcBoxType" value="2"></div></label>
-        </div>
-        </div>
-        <p class="uppercaseText">2. Actions prévues :</p>
-        <div id="lbc-steps-list">${stepsHtml}</div>
+        ${banner}
+        ${body}
         <div id="lbc-success-msg"><svg class="svgInTextSmall"><use href="#svg-success"></use></svg> Configuration appliquée avec succès !</div>
         <div id="lbc-error-msg">La configuration n'a pas pu être enregistrée sur votre boîtier. Vous pouvez réessayer.</div>
-        </div>
         </div>
         </div>
         <div class="hrDivFooter"></div>
         <div class="button-container-overlay">
         <button id="btnCloseLBC" line type="button" onclick="closeOverlay(get('divLBCConfig'))">${tr('BT_CLOSE')}</button>
-        <button id="btnConfirmLBC" type="button" disabled onclick="general.confirmLBCConfig()">Démarrer</button>
+        <button id="btnConfirmLBC" type="button" ${state === 'new' ? 'disabled' : ''} onclick="general.confirmLBCConfig()">${state === 'new' ? 'Démarrer' : 'Relancer l\'assistant'}</button>
         </div>
         </div>
         </div>`;
 
-        div.querySelectorAll('input[name="lbcBoxType"]').forEach(r => r.addEventListener('change', () => get('btnConfirmLBC').disabled = false));
+        const btn = div.querySelector('#btnConfirmLBC'), cls = div.querySelector('#btnCloseLBC'), rerun = div.querySelector('#lbc-rerun');
+        if (rerun) {
+            const sync = () => { btn.style.display = rerun.open ? '' : 'none'; cls.toggleAttribute('line', rerun.open); };
+            rerun.addEventListener('toggle', sync);
+            sync();
+        }
+        div.querySelectorAll('input[name="lbcBoxType"]').forEach(r => r.addEventListener('change', () => btn.disabled = false));
         shOverlay(div);
     }
     confirmLBCConfig() {
@@ -2458,7 +2494,13 @@ class General {
         const box = document.querySelector('input[name="lbcBoxType"]:checked')?.value;
         if (!box) return;
         const btn = get('btnConfirmLBC'), cls = get('btnCloseLBC');
-        const markStep = (id, done) => get(`lbc-step-${id}`)?.classList.toggle('is-done', done);
+        const markStep = (id, done) => {
+            const el = get(`lbc-step-${id}`);
+            if (!el) return;
+            el.classList.toggle('is-done', done);
+            el.classList.remove('is-todo');
+            el.querySelector('.lbc-step-state').textContent = '';
+        };
         const fail = () => {
             get('lbc-error-msg').style.display = 'block';
             btn.textContent = 'Réessayer';
@@ -2466,10 +2508,11 @@ class General {
         };
         btn.style.display = cls.style.display = 'none';
         get('lbc-error-msg').style.display = 'none';
+        get('lbc-done-card')?.remove();
         ['tz', 'gpio', 'radio'].forEach(id => markStep(id, false));
 
         const tz = get('selTimeZone');
-        if (tz) { tz.value = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; tz.dispatchEvent(new Event('change')); }
+        if (tz) { tz.value = LBC_TZ; tz.dispatchEvent(new Event('change')); }
         if (!await this.setGeneral({ boxEdition: box === "2" ? 2 : 1 })) return fail();
         markStep('tz', true);
 
@@ -2483,6 +2526,7 @@ class General {
         markStep('radio', true);
 
         get('lbc-success-msg').style.display = 'block';
+        try { sessionStorage.setItem('lbcReturn', '1'); } catch (e) { }
         setTimeout(() => window.location.reload(), 1500);
     }
     showHAOverlay() {
@@ -3407,6 +3451,7 @@ class Somfy {
                     this.updateRadioBoxPreset();
                     this.onRadioBoardTypeChanged(selBoard, true);
                 }
+                general.updateLBCButton();
 
                 const cbRadio = get('cbEnableRadio');
                 const txtStatus = get('divRadioEnableStatus');
