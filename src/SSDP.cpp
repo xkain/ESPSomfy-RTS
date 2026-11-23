@@ -709,8 +709,8 @@ void SSDPClass::_processRequest(AsyncUDPPacket &p) {
       #endif
       if(pkt.type == MULTICAST) 
         this->_addToSendQueue(IPAddress(SSDP_MULTICAST_ADDR), SSDP_PORT, dev, pkt.st, response_types_t::root, pkt.mx);
-      else 
-        this->_sendResponse(p.remoteIP(), p.remotePort(), dev, pkt.st, response_types_t::root);
+      else  // queued, not sent here: see below
+        this->_addToSendQueue(p.remoteIP(), p.remotePort(), dev, pkt.st, response_types_t::root, 1);
     }
     else {
       UPNPDeviceType *dev = nullptr;
@@ -728,7 +728,10 @@ void SSDPClass::_processRequest(AsyncUDPPacket &p) {
         if(pkt.type == MULTICAST)
           this->_addToSendQueue(IPAddress(SSDP_MULTICAST_ADDR), SSDP_PORT, dev, pkt.st, useUUID ? response_types_t::uuid : response_types_t::root, pkt.mx);
         else {
-          this->_sendResponse(p.remoteIP(), p.remotePort(), dev, pkt.st, useUUID ? response_types_t::uuid : response_types_t::root);
+          // This runs in the async_udp task, whose stack is only 4 KB: building a response
+          // there (1.5 KB buffer plus snprintf and the send) can overflow it and reboot the
+          // ESP32 (#76). Queue it for loop() instead; an mx of 1 sends it straight away.
+          this->_addToSendQueue(p.remoteIP(), p.remotePort(), dev, pkt.st, useUUID ? response_types_t::uuid : response_types_t::root, 1);
         }
       }
     }
