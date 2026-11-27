@@ -198,7 +198,7 @@ For detailed instructions and the cycle diagrams, see the dedicated page:
 This fork's documentation lives in its **[wiki](https://github.com/xkain/ESPSomfy-RTS/wiki)**: one page per screen of the interface, kept current with the latest published release.
 
 > [!NOTE]
-> The wiki is **written in French**. Your browser's translation handles it well, and the screenshots speak for themselves.
+> The wiki is **written in French**. An **[English translation](docs/en/README.md)** of every page is in [`docs/en`](docs/en), and your browser's translation also handles the French well.
 
 * **[Installation guide](https://github.com/xkain/ESPSomfy-RTS/wiki/Guide-d'installation)** — flashing an ESP32 over USB from the browser, and arriving from rstrouse's firmware.
 *  **[Dashboard](https://github.com/xkain/ESPSomfy-RTS/wiki/Tableau-de-bord)** — a tour of the interface: group and device cards, buttons, indicators and the positioning windows.
