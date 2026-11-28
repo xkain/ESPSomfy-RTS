@@ -3622,6 +3622,17 @@ void SomfyShadeController::emitState(uint8_t num) {
 }
 void SomfyShadeController::publish() {
   this->updateGroupFlags();
+  // Bit n-1 set = shade / group n had its topics published. Only ids that were
+  // published before and are gone now get their retained topics cleared, instead
+  // of every unused id on every reconnect (#70). No saved mask yet (first start
+  // after an update): clear every unused id once, as before.
+  pref.begin("Shades", true);
+  const bool known = pref.isKey("mqttShades");
+  const uint32_t wasShades = known ? pref.getULong("mqttShades", 0) : 0xFFFFFFFFu;
+  const uint16_t wasGroups = known ? pref.getUShort("mqttGroups", 0) : 0xFFFFu;
+  pref.end();
+  uint32_t nowShades = 0;
+  uint16_t nowGroups = 0;
   char arrIds[128] = "[";
   for(uint8_t i = 0; i < SOMFY_MAX_SHADES; i++) {
     SomfyShade *shade = &this->shades[i];
@@ -3629,15 +3640,12 @@ void SomfyShadeController::publish() {
     if(strlen(arrIds) > 1) strcat(arrIds, ",");
     itoa(shade->getShadeId(), &arrIds[strlen(arrIds)], 10);
     shade->publish();
+    if(shade->getShadeId() >= 1 && shade->getShadeId() <= SOMFY_MAX_SHADES) nowShades |= 1UL << (shade->getShadeId() - 1);
   }
   strcat(arrIds, "]");
   mqtt.publish("shades", arrIds, true);
   for(uint8_t i = 1; i <= SOMFY_MAX_SHADES; i++) {
-    SomfyShade *shade = this->getShadeById(i);
-    if(shade) continue;
-    else {
-      SomfyShade::unpublish(i);
-    }
+    if((wasShades & ~nowShades) & (1UL << (i - 1))) SomfyShade::unpublish(i);
   }
   strcpy(arrIds, "[");
   for(uint8_t i = 0; i < SOMFY_MAX_GROUPS; i++) {
@@ -3646,13 +3654,19 @@ void SomfyShadeController::publish() {
     if(strlen(arrIds) > 1) strcat(arrIds, ",");
     itoa(group->getGroupId(), &arrIds[strlen(arrIds)], 10);
     group->publish();
+    if(group->getGroupId() >= 1 && group->getGroupId() <= SOMFY_MAX_GROUPS) nowGroups |= 1U << (group->getGroupId() - 1);
   }
   strcat(arrIds, "]");
   mqtt.publish("groups", arrIds, true);
   for(uint8_t i = 1; i <= SOMFY_MAX_GROUPS; i++) {
-    SomfyGroup *group = this->getGroupById(i);
-    if(group) continue;
-    else SomfyGroup::unpublish(i);
+    if((wasGroups & ~nowGroups) & (1U << (i - 1))) SomfyGroup::unpublish(i);
+  }
+  // Saved only while still connected, so a sweep cut short is done again next time.
+  if(mqtt.connected() && (!known || wasShades != nowShades || wasGroups != nowGroups)) {
+    pref.begin("Shades");
+    pref.putULong("mqttShades", nowShades);
+    pref.putUShort("mqttGroups", nowGroups);
+    pref.end();
   }
 }
 uint8_t SomfyShadeController::getNextShadeId() {
@@ -3797,6 +3811,23 @@ bool SomfyShadeController::isRemoteAddressInUse(uint32_t address, uint8_t except
   }
   return false;
 }
+// Set an id's bit in the saved MQTT mask when it is added while MQTT is
+// connected: emitState() publishes its retained topics straight away, but
+// publish() only updates the mask on connect, so without this a shade added
+// and then deleted while MQTT is down would keep its topics.
+static void setMqttPublishedBit(bool isGroup, uint8_t id) {
+  if(!mqtt.connected() || id < 1 || id > (isGroup ? SOMFY_MAX_GROUPS : SOMFY_MAX_SHADES)) return;
+  pref.begin("Shades");
+  if(isGroup) {
+    const uint16_t mask = pref.getUShort("mqttGroups", 0);
+    if(!(mask & (1U << (id - 1)))) pref.putUShort("mqttGroups", mask | (1U << (id - 1)));
+  }
+  else {
+    const uint32_t mask = pref.getULong("mqttShades", 0);
+    if(!(mask & (1UL << (id - 1)))) pref.putULong("mqttShades", mask | (1UL << (id - 1)));
+  }
+  pref.end();
+}
 SomfyShade *SomfyShadeController::addShade(JsonObject &obj, int8_t &err) {
   err = 0;
   SomfyShade *shade = this->addShade();
@@ -3810,6 +3841,7 @@ SomfyShade *SomfyShadeController::addShade(JsonObject &obj, int8_t &err) {
     }
     shade->save();
     shade->emitState("shadeAdded");
+    setMqttPublishedBit(false, shade->getShadeId());
   }
   return shade;
 }
@@ -3941,6 +3973,7 @@ SomfyGroup *SomfyShadeController::addGroup(JsonObject &obj, int8_t &err) {
     }
     group->save();
     group->emitState("groupAdded");
+    setMqttPublishedBit(true, group->getGroupId());
   }
   return group;
 }
