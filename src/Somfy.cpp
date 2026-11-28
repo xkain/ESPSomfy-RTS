@@ -3811,6 +3811,23 @@ bool SomfyShadeController::isRemoteAddressInUse(uint32_t address, uint8_t except
   }
   return false;
 }
+// Set an id's bit in the saved MQTT mask when it is added while MQTT is
+// connected: emitState() publishes its retained topics straight away, but
+// publish() only updates the mask on connect, so without this a shade added
+// and then deleted while MQTT is down would keep its topics.
+static void setMqttPublishedBit(bool isGroup, uint8_t id) {
+  if(!mqtt.connected() || id < 1 || id > (isGroup ? SOMFY_MAX_GROUPS : SOMFY_MAX_SHADES)) return;
+  pref.begin("Shades");
+  if(isGroup) {
+    const uint16_t mask = pref.getUShort("mqttGroups", 0);
+    if(!(mask & (1U << (id - 1)))) pref.putUShort("mqttGroups", mask | (1U << (id - 1)));
+  }
+  else {
+    const uint32_t mask = pref.getULong("mqttShades", 0);
+    if(!(mask & (1UL << (id - 1)))) pref.putULong("mqttShades", mask | (1UL << (id - 1)));
+  }
+  pref.end();
+}
 SomfyShade *SomfyShadeController::addShade(JsonObject &obj, int8_t &err) {
   err = 0;
   SomfyShade *shade = this->addShade();
@@ -3824,6 +3841,7 @@ SomfyShade *SomfyShadeController::addShade(JsonObject &obj, int8_t &err) {
     }
     shade->save();
     shade->emitState("shadeAdded");
+    setMqttPublishedBit(false, shade->getShadeId());
   }
   return shade;
 }
@@ -3955,6 +3973,7 @@ SomfyGroup *SomfyShadeController::addGroup(JsonObject &obj, int8_t &err) {
     }
     group->save();
     group->emitState("groupAdded");
+    setMqttPublishedBit(true, group->getGroupId());
   }
   return group;
 }
